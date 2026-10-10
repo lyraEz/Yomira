@@ -74,3 +74,16 @@ jobs:
             app/build/outputs/apk/release/*.apk
             app/build/outputs/apk/release/apk-report.txt
           retention-days: 7
+
+      # The release APKs above are unsigned. A debug build can be installed on an Android
+      # phone now, without using the owner's private release keystore in CI.
+      - name: Build installable Android test APKs
+        run: ./gradlew --no-daemon :app:assembleDebug
+
+      - name: Upload Android test APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: yomira-android-test-${{ github.sha }}
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7

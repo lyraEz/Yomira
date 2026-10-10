@@ -112,6 +112,12 @@ cd Yomira
 ./gradlew :app:assembleRelease          # APKs de release (sem assinatura se não houver chave)
 ```
 
+O workflow **CI** também disponibiliza APKs de teste instaláveis no artefato
+`yomira-android-test-<commit>`. Eles têm o pacote `com.lyraez.yomira.dev` e são
+assinados pela chave de depuração do runner. Servem para testar no celular,
+mas não atualizam a instalação definitiva `com.lyraez.yomira` e podem exigir
+desinstalação antes de instalar um teste gerado em outra execução do CI.
+
 Para assinar, crie `signing.properties` na raiz (o arquivo é ignorado pelo Git):
 
 ```properties

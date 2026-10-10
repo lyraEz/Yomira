@@ -71,4 +71,23 @@
     <string name="companion_waiting">Aguardando o celular…</string>
     <string name="companion_received">Recebido</string>
     <string name="companion_no_network">Este aparelho não está em uma rede local, então o celular não consegue acessá-lo.</string>
+
+    <!-- TV -->
+    <string name="tv_settings">TV</string>
+    <string name="tv_mode">Interface</string>
+    <string name="tv_mode_auto">Automática (%1$s)</string>
+    <string name="tv_mode_tv">TV, para o controle remoto</string>
+    <string name="tv_mode_phone">Celular ou tablet, para toque</string>
+    <string name="tv_text_scale">Tamanho do texto na TV</string>
+    <string name="tv_safe_area">Margem das bordas da tela</string>
+    <string name="tv_safe_area_summary">%s. Mantém os menus longe das bordas em TVs que cortam a imagem (overscan).</string>
+    <string name="tv_safe_area_none">Nenhuma</string>
+    <string name="tv_menu_long_press">Tecla menu = segurar OK</string>
+    <string name="tv_menu_long_press_summary">O botão de menu do controle abre as opções que, no celular, abrem com um toque longo.</string>
+    <string name="tv_restart_note">A mudança de interface vale depois de reiniciar o app.</string>
+
+    <!-- WebView na TV -->
+    <string name="webview_cursor_hint">As setas movem o ponteiro e o OK clica. Empurre contra a borda de cima ou de baixo para rolar.</string>
+    <string name="webview_cursor_on">Usar ponteiro</string>
+    <string name="webview_cursor_off">Usar navegação da página</string>
 </resources>

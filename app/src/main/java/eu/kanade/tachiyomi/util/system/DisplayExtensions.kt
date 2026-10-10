@@ -20,10 +20,9 @@ private const val TABLET_UI_MIN_SCREEN_WIDTH_PORTRAIT_DP = 700
 private const val TABLET_UI_MIN_SCREEN_WIDTH_LANDSCAPE_DP = 600
 
 fun Context.isTv(): Boolean {
-    val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
-    if (uiModeManager?.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) return true
-    if (packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_LEANBACK)) return true
-    return isTvBox(this)
+    // YMR --> one detection for the whole app, including the user's override
+    return yomira.tv.TvSettings.isTv(this)
+    // YMR <--
 }
 
 fun Configuration.isTabletUi(): Boolean {

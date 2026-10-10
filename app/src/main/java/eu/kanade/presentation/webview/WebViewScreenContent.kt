@@ -44,6 +44,9 @@ import kotlinx.coroutines.launch
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
+import androidx.compose.material3.Text
+import tachiyomi.presentation.core.util.TvDevice
+import yomira.i18n.YMR
 
 @Composable
 fun WebViewScreenContent(
@@ -63,6 +66,11 @@ fun WebViewScreenContent(
 
     var currentUrl by remember { mutableStateOf(url) }
     var showCloudflareHelp by remember { mutableStateOf(false) }
+
+    // YMR -->
+    var tvCursorEnabled by remember { mutableStateOf(true) }
+    val tvWebView = remember { arrayOfNulls<yomira.tv.webview.TvCursorWebView>(1) }
+    // YMR <--
 
     val webClient = remember {
         object : AccompanistWebViewClient() {
@@ -154,6 +162,23 @@ fun WebViewScreenContent(
                                         title = stringResource(MR.strings.action_webview_refresh),
                                         onClick = { navigator.reload() },
                                     ),
+                                    // YMR -->
+                                    *if (TvDevice.isTv) {
+                                        arrayOf(
+                                            AppBar.OverflowAction(
+                                                title = stringResource(
+                                                    if (tvCursorEnabled) YMR.strings.webview_cursor_off else YMR.strings.webview_cursor_on,
+                                                ),
+                                                onClick = {
+                                                    tvCursorEnabled = !tvCursorEnabled
+                                                    tvWebView[0]?.cursorEnabled = tvCursorEnabled
+                                                },
+                                            ),
+                                        )
+                                    } else {
+                                        emptyArray()
+                                    },
+                                    // YMR <--
                                     AppBar.OverflowAction(
                                         title = stringResource(MR.strings.action_share),
                                         onClick = { onShare(currentUrl) },
@@ -171,6 +196,15 @@ fun WebViewScreenContent(
                         },
                     )
 
+                    // YMR -->
+                    if (TvDevice.isTv && tvCursorEnabled) {
+                        Text(
+                            text = stringResource(YMR.strings.webview_cursor_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        )
+                    }
+                    // YMR <--
                     if (showCloudflareHelp) {
                         Surface(
                             modifier = Modifier.padding(8.dp),
@@ -231,6 +265,18 @@ fun WebViewScreenContent(
                 }
             },
             client = webClient,
+            // YMR --> a D-pad driven pointer so site checks can be clicked with a remote
+            factory = { context ->
+                if (TvDevice.isTv) {
+                    yomira.tv.webview.TvCursorWebView(context).also {
+                        it.cursorEnabled = tvCursorEnabled
+                        tvWebView[0] = it
+                    }
+                } else {
+                    WebView(context)
+                }
+            },
+            // YMR <--
         )
     }
 }

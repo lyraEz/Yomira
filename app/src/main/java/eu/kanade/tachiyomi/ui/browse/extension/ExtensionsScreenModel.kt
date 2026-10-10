@@ -278,6 +278,8 @@ class ExtensionsScreenModel(
         screenModelScope.launchIO {
             mutableState.update { it.copy(isRefreshing = true) }
             extensionManager.reloadExtensions()
+            // Also the repository lists: on a TV this replaces the pull-to-refresh gesture.
+            extensionManager.findAvailableExtensions()
             mutableState.update { it.copy(isRefreshing = false) }
         }
     }

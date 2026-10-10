@@ -417,6 +417,9 @@ class PlayerActivity : BaseActivity() {
 
         setContent {
             TachiyomiTheme {
+                // YMR --> TV text scale and focus indication; the video itself stays full-bleed
+                yomira.tv.TvContent(applySafeArea = false) {
+                // YMR <--
                 Box(modifier = Modifier.fillMaxSize()) {
                     AndroidView(
                         factory = { player },
@@ -432,6 +435,9 @@ class PlayerActivity : BaseActivity() {
                             }
                         },
                     )
+                    // YMR --> controls stay inside the TV overscan margin
+                    yomira.tv.TvSafeArea(modifier = Modifier.fillMaxSize()) {
+                    // YMR <--
                     PlayerControls(
                         viewModel = viewModel,
                         castManager = castManager, // Pass the castManager instance
@@ -439,7 +445,13 @@ class PlayerActivity : BaseActivity() {
                         onBackPress = { backPressed() },
                         // ANZ <--
                     )
+                    // YMR -->
+                    }
+                    // YMR <--
                 }
+                // YMR -->
+                }
+                // YMR <--
             }
         }
 

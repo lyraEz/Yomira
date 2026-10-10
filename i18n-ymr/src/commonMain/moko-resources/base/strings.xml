@@ -72,4 +72,23 @@
     <string name="companion_waiting">Waiting for the phone…</string>
     <string name="companion_received">Received</string>
     <string name="companion_no_network">This device is not on a local network, so a phone cannot reach it.</string>
+
+    <!-- TV -->
+    <string name="tv_settings">TV</string>
+    <string name="tv_mode">Interface</string>
+    <string name="tv_mode_auto">Automatic (%1$s)</string>
+    <string name="tv_mode_tv">TV, for the remote</string>
+    <string name="tv_mode_phone">Phone or tablet, for touch</string>
+    <string name="tv_text_scale">Text size on TV</string>
+    <string name="tv_safe_area">Screen edge margin</string>
+    <string name="tv_safe_area_summary">%s. Keeps menus away from the edges on TVs that crop the picture (overscan).</string>
+    <string name="tv_safe_area_none">None</string>
+    <string name="tv_menu_long_press">Menu key = hold OK</string>
+    <string name="tv_menu_long_press_summary">The remote's menu button opens the options that a long press opens on a phone.</string>
+    <string name="tv_restart_note">Changing the interface takes effect after the app is restarted.</string>
+
+    <!-- WebView on TV -->
+    <string name="webview_cursor_hint">Arrows move the pointer, OK clicks. Push against the top or bottom edge to scroll.</string>
+    <string name="webview_cursor_on">Use pointer</string>
+    <string name="webview_cursor_off">Use page navigation</string>
 </resources>

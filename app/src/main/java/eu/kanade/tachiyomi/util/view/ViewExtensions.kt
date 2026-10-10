@@ -33,7 +33,11 @@ inline fun ComponentActivity.setComposeContent(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
             ) {
-                content()
+                // YMR --> TV text scale, overscan margin and focus indication
+                yomira.tv.TvContent {
+                    content()
+                }
+                // YMR <--
             }
         }
     }

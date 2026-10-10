@@ -1,5 +1,9 @@
 package eu.kanade.tachiyomi.ui.main
 
+import tachiyomi.presentation.core.util.TvDevice
+import android.view.ViewConfiguration
+import android.view.KeyEvent
+import android.os.SystemClock
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.Application
@@ -368,6 +372,38 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    // YMR -->
+    private var menuLongPressPending = false
+
+    /**
+     * On a TV the MENU key acts as "hold OK" on the focused item, so every long-press action
+     * (selection mode, context options) is reachable without holding the select button.
+     */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode == KeyEvent.KEYCODE_MENU && TvDevice.isTv && yomira.tv.TvSettings.menuKeyLongPress().get()) {
+            if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0 && !menuLongPressPending) {
+                menuLongPressPending = true
+                val downTime = SystemClock.uptimeMillis()
+                super.dispatchKeyEvent(
+                    KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0),
+                )
+                window.decorView.postDelayed(
+                    {
+                        val upTime = SystemClock.uptimeMillis()
+                        super.dispatchKeyEvent(
+                            KeyEvent(downTime, upTime, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0),
+                        )
+                        menuLongPressPending = false
+                    },
+                    ViewConfiguration.getLongPressTimeout() + MENU_LONG_PRESS_EXTRA_MS,
+                )
+            }
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+    // YMR <--
+
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
         when (val screen = navigator?.lastItem) {
@@ -669,3 +705,7 @@ class MainActivity : BaseActivity() {
 private const val SPLASH_MIN_DURATION = 500 // ms
 private const val SPLASH_MAX_DURATION = 5000 // ms
 private const val SPLASH_EXIT_ANIM_DURATION = 400L // ms
+
+// YMR -->
+private const val MENU_LONG_PRESS_EXTRA_MS = 150L
+// YMR <--

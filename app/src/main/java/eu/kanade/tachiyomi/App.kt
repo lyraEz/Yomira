@@ -136,7 +136,9 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         // Resolved once here so the D-pad focus-highlight modifiers, which are applied to
         // every grid cell and list row, can short-circuit on touch devices without doing
         // per-item work.
-        TvDevice.isTv = isTv()
+        // YMR --> honours the TV / phone override from Settings → Appearance
+        TvDevice.isTv = yomira.tv.TvSettings.isTv(this)
+        // YMR <--
 
         // Mirror the cover-related preferences into snapshot state once, instead of every
         // cover composable doing a DI lookup + SharedPreferences read per item.

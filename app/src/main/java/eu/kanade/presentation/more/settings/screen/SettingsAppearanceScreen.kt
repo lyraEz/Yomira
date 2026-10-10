@@ -45,6 +45,9 @@ object SettingsAppearanceScreen : SearchableSettings {
         val uiPreferences = remember { Injekt.get<UiPreferences>() }
 
         return listOf(
+            // YMR -->
+            yomira.tv.settings.tvPreferencesGroup(),
+            // YMR <--
             getThemeGroup(uiPreferences = uiPreferences),
             getLayoutNavigationGroup(uiPreferences = uiPreferences),
             getVisualCustomizationGroup(uiPreferences = uiPreferences),

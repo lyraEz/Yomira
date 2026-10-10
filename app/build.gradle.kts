@@ -23,6 +23,11 @@ if (Config.includeTelemetry && file("google-services.json").exists()) {
 
 shortcutHelper.setFilePath("./shortcuts.xml")
 
+// YMR --> ABIs built as split APKs (and kept in the release universal APK). Override with -PabiList=...
+val yomiraAbis: List<String> =
+    (project.findProperty("abiList") as? String)?.split(",") ?: listOf("armeabi-v7a", "arm64-v8a")
+// YMR <--
+
 android {
     namespace = "eu.kanade.tachiyomi"
 
@@ -173,9 +178,8 @@ android {
             isUniversalApk = true
             reset()
             // YMR --> Fire TV / TV boxes: 32-bit ARM first; x86 only on request (emulators).
-            val abis = (project.findProperty("abiList") as? String)?.split(",") ?: listOf("armeabi-v7a", "arm64-v8a")
+            include(*yomiraAbis.toTypedArray())
             // YMR <--
-            include(*abis.toTypedArray())
         }
     }
 
@@ -458,6 +462,14 @@ androidComponents {
         // Layout Inspector's Compose tree
         it.packaging.resources.excludes.add("META-INF/*.version")
     }
+    // YMR --> Keep x86 libraries out of the release universal APK unless they were asked for:
+    // Fire TV and TV boxes are ARM, and the x86 mpv libraries add about 100 MB.
+    onVariants(selector().withBuildType("release")) { variant ->
+        listOf("x86", "x86_64").filterNot { it in yomiraAbis }.forEach { abi ->
+            variant.packaging.jniLibs.excludes.add("lib/$abi/**")
+        }
+    }
+    // YMR <--
 }
 
 

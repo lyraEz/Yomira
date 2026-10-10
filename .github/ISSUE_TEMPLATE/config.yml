@@ -1,11 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 🧑‍💻 Discord
-    url: https://discord.gg/ZB6CZ8r7sp
-    about: Common questions are answered here
-  - name: ❌ Help with Extensions
-    url: https://github.com/salmanbappi/AniZen/discussions
-    about: For extension-related questions/issues
-  - name: 🖥️ AniZen GitHub
-    url: https://github.com/salmanbappi/AniZen
-    about: Source code, releases, and documentation
+  - name: Problemas com uma extensão específica
+    url: https://github.com/lyraEz/Rede/issues
+    about: Extensões são mantidas nos repositórios de extensões, não no Yomira.

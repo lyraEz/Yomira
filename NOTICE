@@ -1,0 +1,18 @@
+Yomira
+Copyright 2026 lyraEz
+
+This product is a derivative work of AniZen (https://github.com/salmanbappi/AniZen),
+licensed under the Apache License, Version 2.0, which in turn builds on:
+
+- Anikku (https://github.com/komikku-app/anikku) and Komikku
+- Aniyomi (https://github.com/aniyomiorg/aniyomi)
+- Mihon (https://github.com/mihonapp/mihon) and the Tachiyomi project
+- TachiyomiSY (https://github.com/jobobby04/TachiyomiSY)
+- mpvKt (https://github.com/abdallahmehiz/mpvKt), Copyright 2024 Abdallah Mehiz
+
+Files carrying their own copyright and license headers keep them. The Anime4K
+shaders in app/src/main/assets/shaders are Copyright (c) 2019-2021 bloc97 and
+distributed under the MIT License. Third-party libraries are listed with their
+licenses in the app under More > About > Open source licenses.
+
+Yomira is not an official AniZen release and is not endorsed by its authors.

@@ -1,0 +1,14 @@
+# Privacidade
+
+O Yomira não tem telemetria, anúncios nem contas próprias, e não envia dados de uso a quem mantém o projeto.
+
+O app só se conecta a:
+
+- **Repositórios de extensões** que você adicionar, para listar e baixar extensões.
+- **Sites das fontes**, por meio das extensões que você instalar. O que cada site recebe depende da extensão e do próprio site.
+- **GitHub**, para verificar se há uma versão nova do Yomira (no máximo a cada dois dias; o download automático da atualização pode ser desligado nas configurações).
+- **Serviços opcionais** que você ativar: rastreadores (AniList, MyAnimeList e outros), SyncYomi, provedores do assistente de IA com a sua chave, AniSkip.
+
+O recurso *Enviar do celular / Receber do celular* abre um servidor temporário na sua rede local enquanto o diálogo estiver na tela. Ele só aceita pedidos com o código aleatório exibido no QR code e é encerrado quando o diálogo fecha.
+
+Biblioteca, histórico, configurações e backups ficam no próprio aparelho, ou onde você decidir guardar o backup.

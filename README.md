@@ -1,153 +1,143 @@
 <div align="center">
 
-<img src="./.github/assets/icon.png" alt="AniZen Logo" width="100"/>
+<img src="./.github/assets/icon.png" alt="Ícone do Yomira" width="96"/>
 
-# AniZen
+# Yomira
 
-### A personal anime & movie client for Android.
-*A custom media player built with Jetpack Compose, designed for fluid interactions, smart offline playback, and experimental integrations.*
+Cliente de animes, séries e filmes para **Fire TV e TV Box**, feito para ser usado do começo ao fim com o controle remoto.
 
-[![Discord](https://img.shields.io/discord/1242381704459452488?label=Discord&labelColor=6A7EC2&color=7389D8&logo=discord&logoColor=FFFFFF&style=flat-square)](https://discord.gg/J2wmZqEJnS)
-[![Preview Build](https://img.shields.io/github/actions/workflow/status/salmanbappi/AniZen/preview.yml?branch=preview&label=Preview%20Build&style=flat-square)](https://github.com/salmanbappi/AniZen/actions/workflows/preview.yml)
-[![Release](https://img.shields.io/github/v/release/salmanbappi/AniZen?style=flat-square)](https://github.com/salmanbappi/AniZen/releases)
-[![Downloads](https://img.shields.io/github/downloads/salmanbappi/AniZen/total?style=flat-square)](https://github.com/salmanbappi/AniZen/releases)
-[![Views](https://komarev.com/ghpvc/?username=salmanbappi&repo=AniZen&style=flat-square&color=0877d2)](https://github.com/salmanbappi/AniZen)
-[![License](https://img.shields.io/github/license/salmanbappi/AniZen?label=License&color=0877d2&style=flat-square)](/LICENSE)
-</div>
-
----
-
-## 📖 About AniZen
-
-AniZen is a solo-built passion project that started on the foundation of Aniyomi and Anikku. It was created to explore how far an Android media client can go when designed with modern programming principles, deep player optimizations, and a focus on fluidity. 
-
-It aims to offer a premium, responsive, and completely personalized viewing space while remaining lightweight and respectful of hardware resources.
-
----
-
-## Features
-
-<div align="left">
-
-### Features include:
-
-* **AniZen**:
-  * **🎬 Media Player & Video Engine**:
-    * `Anime4K Neural Shaders` built-in upscaling quality levels (Fast, Balanced, High) and multiple processing modes (A, B, C, A+, B+, C+) for real-time video upscaling.
-    * `Motion Interpolation` temporal interpolation scaling (oversample, mitchell, catmull-rom) generating smooth frames matching the display refresh rate (up to 120fps/144fps).
-    * `MPVFX Filter Suite` card-based interface in the player for Debanding, Video Adjustments (Brightness, Saturation, Contrast, Gamma, Hue, Sharpen), and integrated Anime4K controls.
-    * `Dynamic Mediacodec Switching` automatic fallback to software decoding if active filters exceed hardware capability.
-    * `Adaptive Shader Scaling` automatically downgrades Anime4K quality if high frame drops/delayed frames are detected during playback to keep rendering smooth.
-    * `AniSkip Integration` skippable intros and Netflix-style skip button based on the online AniSkip database.
-    * `Filler Episode Skipping` automatically skips filler episodes based on tracking information.
-    * `Native Picture-in-Picture (PiP)` background playback support with custom controls.
-    * `Advanced Config & Script Editor` in-app code editor for `mpv.conf` and `input.conf` files, and support for running custom scripts.
-    * `Pinch-to-Zoom Gesture` pinch gestures and precise scale control (up to 3x) with dedicated zoom sheet adjustments during playback.
-    * `On-Demand Subtitles` loading of external/custom local subtitle files directly into the active player session via URI.
-    * `Default Stream Memory` automatically remembers preferred stream hoster and quality per anime to fast-forward selection for subsequent episodes.
-    * `Fluid Playback Gestures` long-press to activate jitter-free 2x speed with release animation, and horizontal slide speed adjustments.
-    * `Volume Boosting & Pitch Correction` volume boosting up to 200% with pitch correction to preserve original voices at high speeds.
-    * `Custom Aspect Ratios & Sleep Timer` define custom aspect ratio values and schedule playback sleep timers.
-    * `Custom Player Layout` fully configurable action buttons and player interface layout reordering.
-  * **📥 Resilient Downloader & Storage**:
-    * `1DM-Style Downloader` multi-threaded chunked download engine utilizing byte-range splitting.
-    * `Resilient Part-File Recovery` per-part file size verification, automatic 5x retry logic with exponential backoff, and robust `BufferPool` recycling.
-    * `External Downloader Handoff` seamless delegation of downloads to external managers (like 1DM or ADM), automatically passing custom stream headers, filenames, and download directories.
-    * `Native HLS & DASH Engines` multi-threaded HLS segment downloader with on-the-fly AES-128 decryption, variant playlist resolution, and native DASH muxing via FFmpeg with duration-based progress estimation.
-    * `Pro-Active Stream Pre-fetching` background stream URL resolution for queued downloads, minimizing delay between transitions.
-    * `Pre-Flight Storage Protection` automatic space allocation checks (maintaining a 200MB safety buffer, or 1.5x for FFmpeg operations) before download execution to prevent system instability.
-    * `Early Soft Subtitles Retrieval` downloads and packages VTT, ASS, and SRT subtitle tracks automatically and non-fatally alongside the video file.
-    * `Atomic Directory Assembly` downloads are isolated in a sandbox cache using temporary folder renames (`_tmp`) to prevent partial downloads from cluttering public storage.
-    * `Preload Next Episode` pre-resolves stream links and hoster lists in the background with network-aware throttling to prevent playback stutter.
-  * **📰 Feed & Personalization**:
-    * `Category-Styled Feeds` feed homepage organizes saved searches and popular content under custom category sections with drag-and-drop ordering.
-    * `Saved Search Feeds` pins specific keyword queries and filter configurations directly as auto-updating feed rows.
-    * `Unified Feed Tab` view the latest entries or saved searches from multiple sources simultaneously.
-    * `Custom Cover Art` set custom covers using local files or web URLs.
-    * `Auto theme color` based on each entry's cover for entry View.
-    * `Dynamic Player Theme` automatically themes the media player interface colors based on the active cover art.
-    * `App custom theme` with `22 Color palettes` for endless customization.
-    * `Panorama cover` showing wide cover in full.
-    * `Library Folders` group specific anime into custom collapsible sub-folders inside library categories.
-    * `UI Container Styles` choose card-like container layouts per-tab (Library, Updates, History, Browse, Details, Settings).
-    * `Haze Glassmorphism` toggleable glass-blur styling effects for top and bottom navigation bars.
-  * **📊 Statistics & Maintenance**:
-    * `Behavioral Watch Statistics` tracks rich watch habits (weekly heatmaps, genre affinity, status breakdowns, rolling 30-day feed activity logs, preferred viewing times, and top-viewed titles) and infrastructure metrics (throughput distribution, latency matrices, and topology breakdowns).
-    * `Extension Health Monitoring` live reports detailing extension latency, online node status, and connections metrics.
-    * `AI Diagnostics & Assistant` conversational troubleshooting assistant capable of digesting exception trace logs and library context.
-    * `Unified Rating Distribution` calculates and displays score distributions and mean ratings by combining local ratings and synced tracker data.
-    * `Extension Repository Source Mapping` resolves and tracks the specific GitHub repository (owner/repo) from which extensions are installed.
-    * `Diagnostics Report Export` formats and exports extension health statistics, resolve statuses, and logs directly to the clipboard.
-    * `Adaptive Navigation` suggests layout presets (Default, Minimal, Power) dynamically based on network connectivity and time-of-day.
+[![CI](https://github.com/lyraEz/Yomira/actions/workflows/ci.yml/badge.svg)](https://github.com/lyraEz/Yomira/actions/workflows/ci.yml)
+[![Licença](https://img.shields.io/badge/licen%C3%A7a-Apache--2.0-blue)](LICENSE)
 
 </div>
 
----
+O Yomira é um **fork independente** do [AniZen](https://github.com/salmanbappi/AniZen), que por sua vez descende do Anikku, do Aniyomi e do Mihon/Tachiyomi. **Não é uma versão oficial do AniZen** e não tem ligação com seus autores. O app não traz conteúdo próprio: os catálogos vêm de extensões instaladas a partir de repositórios escolhidos por quem usa.
 
-## 🛠️ Technical Architecture
+- Pacote: `com.lyraez.yomira` (instala ao lado do AniZen, sem conflito)
+- Versão atual: 1.0.0
+- Base do código: AniZen v0.5.215 (`becbe2d`, 30/09/2026)
 
-AniZen follows **Clean Architecture** principles to separate business logic, UI, and data handling into a modular structure:
+## Situação dos testes
 
+O código compila, os testes automatizados passam e os APKs foram inspecionados (launcher de TV, banner, ABIs, assinatura). **Ainda não foi feito o teste em um Fire TV Stick físico.** Até lá, a compatibilidade com o aparelho não está comprovada. A matriz de testes pendentes está em [docs/yomira/TESTES.md](docs/yomira/TESTES.md).
+
+## O que muda em relação ao AniZen
+
+- **Controle remoto em todo o app**: foco bem visível, texto maior na TV, margem de segurança contra overscan, foco restaurado ao voltar de uma tela, tecla Menu como alternativa ao toque longo e um ponteiro controlado pelas setas no WebView (para verificações de site como Cloudflare).
+- **Player para TV**: OK mostra os controles, as setas buscam com os controles ocultos e navegam com eles visíveis, Voltar primeiro esconde os controles e as teclas de mídia funcionam sempre. Veja [docs/yomira/CONTROLE-REMOTO.md](docs/yomira/CONTROLE-REMOTO.md).
+- **Próximo episódio sem fechar o player**: quando um episódio falha (servidor fora do ar, link expirado), o player mostra o erro com opções para tentar de novo, escolher outro servidor ou episódio, em vez de fechar.
+- **Extensões explicadas**: a lista mostra quando o sistema aguarda confirmação, quantas fontes cada extensão carregou e, para extensões instaladas que não carregaram, o motivo (biblioteca incompatível, assinatura, filtro adulto, erro de carregamento) com um diagnóstico que pode ser copiado.
+- **Repositórios pela TV**: colar, receber o endereço pelo celular (QR code na mesma rede Wi-Fi) ou escolher uma das sugestões, com mensagens de erro específicas.
+- **Backup sem seletor de arquivos**: no Fire OS o backup é salvo na pasta do app e pode ser baixado ou enviado pelo celular via QR code, ou copiado com `adb`.
+- **Padrões para aparelhos fracos**: em TVs de 32 bits ou com pouca memória, o player usa cache menor e não força conversão de pixel. Anime4K e outros shaders continuam desligados por padrão e podem ser ativados manualmente.
+
+## Requisitos
+
+| | |
+| --- | --- |
+| Android | 8.0 ou mais novo (API 26+) |
+| Fire OS | Fire OS 7 (Android 9, API 28) ou Fire OS 8 (Android 11, API 30). **Fire OS 6 (Android 7.1, API 25) não é compatível.** |
+| Arquitetura | ARM 32 bits (`armeabi-v7a`) ou 64 bits (`arm64-v8a`) |
+
+Para confirmar o seu aparelho, com a depuração ADB ativada (Configurações → Minha Fire TV → Opções do desenvolvedor):
+
+```sh
+adb connect IP_DO_FIRE_TV
+adb shell getprop ro.product.model
+adb shell getprop ro.build.version.sdk      # precisa ser 26 ou mais
+adb shell getprop ro.product.cpu.abilist    # define qual APK usar
 ```
-app                   # Entry point, dependency injection configuration
-├── core              # Shared helpers, common extensions, and base utilities
-├── data              # Repositories, database (SQLDelight), and networking (OkHttp)
-├── domain            # Core business logic, use cases, and domain models
-├── presentation-core # Reusable UI components, themes, and design tokens (Compose)
-├── source-api        # Extension API interfaces and definitions
-└── source-local      # Local storage and media indexers
+
+## Instalação
+
+Na página de [Releases](https://github.com/lyraEz/Yomira/releases) há três APKs, todos com o mesmo pacote e a mesma assinatura:
+
+| Arquivo | Quando usar |
+| --- | --- |
+| `Yomira-vX.Y.Z-armeabi-v7a.apk` | Fire TV Stick e TV Boxes cujo `abilist` começa com `armeabi-v7a` (a maioria dos Fire TV) |
+| `Yomira-vX.Y.Z-arm64-v8a.apk` | Aparelhos cujo `abilist` começa com `arm64-v8a` |
+| `Yomira-vX.Y.Z-universal.apk` | Se tiver dúvida; funciona em ARM 32 e 64 bits, mas é maior |
+
+**Pelo próprio Fire TV:** instale o app *Downloader*, permita que ele instale apps desconhecidos (Configurações → Minha Fire TV → Opções do desenvolvedor → Instalar apps desconhecidos) e abra o link do APK. O Yomira aparece em *Seus apps e canais*.
+
+**Pelo computador:**
+
+```sh
+adb install -r Yomira-v1.0.0-armeabi-v7a.apk
 ```
 
-### Technical Stack & Decisions
-*   **Development Platform:** 100% Kotlin with Jetpack Compose for declarative UI.
-*   **Concurrency:** Kotlin Coroutines & Flow for asynchronous tasks and state streaming.
-*   **Database:** SQLDelight for compile-time safe SQL queries.
-*   **Core Shaders:** High-quality `ewa_lanczossharp` scaling for sharpest anime lines.
-*   **Scrolling Performance:** Implements `Precision.INEXACT` cover scaling to delegate image processing to the GPU, removing micro-stutter and keeping scrolling fluid on 120/144Hz displays.
+Confira o arquivo antes de instalar com o `SHA256SUMS.txt` da release (`sha256sum -c SHA256SUMS.txt`, ou `certutil -hashfile ARQUIVO SHA256` no Windows). O certificado de assinatura do Yomira tem SHA-256 `e4d0adb9369971bfbe862554d8e7d418b43c17321e2694719d0efeb0f1d677ce`.
 
----
+## Primeiros passos
 
-## 🚀 Getting Started
+1. Na primeira abertura, siga o assistente com as setas e o OK.
+2. Em **Navegar → Extensões → menu → Repositórios de extensões**, adicione um repositório. Estes dois têm o formato compatível conferido:
+   - Rede: `https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json`
+   - Project Nox Anime: `https://raw.githubusercontent.com/Awerkori/anime-extensoes/repo/index.min.json`
 
-### For Users
-1. Head over to the [Releases](https://github.com/salmanbappi/AniZen/releases) tab.
-2. Download the latest `arm64-v8a` release APK.
-3. Install the APK (requires enabling *Install from Unknown Sources*).
-4. Installs under package ID `app.anizen` — runs side-by-side with official Anikku without issues.
+   Qualquer repositório no formato legado do Aniyomi/AniZen (com `repo.json` e `index.min.json`) funciona. O índice **store-v2** usado pelas versões novas do Aniyomi é outro formato e o Yomira não o lê; se você colar um endereço store-v2, o app tenta o `index.min.json` da mesma pasta e explica quando ele não existe.
+3. Instale uma extensão. Se o sistema pedir, confirme a instalação. Quando a extensão estiver assinada por uma chave que nenhum repositório adicionado declara, o app pede para você confiar nela.
+4. A fonte aparece em **Navegar → Fontes**.
 
-### For Developers
-Clone the repository and build using Gradle:
-```bash
-git clone https://github.com/salmanbappi/AniZen.git
-cd AniZen
-./gradlew assembleDebug
+Se uma extensão não aparecer, use **Navegar → Extensões → menu → Recarregar extensões** e veja a seção *Instaladas com problemas*. Uma extensão assinada com outra chave não pode ser atualizada por cima: o Android exige desinstalar a versão atual antes.
+
+## Atualizar o Yomira
+
+Instale o APK novo **por cima** do atual (mesmo pelo Downloader ou com `adb install -r`). Biblioteca, histórico e configurações são mantidos porque o pacote e a assinatura não mudam e o `versionCode` sempre aumenta. **Não desinstale** antes de atualizar.
+
+## Backup e migração do AniZen
+
+O Yomira tem pacote próprio, então não enxerga os dados do AniZen. Para levar biblioteca, histórico, categorias, configurações, fontes e repositórios:
+
+1. No AniZen: **Mais → Configurações → Dados e armazenamento → Criar backup**.
+2. Leve o arquivo `.tachibk` para a TV: pelo Yomira em **Restaurar backup → Receber do celular** (QR code), ou com `adb push arquivo.tachibk /sdcard/Android/data/com.lyraez.yomira/files/backups/`.
+3. No Yomira: **Mais → Configurações → Dados e armazenamento → Restaurar backup** e escolha o arquivo.
+
+O AniZen continua instalado e intacto. As extensões precisam ser instaladas de novo pelo Yomira, a partir dos repositórios restaurados.
+
+Para guardar um backup do Yomira, use **Criar backup**: na TV ele vai para a pasta do app e pode ser baixado no celular pelo QR code ou com `adb pull`. Essa pasta é apagada se o app for desinstalado.
+
+## Serviços desativados
+
+Alguns recursos herdados dependiam de credenciais do autor do AniZen e estão desligados: Discord Rich Presence, sincronização com o Google Drive e a verificação remota do assistente de IA. Os logins de rastreadores (AniList, MyAnimeList e outros) usam registros OAuth dos projetos de origem. Detalhes e como configurar credenciais próprias em [docs/yomira/SERVICOS.md](docs/yomira/SERVICOS.md). O app não tem telemetria; veja [docs/yomira/PRIVACIDADE.md](docs/yomira/PRIVACIDADE.md).
+
+## Compilar
+
+Requer JDK 17 e o Android SDK (plataforma 36).
+
+```sh
+git clone https://github.com/lyraEz/Yomira.git
+cd Yomira
+./gradlew :app:assembleDebug            # versão de desenvolvimento (com.lyraez.yomira.dev)
+./gradlew :app:assembleRelease          # APKs de release (sem assinatura se não houver chave)
 ```
-Automated preview builds can also be found in the [Actions tab](https://github.com/salmanbappi/AniZen/actions/workflows/preview.yml).
 
----
+Para assinar, crie `signing.properties` na raiz (o arquivo é ignorado pelo Git):
 
-## 🤝 Contributing & Support
+```properties
+storeFile=/caminho/para/yomira-release.jks
+storePassword=...
+keyAlias=yomira
+keyPassword=...
+```
 
-*   **Bug Reports:** Report issues and attach logs via [GitHub Issues](https://github.com/salmanbappi/AniZen/issues).
-*   **Community:** Join our [Discord Server](https://discord.gg/J2wmZqEJnS) to ask questions, chat, or suggest features.
+O processo de release, a guarda da chave e a política de versões estão em [docs/yomira/RELEASES.md](docs/yomira/RELEASES.md). Para trazer mudanças do AniZen, veja [docs/yomira/SINCRONIZACAO.md](docs/yomira/SINCRONIZACAO.md).
 
----
+## Créditos
 
-## 💖 Credits
+O Yomira só existe por causa destes projetos, todos de código aberto:
 
-AniZen would not be possible without the incredible open-source projects it builds upon:
-*   [Aniyomi](https://github.com/aniyomiorg/aniyomi) & [Anikku](https://github.com/komikku-app/anikku) (Core codebase foundations)
-*   [Anime4K](https://github.com/bloc97/Anime4K) (Real-time shaders)
-*   [mpvEx](https://github.com/marlboro-advance/mpvEx) (MPV integration patterns)
+- [AniZen](https://github.com/salmanbappi/AniZen), de salmanbappi: a base deste fork
+- [Anikku](https://github.com/komikku-app/anikku) e [Komikku](https://github.com/komikku-app/komikku)
+- [Aniyomi](https://github.com/aniyomiorg/aniyomi)
+- [Mihon](https://github.com/mihonapp/mihon) e o projeto Tachiyomi
+- [TachiyomiSY](https://github.com/jobobby04/TachiyomiSY)
+- [mpv](https://mpv.io) e [mpv-android](https://github.com/mpv-android/mpv-android)
+- [mpvKt](https://github.com/abdallahmehiz/mpvKt) e [mpvEx](https://github.com/marlboro-advance/mpvEx)
+- [Anime4K](https://github.com/bloc97/Anime4K) (shaders, licença MIT)
 
----
+As licenças das bibliotecas usadas aparecem no app em **Mais → Sobre → Licenças de código aberto**.
 
-## 📄 License
+## Licença
 
-AniZen is open-source software licensed under the [Apache-2.0 License](LICENSE).
-
----
-
-<div align="center">
-<sub>Designed, directed, and built solo. Every detail intentional.</sub>
-</div>
+Distribuído sob a [Licença Apache 2.0](LICENSE), a mesma do AniZen. Veja também [NOTICE](NOTICE).

@@ -10,6 +10,33 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.0.0] - 2026-10-10
+
+Primeira versão do fork, sobre o AniZen v0.5.215 (`becbe2d`).
+
+### Added
+- Interface para controle remoto: detecção de TV com opção manual, texto maior, margem contra overscan, foco visível em todos os componentes, foco restaurado ao voltar e tecla Menu como toque longo.
+- Ponteiro controlado pelo D-pad no WebView, para verificações de site.
+- Player: roteamento de teclas do controle (menus navegáveis, busca com as setas, Voltar esconde os controles, teclas de mídia), foco inicial em Reproduzir/Pausar e barra de progresso controlável.
+- Tela de erro dentro do player com Tentar de novo, Servidores, Episódios, Próximo episódio e Sair.
+- Extensões: estado "aguardando confirmação do sistema", contagem de fontes carregadas, seção de extensões instaladas com problemas e diagnóstico copiável.
+- Repositórios: colar, enviar do celular por QR code e sugestões; verificação do repositório antes de salvar e mensagens de erro específicas.
+- Backup e restauração sem seletor de arquivos, com transferência pelo celular.
+
+### Fixed
+- Avançar para o próximo episódio podia fechar o player.
+- Extensões instaladas que não carregavam sumiam sem explicação.
+- Criar backup falhava em aparelhos sem seletor de arquivos.
+- Telas do sistema ausentes no Fire OS (bateria, apps desconhecidos) e links sem navegador fechavam o app.
+
+### Changed
+- Pacote `com.lyraez.yomira`, nome, ícone, banner e assinatura próprios; atualizador aponta para `lyraEz/Yomira`.
+- Discord Rich Presence, sincronização com Google Drive e a verificação remota do assistente de IA desligados por dependerem de credenciais do autor do AniZen.
+- Em TVs de baixo desempenho, cache do mpv menor e conversão `yuv420p` desligada por padrão.
+- O APK universal de release traz só as bibliotecas ARM (32 e 64 bits).
+
+---
+
 ## [Unreleased]
 ### Fixed
 

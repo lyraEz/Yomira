@@ -1,27 +1,33 @@
-name: Official Release
+name: Release
+
+# Manual only. Builds signed APKs with the Yomira key and attaches them to a *draft*
+# GitHub release, so nothing becomes public until the draft is reviewed and published.
+#
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   YOMIRA_KEYSTORE_BASE64    base64 of the release keystore (.jks)
+#   YOMIRA_KEYSTORE_PASSWORD  keystore password
+#   YOMIRA_KEY_ALIAS          key alias
+#   YOMIRA_KEY_PASSWORD       key password (may be the same as the keystore password)
 on:
-  push:
-    branches:
-      - master
-    tags:
-      - 'v*'
-    paths-ignore:
-      - '**.md'
   workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Mark the draft as a pre-release
+        type: boolean
+        default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: release
+  cancel-in-progress: false
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+permissions:
+  contents: write
 
 jobs:
-  build-release:
-    name: Build & Public Release
+  release:
+    name: Build signed release
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    timeout-minutes: 90
 
     steps:
       - name: Clone repo
@@ -38,161 +44,40 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Code Analysis (Detekt)
-        run: ./gradlew detekt --no-daemon
-
-      - name: Bump Version
-        run: ./scripts/bump_version.sh
-
-      - name: Commit and Push Version Bump
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/build.gradle.kts
-          git commit -m "chore: bump version to ${{ env.NEW_VN }}"
-          git push origin master
-
-      - name: Build Release APK
-        run: ./gradlew assembleRelease -Pinclude-telemetry=false -Penable-updater=true --no-daemon
+      - name: Restore keystore
         env:
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-
-      - name: Rename APK
+          KEYSTORE_BASE64: ${{ secrets.YOMIRA_KEYSTORE_BASE64 }}
         run: |
-          VERSION="${{ env.NEW_VN }}"
-          cd app/build/outputs/apk/release/
-          for f in *.apk; do
-            mv "$f" "AniZen-v$VERSION-$f"
-          done
-
-      - name: Generate Detailed Context for AI
-        run: |
-          # Get the previous tag
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            RANGE="-n 10"
-          else
-            RANGE="$PREV_TAG..HEAD"
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::YOMIRA_KEYSTORE_BASE64 is not set; refusing to build an unsigned release."
+            exit 1
           fi
-          
-          mkdir -p .github/ai
-          # 1. Get commits (subjects and bodies)
-          git log $RANGE --pretty=format:"- %s%n%b" | grep -v "chore: bump version" > .github/ai/commits.txt || echo "New version release." > .github/ai/commits.txt
-          
-          # 2. Get file change statistics
-          git diff --stat $RANGE > .github/ai/files.txt
-          
-          # 3. Get actual code diff (capped at 200 lines for stability)
-          git diff -U1 $RANGE | head -n 200 > .github/ai/diff.txt
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/yomira-release.jks"
+          echo "YOMIRA_KEYSTORE_FILE=$RUNNER_TEMP/yomira-release.jks" >> "$GITHUB_ENV"
 
-      - name: Format Changelog with Gemini AI
+      - name: Build signed APKs
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          COMMITS=$(cat .github/ai/commits.txt)
-          FILES=$(cat .github/ai/files.txt)
-          DIFF=$(cat .github/ai/diff.txt)
-          
-          cat > .github/ai/full_prompt.txt <<EOF
-          You are an excited team member of AniZen! Write a friendly and hyped 'Changelog' for our fans. 
-          Summarize WHAT IS NEW and WHAT CHANGED based on the commits and diff below.
-          Use emojis like 🚀, ✨, and 🛠️. Group into 'What's New', 'Fixed', and 'Polished'.
-          CRITICAL: Do NOT mention technical terms like 'code', 'commits', or 'diff'. Focus on improvements!
-          If the diff is truncated, rely on the commit history to tell the story.
-          
-          NEW CHANGES:
-          COMMITS:
-          $COMMITS
+          YOMIRA_KEYSTORE_PASSWORD: ${{ secrets.YOMIRA_KEYSTORE_PASSWORD }}
+          YOMIRA_KEY_ALIAS: ${{ secrets.YOMIRA_KEY_ALIAS }}
+          YOMIRA_KEY_PASSWORD: ${{ secrets.YOMIRA_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:assembleRelease -Penable-updater=true
 
-          FILE STATS:
-          $FILES
-          
-          DIFF SNIPPET:
-          $DIFF
-          EOF
-          
-          PAYLOAD=$(jq -n \
-            --rawfile prompt .github/ai/full_prompt.txt \
-            '{
-              contents: [{parts: [{text: $prompt}]}],
-              generationConfig: {temperature: 0.7, maxOutputTokens: 1024}
-            }')
-          
-          echo "Requesting AI summary from Gemini (gemini-flash-latest)..."
-          RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=$GEMINI_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD")
-          
-          SUMMARY=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty')
-          
-          # Fallback to gemini-flash-lite-latest if primary fails or is empty
-          if [ -z "$SUMMARY" ] || [ "$SUMMARY" == "null" ]; then
-            echo "Primary model failed or empty. Requesting fallback from Gemini (gemini-flash-lite-latest)..."
-            RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=$GEMINI_API_KEY" \
-              -H "Content-Type: application/json" \
-              -d "$PAYLOAD")
-            SUMMARY=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty')
-          fi
-          
-          if [ -z "$SUMMARY" ] || [ "$SUMMARY" == "null" ]; then
-            SUMMARY="We've made some secret improvements under the hood to make your experience better! ✨"
-          fi
-          
-          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-          echo "$SUMMARY" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+      - name: Collect, verify and checksum
+        id: collect
+        run: scripts/yomira/package-release.sh app/build/outputs/apk/release dist
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/yomira-release.jks"
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.NEW_VN }}
-          name: AniZen Release v${{ env.NEW_VN }}
-          files: app/build/outputs/apk/release/*.apk
-          draft: false
-          prerelease: false
-          generate_release_notes: false
-          body: |
-            ## 🚀 AniZen v${{ env.NEW_VN }}
-            
-            ${{ env.CHANGELOG }}
-            
-            ---
-            **📥 Download:** Choose the `arm64-v8a` version for your phone.
-
-      - name: Send Announcement to Discord
-        if: success()
-        env:
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-        run: |
-          # Define clean links for Markdown
-          RELEASE_URL="https://github.com/salmanbappi/AniZen/releases/tag/v${{ env.NEW_VN }}"
-          COMMIT_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-          
-          EMBED_TITLE="🚀 AniZen Official Release (v${{ env.NEW_VN }})"
-          EMBED_DESC=$(cat <<EOF
-          ${{ env.CHANGELOG }}
-
-          ---
-          **📥 [Download Release APK]($RELEASE_URL)**
-          **🔗 [View Release Details]($RELEASE_URL)**
-          EOF
-          )
-
-          # Encode using jq for a clean Discord Embed payload
-          PAYLOAD=$(jq -n \
-            --arg title "$EMBED_TITLE" \
-            --arg desc "$EMBED_DESC" \
-            '{
-              embeds: [{
-                title: $title,
-                description: $desc,
-                color: 16763904
-              }]
-            }')
-          
-          curl -X POST -H "Authorization: Bot $DISCORD_BOT_TOKEN" \
-               -H "Content-Type: application/json" \
-               -d "$PAYLOAD" \
-               https://discord.com/api/v10/channels/1482254131417845821/messages
+          tag_name: v${{ steps.collect.outputs.version }}
+          name: Yomira ${{ steps.collect.outputs.version }}
+          draft: true
+          prerelease: ${{ inputs.prerelease }}
+          body_path: dist/release-notes.md
+          files: |
+            dist/*.apk
+            dist/SHA256SUMS.txt

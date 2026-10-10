@@ -1,0 +1,68 @@
+name: CI
+
+# Builds and checks every push and pull request. Nothing is published from here:
+# the APKs are unsigned and only kept as workflow artifacts for a few days.
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Formatting (files changed since the upstream base)
+        run: ./gradlew --no-daemon spotlessCheck
+
+      - name: Static analysis (detekt)
+        run: ./gradlew --no-daemon detekt
+
+      - name: Unit tests
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :domain:testDebugUnitTest
+
+      - name: Build unsigned release APKs
+        run: ./gradlew --no-daemon :app:assembleRelease
+
+      - name: Inspect APKs
+        run: scripts/yomira/inspect-apks.sh app/build/outputs/apk/release
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: yomira-unsigned-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/apk-report.txt
+          retention-days: 7

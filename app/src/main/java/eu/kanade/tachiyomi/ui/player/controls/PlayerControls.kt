@@ -48,6 +48,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.ui.focus.FocusRequester
+import eu.kanade.tachiyomi.ui.player.controls.components.PlaybackErrorOverlay
 import eu.kanade.tachiyomi.ui.player.VideoTrack
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -56,7 +58,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -84,7 +85,6 @@ import eu.kanade.tachiyomi.ui.player.controls.components.BrightnessSlider
 import eu.kanade.tachiyomi.ui.player.controls.components.ControlsButton
 import eu.kanade.tachiyomi.ui.player.controls.components.DoubleSpeedPlayerUpdate
 import eu.kanade.tachiyomi.ui.player.controls.components.FilledControlsButton
-import eu.kanade.tachiyomi.ui.player.controls.components.PlaybackErrorOverlay
 import eu.kanade.tachiyomi.ui.player.controls.components.SeekbarWithTimers
 import eu.kanade.tachiyomi.ui.player.controls.components.videoTimerWidth
 import eu.kanade.tachiyomi.ui.player.controls.components.ThumbnailPreview
@@ -107,7 +107,6 @@ import tachiyomi.core.common.preference.minusAssign
 import tachiyomi.core.common.preference.plusAssign
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.TvDevice
 import tachiyomi.presentation.core.util.collectAsState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -120,6 +119,7 @@ import androidx.compose.ui.platform.LocalDensity
 import android.content.res.Configuration
 import eu.kanade.tachiyomi.ui.player.PlayerButton
 import eu.kanade.tachiyomi.ui.player.parseButtons
+import tachiyomi.presentation.core.util.TvDevice
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 

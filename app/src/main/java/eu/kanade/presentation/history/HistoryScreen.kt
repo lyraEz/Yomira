@@ -47,8 +47,8 @@ import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.time.LocalDate
 import yomira.tv.focus.tvFocusRestore
+import java.time.LocalDate
 
 @Composable
 fun HistoryScreen(

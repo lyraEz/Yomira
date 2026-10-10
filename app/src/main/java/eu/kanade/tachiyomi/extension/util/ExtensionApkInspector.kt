@@ -67,7 +67,8 @@ object ExtensionApkInspector {
             )
         }
         val installedSignatures = installed.signatureHashes()
-        if (installedSignatures.isNotEmpty() && apk.signatures.isNotEmpty() &&
+        if (installedSignatures.isNotEmpty() &&
+            apk.signatures.isNotEmpty() &&
             installedSignatures.none { it in apk.signatures }
         ) {
             return context.stringResource(YMR.strings.ext_error_signature_mismatch)

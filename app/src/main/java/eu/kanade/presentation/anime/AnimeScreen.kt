@@ -72,6 +72,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.FabPosition
+import yomira.tv.focus.tvFocusRestore
 import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.luminance
@@ -151,7 +152,6 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import yomira.tv.focus.tvFocusRestore
 
 @Composable
 fun AnimeScreen(

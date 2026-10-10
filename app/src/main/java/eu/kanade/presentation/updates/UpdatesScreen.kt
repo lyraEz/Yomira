@@ -49,6 +49,7 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import yomira.tv.focus.tvFocusRestore
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.seconds
 
@@ -57,7 +58,6 @@ import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.PanoramaMode
 import eu.kanade.presentation.components.PanoramaModeToggle
 import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
-import yomira.tv.focus.tvFocusRestore
 
 @Composable
 fun UpdateScreen(

@@ -82,9 +82,9 @@ import tachiyomi.i18n.ank.AMR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.TvDevice
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import tachiyomi.presentation.core.util.TvDevice
 
 @Suppress("TooManyFunctions")
 object SettingsDataScreen : SearchableSettings {

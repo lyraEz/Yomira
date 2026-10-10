@@ -1,9 +1,5 @@
 package eu.kanade.tachiyomi.ui.main
 
-import tachiyomi.presentation.core.util.TvDevice
-import android.view.ViewConfiguration
-import android.view.KeyEvent
-import android.os.SystemClock
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.Application
@@ -15,7 +11,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.KeyEvent
 import android.view.View
+import android.view.ViewConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -129,6 +128,7 @@ import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.util.collectAsState
+import tachiyomi.presentation.core.util.TvDevice
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy

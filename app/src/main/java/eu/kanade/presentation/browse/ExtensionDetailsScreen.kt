@@ -64,6 +64,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.icons.CustomIcons
 import tachiyomi.presentation.core.icons.Magnet
 import tachiyomi.presentation.core.screens.EmptyScreen
+import yomira.i18n.YMR
 
 @Composable
 fun ExtensionDetailsScreen(
@@ -75,6 +76,9 @@ fun ExtensionDetailsScreen(
     onClickClearCookies: () -> Unit,
     onClickUninstall: () -> Unit,
     onClickSource: (sourceId: Long) -> Unit,
+    // YMR -->
+    onClickDiagnostics: () -> Unit = {},
+    // YMR <--
 ) {
     val uriHandler = LocalUriHandler.current
     val url = remember(state.extension) {
@@ -129,6 +133,12 @@ fun ExtensionDetailsScreen(
                                             title = stringResource(MR.strings.pref_clear_cookies),
                                             onClick = onClickClearCookies,
                                         ),
+                                        // YMR -->
+                                        AppBar.OverflowAction(
+                                            title = stringResource(YMR.strings.ext_diagnostics),
+                                            onClick = onClickDiagnostics,
+                                        ),
+                                        // YMR <--
                                     ),
                                 )
                             }

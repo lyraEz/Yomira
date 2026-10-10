@@ -1,15 +1,5 @@
 package eu.kanade.presentation.browse
 
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.text.font.FontFamily
-import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
-import eu.kanade.tachiyomi.util.system.copyToClipboard
-import tachiyomi.core.common.i18n.stringResource
-import yomira.i18n.YMR
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,7 +26,9 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.GetApp
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
@@ -86,6 +78,7 @@ import eu.kanade.presentation.components.SOURCE_SEARCH_BOX_HEIGHT
 import eu.kanade.presentation.components.WarningBanner
 import eu.kanade.presentation.more.settings.screen.browse.ExtensionReposScreen
 import eu.kanade.presentation.util.rememberRequestPackageInstallsPermissionState
+import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
 import tachiyomi.presentation.core.icons.CustomIcons
 import tachiyomi.presentation.core.icons.Magnet
 import eu.kanade.tachiyomi.extension.model.Extension
@@ -110,6 +103,7 @@ import tachiyomi.presentation.core.util.plus
 import tachiyomi.presentation.core.util.secondaryItemAlpha
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import yomira.i18n.YMR
 
 @Composable
 fun ExtensionScreen(
@@ -850,51 +844,12 @@ private fun ExtensionDiagnosticsDialog(
     onUninstall: (() -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
-    val context = LocalContext.current
-    var report by remember(request) { mutableStateOf<String?>(null) }
-    LaunchedEffect(request) {
-        report = runCatching { buildDiagnostics() }.getOrElse { it.toString() }
-    }
-    AlertDialog(
+    yomira.tv.extensions.ExtensionDiagnosticsDialog(
+        title = request.title,
+        summary = request.summary,
+        buildReport = buildDiagnostics,
+        onUninstall = onUninstall,
         onDismissRequest = onDismissRequest,
-        title = { Text(text = request.title) },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
-            ) {
-                request.summary?.let {
-                    Text(text = it, color = MaterialTheme.colorScheme.error)
-                }
-                Text(
-                    text = report ?: "…",
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    report?.let {
-                        context.copyToClipboard(context.stringResource(YMR.strings.ext_diagnostics), it)
-                    }
-                },
-            ) {
-                Text(text = stringResource(YMR.strings.ext_diagnostics_copy))
-            }
-        },
-        dismissButton = {
-            Row {
-                if (onUninstall != null) {
-                    TextButton(onClick = onUninstall) {
-                        Text(text = stringResource(MR.strings.ext_uninstall))
-                    }
-                }
-                TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(MR.strings.action_close))
-                }
-            }
-        },
     )
 }
 // YMR <--

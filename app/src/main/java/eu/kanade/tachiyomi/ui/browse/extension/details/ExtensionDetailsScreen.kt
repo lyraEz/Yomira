@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -27,6 +30,9 @@ data class ExtensionDetailsScreen(
             )
         }
         val state by screenModel.state.collectAsState()
+        // YMR -->
+        var showDiagnostics by remember { mutableStateOf(false) }
+        // YMR <--
 
         if (state.isLoading) {
             LoadingScreen()
@@ -44,7 +50,25 @@ data class ExtensionDetailsScreen(
             onClickClearCookies = screenModel::clearCookies,
             onClickUninstall = screenModel::uninstallExtension,
             onClickSource = screenModel::toggleSource,
+            // YMR -->
+            onClickDiagnostics = { showDiagnostics = true },
+            // YMR <--
         )
+
+        // YMR -->
+        if (showDiagnostics) {
+            val extension = state.extension
+            yomira.tv.extensions.ExtensionDiagnosticsDialog(
+                title = extension?.name ?: pkgName,
+                summary = null,
+                buildReport = {
+                    eu.kanade.tachiyomi.extension.util.ExtensionDiagnostics.build(context, extension, pkgName, null)
+                },
+                onUninstall = null,
+                onDismissRequest = { showDiagnostics = false },
+            )
+        }
+        // YMR <--
 
         LaunchedEffect(Unit) {
             screenModel.events.collectLatest { event ->

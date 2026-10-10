@@ -91,4 +91,22 @@
     <string name="webview_cursor_hint">Arrows move the pointer, OK clicks. Push against the top or bottom edge to scroll.</string>
     <string name="webview_cursor_on">Use pointer</string>
     <string name="webview_cursor_off">Use page navigation</string>
+
+    <!-- Backups without a file picker -->
+    <string name="backup_receive_from_phone">Receive from phone</string>
+    <string name="backup_receive_from_phone_summary">Upload a .tachibk file from a phone on the same Wi-Fi</string>
+    <string name="backup_receive_from_phone_description">Scan the code with a phone on the same Wi-Fi network and choose the backup file. The restore starts when it arrives.</string>
+    <string name="backup_system_picker">Choose with the system file picker</string>
+    <string name="backup_found_title">Backups found on this device</string>
+    <string name="backup_none_found">No backup found. Backups created here are saved in %1$s; you can also copy one there with adb push.</string>
+    <string name="backup_location_app">Yomira folder</string>
+    <string name="backup_location_storage">Automatic backups</string>
+    <string name="backup_location_downloads">Downloads</string>
+    <string name="backup_location_received">Received from phone</string>
+    <string name="backup_saved">Backup saved (%1$s)</string>
+    <string name="backup_send_to_phone">Send to phone</string>
+    <string name="backup_send_to_phone_summary">Download the file on a phone on the same Wi-Fi</string>
+    <string name="backup_send_to_phone_description">Scan the code with a phone on the same Wi-Fi network to download the backup.</string>
+    <string name="backup_adb_hint">With a computer and ADB debugging enabled:</string>
+    <string name="backup_keep_note">The file lives in the app folder and is deleted if %1$s is uninstalled. Keep a copy elsewhere.</string>
 </resources>

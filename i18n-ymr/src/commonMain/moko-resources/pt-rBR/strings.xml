@@ -90,4 +90,22 @@
     <string name="webview_cursor_hint">As setas movem o ponteiro e o OK clica. Empurre contra a borda de cima ou de baixo para rolar.</string>
     <string name="webview_cursor_on">Usar ponteiro</string>
     <string name="webview_cursor_off">Usar navegação da página</string>
+
+    <!-- Backups sem seletor de arquivos -->
+    <string name="backup_receive_from_phone">Receber do celular</string>
+    <string name="backup_receive_from_phone_summary">Envie um arquivo .tachibk de um celular na mesma rede Wi-Fi</string>
+    <string name="backup_receive_from_phone_description">Leia o código com um celular na mesma rede Wi-Fi e escolha o arquivo de backup. A restauração começa quando ele chegar.</string>
+    <string name="backup_system_picker">Escolher com o seletor de arquivos do sistema</string>
+    <string name="backup_found_title">Backups encontrados neste aparelho</string>
+    <string name="backup_none_found">Nenhum backup encontrado. Backups criados aqui ficam em %1$s; você também pode copiar um para lá com adb push.</string>
+    <string name="backup_location_app">Pasta do Yomira</string>
+    <string name="backup_location_storage">Backups automáticos</string>
+    <string name="backup_location_downloads">Downloads</string>
+    <string name="backup_location_received">Recebido do celular</string>
+    <string name="backup_saved">Backup salvo (%1$s)</string>
+    <string name="backup_send_to_phone">Enviar para o celular</string>
+    <string name="backup_send_to_phone_summary">Baixe o arquivo em um celular na mesma rede Wi-Fi</string>
+    <string name="backup_send_to_phone_description">Leia o código com um celular na mesma rede Wi-Fi para baixar o backup.</string>
+    <string name="backup_adb_hint">Com um computador e a depuração ADB ativada:</string>
+    <string name="backup_keep_note">O arquivo fica na pasta do app e é apagado se o %1$s for desinstalado. Guarde uma cópia em outro lugar.</string>
 </resources>

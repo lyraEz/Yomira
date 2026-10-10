@@ -49,4 +49,27 @@
     <string name="ext_install_failed">Install failed</string>
     <string name="ext_reload">Reload extensions</string>
     <string name="ext_nsfw_settings_hint">Adult sources can be turned on in Settings → Browse.</string>
+
+    <!-- Repositories -->
+    <string name="repo_add_message">Paste the address of a repository in the AniZen/Aniyomi legacy format (it ends with index.min.json). Any compatible repository works.</string>
+    <string name="repo_paste">Paste</string>
+    <string name="repo_from_phone">Send from phone</string>
+    <string name="repo_from_phone_description">Scan the code with a phone on the same Wi-Fi network and send the repository address. It will be filled in here.</string>
+    <string name="repo_suggestions">Suggestions</string>
+    <string name="repo_suggestions_note">Suggested repositories are maintained by third parties, not by Yomira.</string>
+    <string name="repo_added">Repository %1$s added with %2$d extensions</string>
+    <string name="repo_error_title">Could not add the repository</string>
+    <string name="repo_error_unreachable">The repository could not be reached. Check the address and the network connection.</string>
+    <string name="repo_error_not_repository">The address answered, but it is not a repository Yomira can read: it needs repo.json and index.min.json in the same folder.</string>
+    <string name="repo_error_store_v2">This address is a store-v2 index, the format used by newer Aniyomi builds, which Yomira does not read. Use the index.min.json address of the same repository (for Rede: https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json).</string>
+
+    <!-- Phone companion -->
+    <string name="companion_text_label">Text to send to the TV</string>
+    <string name="companion_file_label">Backup file (.tachibk)</string>
+    <string name="companion_send">Send to the TV</string>
+    <string name="companion_sent">Sent. You can go back to the TV.</string>
+    <string name="companion_download">Download the backup</string>
+    <string name="companion_waiting">Waiting for the phone…</string>
+    <string name="companion_received">Received</string>
+    <string name="companion_no_network">This device is not on a local network, so a phone cannot reach it.</string>
 </resources>

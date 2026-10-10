@@ -12,12 +12,14 @@ import eu.kanade.presentation.more.settings.screen.browse.components.ExtensionRe
 import eu.kanade.presentation.more.settings.screen.browse.components.ExtensionRepoConflictDialog
 import eu.kanade.presentation.more.settings.screen.browse.components.ExtensionRepoCreateDialog
 import eu.kanade.presentation.more.settings.screen.browse.components.ExtensionRepoDeleteDialog
+import eu.kanade.presentation.more.settings.screen.browse.components.ExtensionRepoErrorDialog
 import eu.kanade.presentation.more.settings.screen.browse.components.ExtensionReposScreen
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.flow.collectLatest
+import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
 
 class ExtensionReposScreen(
@@ -85,6 +87,16 @@ class ExtensionReposScreen(
                     repo = dialog.url,
                 )
             }
+            // YMR -->
+            is RepoDialog.Error -> {
+                ExtensionRepoErrorDialog(
+                    message = dialog.message,
+                    url = dialog.url,
+                    detail = dialog.detail,
+                    onDismissRequest = screenModel::dismissDialog,
+                )
+            }
+            // YMR <--
         }
 
         LaunchedEffect(Unit) {
@@ -92,6 +104,11 @@ class ExtensionReposScreen(
                 if (event is RepoEvent.LocalizedMessage) {
                     context.toast(event.stringRes)
                 }
+                // YMR -->
+                if (event is RepoEvent.Formatted) {
+                    context.toast(context.stringResource(event.stringRes, *event.args.toTypedArray()))
+                }
+                // YMR <--
             }
         }
     }

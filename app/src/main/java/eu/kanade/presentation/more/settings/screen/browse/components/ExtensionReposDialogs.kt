@@ -1,5 +1,22 @@
 package eu.kanade.presentation.more.settings.screen.browse.components
 
+import android.content.ClipboardManager
+import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.util.TvDevice
+import yomira.i18n.YMR
+import yomira.tv.companion.CompanionDialog
+import yomira.tv.companion.CompanionServer
+import yomira.tv.repos.SuggestedRepos
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -33,6 +50,10 @@ fun ExtensionRepoCreateDialog(
 
     val focusRequester = remember { FocusRequester() }
     val nameAlreadyExists = remember(name) { repoUrls.contains(name) }
+    // YMR -->
+    val context = LocalContext.current
+    var showCompanion by remember { mutableStateOf(false) }
+    // YMR <--
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -56,8 +77,13 @@ fun ExtensionRepoCreateDialog(
             Text(text = stringResource(MR.strings.action_add_repo))
         },
         text = {
-            Column {
-                Text(text = stringResource(MR.strings.action_add_repo_message))
+            // YMR --> scrollable, so the shortcuts below stay reachable with the D-pad on a TV
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(text = stringResource(YMR.strings.repo_add_message))
+                // YMR <--
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -79,14 +105,75 @@ fun ExtensionRepoCreateDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                     singleLine = true,
                 )
+
+                // YMR -->
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            context.clipboardText()?.let { name = it.trim() }
+                        },
+                    ) {
+                        Text(text = stringResource(YMR.strings.repo_paste))
+                    }
+                    OutlinedButton(onClick = { showCompanion = true }) {
+                        Text(text = stringResource(YMR.strings.repo_from_phone))
+                    }
+                }
+
+                Text(
+                    text = stringResource(YMR.strings.repo_suggestions),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                SuggestedRepos.all.forEach { suggestion ->
+                    val added = repoUrls.any { suggestion.indexUrl.startsWith(it) }
+                    OutlinedButton(
+                        onClick = { name = suggestion.indexUrl },
+                        enabled = !added,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(text = suggestion.name)
+                            Text(
+                                text = if (added) stringResource(MR.strings.error_repo_exists) else suggestion.indexUrl,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+                Text(
+                    text = stringResource(YMR.strings.repo_suggestions_note),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                // YMR <--
             }
         },
     )
 
+    // YMR -->
+    if (showCompanion) {
+        CompanionDialog(
+            mode = CompanionServer.Mode.Text,
+            title = stringResource(YMR.strings.repo_from_phone),
+            description = stringResource(YMR.strings.repo_from_phone_description),
+            onDismissRequest = { showCompanion = false },
+            onText = { text ->
+                name = text.trim()
+                showCompanion = false
+            },
+        )
+    }
+    // YMR <--
+
     LaunchedEffect(focusRequester) {
         // TODO: https://issuetracker.google.com/issues/204502668
         delay(0.1.seconds)
-        focusRequester.requestFocus()
+        // YMR --> on a TV, opening the keyboard straight away hides the shortcuts
+        if (!TvDevice.isTv) {
+            focusRequester.requestFocus()
+        }
+        // YMR <--
     }
 }
 
@@ -184,3 +271,37 @@ fun ExtensionRepoConfirmDialog(
         },
     )
 }
+
+// YMR -->
+private fun Context.clipboardText(): String? {
+    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return null
+    return clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString()
+}
+// YMR <--
+
+// YMR -->
+@Composable
+fun ExtensionRepoErrorDialog(
+    message: dev.icerock.moko.resources.StringResource,
+    url: String,
+    detail: String?,
+    onDismissRequest: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(YMR.strings.repo_error_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = stringResource(message))
+                Text(text = url, style = MaterialTheme.typography.bodySmall)
+                detail?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(MR.strings.action_ok))
+            }
+        },
+    )
+}
+// YMR <--

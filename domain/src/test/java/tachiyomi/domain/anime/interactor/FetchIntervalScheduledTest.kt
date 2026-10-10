@@ -2,6 +2,7 @@ package tachiyomi.domain.anime.interactor
 
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Test
 import tachiyomi.domain.anime.model.Anime
 import tachiyomi.domain.episode.interactor.GetEpisodesByAnimeId
@@ -13,7 +14,7 @@ class FetchIntervalScheduledTest {
     private val fetchInterval = FetchInterval(getEpisodesByAnimeId)
 
     @Test
-    fun `calculateNextUpdate handles scheduled updates correctly`() {
+    fun `calculateNextUpdate handles scheduled updates correctly`() = runTest { // YMR: toAnimeUpdate is suspend
         // Monday 10:30 AM
         val dayOfWeek = 1 // Monday
         val hour = 10
@@ -40,7 +41,7 @@ class FetchIntervalScheduledTest {
     }
 
     @Test
-    fun `calculateNextUpdate handles late night scheduled updates correctly`() {
+    fun `calculateNextUpdate handles late night scheduled updates correctly`() = runTest { // YMR: toAnimeUpdate is suspend
         // Sunday 11:45 PM
         val dayOfWeek = 7 // Sunday
         val hour = 23

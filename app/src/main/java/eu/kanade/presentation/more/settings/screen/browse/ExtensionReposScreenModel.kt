@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import dev.icerock.moko.resources.StringResource
+import eu.kanade.tachiyomi.extension.ExtensionManager
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.channels.Channel
@@ -21,6 +22,7 @@ import tachiyomi.core.common.util.lang.launchIO
 import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import yomira.i18n.YMR
 
 class ExtensionReposScreenModel(
     private val getExtensionRepo: GetExtensionRepo = Injekt.get(),
@@ -29,6 +31,9 @@ class ExtensionReposScreenModel(
     private val replaceExtensionRepo: ReplaceExtensionRepo = Injekt.get(),
     private val updateExtensionRepo: UpdateExtensionRepo = Injekt.get(),
     private val toggleRepoVisibility: ToggleExtensionRepoVisibility = Injekt.get(),
+    // YMR -->
+    private val extensionManager: ExtensionManager = Injekt.get(),
+    // YMR <--
 ) : StateScreenModel<RepoScreenState>(RepoScreenState.Loading) {
 
     private val _events: Channel<RepoEvent> = Channel(Int.MAX_VALUE)
@@ -54,12 +59,31 @@ class ExtensionReposScreenModel(
      */
     fun createRepo(baseUrl: String) {
         screenModelScope.launchIO {
-            when (val result = createExtensionRepo.await(baseUrl)) {
+            // YMR -->
+            mutableState.update { if (it is RepoScreenState.Success) it.copy(isAdding = true) else it }
+            val result = createExtensionRepo.await(baseUrl)
+            mutableState.update { if (it is RepoScreenState.Success) it.copy(isAdding = false) else it }
+            // YMR <--
+            when (result) {
                 CreateExtensionRepo.Result.InvalidUrl -> _events.send(RepoEvent.InvalidUrl)
                 CreateExtensionRepo.Result.RepoAlreadyExists -> _events.send(RepoEvent.RepoAlreadyExists)
                 is CreateExtensionRepo.Result.DuplicateFingerprint -> {
                     showDialog(RepoDialog.Conflict(result.oldRepo, result.newRepo))
                 }
+                // YMR -->
+                is CreateExtensionRepo.Result.Added -> {
+                    _events.send(RepoEvent.Formatted(YMR.strings.repo_added, listOf(result.repo.name, result.extensionCount)))
+                    // The extension list only learns about new repositories when it is refreshed,
+                    // which on a TV has no pull-to-refresh gesture to trigger it.
+                    extensionManager.findAvailableExtensions()
+                }
+                is CreateExtensionRepo.Result.Unreachable ->
+                    showDialog(RepoDialog.Error(YMR.strings.repo_error_unreachable, result.url, result.reason))
+                is CreateExtensionRepo.Result.NotARepository ->
+                    showDialog(RepoDialog.Error(YMR.strings.repo_error_not_repository, result.url, result.reason))
+                CreateExtensionRepo.Result.UnsupportedStoreV2 ->
+                    showDialog(RepoDialog.Error(YMR.strings.repo_error_store_v2, baseUrl, null))
+                // YMR <--
                 else -> {}
             }
         }
@@ -85,6 +109,9 @@ class ExtensionReposScreenModel(
         if (status is RepoScreenState.Success) {
             screenModelScope.launchIO {
                 updateExtensionRepo.awaitAll()
+                // YMR -->
+                extensionManager.findAvailableExtensions()
+                // YMR <--
             }
         }
     }
@@ -127,6 +154,10 @@ sealed class RepoEvent {
     sealed class LocalizedMessage(val stringRes: StringResource) : RepoEvent()
     data object InvalidUrl : LocalizedMessage(MR.strings.invalid_repo_name)
     data object RepoAlreadyExists : LocalizedMessage(MR.strings.error_repo_exists)
+
+    // YMR -->
+    data class Formatted(val stringRes: StringResource, val args: List<Any>) : RepoEvent()
+    // YMR <--
 }
 
 sealed class RepoDialog {
@@ -134,6 +165,10 @@ sealed class RepoDialog {
     data class Delete(val repo: String) : RepoDialog()
     data class Conflict(val oldRepo: ExtensionRepo, val newRepo: ExtensionRepo) : RepoDialog()
     data class Confirm(val url: String) : RepoDialog()
+
+    // YMR -->
+    data class Error(val message: StringResource, val url: String, val detail: String?) : RepoDialog()
+    // YMR <--
 }
 
 sealed class RepoScreenState {
@@ -146,6 +181,9 @@ sealed class RepoScreenState {
         val repos: ImmutableSet<ExtensionRepo>,
         val oldRepos: ImmutableSet<String>? = null,
         val dialog: RepoDialog? = null,
+        // YMR -->
+        val isAdding: Boolean = false,
+        // YMR <--
     ) : RepoScreenState() {
 
         val isEmpty: Boolean

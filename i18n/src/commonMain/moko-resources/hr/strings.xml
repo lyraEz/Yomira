@@ -901,7 +901,7 @@
     <string name="action_start_download_externally">Koristi eksterno preuzimanje</string>
     <string name="pref_bottom_nav_style">Stil donje navigacije</string>
     <string name="default_anime_category">Standardna anime kategorija</string>
-    <string name="unofficial_extension_message_anizen">Ovo proširenje nije sa službenog popisa AniZen proširenja.</string>
+    <string name="unofficial_extension_message_anizen">Ovo proširenje nije sa službenog popisa Yomira proširenja.</string>
     <string name="rotation_reverse_landscape">Preokreni ležeći format</string>
     <string name="rotation_sensor_portrait">Uspravni format</string>
     <string name="pref_progress_mark_as_seen">U kojem trenutku označiti epizodu kao pogledanu</string>
@@ -960,7 +960,7 @@
     <string name="label_anime_sources">Anime izvori</string>
     <string name="action_global_anime_search">Globalna pretraga animea</string>
     <string name="pref_search_pinned_anime_sources_only">Traži samo prikvačene anime izvore u globalnoj pretrazi</string>
-    <string name="unofficial_anime_extension_message">Ovo proširenje nije službeno AniZen proširenje.</string>
+    <string name="unofficial_anime_extension_message">Ovo proširenje nije službeno Yomira proširenje.</string>
     <string name="label_anime_history">Anime</string>
     <string name="label_anime_updates">Anime</string>
     <string name="pref_hide_in_manga_library_items">Sakrij manga unose koji se već nalaze u biblioteci</string>
@@ -1002,7 +1002,7 @@
     <string name="delete_confirmation">Stvarno želiš izbrisati „%s”?</string>
     <string name="pref_reset_mpv_conf">Obnovi MPV konfiguracijsku datoteku</string>
     <string name="pref_mpv_input">Uredi MPV ulaznu datoteku za konfiguraciju mapiranja tipkovnice</string>
-    <string name="onboarding_storage_action_create_folder">Stvori standardnu mapu za AniZen</string>
+    <string name="onboarding_storage_action_create_folder">Stvori standardnu mapu za Yomira</string>
     <string name="download_speed_limit_hint">Postavi na 0 za deaktiviranje ograničenja brzine.</string>
     <string name="download_speed_limit">Ograničenje brzine preuzimanja</string>
     <string name="pref_start_screen">Početni ekran</string>
@@ -1038,7 +1038,7 @@
     <string name="error_repo_exists">Ovaj repozitorij već postoji!</string>
     <string name="action_delete_repo">Izbriši repozitorij</string>
     <string name="invalid_repo_name">Neispravan URL repozitorija</string>
-    <string name="action_add_repo_message">Dodaj dodatne repozitorije u AniZen. Ovo bi trebao biti URL koji završava s „index.min.json”.</string>
+    <string name="action_add_repo_message">Dodaj dodatne repozitorije u Yomira. Ovo bi trebao biti URL koji završava s „index.min.json”.</string>
     <string name="pref_download_slots">Maksimalni broj preuzimanja</string>
     <string name="invalid_backup_file_error">Potpuna greška:</string>
     <string name="action_reorganize_by">Promjieni redoslijed</string>

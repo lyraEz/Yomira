@@ -63,7 +63,7 @@ object SubtitleDownloader {
         // Fallback to public device downloads directory
         val fallback = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            "AniZen/subtitles/$safeSource/$safeAnime",
+            "Yomira/subtitles/$safeSource/$safeAnime",
         )
         if (!fallback.exists()) {
             fallback.mkdirs()

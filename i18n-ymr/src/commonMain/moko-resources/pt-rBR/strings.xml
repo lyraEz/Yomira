@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sobre -->
+    <string name="about_project">Projeto</string>
+    <string name="about_credits">Créditos</string>
+    <string name="about_unofficial">Fork independente do AniZen</string>
+    <string name="about_unofficial_summary">O Yomira não é uma versão oficial do AniZen. Ele parte do trabalho dos projetos abaixo, sob a licença Apache 2.0.</string>
+
+    <!-- Serviços -->
+    <string name="discord_rpc_unavailable">O Discord Rich Presence está desligado nesta compilação. Ele precisa de um aplicativo do Discord registrado por quem compila o app; o Yomira não reutiliza o do AniZen.</string>
+
+    <!-- Erros do player -->
+    <string name="player_error_hosters_failed">Não foi possível carregar os servidores deste episódio</string>
+    <string name="player_error_no_hosters">A fonte não ofereceu nenhum servidor para este episódio</string>
+    <string name="player_error_no_video">Nenhum servidor retornou um vídeo reproduzível</string>
+    <string name="player_error_stream">O vídeo parou ou não pôde ser aberto</string>
+    <string name="player_error_hint">Links podem expirar. Tente de novo, escolha outro servidor ou outro episódio.</string>
+    <string name="player_error_retry">Tentar de novo</string>
+    <string name="player_error_servers">Servidores</string>
+    <string name="player_error_episodes">Episódios</string>
+    <string name="player_error_next">Próximo episódio</string>
+    <string name="player_error_exit">Sair do player</string>
+
+    <!-- Problemas de instalação e carregamento de extensões -->
+    <string name="ext_error_not_apk">O arquivo baixado não é um APK válido. O repositório pode estar entregando um arquivo corrompido ou incompleto.</string>
+    <string name="ext_error_not_extension">%1$s não é uma extensão de anime (não declara tachiyomi.animeextension).</string>
+    <string name="ext_error_lib_version">Esta extensão usa a biblioteca de extensões %1$s; o Yomira aceita as versões %2$d a %3$d.</string>
+    <string name="ext_error_downgrade">A versão %1$s está instalada e o Android não instala uma versão mais antiga (%2$s) por cima. Desinstale a extensão antes se quiser mesmo esta versão.</string>
+    <string name="ext_error_signature_mismatch">A cópia instalada desta extensão foi assinada com outra chave. O Android não atualiza entre assinaturas diferentes: desinstale a extensão atual e depois instale esta. As configurações desta fonte serão perdidas.</string>
+    <string name="ext_error_installer_conflict">O Android recusou a atualização porque ela conflita com o pacote instalado (normalmente assinatura diferente).</string>
+    <string name="ext_error_installer_incompatible">O Android informou que este APK é incompatível com o aparelho (versão do Android ou arquitetura do processador).</string>
+    <string name="ext_error_installer_storage">Espaço insuficiente para instalar a extensão.</string>
+    <string name="ext_error_installer_blocked">A instalação foi bloqueada pelo sistema. Permita que o Yomira instale apps desconhecidos e tente de novo.</string>
+    <string name="ext_error_installer_generic">O instalador do sistema não conseguiu instalar a extensão.</string>
+    <string name="ext_awaiting_confirmation">Aguardando confirmação do sistema</string>
+    <string name="ext_loaded_sources">Carregada · %1$d fontes</string>
+    <string name="ext_loaded_no_sources">Carregada · sem fontes</string>
+    <string name="ext_problems">Instaladas com problemas</string>
+    <string name="ext_failure_missing_version">APK inválido: sem nome de versão</string>
+    <string name="ext_failure_lib_version">Incompatível: biblioteca de extensões %1$s</string>
+    <string name="ext_failure_unsigned">APK sem assinatura</string>
+    <string name="ext_failure_nsfw">Oculta: fontes adultas estão desligadas</string>
+    <string name="ext_failure_class_load">Não foi possível carregar as fontes</string>
+    <string name="ext_failure_manifest">Manifesto inválido</string>
+    <string name="ext_diagnostics">Diagnóstico</string>
+    <string name="ext_diagnostics_copy">Copiar diagnóstico</string>
+    <string name="ext_diagnostics_copied">Diagnóstico copiado</string>
+    <string name="ext_install_failed">Falha na instalação</string>
+    <string name="ext_reload">Recarregar extensões</string>
+    <string name="ext_nsfw_settings_hint">Fontes adultas podem ser ligadas em Configurações → Explorar.</string>
+</resources>

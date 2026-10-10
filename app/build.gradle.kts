@@ -26,34 +26,55 @@ shortcutHelper.setFilePath("./shortcuts.xml")
 android {
     namespace = "eu.kanade.tachiyomi"
 
+    // YMR -->
+    // Yomira release signing. The keystore and its passwords never live in the repository:
+    // they come from `signing.properties` (git-ignored) or from environment variables in CI.
+    // Without them the release APK is produced unsigned instead of failing the build.
+    val yomiraSigning = Properties().apply {
+        val propFile = rootProject.file("signing.properties")
+        if (propFile.exists()) {
+            propFile.inputStream().use { load(it) }
+        }
+    }
+    fun signingValue(prop: String, env: String): String? =
+        yomiraSigning.getProperty(prop)?.takeIf { it.isNotBlank() }
+            ?: System.getenv(env)?.takeIf { it.isNotBlank() }
+
+    val yomiraStoreFile = signingValue("storeFile", "YOMIRA_KEYSTORE_FILE")?.let { rootProject.file(it) }
+    val hasYomiraSigning = yomiraStoreFile?.exists() == true &&
+        signingValue("storePassword", "YOMIRA_KEYSTORE_PASSWORD") != null &&
+        signingValue("keyAlias", "YOMIRA_KEY_ALIAS") != null
+
     signingConfigs {
         create("release") {
-            val props = Properties()
-            val propFile = file("../signing.properties")
-            if (propFile.exists()) {
-                propFile.inputStream().use { props.load(it) }
+            if (hasYomiraSigning) {
+                storeFile = yomiraStoreFile
+                storePassword = signingValue("storePassword", "YOMIRA_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "YOMIRA_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "YOMIRA_KEY_PASSWORD")
+                    ?: signingValue("storePassword", "YOMIRA_KEYSTORE_PASSWORD")
             }
-
-            storeFile = file("anizen.jks")
-            storePassword = props.getProperty("storePassword") ?: System.getenv("SIGNING_STORE_PASSWORD") ?: ""
-            keyAlias = props.getProperty("keyAlias") ?: System.getenv("SIGNING_KEY_ALIAS") ?: ""
-            keyPassword = props.getProperty("keyPassword") ?: System.getenv("SIGNING_KEY_PASSWORD") ?: ""
 
             enableV1Signing = true
             enableV2Signing = true
             enableV3Signing = true
         }
     }
+    // YMR <--
 
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "app.anizen"
+        // YMR -->
+        applicationId = "com.lyraez.yomira"
 
-        versionCode = 715
-        versionName = "0.5.215"
+        // versionCode must grow with every published APK and is shared by all ABI splits.
+        // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
+        versionCode = 10000
+        versionName = "1.0.0"
 
-        manifestPlaceholders["author"] = "@salmanbappi"
+        manifestPlaceholders["author"] = "@lyraEz"
+        // YMR <--
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
@@ -64,6 +85,14 @@ android {
         targetSdk = 36
 
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
+
+        // YMR --> Services tied to someone else's credentials stay off unless configured.
+        val discordAppId = (project.findProperty("yomira.discordAppId") as? String).orEmpty()
+        buildConfigField("String", "DISCORD_RPC_APP_ID", "\"$discordAppId\"")
+        buildConfigField("boolean", "DISCORD_RPC_ENABLED", "${discordAppId.isNotBlank()}")
+        val hasGoogleDriveClient = file("src/main/assets/client_secrets.json").exists()
+        buildConfigField("boolean", "GOOGLE_DRIVE_SYNC_ENABLED", "$hasGoogleDriveClient")
+        // YMR <--
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -84,7 +113,9 @@ android {
                 "proguard-rules.pro",
             )
 
-            signingConfig = signingConfigs.getByName("release")
+            // YMR -->
+            signingConfig = if (hasYomiraSigning) signingConfigs.getByName("release") else null
+            // YMR <--
 
             buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLastCommitTime = true)}\"")
         }
@@ -141,7 +172,9 @@ android {
             isEnable = true
             isUniversalApk = true
             reset()
-            val abis = (project.findProperty("abiList") as? String)?.split(",") ?: listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            // YMR --> Fire TV / TV boxes: 32-bit ARM first; x86 only on request (emulators).
+            val abis = (project.findProperty("abiList") as? String)?.split(",") ?: listOf("armeabi-v7a", "arm64-v8a")
+            // YMR <--
             include(*abis.toTypedArray())
         }
     }
@@ -250,6 +283,9 @@ dependencies {
     // SY -->
     implementation(projects.i18nSy)
     // SY <-
+    // YMR -->
+    implementation(projects.i18nYmr)
+    // YMR <--
     implementation(projects.core.archive)
     implementation(projects.core.common)
     implementation(projects.coreMetadata)
@@ -429,4 +465,4 @@ buildscript {
     dependencies {
         classpath(kotlinx.gradle)
     }
-} // Trigger build Sun Mar 29 21:15:36 +06 2026
+}

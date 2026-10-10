@@ -174,7 +174,7 @@ class NavigationSettingsScreen(
                                             behaviorMap = behaviorMap
                                         )
                                         val serialized = NavConfigSerializer.serialize(config)
-                                        context.copyToClipboard("AniZen Layout", serialized)
+                                        context.copyToClipboard("Yomira Layout", serialized)
                                         context.toast("Layout string copied to clipboard")
                                     }
                                 ),

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yomira-only strings. Inherited strings stay in i18n, i18n-sy, i18n-kmk and i18n-ank. -->
+<resources>
+    <!-- About -->
+    <string name="about_project">Project</string>
+    <string name="about_credits">Credits</string>
+    <string name="about_unofficial">Independent fork of AniZen</string>
+    <string name="about_unofficial_summary">Yomira is not an official AniZen release. It builds on the work of the projects below, under the Apache 2.0 license.</string>
+
+    <!-- Services -->
+    <string name="discord_rpc_unavailable">Discord Rich Presence is off in this build. It needs a Discord application registered by whoever builds the app; Yomira does not reuse the one from AniZen.</string>
+
+    <!-- Player errors -->
+    <string name="player_error_hosters_failed">Could not load the servers for this episode</string>
+    <string name="player_error_no_hosters">This source offered no server for this episode</string>
+    <string name="player_error_no_video">None of the servers returned a playable video</string>
+    <string name="player_error_stream">The video stopped or could not be opened</string>
+    <string name="player_error_hint">Links can expire. Try again, choose another server or pick another episode.</string>
+    <string name="player_error_retry">Try again</string>
+    <string name="player_error_servers">Servers</string>
+    <string name="player_error_episodes">Episodes</string>
+    <string name="player_error_next">Next episode</string>
+    <string name="player_error_exit">Exit player</string>
+
+    <!-- Extension install and load problems -->
+    <string name="ext_error_not_apk">The downloaded file is not a valid APK. The repository may be serving a broken or incomplete file.</string>
+    <string name="ext_error_not_extension">%1$s is not an anime extension (it does not declare tachiyomi.animeextension).</string>
+    <string name="ext_error_lib_version">This extension uses extension library %1$s; Yomira supports versions %2$d to %3$d.</string>
+    <string name="ext_error_downgrade">Version %1$s is installed and Android does not install an older version (%2$s) over it. Uninstall the extension first if you really want this version.</string>
+    <string name="ext_error_signature_mismatch">The installed copy of this extension was signed with a different key. Android cannot update between signatures: uninstall the current extension, then install this one. Its settings for this source will be lost.</string>
+    <string name="ext_error_installer_conflict">Android refused the update because it conflicts with the installed package (usually a different signature).</string>
+    <string name="ext_error_installer_incompatible">Android says this APK is incompatible with the device (Android version or CPU architecture).</string>
+    <string name="ext_error_installer_storage">Not enough storage to install the extension.</string>
+    <string name="ext_error_installer_blocked">The installation was blocked by the system. Allow Yomira to install unknown apps and try again.</string>
+    <string name="ext_error_installer_generic">The system installer could not install the extension.</string>
+    <string name="ext_awaiting_confirmation">Waiting for system confirmation</string>
+    <string name="ext_loaded_sources">Loaded · %1$d sources</string>
+    <string name="ext_loaded_no_sources">Loaded · no sources</string>
+    <string name="ext_problems">Installed with problems</string>
+    <string name="ext_failure_missing_version">Invalid APK: no version name</string>
+    <string name="ext_failure_lib_version">Incompatible: extension library %1$s</string>
+    <string name="ext_failure_unsigned">Unsigned APK</string>
+    <string name="ext_failure_nsfw">Hidden: adult sources are turned off</string>
+    <string name="ext_failure_class_load">Could not load its sources</string>
+    <string name="ext_failure_manifest">Invalid manifest</string>
+    <string name="ext_diagnostics">Diagnostics</string>
+    <string name="ext_diagnostics_copy">Copy diagnostics</string>
+    <string name="ext_diagnostics_copied">Diagnostics copied</string>
+    <string name="ext_install_failed">Install failed</string>
+    <string name="ext_reload">Reload extensions</string>
+    <string name="ext_nsfw_settings_hint">Adult sources can be turned on in Settings → Browse.</string>
+</resources>

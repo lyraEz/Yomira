@@ -95,12 +95,10 @@ class AppUpdateChecker(
 
 val GITHUB_REPO: String by lazy { getGithubRepo() }
 
-fun getGithubRepo(peekIntoPreview: Boolean = false): String =
-    if (isPreviewBuildType || peekIntoPreview) {
-        "salmanbappi/anizen-preview"
-    } else {
-        "salmanbappi/AniZen"
-    }
+// YMR --> Yomira publishes every build (stable and preview) in its own repository.
+@Suppress("UNUSED_PARAMETER")
+fun getGithubRepo(peekIntoPreview: Boolean = false): String = "lyraEz/Yomira"
+// YMR <--
 
 val RELEASE_TAG: String by lazy { getReleaseTag() }
 

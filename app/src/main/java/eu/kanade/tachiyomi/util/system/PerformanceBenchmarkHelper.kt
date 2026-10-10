@@ -209,7 +209,7 @@ object PerformanceBenchmarkHelper {
         }
 
         return buildString {
-            appendLine("=== AniZen Performance Audit (30s Detailed) ===")
+            appendLine("=== Yomira Performance Audit (30s Detailed) ===")
             appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL} (SDK ${Build.VERSION.SDK_INT}, ${Runtime.getRuntime().availableProcessors()} Cores)")
             appendLine("Stats: $totalFrames frames | Jank: ${jankRecords.size} (${"%.1f".format(jankPercentage)}%) | Severe Freezes (>50ms): ${severeJanks.size}")
             appendLine("Stability: ${"%.1f".format(pct60fps)}% @ 60fps target | ${"%.1f".format(pct30fps)}% @ 30fps target")

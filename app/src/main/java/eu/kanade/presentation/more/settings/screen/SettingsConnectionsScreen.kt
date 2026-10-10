@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.connections.ConnectionsManager
 import eu.kanade.tachiyomi.data.connections.ConnectionsService
@@ -54,6 +55,7 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.kmk.KMR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import yomira.i18n.YMR
 
 object SettingsConnectionsScreen : SearchableSettings {
 
@@ -80,6 +82,15 @@ object SettingsConnectionsScreen : SearchableSettings {
             }
         }
 
+        // YMR -->
+        if (!BuildConfig.DISCORD_RPC_ENABLED) {
+            return listOf(
+                Preference.PreferenceItem.InfoPreference(
+                    tachiyomi.presentation.core.i18n.stringResource(YMR.strings.discord_rpc_unavailable),
+                ),
+            )
+        }
+        // YMR <--
         return listOf(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.special_services),

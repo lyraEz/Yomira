@@ -7,6 +7,7 @@
 package eu.kanade.tachiyomi.data.connections.discord
 
 import androidx.annotation.StringRes
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
 import kotlinx.serialization.SerialName
@@ -16,13 +17,16 @@ import kotlinx.serialization.json.JsonElement
 // Constant for logging tag
 const val RICH_PRESENCE_TAG = "discord_rpc"
 
-// Constant for application id
-const val RICH_PRESENCE_APPLICATION_ID = "1471263338934566972"
+// YMR -->
+// The Discord application belongs to whoever builds the app. Yomira ships without one, so Rich
+// Presence stays off unless the build sets `-Pyomira.discordAppId=<id>` (see docs/yomira/SERVICOS.md).
+val RICH_PRESENCE_APPLICATION_ID: String = BuildConfig.DISCORD_RPC_APP_ID
 
 const val DOWNLOAD_BUTTON_LABEL = "Download"
-const val DOWNLOAD_BUTTON_URL = "https://github.com/salmanbappi/AniZen/releases/latest"
-const val DISCORD_BUTTON_LABEL = "Discord"
-const val DISCORD_BUTTON_URL = "https://discord.gg/J2wmZqEJnS"
+const val DOWNLOAD_BUTTON_URL = "https://github.com/lyraEz/Yomira/releases/latest"
+const val DISCORD_BUTTON_LABEL = "GitHub"
+const val DISCORD_BUTTON_URL = "https://github.com/lyraEz/Yomira"
+// YMR <--
 
 @Serializable
 data class Activity(
@@ -192,7 +196,10 @@ enum class DiscordScreen(
 }
 
 // Constants for standard Rich Presence image urls
-private const val ANIZEN_LOGO_IMAGE_URL = "https://raw.githubusercontent.com/salmanbappi/AniZen/preview/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+// YMR -->
+private const val ANIZEN_LOGO_IMAGE_URL = "https://raw.githubusercontent.com/lyraEz/Yomira/main/.github/assets/icon.png"
+
+// YMR <--
 private const val ANIMETAIL_IMAGE_URL = ANIZEN_LOGO_IMAGE_URL
 private const val ANIMETAIL_PREVIEW_IMAGE_URL = ANIZEN_LOGO_IMAGE_URL
 private val ANIMETAIL_IMAGE = if (isPreviewBuildType) ANIMETAIL_PREVIEW_IMAGE_URL else ANIMETAIL_IMAGE_URL

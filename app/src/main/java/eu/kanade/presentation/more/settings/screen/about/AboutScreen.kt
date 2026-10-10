@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Public
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +28,6 @@ import eu.kanade.presentation.util.LocalBackPress
 import eu.kanade.presentation.util.Screen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
-import eu.kanade.tachiyomi.ui.more.ComingUpdatesScreen
 import eu.kanade.tachiyomi.ui.more.NewUpdateScreen
 import eu.kanade.tachiyomi.ui.more.WhatsNewScreen
 import eu.kanade.tachiyomi.util.CrashLogUtil
@@ -38,7 +35,6 @@ import eu.kanade.tachiyomi.util.lang.toDateTimestampString
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
-import eu.kanade.tachiyomi.util.system.isReleaseBuildType
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.updaterEnabled
 import kotlinx.coroutines.launch
@@ -48,16 +44,14 @@ import tachiyomi.core.common.util.lang.withUIContext
 import tachiyomi.core.common.util.system.logcat
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
-import tachiyomi.i18n.kmk.KMR
-import tachiyomi.presentation.core.components.LinkIcon
 import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.icons.CustomIcons
-import tachiyomi.presentation.core.icons.Discord
 import tachiyomi.presentation.core.icons.Github
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import yomira.i18n.YMR
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -178,50 +172,21 @@ object AboutScreen : Screen() {
                             },
                         )
 
-                        if (isReleaseBuildType || isDebugBuildType) {
-                            MoreItem(
-                                title = stringResource(KMR.strings.whats_coming),
-                                subtitle = if (isCheckingWhatsComing) "Checking..." else null,
-                                onClick = {
-                                    if (!isCheckingWhatsComing) {
-                                        scope.launch {
-                                            isCheckingWhatsComing = true
-
-                                            checkVersion(
-                                                context = context,
-                                                onAvailableUpdate = { result ->
-                                                    val updateScreen = ComingUpdatesScreen(
-                                                        versionName = result.release.version,
-                                                        changelogInfo = result.release.info,
-                                                        releaseLink = result.release.releaseLink,
-                                                        downloadLink = result.release.getDownloadLink(),
-                                                    )
-                                                    navigator.push(updateScreen)
-                                                },
-                                                onFinish = {
-                                                    isCheckingWhatsComing = false
-                                                },
-                                                peekIntoPreview = true,
-                                            )
-                                        }
-                                    }
-                                },
-                            )
-                        }
+                        // YMR --> Yomira has no separate preview channel to peek into.
+                        // YMR <--
                         // KMK <--
                     }
                 }
 
+                // YMR -->
                 item {
-                    MoreSection(title = "Community") {
+                    MoreSection(title = stringResource(YMR.strings.about_project)) {
                         MoreItem(
-                            title = stringResource(MR.strings.help_translate),
-                            onClick = {
-                                uriHandler.openUri(
-                                    "https://crowdin.com/project/komikku/" +
-                                        "invite?h=f922abd4193e77309b084a08c74b89872112170",
-                                )
-                            },
+                            title = "GitHub",
+                            subtitle = YOMIRA_REPO_URL,
+                            icon = CustomIcons.Github,
+                            iconTint = MaterialTheme.colorScheme.onSurface,
+                            onClick = { uriHandler.openUri(YOMIRA_REPO_URL) },
                         )
 
                         MoreItem(
@@ -231,27 +196,26 @@ object AboutScreen : Screen() {
 
                         MoreItem(
                             title = stringResource(MR.strings.privacy_policy),
-                            onClick = { uriHandler.openUri("https://mihon.app/privacy/") },
+                            onClick = { uriHandler.openUri("$YOMIRA_REPO_URL/blob/main/docs/yomira/PRIVACIDADE.md") },
                         )
                     }
                 }
 
                 item {
-                    MoreSection(title = "Links") {
+                    MoreSection(title = stringResource(YMR.strings.about_credits)) {
                         MoreItem(
-                            title = "Discord",
-                            subtitle = "Join our community",
-                            icon = CustomIcons.Discord,
-                            iconTint = Color(0xFF5865F2),
-                            onClick = { uriHandler.openUri("https://discord.gg/J2wmZqEJnS") }
+                            title = stringResource(YMR.strings.about_unofficial),
+                            subtitle = stringResource(YMR.strings.about_unofficial_summary),
+                            onClick = { uriHandler.openUri("$YOMIRA_REPO_URL#cr%C3%A9ditos") },
                         )
-                        MoreItem(
-                            title = "GitHub",
-                            subtitle = "Source code",
-                            icon = CustomIcons.Github,
-                            iconTint = MaterialTheme.colorScheme.onSurface,
-                            onClick = { uriHandler.openUri("https://github.com/salmanbappi/AniZen") }
-                        )
+                        UPSTREAM_PROJECTS.forEach { (name, url) ->
+                            MoreItem(
+                                title = name,
+                                subtitle = url,
+                                icon = Icons.Outlined.Public,
+                                onClick = { uriHandler.openUri(url) },
+                            )
+                        }
                     }
                 }
             }
@@ -376,4 +340,15 @@ object AboutScreen : Screen() {
             BuildConfig.BUILD_TIME
         }
     }
+
+    // YMR -->
+    private const val YOMIRA_REPO_URL = "https://github.com/lyraEz/Yomira"
+
+    private val UPSTREAM_PROJECTS = listOf(
+        "Yomira" to "https://github.com/salmanbappi/Yomira",
+        "Anikku" to "https://github.com/komikku-app/anikku",
+        "Aniyomi" to "https://github.com/aniyomiorg/aniyomi",
+        "Mihon" to "https://github.com/mihonapp/mihon",
+    )
+    // YMR <--
 }

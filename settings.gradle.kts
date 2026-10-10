@@ -43,7 +43,9 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-rootProject.name = "AniZen"
+// YMR -->
+rootProject.name = "Yomira"
+// YMR <--
 include(":app")
 include(":core-metadata")
 include(":core:archive")
@@ -59,6 +61,9 @@ include(":flagkit")
 // SY -->
 include(":i18n-sy")
 // SY <--
+// YMR -->
+include(":i18n-ymr")
+// YMR <--
 include(":macrobenchmark")
 include(":presentation-core")
 include(":presentation-widget")

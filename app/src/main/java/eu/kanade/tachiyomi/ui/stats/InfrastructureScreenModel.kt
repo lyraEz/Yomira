@@ -56,7 +56,7 @@ class InfrastructureScreenModel(
 
         val report = state.report
         val sb = StringBuilder()
-        sb.append("--- ANIZEN EXTENSION HEALTH REPORT ---\n")
+        sb.append("--- YOMIRA EXTENSION HEALTH REPORT ---\n")
         sb.append("Timestamp: ${java.time.Instant.now()}\n")
         sb.append("Avg Latency: ${report.globalMetrics.avgLatency}ms\n")
         sb.append("Active Sources: ${report.globalMetrics.activeNodeCount}/${report.nodes.size}\n\n")
@@ -73,7 +73,7 @@ class InfrastructureScreenModel(
         }
 
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("AniZen Infra Report", sb.toString())
+        val clip = ClipData.newPlainText("Yomira Infra Report", sb.toString())
         clipboard.setPrimaryClip(clip)
 
         screenModelScope.launchIO {
@@ -228,7 +228,7 @@ class InfrastructureScreenModel(
             val request = Request.Builder()
                 .url(source.baseUrl)
                 .headers(source.headers)
-                .header("X-AniZen-Probe", "CommandCenter-v2.2")
+                .header("X-Yomira-Probe", "CommandCenter-v2.2")
                 .build()
 
             measureTimeMillis {

@@ -48,7 +48,6 @@ class AiManager(
 
     // Circuit Breaker Config
     private val MAP_VERSION = 132
-    private val REMOTE_KILL_SWITCH_URL = "https://raw.githubusercontent.com/salmanbappi/anikku-config/main/ai_kill_switch.json"
 
     fun resetCircuitBreaker() {
         aiPreferences.isCircuitBreakerTripped().set(false)
@@ -92,7 +91,7 @@ class AiManager(
 
         val customPrompt = aiPreferences.aiSystemPrompt().get()
         val defaultSystemInstruction = """
-            You are the 'AniZen System Assistant', a senior systems engineer.
+            You are the 'Yomira System Assistant', a senior systems engineer.
             You have access to native diagnostic tools for logs, system maps, the user's anime library, and EverythingMoe extension intelligence.
             
             OPERATIONAL PROTOCOLS:
@@ -214,19 +213,12 @@ class AiManager(
         return aiPreferences.isCircuitBreakerTripped().get()
     }
 
-    private suspend fun isRemoteKillSwitchActive(): Boolean = withIOContext {
-        try {
-            val request = Request.Builder().url(REMOTE_KILL_SWITCH_URL).build()
-            networkHelper.client.newCall(request).execute().use {
-                if (it.isSuccessful) {
-                    val body = it.body.string()
-                    body.contains("\"disabled\": true")
-                } else false
-            }
-        } catch (e: Exception) {
-            false // Default to enabled if network fails
-        }
-    }
+    // YMR --> The kill switch lived in the original author's config repository. Yomira does not
+    // phone home to a third party, so the remote switch is always considered inactive.
+    @Suppress("FunctionOnlyReturningConstant", "RedundantSuspendModifier")
+    private suspend fun isRemoteKillSwitchActive(): Boolean = false
+
+    // YMR <--
 
     private fun recordRequestSuccess() {
         val count = aiPreferences.hourlyAiRequestCount().get()
@@ -281,8 +273,8 @@ class AiManager(
 
             val pinnedBlocks = mutableListOf<List<String>>()
             val currentBlock = mutableListOf<String>()
-            
-            val packagePattern = "(eu\\.kanade|app\\.anizen|mpv|ffmpeg|AndroidRuntime|libc|DEBUG|System\\.err|XLog|FileUtils|ActivityThread|InputDispatcher)".toRegex()
+
+            val packagePattern = "(eu\\.kanade|com\\.lyraez\\.yomira|mpv|ffmpeg|AndroidRuntime|libc|DEBUG|System\\.err|XLog|FileUtils|ActivityThread|InputDispatcher)".toRegex()
             val piiRedaction = "(?i)(?:authorization|cookie|set-cookie):\\s*[^\\n\\r]+|(?<=\\?|&)[^=]+=[^&\\s]*|(?:[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})|(?:auth|token|key|password|secret|sid|session)=[a-zA-Z0-9._-]+".toRegex()
             
             // Only trigger analysis on serious events
@@ -374,7 +366,7 @@ class AiManager(
         if (installed.isEmpty()) {
             val sources = try { sourceManager.getOnlineSources() } catch (e: Exception) { emptyList() }
             return if (sources.isEmpty()) {
-                "No extensions or sources currently installed in AniZen."
+                "No extensions or sources currently installed in Yomira."
             } else {
                 "Registered Sources in App:\n" + sources.joinToString("\n") { s ->
                     val bUrl = (s as? eu.kanade.tachiyomi.animesource.online.AnimeHttpSource)?.baseUrl ?: (s as? eu.kanade.tachiyomi.source.online.HttpSource)?.baseUrl ?: "N/A"
@@ -424,7 +416,7 @@ class AiManager(
         return toolContext.toString().trim()
     }
 
-    private fun getDeviceInfo(): String = "Model: ${android.os.Build.MODEL}, SDK: ${android.os.Build.VERSION.SDK_INT}, App: AniZen"
+    private fun getDeviceInfo(): String = "Model: ${android.os.Build.MODEL}, SDK: ${android.os.Build.VERSION.SDK_INT}, App: Yomira"
 
     suspend fun getErrorCount(): Int = withIOContext {
         try {
@@ -853,8 +845,10 @@ class AiManager(
         val request = Request.Builder()
             .url("https://openrouter.ai/api/v1/chat/completions")
             .header("Authorization", "Bearer $apiKey")
-            .header("HTTP-Referer", "https://github.com/salmanbappi/AniZen")
-            .header("X-Title", "AniZen")
+            // YMR -->
+            .header("HTTP-Referer", "https://github.com/lyraEz/Yomira")
+            .header("X-Title", "Yomira")
+            // YMR <--
             .header("Content-Type", "application/json")
             .post(json.encodeToString(GroqRequest.serializer(), requestBody).toRequestBody(jsonMediaType))
             .build()

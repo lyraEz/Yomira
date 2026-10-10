@@ -1045,7 +1045,7 @@
     <string name="pref_start_screen">시작화면</string>
     <string name="pref_gpu_next_title">gpu-next 활성화</string>
     <string name="pref_gpu_next_subtitle">새로운 비디오 렌더링 백엔드</string>
-    <string name="onboarding_storage_action_create_folder">기본 AniZen 폴더 생성</string>
+    <string name="onboarding_storage_action_create_folder">기본 Yomira 폴더 생성</string>
     <string name="download_speed_limit_hint">속도 제한을 비활성화하려면 0으로 설정하세요.</string>
     <string name="pref_player_audio_channels">오디오 채널</string>
     <string name="pref_player_audio_channels_auto">자동</string>

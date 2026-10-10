@@ -99,6 +99,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <!-- YMR -->
+                <data android:scheme="yomira" />
                 <data android:scheme="anizen" />
                 <data android:scheme="aniyomi" />
                 <data android:scheme="mihon" />
@@ -272,8 +274,6 @@
 
                 <data
                     android:scheme="eu.kanade.google.oauth" />
-                <data
-                    android:scheme="com.googleusercontent.apps.1036904236703-8f782r03uqs8hnf7q7udk69fe6lki3j2" />
             </intent-filter>
         </activity>
 

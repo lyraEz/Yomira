@@ -16,6 +16,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.compose.ui.util.fastAny
 import eu.kanade.domain.connections.service.ConnectionsPreferences
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.connections.ConnectionsManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -106,6 +107,9 @@ class DiscordRPCService : Service() {
         private val playerPreferences: PlayerPreferences by injectLazy()
 
         fun start(context: Context) {
+            // YMR -->
+            if (!BuildConfig.DISCORD_RPC_ENABLED) return
+            // YMR <--
             handler.removeCallbacksAndMessages(null)
             if (rpc == null && connectionsPreferences.enableDiscordRPC().get()) {
                 since = System.currentTimeMillis()

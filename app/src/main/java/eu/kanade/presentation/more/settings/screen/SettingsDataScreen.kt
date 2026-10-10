@@ -50,6 +50,7 @@ import eu.kanade.presentation.more.settings.screen.data.SyncTriggerOptionsScreen
 import eu.kanade.presentation.more.settings.widget.BasePreferenceWidget
 import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
 import eu.kanade.presentation.util.relativeTimeSpanString
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.backup.create.BackupCreateJob
 import eu.kanade.tachiyomi.data.backup.restore.BackupRestoreJob
 import eu.kanade.tachiyomi.data.cache.ChapterCache
@@ -63,6 +64,7 @@ import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -389,11 +391,15 @@ object SettingsDataScreen : SearchableSettings {
                     Preference.PreferenceItem.ListPreference(
                         pref = syncPreferences.syncService(),
                         title = stringResource(SYMR.strings.pref_sync_service),
-                        entries = persistentMapOf(
-                            SyncManager.SyncService.NONE.value to stringResource(MR.strings.off),
-                            SyncManager.SyncService.SYNCYOMI.value to stringResource(SYMR.strings.syncyomi),
-                            SyncManager.SyncService.GOOGLE_DRIVE.value to stringResource(SYMR.strings.google_drive),
-                        ),
+                        // YMR --> Google Drive needs an OAuth client owned by whoever builds the app.
+                        entries = buildMap {
+                            put(SyncManager.SyncService.NONE.value, stringResource(MR.strings.off))
+                            put(SyncManager.SyncService.SYNCYOMI.value, stringResource(SYMR.strings.syncyomi))
+                            if (BuildConfig.GOOGLE_DRIVE_SYNC_ENABLED) {
+                                put(SyncManager.SyncService.GOOGLE_DRIVE.value, stringResource(SYMR.strings.google_drive))
+                            }
+                        }.toPersistentMap(),
+                        // YMR <--
                         onValueChanged = { true },
                     ),
                 ),

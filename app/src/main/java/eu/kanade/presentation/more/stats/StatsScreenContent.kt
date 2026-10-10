@@ -366,7 +366,7 @@ private fun AiIntelligenceSection(
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         IconButton(
                             onClick = {
-                                context.copyToClipboard("AniZen AI Analysis", analysis)
+                                context.copyToClipboard("Yomira AI Analysis", analysis)
                             },
                             modifier = Modifier.size(32.dp)
                         ) {

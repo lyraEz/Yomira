@@ -840,7 +840,7 @@
     <string name="action_migrate_duplicate">既存のエントリを移行する</string>
     <string name="action_add_repo">リポジトリを追加</string>
     <string name="label_add_repo_input">リポジトリのURL</string>
-    <string name="action_add_repo_message">AniZen にリポジトリを追加します。これは、\"index.min.json\"で終わる URL である必要があります。</string>
+    <string name="action_add_repo_message">Yomira にリポジトリを追加します。これは、\"index.min.json\"で終わる URL である必要があります。</string>
     <string name="error_repo_exists">このリポジトリは既に存在しています!</string>
     <string name="action_delete_repo">リポジトリの削除</string>
     <string name="action_replace_repo">置き換え</string>

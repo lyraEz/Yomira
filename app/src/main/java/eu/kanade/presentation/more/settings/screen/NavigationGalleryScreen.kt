@@ -111,7 +111,7 @@ class NavigationGalleryScreen : Screen() {
                                 name = name,
                                 description = desc,
                                 config = config,
-                                author = "AniZen System"
+                                author = "Yomira System",
                             ),
                             onApply = {
                                 uiPreferences.updateNavConfig(config)

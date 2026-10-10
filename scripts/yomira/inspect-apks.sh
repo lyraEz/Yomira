@@ -8,6 +8,8 @@
 #
 # Usage: scripts/yomira/inspect-apks.sh <apk-dir>
 set -euo pipefail
+# Checks read captured output through here-strings: with pipefail, `echo "$big" | grep -q`
+# fails at random when grep exits before echo has written everything (SIGPIPE).
 
 DIR="${1:?usage: inspect-apks.sh <apk-dir>}"
 SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
@@ -26,33 +28,33 @@ for apk in "$DIR"/*.apk; do
   name="$(basename "$apk")"
   badging="$("$AAPT2" dump badging "$apk")"
   manifest="$("$AAPT2" dump xmltree --file AndroidManifest.xml "$apk")"
-  libs="$(unzip -l "$apk" | awk '{print $4}' | grep '^lib/' | cut -d/ -f2 | sort -u | tr '\n' ' ')"
+  libs="$(unzip -l "$apk" | awk '$4 ~ /^lib\// {split($4, p, "/"); print p[2]}' | sort -u | tr '\n' ' ')"
 
   {
     echo "== $name"
-    echo "$badging" | grep -E "^package:" | sed "s/ platformBuildVersion.*//"
-    echo "$badging" | grep -E "^(sdkVersion|targetSdkVersion):"
+    grep -E "^package:" <<<"$badging" | sed "s/ platformBuildVersion.*//"
+    grep -E "^(minSdkVersion|sdkVersion|targetSdkVersion):" <<<"$badging"
     echo "native ABIs: ${libs:-none}"
-    echo "$badging" | grep -E "^(leanback-launchable-activity|launchable-activity):" | sed "s/  label=.*//"
-    echo "$badging" | grep -E "uses-feature(-not-required)?:.*(touchscreen|leanback)" || true
+    grep -E "^(leanback-launchable-activity|launchable-activity):" <<<"$badging" | sed "s/  label=.*//"
+    grep -E "uses-feature(-not-required)?:.*(touchscreen|leanback)" <<<"$badging" || true
     echo "size: $(du -h "$apk" | cut -f1)"
     echo
   } >> "$REPORT"
 
   fail() { echo "FAIL $name: $1" | tee -a "$REPORT" >&2; status=1; }
 
-  echo "$badging" | grep -q "^leanback-launchable-activity:" || fail "no LEANBACK_LAUNCHER activity"
-  echo "$manifest" | grep -q "android:banner" || fail "application has no android:banner"
-  if echo "$badging" | grep -E "^uses-feature: name='android.hardware.touchscreen'" >/dev/null; then
+  grep -q "^leanback-launchable-activity:" <<<"$badging" || fail "no LEANBACK_LAUNCHER activity"
+  grep -q "android:banner" <<<"$manifest" || fail "application has no android:banner"
+  if grep -qE "^uses-feature: name='android.hardware.touchscreen'" <<<"$badging"; then
     fail "touchscreen is required"
   fi
-  if echo "$badging" | grep -E "^uses-feature: name='android.software.leanback'" >/dev/null; then
+  if grep -qE "^uses-feature: name='android.software.leanback'" <<<"$badging"; then
     fail "leanback is required (phones could not install it)"
   fi
   for abi in armeabi-v7a arm64-v8a x86 x86_64; do
     case "$name" in
       *-"$abi"-*)
-        echo " $libs " | grep -q " $abi " || fail "split $abi carries no lib/$abi"
+        grep -q " $abi " <<<" $libs " || fail "split $abi carries no lib/$abi"
         ;;
     esac
   done

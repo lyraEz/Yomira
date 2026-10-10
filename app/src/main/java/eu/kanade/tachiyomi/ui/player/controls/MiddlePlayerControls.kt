@@ -28,6 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,7 @@ import `is`.xyz.mpv.Utils
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.tvCircleFocusHighlight
 import kotlin.math.abs
 
 @Composable
@@ -65,6 +68,9 @@ fun MiddlePlayerControls(
     enter: EnterTransition,
     exit: ExitTransition,
     modifier: Modifier = Modifier,
+    // YMR --> receives the initial remote focus when the controls appear
+    playPauseFocusRequester: FocusRequester? = null,
+    // YMR <--
 ) {
     Row(
         modifier,
@@ -122,6 +128,10 @@ fun MiddlePlayerControls(
                         painter = rememberAnimatedVectorPainter(icon, !paused),
                         modifier = Modifier
                             .size(96.dp)
+                            // YMR -->
+                            .then(playPauseFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
+                            .tvCircleFocusHighlight(focusedScale = 1.1f, focusedBackgroundAlpha = 0.35f)
+                            // YMR <--
                             .clip(CircleShape)
                             .clickable(
                                 interaction,

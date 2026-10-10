@@ -133,6 +133,11 @@ import kotlin.time.Duration.Companion.milliseconds
 class PlayerActivity : BaseActivity() {
     // ANZ -->
     private var httpServer: HttpServer? = null
+
+    // YMR -->
+    private var previousUncaughtHandler: Thread.UncaughtExceptionHandler? = null
+
+    // YMR <--
     internal val viewModel by viewModels<PlayerViewModel>()
     internal val player by lazy { AniyomiMPVView(this, null) }
     // ANZ <--
@@ -260,8 +265,25 @@ class PlayerActivity : BaseActivity() {
                     "Unknown error",
                 )
                 withUIContext {
-                    setInitialEpisodeError(exception)
+                    // YMR --> once the episode is known the error stays inside the player, where the
+                    // user can retry or pick another episode; without one there is nothing to show.
+                    if (viewModel.currentEpisode.value != null && viewModel.currentSource.value != null) {
+                        val reason = if (exception is PlayerViewModel.ExceptionWithStringResource &&
+                            exception.stringResource == MR.strings.no_hosters
+                        ) {
+                            PlaybackError.Reason.NO_HOSTERS
+                        } else {
+                            PlaybackError.Reason.HOSTERS_FAILED
+                        }
+                        viewModel.showPlaybackError(reason, exception)
+                    } else {
+                        setInitialEpisodeError(exception)
+                    }
+                    // YMR <--
                 }
+                // YMR --> loading hosters after a failed init dereferenced a null source
+                return@launchNonCancellable
+                // YMR <--
             }
 
             viewModel.updateIsLoadingHosters(false)
@@ -296,15 +318,23 @@ class PlayerActivity : BaseActivity() {
         setupMediaSession()
         setupPlayerOrientation()
 
-
-
-        Thread.setDefaultUncaughtExceptionHandler { _, throwable ->
-            runOnUiThread {
-                toast(throwable.message)
+        // YMR -->
+        // The player used to replace the process-wide handler with one that finished this activity,
+        // so any background failure (e.g. while loading the next episode) closed the player, and the
+        // handler outlived the activity. Background failures now surface as an in-player error;
+        // main-thread crashes still reach the app's crash handler.
+        previousUncaughtHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            if (thread === mainLooper.thread || isFinishing || isDestroyed) {
+                previousUncaughtHandler?.uncaughtException(thread, throwable)
+                return@setDefaultUncaughtExceptionHandler
             }
-            logcat(LogPriority.ERROR, throwable)
-            finish()
+            logcat(LogPriority.ERROR, throwable) { "Uncaught exception on ${thread.name} in player" }
+            runOnUiThread {
+                viewModel.showPlaybackError(PlaybackError.Reason.STREAM_FAILED, throwable)
+            }
         }
+        // YMR <--
 
         viewModel.eventFlow
             .onEach { event ->
@@ -362,7 +392,13 @@ class PlayerActivity : BaseActivity() {
                     }
                     // ANK -->
                     is PlayerViewModel.Event.SetVideoLoadError -> {
-                        setInitialEpisodeError(event.error)
+                        // YMR --> stay in the player; the overlay offers retry, servers and exit
+                        if (viewModel.currentEpisode.value != null) {
+                            viewModel.showPlaybackError(PlaybackError.Reason.NO_PLAYABLE_VIDEO, event.error)
+                        } else {
+                            setInitialEpisodeError(event.error)
+                        }
+                        // YMR <--
                     }
                     // ANK <--
                 }
@@ -422,6 +458,13 @@ class PlayerActivity : BaseActivity() {
 
     override fun onDestroy() {
         player.isExiting = true
+
+        // YMR -->
+        if (previousUncaughtHandler != null) {
+            Thread.setDefaultUncaughtExceptionHandler(previousUncaughtHandler)
+            previousUncaughtHandler = null
+        }
+        // YMR <--
 
         // ANZ -->
         val serverToStop = httpServer
@@ -862,13 +905,16 @@ class PlayerActivity : BaseActivity() {
 
                 viewModel.setCurrentVideoError()
 
+                // YMR --> an expired or broken stream shows the error overlay instead of closing
+                val streamError = RuntimeException(errorMessage)
                 if (playerPreferences.switchOnFailure().get()) {
                     if (!viewModel.loadBestVideo()) {
-                        finish()
+                        viewModel.showPlaybackError(PlaybackError.Reason.STREAM_FAILED, streamError)
                     }
                 } else {
-                    viewModel.setIsStopped(true)
+                    viewModel.showPlaybackError(PlaybackError.Reason.STREAM_FAILED, streamError)
                 }
+                // YMR <--
             }
         }
     }
@@ -1187,31 +1233,33 @@ class PlayerActivity : BaseActivity() {
                         launchUI { toast(MR.strings.no_next_episode) }
                     }
                     viewModel.isLoading.update { _ -> false }
+                    // YMR --> nothing was switched; keep showing the current episode
+                    viewModel.updateIsLoadingEpisode(false)
+                    // YMR <--
                 }
 
                 else -> {
-                    if (switchMethod.hosterList != null) {
-                        when {
-                            switchMethod.hosterList.isEmpty() -> withUIContext {
-                                setInitialEpisodeError(
-                                    PlayerViewModel.ExceptionWithStringResource(
-                                        "Hoster list is empty",
-                                        MR.strings.no_hosters,
-                                    ),
-                                )
-                            }
-                            else -> {
-                                viewModel.loadHosters(
-                                    source = switchMethod.source,
-                                    hosterList = switchMethod.hosterList,
-                                    hosterIndex = -1,
-                                    videoIndex = -1,
-                                )
-                            }
+                    // YMR --> a failed episode keeps the player open with an actionable error
+                    // instead of finishing the activity (the "next episode closes the player" bug).
+                    when (
+                        val outcome = EpisodeNavigation.afterEpisodeLoad(
+                            hosters = switchMethod.hosterList,
+                            error = switchMethod.error,
+                        )
+                    ) {
+                        is EpisodeNavigation.Outcome.LoadHosters -> {
+                            viewModel.loadHosters(
+                                source = switchMethod.source,
+                                hosterList = outcome.hosters,
+                                hosterIndex = -1,
+                                videoIndex = -1,
+                            )
                         }
-                    } else {
-                        logcat(LogPriority.ERROR) { "Error getting links" }
+                        is EpisodeNavigation.Outcome.ShowError -> withUIContext {
+                            viewModel.showPlaybackError(outcome.reason, outcome.cause)
+                        }
                     }
+                    // YMR <--
 
                     if (isInPictureInPictureMode && pipEpisodeToasts) {
                         launchUI { toast(switchMethod.episodeTitle) }
@@ -1714,8 +1762,55 @@ class PlayerActivity : BaseActivity() {
     private fun isTextInputActive(): Boolean = inputMethodManager.isActive
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (!isTextInputActive() && player.onKey(event)) return true
-        return super.dispatchKeyEvent(event)
+        // YMR --> remote-control routing; see PlayerKeyRouter for the rules
+        val state = PlayerKeyRouter.State(
+            textInputActive = isTextInputActive(),
+            overlayOpen = viewModel.sheetShown.value != Sheets.None ||
+                viewModel.panelShown.value != Panels.None ||
+                viewModel.dialogShown.value != Dialogs.None ||
+                viewModel.playbackError.value != null,
+            controlsShown = viewModel.controlsShown.value,
+        )
+        when (val decision = PlayerKeyRouter.route(event.keyCode, state)) {
+            PlayerKeyRouter.Decision.Ui -> {
+                if (state.controlsShown) viewModel.onControlsInteraction()
+                return super.dispatchKeyEvent(event)
+            }
+            PlayerKeyRouter.Decision.Mpv -> {
+                if (!state.textInputActive && player.onKey(event)) return true
+                return super.dispatchKeyEvent(event)
+            }
+            is PlayerKeyRouter.Decision.Handle -> {
+                if (event.action == KeyEvent.ACTION_DOWN &&
+                    (event.repeatCount == 0 || decision.repeatable)
+                ) {
+                    performKeyAction(decision.action)
+                }
+                return true
+            }
+        }
+        // YMR <--
     }
     // ANZ <--
+
+    // YMR -->
+    private fun performKeyAction(action: PlayerKeyRouter.Action) {
+        when (action) {
+            PlayerKeyRouter.Action.SHOW_CONTROLS -> viewModel.showControls()
+            PlayerKeyRouter.Action.HIDE_CONTROLS -> viewModel.hideControls()
+            PlayerKeyRouter.Action.TOGGLE_PLAY_PAUSE -> viewModel.pauseUnpause()
+            PlayerKeyRouter.Action.PLAY -> viewModel.unpause()
+            PlayerKeyRouter.Action.PAUSE -> viewModel.pause()
+            PlayerKeyRouter.Action.SEEK_BACKWARD -> viewModel.leftSeek()
+            PlayerKeyRouter.Action.SEEK_FORWARD -> viewModel.rightSeek()
+            PlayerKeyRouter.Action.NEXT_EPISODE -> viewModel.changeEpisode(previous = false)
+            PlayerKeyRouter.Action.PREVIOUS_EPISODE -> viewModel.changeEpisode(previous = true)
+            PlayerKeyRouter.Action.OPEN_MENU -> {
+                viewModel.hideControls()
+                viewModel.showSheet(Sheets.More)
+            }
+            PlayerKeyRouter.Action.EXIT -> backPressed()
+        }
+    }
+    // YMR <--
 }

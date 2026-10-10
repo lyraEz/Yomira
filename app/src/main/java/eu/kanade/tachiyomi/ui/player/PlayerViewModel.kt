@@ -1035,6 +1035,17 @@ class PlayerViewModel @JvmOverloads constructor(
         _seekBarShown.update { true }
     }
 
+    // YMR -->
+    private val _controlsInteraction = MutableStateFlow(0)
+
+    /** Bumped on every remote key handled by the visible controls, to restart their auto-hide. */
+    val controlsInteraction = _controlsInteraction.asStateFlow()
+
+    fun onControlsInteraction() {
+        _controlsInteraction.update { it + 1 }
+    }
+    // YMR <--
+
     fun hideControls() {
         viewModelScope.launch {
             eventChannel.send(Event.SetStatusBar(false))
@@ -1398,6 +1409,10 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     fun resetHosterState() {
+        // YMR --> the old episode's video is no longer playing; loadVideo() relies on this to
+        // fall back to another server instead of keeping a stale selection.
+        _currentVideo.update { _ -> null }
+        // YMR <--
         _pausedState.update { _ -> false }
         _hosterState.update { _ -> emptyList() }
         _hosterList.update { _ -> emptyList() }
@@ -1626,21 +1641,55 @@ class PlayerViewModel @JvmOverloads constructor(
         // ANZ -->
         val playlist = currentPlaylist.value
         val skipFiller = playerPreferences.skipFillerEpisodes().get()
-        var newIndex = if (previous) getCurrentEpisodeIndex() - 1 else getCurrentEpisodeIndex() + 1
-
-        if (!previous && skipFiller) {
-            while (newIndex <= playlist.lastIndex && (fillerEpisodes.contains(playlist[newIndex].episode_number) || playlist[newIndex].fillermark)) {
-                newIndex++
-            }
-        }
-
-        return when {
-            previous && newIndex < 0 -> -1L
-            !previous && newIndex > playlist.lastIndex -> -1L
-            else -> playlist.getOrNull(newIndex)?.id ?: -1L
-        }
+        // YMR --> shared with the unit-tested rules in EpisodeNavigation
+        val newIndex = EpisodeNavigation.adjacentIndex(
+            size = playlist.size,
+            currentIndex = getCurrentEpisodeIndex(),
+            previous = previous,
+            isSkippable = { index ->
+                skipFiller &&
+                    (fillerEpisodes.contains(playlist[index].episode_number) || playlist[index].fillermark)
+            },
+        )
+        return playlist.getOrNull(newIndex)?.id ?: -1L
+        // YMR <--
         // ANZ <--
     }
+
+    // YMR -->
+    private fun updateAdjacentEpisodeFlags() {
+        val size = currentPlaylist.value.size
+        val index = getCurrentEpisodeIndex()
+        _hasPreviousEpisode.update { _ -> EpisodeNavigation.hasPrevious(size, index) }
+        _hasNextEpisode.update { _ -> EpisodeNavigation.hasNext(size, index) }
+    }
+
+    private val _playbackError = MutableStateFlow<PlaybackError?>(null)
+
+    /** Set while the player shows a recoverable error instead of a video. */
+    val playbackError = _playbackError.asStateFlow()
+
+    fun showPlaybackError(reason: PlaybackError.Reason, cause: Throwable?) {
+        val episode = currentEpisode.value
+        val detail = when (cause) {
+            is ExceptionWithStringResource -> cause.message
+            null -> null
+            else -> cause.message ?: cause.javaClass.simpleName
+        }
+        logcat(LogPriority.ERROR, cause) { "Playback error $reason for episode ${episode?.id}: $detail" }
+        isLoading.update { _ -> false }
+        updateIsLoadingEpisode(false)
+        updateIsLoadingHosters(false)
+        setIsStopped(true)
+        _playbackError.update { _ ->
+            PlaybackError(reason = reason, episodeId = episode?.id, episodeName = episode?.name, detail = detail)
+        }
+    }
+
+    fun clearPlaybackError() {
+        _playbackError.update { _ -> null }
+    }
+    // YMR <--
 
     fun updateHasNextEpisode(value: Boolean) {
         _hasNextEpisode.update { _ -> value }
@@ -1750,8 +1799,9 @@ class PlayerViewModel @JvmOverloads constructor(
 
                 updateEpisode(episode)
 
-                _hasPreviousEpisode.update { _ -> getCurrentEpisodeIndex() != 0 }
-                _hasNextEpisode.update { _ -> getCurrentEpisodeIndex() != currentPlaylist.value.size - 1 }
+                // YMR -->
+                updateAdjacentEpisodeFlags()
+                // YMR <--
 
                 // ANZ -->
                 if (isDifferentAnime) {
@@ -2027,7 +2077,10 @@ class PlayerViewModel @JvmOverloads constructor(
                         val (hosterIdx, videoIdx) = HosterLoader.selectBestVideo(hosterState.value, defaultSelector)
                         // ANZ <--
                         if (hosterIdx == -1) {
-                            throw ExceptionWithStringResource("No available videos", MR.strings.no_available_videos)
+                            // YMR --> was an uncaught throw that closed the player
+                            showPlaybackError(PlaybackError.Reason.NO_PLAYABLE_VIDEO, null)
+                            return@coroutineScope
+                            // YMR <--
                         }
 
                         val video = (hosterState.value[hosterIdx] as HosterState.Ready).videoList[videoIdx]
@@ -2045,6 +2098,10 @@ class PlayerViewModel @JvmOverloads constructor(
                 }
 
                 throw e
+                // YMR --> loadVideo() throws once every candidate failed; keep the player open.
+            } catch (e: ExceptionWithStringResource) {
+                showPlaybackError(PlaybackError.Reason.NO_PLAYABLE_VIDEO, e)
+                // YMR <--
             }
         }
     }
@@ -2170,6 +2227,9 @@ class PlayerViewModel @JvmOverloads constructor(
         // ANK --> Playback resumed, so drop any postponed selection
         hasPendingVideoFallback.set(false)
         // ANK <--
+        // YMR -->
+        clearPlaybackError()
+        // YMR <--
 
         eventChannel.send(Event.SetVideo(resolvedVideo))
         return true
@@ -2240,6 +2300,9 @@ class PlayerViewModel @JvmOverloads constructor(
         val hosterList: List<Hoster>?,
         val episodeTitle: String,
         val source: AnimeSource,
+        // YMR -->
+        val error: Throwable? = null,
+        // YMR <--
     )
 
     suspend fun loadEpisode(episodeId: Long?): EpisodeLoadResult? {
@@ -2250,31 +2313,40 @@ class PlayerViewModel @JvmOverloads constructor(
 
         _currentEpisode.update { _ -> chosenEpisode }
         updateEpisode(chosenEpisode)
-        // ANZ -->
-        _hasPreviousEpisode.update { _ -> getCurrentEpisodeIndex() != 0 }
-        _hasNextEpisode.update { _ -> getCurrentEpisodeIndex() != currentPlaylist.value.size - 1 }
-        // ANZ <--
+        // YMR -->
+        updateAdjacentEpisodeFlags()
+        clearPlaybackError()
+        // Progress from now on belongs to the chosen episode, even if its servers fail to load.
+        this@PlayerViewModel.episodeId = chosenEpisode.id ?: -1L
+        // The previous episode's servers must never be offered for this one.
+        currentHosterList = null
+        // YMR <--
 
         return withIOContext {
+            // YMR -->
+            var error: Throwable? = null
+            // YMR <--
             try {
-                val currentEpisode =
-                    currentEpisode.value
-                        ?: throw ExceptionWithStringResource("No episode loaded", MR.strings.no_episode_loaded)
                 currentHosterList = EpisodeLoader.getHosters(
-                    currentEpisode.toDomainEpisode()!!,
+                    chosenEpisode.toDomainEpisode()!!,
                     anime,
                     source,
                 )
-
-                this@PlayerViewModel.episodeId = currentEpisode.id!!
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 logcat(LogPriority.ERROR, e) { e.message ?: "Error getting links" }
+                // YMR -->
+                error = e
+                // YMR <--
             }
 
             EpisodeLoadResult(
                 hosterList = currentHosterList,
                 episodeTitle = anime.title + " - " + chosenEpisode.name,
                 source = source,
+                // YMR -->
+                error = error,
+                // YMR <--
             )
         }
     }

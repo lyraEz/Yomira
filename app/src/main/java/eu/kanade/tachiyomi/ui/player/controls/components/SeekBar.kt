@@ -18,6 +18,7 @@
 package eu.kanade.tachiyomi.ui.player.controls.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -34,6 +36,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +52,7 @@ import eu.kanade.tachiyomi.animesource.model.ChapterType
 import eu.kanade.tachiyomi.ui.player.controls.LocalPlayerButtonsClickEvent
 import `is`.xyz.mpv.Utils
 import tachiyomi.presentation.core.components.material.padding
+import tachiyomi.presentation.core.util.tvFocusHighlight
 
 /**
  * Width of the video timer slots flanking the seekbar.
@@ -80,6 +88,9 @@ fun SeekbarWithTimers(
     onDurationTextLayout: (TextLayoutResult) -> Unit = {},
     chapters: List<Segment>,
     modifier: Modifier = Modifier,
+    // YMR --> seeking from the remote while the bar has focus (true = forward)
+    onKeySeek: ((Boolean) -> Unit)? = null,
+    // YMR <--
 ) {
     val clickEvent = LocalPlayerButtonsClickEvent.current
     Row(
@@ -114,7 +125,39 @@ fun SeekbarWithTimers(
                         }
                     }
             },
-            modifier = Modifier.weight(1f),
+            // YMR -->
+            modifier = Modifier
+                .weight(1f)
+                .then(
+                    if (onKeySeek == null) {
+                        Modifier
+                    } else {
+                        Modifier
+                            .tvFocusHighlight(
+                                shape = RoundedCornerShape(50),
+                                borderWidth = 2.dp,
+                                focusedBackgroundAlpha = 0.2f,
+                            )
+                            .onKeyEvent { event ->
+                                if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+                                when (event.key) {
+                                    Key.DirectionLeft -> {
+                                        clickEvent()
+                                        onKeySeek(false)
+                                        true
+                                    }
+                                    Key.DirectionRight -> {
+                                        clickEvent()
+                                        onKeySeek(true)
+                                        true
+                                    }
+                                    else -> false
+                                }
+                            }
+                            .focusable()
+                    },
+                ),
+            // YMR <--
             colors = SeekerDefaults.seekerColors(
                 progressColor = MaterialTheme.colorScheme.primary,
                 thumbColor = MaterialTheme.colorScheme.primary,

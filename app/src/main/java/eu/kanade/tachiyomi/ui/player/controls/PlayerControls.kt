@@ -56,6 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -83,6 +84,7 @@ import eu.kanade.tachiyomi.ui.player.controls.components.BrightnessSlider
 import eu.kanade.tachiyomi.ui.player.controls.components.ControlsButton
 import eu.kanade.tachiyomi.ui.player.controls.components.DoubleSpeedPlayerUpdate
 import eu.kanade.tachiyomi.ui.player.controls.components.FilledControlsButton
+import eu.kanade.tachiyomi.ui.player.controls.components.PlaybackErrorOverlay
 import eu.kanade.tachiyomi.ui.player.controls.components.SeekbarWithTimers
 import eu.kanade.tachiyomi.ui.player.controls.components.videoTimerWidth
 import eu.kanade.tachiyomi.ui.player.controls.components.ThumbnailPreview
@@ -105,6 +107,7 @@ import tachiyomi.core.common.preference.minusAssign
 import tachiyomi.core.common.preference.plusAssign
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.TvDevice
 import tachiyomi.presentation.core.util.collectAsState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -195,11 +198,29 @@ fun PlayerControls(
     val customButtons by viewModel.customButtons.collectAsState()
     val customButton by viewModel.primaryButton.collectAsState()
 
+    // YMR -->
+    val controlsInteraction by viewModel.controlsInteraction.collectAsState()
+
+    // With a remote, opening the controls puts focus on Play/Pause so OK acts at once and the
+    // D-pad moves from there. Touch devices never take this path (nothing is focusable by touch).
+    val playPauseFocus = remember { FocusRequester() }
+    LaunchedEffect(controlsShown, areControlsLocked) {
+        if (TvDevice.isTv && controlsShown && !areControlsLocked) {
+            repeat(5) {
+                delay(60)
+                if (runCatching { playPauseFocus.requestFocus() }.isSuccess) return@LaunchedEffect
+            }
+        }
+    }
+    // YMR <--
     LaunchedEffect(
         controlsShown,
         paused,
         isSeekingUI,
         resetControls,
+        // YMR --> remote navigation keeps the controls on screen
+        controlsInteraction,
+        // YMR <--
     ) {
         if (controlsShown && paused == false && !isSeekingUI) {
             delay(playerTimeToDisappear.toLong())
@@ -443,6 +464,9 @@ fun PlayerControls(
                         onPlayPauseClick = viewModel::pauseUnpause,
                         enter = fadeIn(playerControlsEnterAnimationSpec()),
                         exit = fadeOut(playerControlsExitAnimationSpec()),
+                        // YMR -->
+                        playPauseFocusRequester = playPauseFocus,
+                        // YMR <--
                     )
                 }
                 // ANZ <--
@@ -547,42 +571,45 @@ fun PlayerControls(
                         }
                     }
 
-                    SeekbarWithTimers(
-                        position = sliderPosition,
-                        duration = totalDuration,
-                        readAheadValue = readAhead ?: 0f,
-                        onValueChange = {
-                            if (!viewModel.isSeekingUI.value) {
-                                wasPlayerAlreadyPause = viewModel.paused.value == true
-                                viewModel.pause()
-                                viewModel.updateIsSeeking(true)
-                            }
-                            sliderPosition = it
-                            lastTargetSeekPos = it
-                            viewModel.updateSeekPos(it)
-                            viewModel.scrubSeekTo(it.toInt(), false)
-                        },
-                        onValueChangeFinished = {
-                            val target = sliderPosition
-                            lastTargetSeekPos = target
-                            viewModel.updateSeekPos(target)
-                            viewModel.updateIsSeeking(false)
-                            viewModel.seekTo(target.toInt(), preciseSeeking)
-                            if (!wasPlayerAlreadyPause) {
-                                viewModel.unpause()
-                            }
-                        },
-                        timersInverted = Pair(false, invertDuration),
-                        durationTimerOnCLick = { playerPreferences.invertDuration().set(!invertDuration) },
-                        positionTimerOnClick = {},
-                        onDurationTextLayout = { layoutResult ->
-                            if (layoutResult.lineCount > 0) {
-                                durationInkWidthPx =
-                                    layoutResult.getLineRight(0) - layoutResult.getLineLeft(0)
-                            }
-                        },
-                        chapters = chaptersList,
-                    )
+                        SeekbarWithTimers(
+                            position = sliderPosition,
+                            duration = totalDuration,
+                            readAheadValue = readAhead ?: 0f,
+                            onValueChange = {
+                                if (!viewModel.isSeekingUI.value) {
+                                    wasPlayerAlreadyPause = viewModel.paused.value == true
+                                    viewModel.pause()
+                                    viewModel.updateIsSeeking(true)
+                                }
+                                sliderPosition = it
+                                lastTargetSeekPos = it
+                                viewModel.updateSeekPos(it)
+                                viewModel.scrubSeekTo(it.toInt(), false)
+                            },
+                            onValueChangeFinished = {
+                                val target = sliderPosition
+                                lastTargetSeekPos = target
+                                viewModel.updateSeekPos(target)
+                                viewModel.updateIsSeeking(false)
+                                viewModel.seekTo(target.toInt(), preciseSeeking)
+                                if (!wasPlayerAlreadyPause) {
+                                    viewModel.unpause()
+                                }
+                            },
+                            timersInverted = Pair(false, invertDuration),
+                            // YMR -->
+                            onKeySeek = { forward -> if (forward) viewModel.rightSeek() else viewModel.leftSeek() },
+                            // YMR <--
+                            durationTimerOnCLick = { playerPreferences.invertDuration().set(!invertDuration) },
+                            positionTimerOnClick = {},
+                            onDurationTextLayout = { layoutResult ->
+                                if (layoutResult.lineCount > 0) {
+                                    durationInkWidthPx =
+                                        layoutResult.getLineRight(0) - layoutResult.getLineLeft(0)
+                                }
+                            },
+                            chapters = chaptersList,
+                        )
                     }
                 }
                 val mediaTitle by viewModel.mediaTitle.collectAsState()
@@ -896,6 +923,32 @@ fun PlayerControls(
         val dialog by viewModel.dialogShown.collectAsState()
         val anime by viewModel.currentAnime.collectAsState()
         val playlist by viewModel.currentPlaylist.collectAsState()
+
+        // YMR -->
+        val playbackError by viewModel.playbackError.collectAsState()
+        val errorHosters by viewModel.hosterList.collectAsState()
+        val errorHasNext by viewModel.hasNextEpisode.collectAsState()
+        playbackError?.let { error ->
+            if (sheetShown == Sheets.None && dialog == Dialogs.None) {
+                PlaybackErrorOverlay(
+                    error = error,
+                    hasServers = errorHosters.isNotEmpty(),
+                    hasNextEpisode = errorHasNext,
+                    onRetry = {
+                        viewModel.clearPlaybackError()
+                        activity.changeEpisode(error.episodeId ?: viewModel.currentEpisode.value?.id)
+                    },
+                    onChooseServer = { viewModel.showSheet(Sheets.QualityTracks) },
+                    onChooseEpisode = { viewModel.showEpisodeListDialog() },
+                    onNextEpisode = {
+                        viewModel.clearPlaybackError()
+                        viewModel.changeEpisode(previous = false)
+                    },
+                    onExit = onBackPress,
+                )
+            }
+        }
+        // YMR <--
 
         PlayerDialogs(
             dialogShown = dialog,

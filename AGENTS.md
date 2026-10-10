@@ -1,3 +1,34 @@
+# Yomira — guia do fork
+
+Este repositório é o **Yomira**, um fork independente do AniZen voltado a Fire TV e TV Box
+(`applicationId = com.lyraez.yomira`). O texto abaixo da linha descreve o processo do AniZen e
+fica como referência para sincronizações; onde ele conflitar com isto, vale esta seção.
+
+- Não publique no repositório do AniZen, não use credenciais dele e não recrie seus workflows de
+  release/Discord. CI e release do Yomira: `.github/workflows/ci.yml` e `release.yml` (manual,
+  gera rascunho). Processo em `docs/yomira/RELEASES.md`.
+- Pull requests são o caminho normal de integração no Yomira.
+- O Yomira mantém o histórico completo do AniZen: sincronize com `git merge upstream/master`
+  (veja `docs/yomira/SINCRONIZACAO.md`). Base registrada em `.yomira/upstream.json`.
+- Marque código do Yomira dentro de arquivos herdados com `// YMR -->` / `// YMR <--` e preserve
+  os marcadores herdados (`ANZ`, `ANK`, `KMK`, `SY`, `AY`). Código novo vai em `yomira.*`.
+- Strings novas vão em `i18n-ymr` (`YMR`), em inglês (`base`) e português (`pt-rBR`).
+  Depois de sincronizar, rode `scripts/yomira/rebrand_strings.py`.
+- Nunca versione keystore, `signing.properties`, senhas ou `client_secrets.json`.
+- Commits, pull requests, código e documentação não levam assinatura de ferramentas de IA:
+  nada de trailers `Co-Authored-By` de assistentes, avisos "gerado por", links de sessão ou
+  marcas d'água. Autor e committer são a identidade do mantenedor (`lyraEz`). Mensagens de
+  commit descrevem a mudança em si, sem emojis nem texto padrão. A atribuição automática do
+  Claude Code está desligada em `.claude/settings.json`.
+
+Verificação antes de enviar:
+
+```bash
+./gradlew :app:compileDebugKotlin :app:testDebugUnitTest spotlessCheck
+```
+
+---
+
 # AniZen — Agent & Contributor Guide
 
 AniZen is an Android anime/movie client (min SDK 26, Jetpack Compose + Material3, Voyager

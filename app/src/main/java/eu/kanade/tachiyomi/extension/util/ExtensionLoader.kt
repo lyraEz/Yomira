@@ -11,6 +11,7 @@ import dalvik.system.PathClassLoader
 import eu.kanade.domain.extension.interactor.TrustExtension
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
@@ -37,9 +38,6 @@ object ExtensionLoader {
 
     private val preferences: SourcePreferences by injectLazy()
     private val trustExtension: TrustExtension by injectLazy()
-    private val loadNsfwSource by lazy {
-        preferences.showNsfwSource().get()
-    }
 
     private const val EXTENSION_FEATURE = "tachiyomi.animeextension"
     private const val METADATA_SOURCE_CLASS = "tachiyomi.animeextension.class"
@@ -207,7 +205,7 @@ object ExtensionLoader {
         val extensionPackage = getExtensionInfoFromPkgName(context, pkgName)
         if (extensionPackage == null) {
             logcat(LogPriority.ERROR) { "Extension package is not found ($pkgName)" }
-            return@withContext LoadResult.Error
+            return@withContext LoadResult.Error()
         }
         loadExtension(context, extensionPackage)
     }
@@ -273,9 +271,28 @@ object ExtensionLoader {
         val versionName = pkgInfo.versionName
         val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)
 
+        // YMR -->
+        fun failure(reason: ExtensionLoadFailure.Reason, detail: String?, libVersion: Double? = null) =
+            LoadResult.Error(
+                ExtensionLoadFailure(
+                    pkgName = pkgName,
+                    name = extName,
+                    versionName = versionName,
+                    versionCode = versionCode,
+                    libVersion = libVersion,
+                    reason = reason,
+                    detail = detail,
+                    signatureHash = getSignatures(pkgInfo)?.lastOrNull(),
+                    isShared = extensionInfo.isShared,
+                ),
+            )
+        // YMR <--
+
         if (versionName.isNullOrEmpty()) {
             logcat(LogPriority.WARN) { "Missing versionName for extension $extName" }
-            return LoadResult.Error
+            // YMR -->
+            return failure(ExtensionLoadFailure.Reason.MISSING_VERSION, "versionName is empty")
+            // YMR <--
         }
 
         // Validate lib version
@@ -298,14 +315,22 @@ object ExtensionLoader {
                 "Lib version is $libVersion, while only versions " +
                     "$LIB_VERSION_MIN to $LIB_VERSION_MAX are allowed"
             }
-            return LoadResult.Error
+            // YMR -->
+            return failure(
+                ExtensionLoadFailure.Reason.LIB_VERSION_UNSUPPORTED,
+                "extensionLib=$libVersion, supported=$LIB_VERSION_MIN..$LIB_VERSION_MAX, versionName=$versionName",
+                libVersion,
+            )
+            // YMR <--
         }
         // ANZ <--
 
         val signatures = getSignatures(pkgInfo)
         if (signatures.isNullOrEmpty()) {
             logcat(LogPriority.WARN) { "Package $pkgName isn't signed" }
-            return LoadResult.Error
+            // YMR -->
+            return failure(ExtensionLoadFailure.Reason.UNSIGNED, null, libVersion)
+            // YMR <--
         } else if (!trustExtension.isTrusted(pkgInfo, signatures)) {
             val extension = Extension.Untrusted(
                 extName,
@@ -326,10 +351,12 @@ object ExtensionLoader {
                 is String -> v.toBoolean() || v == "1"
                 else -> false
             }
-        if (!loadNsfwSource && isNsfw) {
+        // YMR --> read the setting on every load so toggling it does not need an app restart
+        if (!preferences.showNsfwSource().get() && isNsfw) {
             logcat(LogPriority.WARN) { "NSFW extension $pkgName not allowed" }
-            return LoadResult.Error
+            return failure(ExtensionLoadFailure.Reason.NSFW_FILTERED, null, libVersion)
         }
+        // YMR <--
 
         val isTorrent = appInfo.metaData?.getBoolean(METADATA_IS_TORRENT) == true ||
             when (val v = appInfo.metaData?.get(METADATA_TORRENT)) {
@@ -343,10 +370,20 @@ object ExtensionLoader {
             ChildFirstPathClassLoader(appInfo.sourceDir, null, context.classLoader)
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($pkgName)" }
-            return LoadResult.Error
+            // YMR -->
+            return failure(ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED, e.describe(), libVersion)
+            // YMR <--
         }
 
-        val sources = appInfo.metaData.getString(METADATA_SOURCE_CLASS)!!
+        // YMR -->
+        val sourceClassMeta = appInfo.metaData?.getString(METADATA_SOURCE_CLASS)
+            ?: return failure(
+                ExtensionLoadFailure.Reason.MANIFEST_INVALID,
+                "missing <meta-data android:name=\"$METADATA_SOURCE_CLASS\">",
+                libVersion,
+            )
+        // YMR <--
+        val sources = sourceClassMeta
             .split(";")
             .map {
                 val sourceClass = it.trim()
@@ -415,11 +452,15 @@ object ExtensionLoader {
                         }
                     } catch (e: Throwable) {
                         logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($it)" }
-                        return LoadResult.Error
+                        // YMR -->
+                        return failure(ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED, "$it: ${e.describe()}", libVersion)
+                        // YMR <--
                     }
                 } catch (e: Throwable) {
                     logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($it)" }
-                    return LoadResult.Error
+                    // YMR -->
+                    return failure(ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED, "$it: ${e.describe()}", libVersion)
+                    // YMR <--
                 }
             }
 
@@ -526,6 +567,21 @@ object ExtensionLoader {
             publicSourceDir = apkPath
         }
     }
+
+    // YMR -->
+    private fun Throwable.describe(): String {
+        val root = generateSequence(this) { it.cause }.last()
+        return buildString {
+            append(this@describe.javaClass.name)
+            this@describe.message?.let { append(": ").append(it) }
+            if (root !== this@describe) {
+                append(" (caused by ").append(root.javaClass.name)
+                root.message?.let { append(": ").append(it) }
+                append(")")
+            }
+        }
+    }
+    // YMR <--
 
     private data class ExtensionInfo(
         val packageInfo: PackageInfo,

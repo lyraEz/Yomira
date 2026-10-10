@@ -1,5 +1,15 @@
 package eu.kanade.presentation.browse
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.font.FontFamily
+import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
+import eu.kanade.tachiyomi.util.system.copyToClipboard
+import tachiyomi.core.common.i18n.stringResource
+import yomira.i18n.YMR
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -116,6 +126,10 @@ fun ExtensionScreen(
     onOpenExtension: (Extension.Installed) -> Unit,
     onClickUpdateAll: () -> Unit,
     onRefresh: () -> Unit,
+    // YMR -->
+    onBuildDiagnostics: suspend (Extension?, String, String?) -> String = { _, _, _ -> "" },
+    onUninstallPackage: (String) -> Unit = {},
+    // YMR <--
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val uiPreferences = remember { Injekt.get<UiPreferences>() }
@@ -161,6 +175,10 @@ fun ExtensionScreen(
                     onOpenExtension = onOpenExtension,
                     onClickUpdateAll = onClickUpdateAll,
                     useContainer = useContainer,
+                    // YMR -->
+                    onBuildDiagnostics = onBuildDiagnostics,
+                    onUninstallPackage = onUninstallPackage,
+                    // YMR <--
                 )
             }
         }
@@ -181,13 +199,34 @@ private fun ExtensionContent(
     onOpenExtension: (Extension.Installed) -> Unit,
     onClickUpdateAll: () -> Unit,
     useContainer: Boolean,
+    // YMR -->
+    onBuildDiagnostics: suspend (Extension?, String, String?) -> String,
+    onUninstallPackage: (String) -> Unit,
+    // YMR <--
 ) {
     val context = LocalContext.current
     var trustState by remember { mutableStateOf<Extension.Untrusted?>(null) }
+    // YMR -->
+    var diagnosticsRequest by remember { mutableStateOf<DiagnosticsRequest?>(null) }
+    // YMR <--
     val installGranted = rememberRequestPackageInstallsPermissionState(initialValue = true)
 
-    val handleItemClick: (Extension) -> Unit = remember(onInstallExtension, onOpenExtension) {
-        { ext ->
+    val handleItemClick: (Extension) -> Unit = remember(onInstallExtension, onOpenExtension, state.items) {
+        click@{ ext ->
+            // YMR --> a failed install opens its explanation instead of retrying blindly
+            val failedItem = state.items.values.flatten()
+                .find { it.extension.pkgName == ext.pkgName && it.installStep == InstallStep.Error }
+            if (failedItem != null) {
+                diagnosticsRequest = DiagnosticsRequest(
+                    extension = ext,
+                    pkgName = ext.pkgName.substringBefore("-"),
+                    title = ext.name,
+                    summary = failedItem.installError,
+                    installError = failedItem.installError,
+                )
+                return@click
+            }
+            // YMR <--
             when (ext) {
                 is Extension.Available -> onInstallExtension(ext)
                 is Extension.Installed -> onOpenExtension(ext)
@@ -324,7 +363,51 @@ private fun ExtensionContent(
             }
         }
     }
+        // YMR --> APKs that are installed but did not load, with the reason
+        if (state.failures.isNotEmpty()) {
+            item(contentType = "header", key = "extensionHeader-failures") {
+                ExtensionHeader(text = stringResource(YMR.strings.ext_problems))
+            }
+            itemsIndexed(
+                items = state.failures,
+                key = { _, failure -> "extension-failure-${failure.pkgName}" },
+                contentType = { _, _ -> "extension_failure" },
+            ) { _, failure ->
+                val summary = failure.describe()
+                ExtensionFailureItem(
+                    failure = failure,
+                    onClick = {
+                        diagnosticsRequest = DiagnosticsRequest(
+                            extension = null,
+                            pkgName = failure.pkgName,
+                            title = failure.name,
+                            summary = summary,
+                            installError = null,
+                            canUninstall = failure.isShared,
+                        )
+                    },
+                )
+            }
+        }
+        // YMR <--
     }
+    // YMR -->
+    diagnosticsRequest?.let { request ->
+        ExtensionDiagnosticsDialog(
+            request = request,
+            buildDiagnostics = { onBuildDiagnostics(request.extension, request.pkgName, request.installError) },
+            onUninstall = if (request.canUninstall) {
+                {
+                    onUninstallPackage(request.pkgName)
+                    diagnosticsRequest = null
+                }
+            } else {
+                null
+            },
+            onDismissRequest = { diagnosticsRequest = null },
+        )
+    }
+    // YMR <--
     if (trustState != null) {
         ExtensionTrustDialog(
             onClickConfirm = {
@@ -510,11 +593,32 @@ private fun ExtensionItemContent(
                         text = when (installStep) {
                             InstallStep.Pending -> stringResource(MR.strings.ext_pending)
                             InstallStep.Downloading -> stringResource(MR.strings.ext_downloading)
+                            // YMR -->
+                            InstallStep.AwaitingConfirmation -> stringResource(YMR.strings.ext_awaiting_confirmation)
+                            // YMR <--
                             InstallStep.Installing -> stringResource(MR.strings.ext_installing)
                             else -> error("Must not show non-install process text")
                         },
                     )
                 }
+                // YMR -->
+                if (installStep == InstallStep.Error) {
+                    DotSeparatorNoSpaceText()
+                    Text(
+                        text = stringResource(YMR.strings.ext_install_failed),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                } else if (installStep.isCompleted() && extension is Extension.Installed) {
+                    DotSeparatorNoSpaceText()
+                    Text(
+                        text = if (extension.sources.isEmpty()) {
+                            stringResource(YMR.strings.ext_loaded_no_sources)
+                        } else {
+                            stringResource(YMR.strings.ext_loaded_sources, extension.sources.size)
+                        },
+                    )
+                }
+                // YMR <--
             }
         }
     }
@@ -667,3 +771,130 @@ private fun ExtensionTrustDialog(
 
 private const val TORRENT_ICON = "torrentIcon"
 
+// YMR -->
+private data class DiagnosticsRequest(
+    val extension: Extension?,
+    val pkgName: String,
+    val title: String,
+    val summary: String?,
+    val installError: String?,
+    val canUninstall: Boolean = false,
+)
+
+@Composable
+private fun ExtensionLoadFailure.describe(): String = when (reason) {
+    ExtensionLoadFailure.Reason.MISSING_VERSION -> stringResource(YMR.strings.ext_failure_missing_version)
+    ExtensionLoadFailure.Reason.LIB_VERSION_UNSUPPORTED ->
+        stringResource(YMR.strings.ext_failure_lib_version, libVersion?.toString() ?: "?")
+    ExtensionLoadFailure.Reason.UNSIGNED -> stringResource(YMR.strings.ext_failure_unsigned)
+    ExtensionLoadFailure.Reason.NSFW_FILTERED ->
+        stringResource(YMR.strings.ext_failure_nsfw) + "\n" + stringResource(YMR.strings.ext_nsfw_settings_hint)
+    ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED -> stringResource(YMR.strings.ext_failure_class_load)
+    ExtensionLoadFailure.Reason.MANIFEST_INVALID -> stringResource(YMR.strings.ext_failure_manifest)
+}
+
+@Composable
+private fun ExtensionFailureItem(
+    failure: ExtensionLoadFailure,
+    onClick: () -> Unit,
+) {
+    BaseBrowseItem(
+        onClickItem = onClick,
+        onLongClickItem = onClick,
+        icon = {
+            Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Outlined.ErrorOutline,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+            }
+        },
+        action = {
+            IconButton(onClick = onClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Info,
+                    contentDescription = stringResource(YMR.strings.ext_diagnostics),
+                )
+            }
+        },
+        content = {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = MaterialTheme.padding.medium),
+            ) {
+                Text(
+                    text = failure.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = listOfNotNull(failure.versionName, failure.describe().lineSequence().first())
+                        .joinToString(" · "),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun ExtensionDiagnosticsDialog(
+    request: DiagnosticsRequest,
+    buildDiagnostics: suspend () -> String,
+    onUninstall: (() -> Unit)?,
+    onDismissRequest: () -> Unit,
+) {
+    val context = LocalContext.current
+    var report by remember(request) { mutableStateOf<String?>(null) }
+    LaunchedEffect(request) {
+        report = runCatching { buildDiagnostics() }.getOrElse { it.toString() }
+    }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = request.title) },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+            ) {
+                request.summary?.let {
+                    Text(text = it, color = MaterialTheme.colorScheme.error)
+                }
+                Text(
+                    text = report ?: "…",
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    report?.let {
+                        context.copyToClipboard(context.stringResource(YMR.strings.ext_diagnostics), it)
+                    }
+                },
+            ) {
+                Text(text = stringResource(YMR.strings.ext_diagnostics_copy))
+            }
+        },
+        dismissButton = {
+            Row {
+                if (onUninstall != null) {
+                    TextButton(onClick = onUninstall) {
+                        Text(text = stringResource(MR.strings.ext_uninstall))
+                    }
+                }
+                TextButton(onClick = onDismissRequest) {
+                    Text(text = stringResource(MR.strings.action_close))
+                }
+            }
+        },
+    )
+}
+// YMR <--

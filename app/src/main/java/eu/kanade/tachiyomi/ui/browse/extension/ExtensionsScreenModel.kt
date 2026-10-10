@@ -11,11 +11,14 @@ import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.presentation.components.SEARCH_DEBOUNCE_MILLIS
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.extension.util.ExtensionDiagnostics
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -50,6 +53,9 @@ class ExtensionsScreenModel(
 
     init {
         val context = Injekt.get<Application>()
+        // YMR --> install errors travel with the item so the list can explain a failure
+        var installErrors: Map<String, String> = emptyMap()
+        // YMR <--
         val extensionMapper: (Map<String, InstallStep>) -> ((Extension) -> ExtensionUiModel.Item) = { map ->
             {
                 val author = when (it) {
@@ -57,7 +63,15 @@ class ExtensionsScreenModel(
                     is Extension.Installed -> it.author
                     is Extension.Untrusted -> it.author
                 }
-                ExtensionUiModel.Item(it, map[it.pkgName] ?: InstallStep.Idle, author)
+                // YMR -->
+                val step = map[it.pkgName] ?: InstallStep.Idle
+                ExtensionUiModel.Item(
+                    extension = it,
+                    installStep = step,
+                    repoName = author,
+                    installError = installErrors[it.pkgName].takeIf { step == InstallStep.Error },
+                )
+                // YMR <--
             }
         }
         val queryFilter: (String) -> ((Extension) -> Boolean) = { query ->
@@ -105,7 +119,13 @@ class ExtensionsScreenModel(
                 state.map { it.nsfwOnly }.distinctUntilChanged(),
                 currentDownloads,
                 getExtensions.subscribe(),
-            ) { query: String?, nsfwOnly: Boolean, downloads: Map<String, InstallStep>, extensions: eu.kanade.domain.extension.model.Extensions ->
+                // YMR -->
+                extensionManager.installErrors,
+                // YMR <--
+            ) { query: String?, nsfwOnly: Boolean, downloads: Map<String, InstallStep>, extensions: eu.kanade.domain.extension.model.Extensions, errors: Map<String, String> ->
+                // YMR -->
+                installErrors = errors
+                // YMR <--
                 val (_updates, _installed, _available, _untrusted) = extensions
                 val searchQuery = query ?: ""
 
@@ -165,6 +185,12 @@ class ExtensionsScreenModel(
                 }
         }
         screenModelScope.launchIO { findAvailableExtensions() }
+
+        // YMR -->
+        extensionManager.failedExtensionsFlow
+            .onEach { failures -> mutableState.update { it.copy(failures = failures.toImmutableList()) } }
+            .launchIn(screenModelScope)
+        // YMR <--
 
         preferences.animeExtensionUpdatesCount().changes()
             .onEach { mutableState.update { state -> state.copy(updates = it) } }
@@ -247,6 +273,23 @@ class ExtensionsScreenModel(
         }
     }
 
+    // YMR -->
+    fun reloadExtensions() {
+        screenModelScope.launchIO {
+            mutableState.update { it.copy(isRefreshing = true) }
+            extensionManager.reloadExtensions()
+            mutableState.update { it.copy(isRefreshing = false) }
+        }
+    }
+
+    fun uninstallPackage(pkgName: String) {
+        extensionManager.uninstallPackage(pkgName)
+    }
+
+    suspend fun diagnosticsFor(extension: Extension?, pkgName: String, installError: String?): String =
+        ExtensionDiagnostics.build(Injekt.get<Application>(), extension, pkgName, installError)
+    // YMR <--
+
     @Immutable
     data class State(
         val isLoading: Boolean = true,
@@ -256,8 +299,13 @@ class ExtensionsScreenModel(
         val installer: BasePreferences.ExtensionInstaller? = null,
         val searchQuery: String? = null,
         val nsfwOnly: Boolean = false,
+        // YMR -->
+        val failures: ImmutableList<ExtensionLoadFailure> = persistentListOf(),
+        // YMR <--
     ) {
-        val isEmpty = items.isEmpty()
+        // YMR -->
+        val isEmpty = items.isEmpty() && failures.isEmpty()
+        // YMR <--
     }
 }
 
@@ -275,5 +323,8 @@ object ExtensionUiModel {
         val extension: Extension,
         val installStep: InstallStep,
         val repoName: String? = null,
+        // YMR -->
+        val installError: String? = null,
+        // YMR <--
     )
 }

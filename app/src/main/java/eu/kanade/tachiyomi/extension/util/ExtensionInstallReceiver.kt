@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -54,7 +55,9 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
                     when (val result = getExtensionFromIntent(context, intent)) {
                         is LoadResult.Success -> listener.onExtensionInstalled(result.extension)
                         is LoadResult.Untrusted -> listener.onExtensionUntrusted(result.extension)
-                        else -> {}
+                        // YMR -->
+                        is LoadResult.Error -> result.failure?.let(listener::onExtensionFailed)
+                        // YMR <--
                     }
                 }
             }
@@ -63,7 +66,9 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
                     when (val result = getExtensionFromIntent(context, intent)) {
                         is LoadResult.Success -> listener.onExtensionUpdated(result.extension)
                         is LoadResult.Untrusted -> listener.onExtensionUntrusted(result.extension)
-                        else -> {}
+                        // YMR -->
+                        is LoadResult.Error -> result.failure?.let(listener::onExtensionFailed)
+                        // YMR <--
                     }
                 }
             }
@@ -97,7 +102,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
         val pkgName = getPackageNameFromIntent(intent)
         if (pkgName == null) {
             logcat(LogPriority.WARN) { "Package name not found" }
-            return LoadResult.Error
+            return LoadResult.Error()
         }
         return ExtensionLoader.loadExtensionFromPkgName(context, pkgName)
     }
@@ -116,6 +121,10 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
         fun onExtensionInstalled(extension: Extension.Installed)
         fun onExtensionUpdated(extension: Extension.Installed)
         fun onExtensionUntrusted(extension: Extension.Untrusted)
+
+        // YMR -->
+        fun onExtensionFailed(failure: ExtensionLoadFailure)
+        // YMR <--
         fun onPackageUninstalled(pkgName: String)
     }
 

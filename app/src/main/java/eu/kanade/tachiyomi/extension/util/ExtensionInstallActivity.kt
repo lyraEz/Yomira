@@ -50,7 +50,9 @@ class ExtensionInstallActivity : Activity() {
             return
         }
         if (requestCode == INSTALL_REQUEST_CODE) {
-            checkInstallationResult(resultCode)
+            // YMR -->
+            checkInstallationResult(resultCode, data)
+            // YMR <--
         }
         finish()
     }
@@ -63,7 +65,7 @@ class ExtensionInstallActivity : Activity() {
         }
     }
 
-    private fun checkInstallationResult(resultCode: Int) {
+    private fun checkInstallationResult(resultCode: Int, data: Intent? = null) {
         val downloadId = intent.extras!!.getLong(ExtensionInstaller.EXTRA_DOWNLOAD_ID)
         val extensionManager = Injekt.get<ExtensionManager>()
         val newStep = when (resultCode) {
@@ -71,6 +73,13 @@ class ExtensionInstallActivity : Activity() {
             RESULT_CANCELED -> InstallStep.Idle
             else -> InstallStep.Error
         }
+        // YMR -->
+        if (newStep == InstallStep.Error) {
+            @Suppress("DEPRECATION")
+            val legacyCode = data?.getIntExtra("android.intent.extra.INSTALL_RESULT", 0) ?: 0
+            extensionManager.reportInstallError(downloadId, "System installer result $resultCode (code $legacyCode)")
+        }
+        // YMR <--
         extensionManager.updateInstallStep(downloadId, newStep)
     }
 }

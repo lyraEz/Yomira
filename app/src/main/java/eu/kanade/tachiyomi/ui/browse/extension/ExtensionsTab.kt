@@ -27,6 +27,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.map
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
+import yomira.i18n.YMR
 
 @Composable
 fun extensionsTab(
@@ -38,8 +39,11 @@ fun extensionsTab(
     val updates by extensionsScreenModel.state.map { it.updates }.collectAsStateWithLifecycle(0)
     val actionFilter = stringResource(MR.strings.action_filter)
     val labelExtensionRepos = stringResource(MR.strings.label_extension_repos)
+    // YMR -->
+    val labelReload = stringResource(YMR.strings.ext_reload)
+    // YMR <--
 
-    return remember(updates, actionFilter, labelExtensionRepos) {
+    return remember(updates, actionFilter, labelExtensionRepos, labelReload) {
         TabContent(
             titleRes = MR.strings.label_extensions,
             badgeNumber = updates.takeIf { it > 0 },
@@ -67,6 +71,12 @@ fun extensionsTab(
                     title = labelExtensionRepos,
                     onClick = { navigator.push(ExtensionReposScreen()) },
                 ),
+                // YMR -->
+                AppBar.OverflowAction(
+                    title = labelReload,
+                    onClick = { extensionsScreenModel.reloadExtensions() },
+                ),
+                // YMR <--
             ),
             content = { contentPadding, _ ->
                 val state by extensionsScreenModel.state.collectAsStateWithLifecycle()
@@ -127,6 +137,10 @@ fun extensionsTab(
                     onUninstallExtension = onUninstallExtension,
                     onUpdateExtension = extensionsScreenModel::updateExtension,
                     onRefresh = extensionsScreenModel::findAvailableExtensions,
+                    // YMR -->
+                    onBuildDiagnostics = extensionsScreenModel::diagnosticsFor,
+                    onUninstallPackage = extensionsScreenModel::uninstallPackage,
+                    // YMR <--
                 )
 
                 privateExtensionToUninstall?.let { extension ->

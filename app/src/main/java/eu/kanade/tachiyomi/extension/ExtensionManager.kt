@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.extension.api.ExtensionApi
 import eu.kanade.tachiyomi.extension.api.ExtensionUpdateNotifier
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
 import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.util.system.cancelNotification
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -101,6 +103,30 @@ class ExtensionManager(
     private val untrustedExtensionsMapFlow = MutableStateFlow(emptyMap<String, Extension.Untrusted>())
     val untrustedExtensionsFlow = untrustedExtensionsMapFlow.mapExtensions(scope)
 
+    // YMR -->
+    private val failedExtensionsMapFlow = MutableStateFlow(emptyMap<String, ExtensionLoadFailure>())
+
+    /** Installed extension APKs that could not be loaded, with the reason. */
+    val failedExtensionsFlow: StateFlow<List<ExtensionLoadFailure>> = failedExtensionsMapFlow
+        .map { it.values.sortedBy { failure -> failure.name.lowercase() } }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    /** Last install error per item, keyed like the extension list items. */
+    val installErrors: StateFlow<Map<String, String>> get() = installer.installErrors
+
+    fun reportInstallError(downloadId: Long, detail: String) {
+        installer.reportInstallError(downloadId, detail)
+    }
+
+    fun failureFor(pkgName: String): ExtensionLoadFailure? = failedExtensionsMapFlow.value[pkgName]
+
+    /** Scans the installed packages again, e.g. after changing a setting that filters extensions. */
+    suspend fun reloadExtensions() {
+        initAnimeExtensions()
+        updatePendingUpdatesCount()
+    }
+    // YMR <--
+
     init {
         scope.launch {
             initAnimeExtensions()
@@ -161,6 +187,13 @@ class ExtensionManager(
         untrustedExtensionsMapFlow.value = animeextensions
             .filterIsInstance<LoadResult.Untrusted>()
             .associate { it.extension.pkgName to it.extension }
+
+        // YMR -->
+        failedExtensionsMapFlow.value = animeextensions
+            .filterIsInstance<LoadResult.Error>()
+            .mapNotNull { it.failure }
+            .associateBy { it.pkgName }
+        // YMR <--
 
         _isInitialized.value = true
     }
@@ -298,7 +331,52 @@ class ExtensionManager(
 
     fun updateInstallStep(downloadId: Long, step: InstallStep) {
         installer.updateInstallStep(downloadId, step)
+        // YMR -->
+        // The installer reporting success only means the APK is on the device. Read it back from
+        // PackageManager and load it, so the list shows whether it is trusted and has sources even
+        // when the package broadcast is late or never arrives (seen on some TV firmwares).
+        if (step == InstallStep.Installed) {
+            installer.packageForDownload(downloadId)?.let { pkgName ->
+                scope.launch { refreshInstalledPackage(pkgName) }
+            }
+        }
+        // YMR <--
     }
+
+    // YMR -->
+    private suspend fun refreshInstalledPackage(pkgName: String) {
+        repeat(REFRESH_ATTEMPTS) { attempt ->
+            when (val result = ExtensionLoader.loadExtensionFromPkgName(context, pkgName)) {
+                is LoadResult.Success -> {
+                    failedExtensionsMapFlow.value -= pkgName
+                    untrustedExtensionsMapFlow.value -= pkgName
+                    installedExtensionsMapFlow.value += result.extension.withUpdateCheck()
+                    updatePendingUpdatesCount()
+                    return
+                }
+                is LoadResult.Untrusted -> {
+                    failedExtensionsMapFlow.value -= pkgName
+                    installedExtensionsMapFlow.value -= pkgName
+                    untrustedExtensionsMapFlow.value += result.extension
+                    updatePendingUpdatesCount()
+                    return
+                }
+                is LoadResult.Error -> {
+                    val failure = result.failure
+                    if (failure != null) {
+                        installedExtensionsMapFlow.value -= pkgName
+                        untrustedExtensionsMapFlow.value -= pkgName
+                        failedExtensionsMapFlow.value += (pkgName to failure)
+                        return
+                    }
+                    // Not visible to PackageManager yet; give the system a moment.
+                    delay(REFRESH_DELAY_MS * (attempt + 1))
+                }
+            }
+        }
+        logcat(LogPriority.WARN) { "Installed package $pkgName could not be read back from PackageManager" }
+    }
+    // YMR <--
 
     /**
      * Uninstalls the anime extension that matches the given package name.
@@ -308,6 +386,13 @@ class ExtensionManager(
     fun uninstallExtension(extension: Extension) {
         installer.uninstallApk(extension.pkgName)
     }
+
+    // YMR -->
+    /** Uninstalls by package name, for APKs that never loaded into an [Extension]. */
+    fun uninstallPackage(pkgName: String) {
+        installer.uninstallApk(pkgName)
+    }
+    // YMR <--
 
     /**
      * Adds the given extension to the list of trusted extensions. It also loads in background the
@@ -322,9 +407,13 @@ class ExtensionManager(
 
         untrustedExtensionsMapFlow.value -= extension.pkgName
 
-        ExtensionLoader.loadExtensionFromPkgName(context, extension.pkgName)
-            .let { it as? LoadResult.Success }
-            ?.let { registerNewExtension(it.extension) }
+        // YMR --> a trusted extension can still fail to load; keep it visible with the reason
+        when (val result = ExtensionLoader.loadExtensionFromPkgName(context, extension.pkgName)) {
+            is LoadResult.Success -> registerNewExtension(result.extension)
+            is LoadResult.Error -> result.failure?.let { failedExtensionsMapFlow.value += (it.pkgName to it) }
+            is LoadResult.Untrusted -> untrustedExtensionsMapFlow.value += result.extension
+        }
+        // YMR <--
     }
 
     /**
@@ -355,6 +444,9 @@ class ExtensionManager(
     private fun unregisterAnimeExtension(pkgName: String) {
         installedExtensionsMapFlow.value -= pkgName
         untrustedExtensionsMapFlow.value -= pkgName
+        // YMR -->
+        failedExtensionsMapFlow.value -= pkgName
+        // YMR <--
     }
 
     /**
@@ -363,23 +455,42 @@ class ExtensionManager(
     private inner class InstallationListener : ExtensionInstallReceiver.Listener {
 
         override fun onExtensionInstalled(extension: Extension.Installed) {
+            // YMR -->
+            failedExtensionsMapFlow.value -= extension.pkgName
+            // YMR <--
             registerNewExtension(extension.withUpdateCheck())
             updatePendingUpdatesCount()
             installer.dismissInstallNotification(extension.pkgName)
         }
 
         override fun onExtensionUpdated(extension: Extension.Installed) {
+            // YMR -->
+            failedExtensionsMapFlow.value -= extension.pkgName
+            // YMR <--
             registerUpdatedExtension(extension.withUpdateCheck())
             updatePendingUpdatesCount()
             installer.dismissInstallNotification(extension.pkgName)
         }
 
         override fun onExtensionUntrusted(extension: Extension.Untrusted) {
+            // YMR -->
+            failedExtensionsMapFlow.value -= extension.pkgName
+            // YMR <--
             installedExtensionsMapFlow.value -= extension.pkgName
             untrustedExtensionsMapFlow.value += extension
             updatePendingUpdatesCount()
             installer.dismissInstallNotification(extension.pkgName)
         }
+
+        // YMR -->
+        override fun onExtensionFailed(failure: ExtensionLoadFailure) {
+            installedExtensionsMapFlow.value -= failure.pkgName
+            untrustedExtensionsMapFlow.value -= failure.pkgName
+            failedExtensionsMapFlow.value += (failure.pkgName to failure)
+            updatePendingUpdatesCount()
+            installer.dismissInstallNotification(failure.pkgName)
+        }
+        // YMR <--
 
         override fun onPackageUninstalled(pkgName: String) {
             ExtensionLoader.uninstallPrivateExtension(context, pkgName)
@@ -419,6 +530,13 @@ class ExtensionManager(
     }
 
     private operator fun <T : Extension> Map<String, T>.plus(extension: T) = plus(extension.pkgName to extension)
+
+    // YMR -->
+    private companion object {
+        const val REFRESH_ATTEMPTS = 5
+        const val REFRESH_DELAY_MS = 400L
+    }
+    // YMR <--
 
     private fun <T : Extension> StateFlow<Map<String, T>>.mapExtensions(
         scope: CoroutineScope,

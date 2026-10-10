@@ -23,6 +23,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import logcat.LogPriority
@@ -34,6 +35,7 @@ import tachiyomi.i18n.MR
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * The installer which installs, updates and uninstalls the extensions.
@@ -50,6 +52,30 @@ internal class ExtensionInstaller(
     private val extensionInstaller = Injekt.get<BasePreferences>().extensionInstaller()
     private val httpClient: OkHttpClient = Injekt.get<NetworkHelper>().client
 
+    // YMR -->
+    /** downloadId -> key the UI uses for the item (Extension.pkgName at download time). */
+    private val downloadKeys = ConcurrentHashMap<Long, String>()
+
+    /** downloadId -> package name read from the downloaded APK. */
+    private val downloadPackages = ConcurrentHashMap<Long, String>()
+
+    private val _installErrors = MutableStateFlow<Map<String, String>>(emptyMap())
+
+    /** Last install failure per item key, shown in the extension list and its diagnostic. */
+    val installErrors = _installErrors.asStateFlow()
+
+    fun packageForDownload(downloadId: Long): String? = downloadPackages[downloadId]
+
+    fun reportInstallError(downloadId: Long, detail: String) {
+        val key = downloadKeys[downloadId] ?: return
+        _installErrors.update { it + (key to detail) }
+    }
+
+    fun clearInstallError(key: String) {
+        _installErrors.update { it - key }
+    }
+    // YMR <--
+
     /**
      * Adds the given extension to the downloads queue and returns an observable containing its
      * step in the installation process.
@@ -65,6 +91,10 @@ internal class ExtensionInstaller(
         
         val step = MutableStateFlow(InstallStep.Pending)
         activeSteps[downloadId] = step
+        // YMR -->
+        downloadKeys[downloadId] = extension.pkgName
+        clearInstallError(extension.pkgName)
+        // YMR <--
 
         val job = scope.launch {
             val tmpFile = File(context.cacheDir, "extension_${extension.pkgName}.apk")
@@ -73,7 +103,9 @@ internal class ExtensionInstaller(
                 val request = Request.Builder().url(url).build()
                 httpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        throw Exception("Failed to download extension")
+                        // YMR -->
+                        throw ExtensionInstallException("HTTP ${response.code} while downloading $url")
+                        // YMR <--
                     }
                     response.body.byteStream().use { input ->
                         tmpFile.outputStream().use { output ->
@@ -82,6 +114,14 @@ internal class ExtensionInstaller(
                     }
                 }
 
+                // YMR --> catch what Android would reject before handing the APK to it
+                val apkInfo = ExtensionApkInspector.inspect(context, tmpFile)
+                downloadPackages[downloadId] = apkInfo.packageName
+                ExtensionApkInspector.checkInstallable(context, apkInfo)?.let { problem ->
+                    throw ExtensionInstallException(problem)
+                }
+                // YMR <--
+
                 step.value = InstallStep.Installing
                 installApk(downloadId, tmpFile)
             } catch (e: Exception) {
@@ -89,6 +129,9 @@ internal class ExtensionInstaller(
                     // Canceled
                 } else {
                     logcat(LogPriority.ERROR, e)
+                    // YMR -->
+                    reportInstallError(downloadId, e.message ?: e.javaClass.simpleName)
+                    // YMR <--
                     step.value = InstallStep.Error
                 }
             }
@@ -112,6 +155,9 @@ internal class ExtensionInstaller(
     fun installApk(downloadId: Long, tempFile: File) {
         when (val installer = extensionInstaller.get()) {
             BasePreferences.ExtensionInstaller.LEGACY -> {
+                // YMR -->
+                updateInstallStep(downloadId, InstallStep.AwaitingConfirmation)
+                // YMR <--
                 val intent = Intent(context, ExtensionInstallActivity::class.java)
                     .setDataAndType(tempFile.getUriCompat(context), APK_MIME)
                     .putExtra(EXTRA_DOWNLOAD_ID, downloadId)
@@ -125,6 +171,12 @@ internal class ExtensionInstaller(
                     if (ExtensionLoader.installPrivateExtensionFile(context, tempFile)) {
                         extensionManager.updateInstallStep(downloadId, InstallStep.Installed)
                     } else {
+                        // YMR -->
+                        reportInstallError(
+                            downloadId,
+                            "The private installer rejected the APK (downgrade, unsigned or signature mismatch)",
+                        )
+                        // YMR <--
                         extensionManager.updateInstallStep(downloadId, InstallStep.Error)
                     }
                 } catch (e: Exception) {
@@ -232,3 +284,7 @@ internal class ExtensionInstaller(
         const val EXTRA_DOWNLOAD_ID = "ExtensionInstaller.extra.DOWNLOAD_ID"
     }
 }
+
+// YMR -->
+class ExtensionInstallException(message: String) : Exception(message)
+// YMR <--

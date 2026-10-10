@@ -79,12 +79,31 @@ abstract class Installer(private val service: Service) {
      * @see waitingInstall
      */
     fun continueQueue(resultStep: InstallStep) {
+        // YMR -->
+        continueQueue(resultStep, null)
+    }
+
+    /** Like [continueQueue], recording [errorDetail] for the item when the install failed. */
+    fun continueQueue(resultStep: InstallStep, errorDetail: String?) {
+        // YMR <--
         val completedEntry = waitingInstall.getAndSet(null)
         if (completedEntry != null) {
+            // YMR -->
+            if (errorDetail != null) {
+                extensionManager.reportInstallError(completedEntry.downloadId, errorDetail)
+            }
+            // YMR <--
             extensionManager.updateInstallStep(completedEntry.downloadId, resultStep)
             checkQueue()
         }
     }
+
+    // YMR -->
+    /** Marks the entry being installed as waiting for the system confirmation screen. */
+    protected fun markAwaitingConfirmation() {
+        getActiveEntry()?.let { extensionManager.updateInstallStep(it.downloadId, InstallStep.AwaitingConfirmation) }
+    }
+    // YMR <--
 
     /**
      * Checks the queue. The provided service will be stopped if the queue is empty.

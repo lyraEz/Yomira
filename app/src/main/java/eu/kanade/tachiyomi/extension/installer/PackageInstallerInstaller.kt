@@ -10,6 +10,7 @@ import android.content.pm.PackageInstaller
 import android.os.Build
 import androidx.core.content.ContextCompat
 import eu.kanade.tachiyomi.extension.model.InstallStep
+import eu.kanade.tachiyomi.extension.util.ExtensionApkInspector
 import eu.kanade.tachiyomi.util.lang.use
 import eu.kanade.tachiyomi.util.system.getParcelableExtraCompat
 import eu.kanade.tachiyomi.util.system.getUriSize
@@ -22,14 +23,22 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
 
     private val packageActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
+            // YMR -->
+            val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
+            val statusMessage = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
+            logcat { "PackageInstaller status=$status message=$statusMessage" }
+            // YMR <--
+            when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val userAction = intent.getParcelableExtraCompat<Intent>(Intent.EXTRA_INTENT)
                     if (userAction == null) {
                         logcat(LogPriority.ERROR) { "Fatal error for $intent" }
-                        continueQueue(InstallStep.Error)
+                        continueQueue(InstallStep.Error, statusMessage)
                         return
                     }
+                    // YMR -->
+                    markAwaitingConfirmation()
+                    // YMR <--
                     userAction.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     service.startActivity(userAction)
                 }
@@ -37,7 +46,12 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
                     continueQueue(InstallStep.Idle)
                 }
                 PackageInstaller.STATUS_SUCCESS -> continueQueue(InstallStep.Installed)
-                else -> continueQueue(InstallStep.Error)
+                // YMR -->
+                else -> continueQueue(
+                    InstallStep.Error,
+                    ExtensionApkInspector.describeInstallerStatus(service, status, statusMessage),
+                )
+                // YMR <--
             }
         }
     }
@@ -85,7 +99,9 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
             activeSession?.let { (_, sessionId) ->
                 packageInstaller.abandonSession(sessionId)
             }
-            continueQueue(InstallStep.Error)
+            // YMR -->
+            continueQueue(InstallStep.Error, e.message ?: e.javaClass.simpleName)
+            // YMR <--
         }
     }
 

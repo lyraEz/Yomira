@@ -57,7 +57,7 @@
     <string name="repo_from_phone_description">Scan the code with a phone on the same Wi-Fi network and send the repository address. It will be filled in here.</string>
     <string name="repo_suggestions">Suggestions</string>
     <string name="repo_suggestions_note">Suggested repositories are maintained by third parties, not by Yomira.</string>
-    <string name="repo_added">Repository %1$s added with %2$d extensions</string>
+    <string name="repo_added">Repository %1$s added (extensions: %2$d)</string>
     <string name="repo_error_title">Could not add the repository</string>
     <string name="repo_error_unreachable">The repository could not be reached. Check the address and the network connection.</string>
     <string name="repo_error_not_repository">The address answered, but it is not a repository Yomira can read: it needs repo.json and index.min.json in the same folder.</string>
@@ -109,4 +109,7 @@
     <string name="backup_send_to_phone_description">Scan the code with a phone on the same Wi-Fi network to download the backup.</string>
     <string name="backup_adb_hint">With a computer and ADB debugging enabled:</string>
     <string name="backup_keep_note">The file lives in the app folder and is deleted if %1$s is uninstalled. Keep a copy elsewhere.</string>
+
+    <string name="settings_screen_unavailable">This device does not have that settings screen.</string>
+    <string name="no_app_for_link">No app on this device can open %1$s</string>
 </resources>

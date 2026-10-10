@@ -35,9 +35,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import eu.kanade.presentation.util.rememberRequestPackageInstallsPermissionState
 import eu.kanade.tachiyomi.util.system.launchRequestPackageInstallsPermission
+import eu.kanade.tachiyomi.util.system.startFirstAvailableActivity
+import eu.kanade.tachiyomi.util.system.toast
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import yomira.i18n.YMR
 
 internal class PermissionStep : OnboardingStep {
 
@@ -106,7 +109,14 @@ internal class PermissionStep : OnboardingStep {
                     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                         data = Uri.parse("package:${context.packageName}")
                     }
-                    context.startActivity(intent)
+                    // YMR --> Fire OS may not offer this screen; never crash the first-run setup
+                    val opened = context.startFirstAvailableActivity(
+                        intent,
+                        Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")),
+                    )
+                    if (!opened) context.toast(YMR.strings.settings_screen_unavailable)
+                    // YMR <--
                 },
             )
         }

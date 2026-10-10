@@ -57,9 +57,32 @@ fun Context.isPackageInstalled(packageName: String): Boolean {
 }
 
 fun Context.launchRequestPackageInstallsPermission() {
-    Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-        data = "package:$packageName".toUri()
-        startActivity(this)
-    }
+    // YMR --> some TV firmwares (Fire OS included) have no per-app "install unknown apps" screen;
+    // fall back to the security and general settings instead of crashing.
+    startFirstAvailableActivity(
+        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData("package:$packageName".toUri()),
+        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES),
+        Intent(Settings.ACTION_SECURITY_SETTINGS),
+        Intent(Settings.ACTION_SETTINGS),
+    )
+    // YMR <--
 }
+
+// YMR -->
+/** Starts the first intent the system can handle; returns false when none can be opened. */
+fun Context.startFirstAvailableActivity(vararg intents: Intent): Boolean {
+    for (intent in intents) {
+        try {
+            if (this !is android.app.Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            return true
+        } catch (_: android.content.ActivityNotFoundException) {
+            continue
+        } catch (_: SecurityException) {
+            continue
+        }
+    }
+    return false
+}
+// YMR <--
 // ANZ <--

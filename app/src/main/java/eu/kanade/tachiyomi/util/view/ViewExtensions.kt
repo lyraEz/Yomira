@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import eu.kanade.presentation.theme.TachiyomiTheme
 import eu.kanade.tachiyomi.R
@@ -33,9 +34,13 @@ inline fun ComponentActivity.setComposeContent(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
             ) {
-                // YMR --> TV text scale, overscan margin and focus indication
-                yomira.tv.TvContent {
-                    content()
+                // YMR --> TV text scale, overscan margin and focus indication; links never crash
+                CompositionLocalProvider(
+                    LocalUriHandler provides yomira.tv.SafeUriHandler(this@setComposeContent),
+                ) {
+                    yomira.tv.TvContent {
+                        content()
+                    }
                 }
                 // YMR <--
             }

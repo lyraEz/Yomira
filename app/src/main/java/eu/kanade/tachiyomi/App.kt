@@ -138,6 +138,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         // per-item work.
         // YMR --> honours the TV / phone override from Settings → Appearance
         TvDevice.isTv = yomira.tv.TvSettings.isTv(this)
+        yomira.tv.DeviceProfile.init(this, TvDevice.isTv)
         // YMR <--
 
         // Mirror the cover-related preferences into snapshot state once, instead of every

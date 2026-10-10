@@ -57,6 +57,7 @@ import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.PanoramaMode
 import eu.kanade.presentation.components.PanoramaModeToggle
 import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
+import yomira.tv.focus.tvFocusRestore
 
 @Composable
 fun UpdateScreen(
@@ -166,7 +167,9 @@ fun UpdateScreen(
                         enabled = !state.selectionMode,
                     ) {
                         FastScrollLazyColumn(
-                            modifier = Modifier.fillMaxSize(),
+                            // YMR -->
+                            modifier = Modifier.fillMaxSize().tvFocusRestore(),
+                            // YMR <--
                         ) {
                             updatesLastUpdatedItem(lastUpdated)
 

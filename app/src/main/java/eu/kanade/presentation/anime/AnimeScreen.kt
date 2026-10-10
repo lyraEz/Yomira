@@ -151,6 +151,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.time.Instant
 import java.util.concurrent.TimeUnit
+import yomira.tv.focus.tvFocusRestore
 
 @Composable
 fun AnimeScreen(
@@ -1222,7 +1223,9 @@ fun AnimeScreenLargeImpl(
                                     endContentPadding = contentPadding.calculateEndPadding(layoutDirection),
                                 ) {
                                     LazyColumn(
-                                        modifier = Modifier.fillMaxHeight(),
+                                        // YMR --> on TV focus starts (and returns) on the episodes
+                                        modifier = Modifier.fillMaxHeight().tvFocusRestore(),
+                                        // YMR <--
                                         state = episodeListState,
                                         contentPadding = PaddingValues(
                                             top = contentPadding.calculateTopPadding(),

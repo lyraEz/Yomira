@@ -48,6 +48,7 @@ import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.time.LocalDate
+import yomira.tv.focus.tvFocusRestore
 
 @Composable
 fun HistoryScreen(
@@ -145,6 +146,9 @@ private fun HistoryScreenContent(
 
     FastScrollLazyColumn(
         contentPadding = contentPadding,
+        // YMR -->
+        modifier = Modifier.tvFocusRestore(),
+        // YMR <--
     ) {
         if (useContainer) {
             items(

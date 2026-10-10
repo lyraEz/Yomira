@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import yomira.tv.focus.tvFocusRestore
 
 @Composable
 internal fun LibraryList(
@@ -57,7 +58,9 @@ internal fun LibraryList(
     val selectedIds = remember(selection) { selection.map { it.id }.toSet() }
 
     FastScrollLazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        // YMR -->
+        modifier = Modifier.fillMaxSize().tvFocusRestore(),
+        // YMR <--
         contentPadding = contentPadding + PaddingValues(vertical = 8.dp),
     ) {
         item {

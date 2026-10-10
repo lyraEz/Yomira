@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.anime.model.Anime
 import tachiyomi.domain.anime.model.asAnimeCover
 import tachiyomi.presentation.core.util.plus
+import androidx.compose.ui.focus.focusRestorer
 
 @Composable
 fun BrowseSourceComfortableGrid(
@@ -43,6 +44,9 @@ fun BrowseSourceComfortableGrid(
     val selectionIds = remember(selection) { selection.map { it.id }.toSet() }
     LazyVerticalGrid(
         columns = columns,
+        // YMR --> back from an entry, the remote focus returns to it
+        modifier = Modifier.focusRestorer(),
+        // YMR <--
         contentPadding = contentPadding + PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(CommonAnimeItemDefaults.GridVerticalSpacer),
         horizontalArrangement = Arrangement.spacedBy(CommonAnimeItemDefaults.GridHorizontalSpacer),

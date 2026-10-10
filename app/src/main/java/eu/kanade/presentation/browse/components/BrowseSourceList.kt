@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.anime.model.Anime
 import tachiyomi.domain.anime.model.AnimeCover
 import tachiyomi.presentation.core.util.plus
+import androidx.compose.ui.focus.focusRestorer
 
 @Composable
 fun BrowseSourceList(
@@ -41,7 +42,9 @@ fun BrowseSourceList(
     val selectionIds = remember(selection) { selection.map { it.id }.toSet() }
     LazyColumn(
         contentPadding = contentPadding + PaddingValues(vertical = 8.dp),
-        modifier = Modifier.fillMaxSize(),
+        // YMR -->
+        modifier = Modifier.fillMaxSize().focusRestorer(),
+        // YMR <--
     ) {
         if (animeList.loadState.prepend is LoadState.Loading) {
             item(key = "browse-list-load-prepend") {

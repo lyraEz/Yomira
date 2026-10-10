@@ -331,7 +331,14 @@ class PlayerActivity : BaseActivity() {
             }
             logcat(LogPriority.ERROR, throwable) { "Uncaught exception on ${thread.name} in player" }
             runOnUiThread {
-                viewModel.showPlaybackError(PlaybackError.Reason.STREAM_FAILED, throwable)
+                // A failure in a side task (thumbnails, skip times, cast) must not stop a video that
+                // is playing; only replace the screen when nothing is being shown.
+                val playing = viewModel.currentVideo.value != null && !viewModel.isLoadingEpisode.value
+                if (playing) {
+                    toast(throwable.message ?: throwable.javaClass.simpleName)
+                } else {
+                    viewModel.showPlaybackError(PlaybackError.Reason.STREAM_FAILED, throwable)
+                }
             }
         }
         // YMR <--

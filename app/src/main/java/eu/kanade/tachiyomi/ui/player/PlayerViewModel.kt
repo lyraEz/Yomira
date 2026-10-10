@@ -1681,6 +1681,8 @@ class PlayerViewModel @JvmOverloads constructor(
         updateIsLoadingEpisode(false)
         updateIsLoadingHosters(false)
         setIsStopped(true)
+        // The overlay must be the only thing the remote can focus.
+        hideControls()
         _playbackError.update { _ ->
             PlaybackError(reason = reason, episodeId = episode?.id, episodeName = episode?.name, detail = detail)
         }

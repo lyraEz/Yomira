@@ -401,6 +401,8 @@ dependencies {
     implementation(libs.palette.ktx)
     implementation(libs.materialKolor)
     implementation(libs.haze)
+    implementation(libs.backdrop)
+    implementation(libs.backdrop.shapes)
     implementation(compose.colorpicker)
     implementation(projects.flagkit)
     // KMK <-

@@ -71,6 +71,8 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version = "2.4.3" 
 palette-ktx = "androidx.palette:palette-ktx:1.0.0"
 materialKolor = "com.materialkolor:material-kolor:2.1.1"
 haze = "dev.chrisbanes.haze:haze:1.7.2"
+backdrop = "io.github.kyant0:backdrop:1.0.6"
+backdrop-shapes = "io.github.kyant0:shapes:1.2.0"
 
 swipe = "me.saket.swipe:swipe:1.3.0"
 

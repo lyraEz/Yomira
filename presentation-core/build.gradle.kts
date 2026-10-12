@@ -51,4 +51,6 @@ dependencies {
     implementation(androidx.paging.compose)
     implementation(kotlinx.immutables)
     implementation(libs.haze)
+    implementation(libs.backdrop)
+    implementation(libs.backdrop.shapes)
 }

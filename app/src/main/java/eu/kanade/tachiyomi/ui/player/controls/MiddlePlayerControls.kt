@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.player.controls
 
-import eu.kanade.tachiyomi.ui.player.controls.components.playerGlassChip
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -128,24 +127,26 @@ fun MiddlePlayerControls(
                     enter = enter,
                     exit = exit,
                 ) {
-                    Image(
-                        painter = rememberAnimatedVectorPainter(icon, !paused),
+                    // YMR --> big play/pause glyph made of liquid glass, no orb around it
+                    Box(
                         modifier = Modifier
                             .size(big)
-                            // YMR -->
                             .then(playPauseFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
                             .tvCircleFocusHighlight(focusedScale = 1.1f, focusedBackgroundAlpha = 0.35f)
-                            // big live glass orb
-                            .playerGlassChip(interaction, CircleShape)
-                            // YMR <--
                             .clickable(
                                 interaction,
-                                ripple(),
+                                indication = null,
                                 onClick = onPlayPauseClick,
-                            )
-                            .padding(MaterialTheme.padding.large),
-                        contentDescription = null,
-                    )
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        yomira.player.GlassIcon(
+                            painter = rememberAnimatedVectorPainter(icon, !paused),
+                            size = big - MaterialTheme.padding.large * 2,
+                            interactionSource = interaction,
+                        )
+                    }
+                    // YMR <--
                 }
             }
         }

@@ -107,24 +107,19 @@ fun SeekbarWithTimers(
             },
             modifier = Modifier.width(videoTimerWidth),
         )
-        Seeker(
+        // YMR --> liquid glass slider (iOS style) instead of the Material seeker
+        yomira.player.GlassSeekBar(
             value = position.coerceIn(0f, duration),
-            range = 0f..duration,
+            range = 0f..duration.coerceAtLeast(0.001f),
             onValueChange = onValueChange,
             onValueChangeFinished = onValueChangeFinished,
             readAheadValue = readAheadValue,
-            segments = remember(chapters, duration) {
+            chapterStarts = remember(chapters, duration) {
                 chapters
                     .filter { it.start in 0f..duration }
-                    .let {
-                        // add an extra segment at 0 if it doesn't exist.
-                        if (it.isNotEmpty() && it[0].start != 0f) {
-                            listOf(Segment("", 0f)) + it
-                        } else {
-                            it
-                        }
-                    }
+                    .map { it.start }
             },
+            // YMR <--
             // YMR -->
             modifier = Modifier
                 .weight(1f)
@@ -158,12 +153,6 @@ fun SeekbarWithTimers(
                     },
                 ),
             // YMR <--
-            colors = SeekerDefaults.seekerColors(
-                progressColor = MaterialTheme.colorScheme.primary,
-                thumbColor = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.background,
-                readAheadColor = MaterialTheme.colorScheme.inversePrimary,
-            ),
         )
         VideoTimer(
             value = if (timersInverted.second) position - duration else duration,

@@ -45,6 +45,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import eu.kanade.tachiyomi.ui.player.controls.LocalPlayerButtonsClickEvent
 import tachiyomi.presentation.core.components.material.Button
 import tachiyomi.presentation.core.components.material.DISABLED_ALPHA
@@ -87,24 +89,22 @@ fun ControlsButton(
                 interactionSource = interactionSource,
                 indication = null,
             )
-            // YMR --> floating glass chip over the video
-            .playerGlassChip(interactionSource, CircleShape)
-            // YMR <--
-            .indication(
-                interactionSource,
-                ripple(),
-            )
+            // YMR --> no bubble: the glyph itself is liquid glass
+            .playerButtonSpacing()
             .padding(
                 vertical = MaterialTheme.padding.medium * scale,
                 horizontal = horizontalSpacing * scale,
-            ),
+            )
+            .semantics { if (title != null) contentDescription = title },
     ) {
-        Icon(
-            icon,
-            title,
-            tint = iconColor,
-            modifier = Modifier.size(iconSize * scale),
+        yomira.player.GlassIcon(
+            icon = icon,
+            size = iconSize * scale,
+            enabled = enabled,
+            interactionSource = interactionSource,
+            color = color,
         )
+        // YMR <--
     }
 }
 
@@ -138,19 +138,21 @@ fun ControlsButton(
                 indication = null,
 
             )
-            // YMR -->
-            .playerGlassChip(interactionSource, CircleShape)
+            // YMR --> plain text with a soft shadow, no bubble
+            .playerButtonSpacing()
             // YMR <--
-            .indication(
-                interactionSource,
-                ripple(),
-            )
             .padding(MaterialTheme.padding.medium * scale),
     ) {
         Text(
             text,
             color = color,
-            style = MaterialTheme.typography.bodyMedium.let { it.copy(fontSize = it.fontSize * scale) },
+            style = MaterialTheme.typography.bodyMedium.let {
+                it.copy(
+                    fontSize = it.fontSize * scale,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    shadow = androidx.compose.ui.graphics.Shadow(Color.Black.copy(alpha = 0.55f), blurRadius = 8f),
+                )
+            },
         )
     }
 }
@@ -201,53 +203,10 @@ private fun PreviewControlsButton() {
 }
 
 // YMR -->
-/**
- * Dark liquid glass chip for player controls. Over the video it blurs and bends the frame copy
- * recorded by yomira.player.VideoGlassBackdrop; where no live blur is available it falls back to a
- * translucent tinted surface with a light rim and a springy press scale.
- */
+/** Gap kept around each player button, from the button look settings. */
 @Composable
-fun Modifier.playerGlassChip(
-    interactionSource: androidx.compose.foundation.interaction.InteractionSource,
-    shape: androidx.compose.ui.graphics.Shape,
-): Modifier {
-    val backdrop = yomira.glass.LocalGlassBackdrop.current
-    val base = yomira.glass.LocalGlassStyle.current
-    // Space between neighbouring chips so each reads as its own floating control.
+fun Modifier.playerButtonSpacing(): Modifier {
     val gap = yomira.player.LocalPlayerButtonLook.current.spacing
-    val spaced = this.padding(horizontal = gap, vertical = gap * 2 / 3)
-    if (backdrop != null && base.liveBlur) {
-        // Live glass over the copy of the video recorded by yomira.player.VideoGlassBackdrop.
-        val style = remember(base) {
-            base.copy(
-                dark = true,
-                shadow = false,
-                tintAlpha = 0.18f,
-                blurRadius = maxOf(base.blurRadius, 14.dp),
-                depthEffect = false,
-            )
-        }
-        return spaced.glass(
-            shape = shape,
-            backdrop = backdrop,
-            style = style,
-            interaction = yomira.glass.rememberGlassInteraction(),
-            small = true,
-        )
-    }
-    val pressed by interactionSource.collectIsPressedAsState()
-    val scale by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (pressed) 1.1f else 1f,
-        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.5f, stiffness = 300f),
-        label = "glassPress",
-    )
-    return spaced
-        .graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-        }
-        .clip(shape)
-        .background(Color.Black.copy(alpha = 0.38f))
-        .border(0.5.dp, Color.White.copy(alpha = 0.2f), shape)
+    return this.padding(horizontal = gap, vertical = gap * 2 / 3)
 }
 // YMR <--

@@ -60,7 +60,7 @@ import yomira.glass.LocalFloatingBarInset
 import yomira.glass.LocalGlassBackdrop
 import yomira.glass.LocalGlassStyle
 import yomira.glass.LocalGlassTopBar
-import yomira.glass.glassBar
+import yomira.glass.glassBarFaded
 import yomira.glass.glassSource
 import yomira.glass.rememberGlassBackdrop
 import dev.chrisbanes.haze.HazeDefaults
@@ -152,7 +152,6 @@ fun Scaffold(
         null
     }
     val glassBarTint = (glassStyle.tintAlpha + 0.32f).coerceAtMost(0.88f)
-    val glassBarEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
     val floatingBarInset = LocalFloatingBarInset.current
     // YMR <--
 
@@ -182,14 +181,14 @@ fun Scaffold(
                             ),
                         )
                     // YMR -->
-                    } else if (glassBackdrop != null && glassTopBarSurface) {
-                        Modifier.glassBar(glassBackdrop, glassStyle, glassBarTint, glassBarEdge)
-                    // YMR <--
                     } else {
                         Modifier
                     }
                 ) {
-                    // YMR -->
+                    // YMR --> glass that fades out below the bar instead of ending in a line
+                    if (glassBackdrop != null && glassTopBarSurface) {
+                        Box(Modifier.matchParentSize().glassBarFaded(glassBackdrop, glassStyle, glassBarTint))
+                    }
                     CompositionLocalProvider(
                         LocalGlassTopBar provides (glassBackdrop != null && glassTopBarSurface),
                         LocalGlassBackdrop provides glassBackdrop.takeUnless { glassTopBarSurface },

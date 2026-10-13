@@ -35,7 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.anime.DownloadAction
 import yomira.glass.glass
-import yomira.glass.glassBar
+import yomira.glass.glassBarFaded
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DownloadDropdownMenu
@@ -90,14 +90,13 @@ fun AnimeToolbar(
     val backdrop = yomira.glass.LocalGlassBackdrop.current
     val glassStyle = yomira.glass.LocalGlassStyle.current
     val barTint = (glassStyle.tintAlpha + 0.32f).coerceAtMost(0.88f)
-    val barEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
     androidx.compose.foundation.layout.Box(modifier = modifier) {
         if (backdrop != null) {
             androidx.compose.foundation.layout.Box(
                 Modifier
                     .matchParentSize()
                     .graphicsLayer { alpha = backgroundAlphaProvider() }
-                    .glassBar(backdrop, glassStyle, barTint, barEdge),
+                    .glassBarFaded(backdrop, glassStyle, barTint),
             )
         }
     Column(

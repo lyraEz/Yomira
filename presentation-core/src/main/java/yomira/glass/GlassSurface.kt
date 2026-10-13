@@ -18,6 +18,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -288,6 +292,52 @@ fun Modifier.glassBar(backdrop: Backdrop, style: GlassStyle, tintAlpha: Float, e
             drawRect(edgeColor, topLeft = Offset(0f, size.height - 1f), size = size.copy(height = 1f))
         },
     )
+}
+
+/**
+ * [glassBar] whose blur and tint keep going [fade] below the bar and fade out there, so the glass
+ * melts into the content instead of ending in a hard line (iOS scroll-edge effect). Put it on a
+ * child that matches the bar's size: the extra height is drawn below without changing the layout.
+ */
+fun Modifier.glassBarFaded(
+    backdrop: Backdrop,
+    style: GlassStyle,
+    tintAlpha: Float,
+    fade: Dp = 24.dp,
+): Modifier {
+    val base = if (style.dark) Color.Black else Color.White
+    return this
+        .layout { measurable, constraints ->
+            val extra = fade.roundToPx()
+            val width = constraints.maxWidth
+            val height = constraints.maxHeight
+            val placeable = measurable.measure(Constraints.fixed(width, height + extra))
+            layout(width, height) { placeable.place(0, 0) }
+        }
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val solid = ((size.height - fade.toPx()) / size.height).coerceIn(0f, 1f)
+            drawRect(
+                brush = Brush.verticalGradient(
+                    0f to Color.Black,
+                    solid to Color.Black,
+                    1f to Color.Transparent,
+                ),
+                blendMode = BlendMode.DstIn,
+            )
+        }
+        .drawPlainBackdrop(
+            backdrop = backdrop,
+            shape = { RectangleShape },
+            effects = {
+                colorControls(brightness = style.brightness, contrast = 1f, saturation = style.vibrance)
+                blur((style.blurRadius * 1.5f).coerceAtMost(32.dp).toPx())
+            },
+            onDrawSurface = {
+                drawRect(base.copy(alpha = tintAlpha))
+            },
+        )
 }
 
 /** Blur radius scaled for wide surfaces such as sheets. */

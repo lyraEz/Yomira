@@ -35,6 +35,17 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Detalhes | Botões de vidro sobre a capa, barra que vira vidro, ações em blocos, episódios em cartões | `AnimeToolbar.kt`, `AnimeInfoHeader.kt`, `AnimeEpisodeListItem.kt` |
 
 ## Falta fazer (ordem sugerida)
+0. Pedidos de 13/10 (prioridade):
+   a. Player: tirar as bolhas de vidro dos botões e aplicar o vidro direto no ícone (ícone mascarando o
+      backdrop do vídeo: camada offscreen + blur/brilho + máscara DstIn com o painter do ícone; sem blur:
+      ícone branco com sombra suave). Arquivo: `ControlsButton.kt` (`playerGlassChip`), `MiddlePlayerControls.kt`.
+   b. Barra de progresso de vidro estilo iOS 27: trilho em cápsula de vidro, polegar que vira lente ao
+      arrastar (CombinedBackdrop vídeo + trilho), molas só na fase de desenho. Arquivo: `SeekBar.kt`.
+   c. Microtravamentos nas abas (Biblioteca → Mais): ver relatório da análise; suspeitos: `-dontoptimize`
+      no R8, gravação dupla (backdrop da Home + do Scaffold), blur grande na barra superior, falta de
+      baseline profile/profileinstaller.
+   d. Blur com corte reto (detalhes do anime e barras de vidro): esmaecer com máscara em gradiente
+      (barra mais alta que o conteúdo, sem a linha de 1 px) e capa desfocada com fade.
 1. Detalhes do anime (restante): capa de fundo mais desfocada e cabeçalho "N episódios" de vidro.
 2. Folhas e diálogos: desfoque de janela (Android 12+, `blurBehindRadius`) nos `Dialog`/`AdaptiveSheet`,
    e versões dentro da janela quando precisar refratar a página.

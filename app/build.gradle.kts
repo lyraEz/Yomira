@@ -75,8 +75,8 @@ android {
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
         // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
-        versionCode = 10100
-        versionName = "1.1.0"
+        versionCode = 10101
+        versionName = "1.1.1"
 
         manifestPlaceholders["author"] = "@lyraEz"
         // YMR <--

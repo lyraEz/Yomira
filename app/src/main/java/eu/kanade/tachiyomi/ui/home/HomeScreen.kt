@@ -89,6 +89,20 @@ import eu.kanade.domain.ui.model.NavAction
 import eu.kanade.presentation.util.Screen
 import eu.kanade.presentation.util.Tab
 import eu.kanade.presentation.util.isTabletUi
+import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
+import androidx.compose.animation.fadeOut
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import tachiyomi.presentation.core.util.TvDevice
+import yomira.glass.FloatingGlassTabBar
+import yomira.glass.FloatingTabBarInset
+import yomira.glass.GlassOrbButton
+import yomira.glass.GlassTabItem
+import yomira.glass.LocalFloatingBarInset
+import yomira.glass.LocalGlassStyle
+import yomira.glass.glassSource
+import yomira.glass.rememberGlassBackdrop
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.connections.discord.DiscordRPCService
 import eu.kanade.tachiyomi.data.connections.discord.DiscordScreen
@@ -173,6 +187,11 @@ object HomeScreen : Screen() {
         val behaviorMap by uiPreferences.bottomNavBehaviors().collectAsStatePref()
         val executor = remember(context, scope, navigator) { NavActionExecutor(context, scope, navigator) }
 
+        // YMR --> phones get the floating liquid glass tab bar; tablets and TVs keep rail/bar
+        val floatingBar = !isTabletUi() && !TvDevice.isTv
+        val glassStyle = LocalGlassStyle.current
+        // YMR <--
+
         TabNavigator(
             tab = defaultTab,
             key = TAB_NAVIGATOR_KEY,
@@ -189,6 +208,9 @@ object HomeScreen : Screen() {
                 Scaffold(
                     modifier = Modifier.nestedScroll(nestedScrollConnection),
                     hazeEnabled = hazeEnabled,
+                    // YMR -->
+                    glassTopBar = false,
+                    // YMR <--
                     startBar = {
                         if (isTabletUi()) {
                             NavigationRail(
@@ -203,7 +225,9 @@ object HomeScreen : Screen() {
                         }
                     },
                     bottomBar = {
-                        if (!isTabletUi()) {
+                        // YMR -->
+                        if (!isTabletUi() && !floatingBar) {
+                        // YMR <--
                             LaunchedEffect(Unit) {
                                 showBottomNavEvent.receiveAsFlow().collectLatest { bottomNavVisible = it }
                             }
@@ -227,12 +251,30 @@ object HomeScreen : Screen() {
                     },
                     contentWindowInsets = WindowInsets(0),
                 ) { contentPadding ->
+                    // YMR -->
+                    val homeBackdrop = if (floatingBar && glassStyle.liveBlur) {
+                        rememberGlassBackdrop(MaterialTheme.colorScheme.background)
+                    } else {
+                        null
+                    }
+                    if (floatingBar) {
+                        LaunchedEffect(Unit) {
+                            showBottomNavEvent.receiveAsFlow().collectLatest { bottomNavVisible = it }
+                        }
+                    }
+                    // YMR <--
                     Box(
                         modifier = Modifier
                             .padding(contentPadding)
                             .consumeWindowInsets(contentPadding)
                             .fillMaxSize(),
                     ) {
+                      // YMR -->
+                      Box(Modifier.fillMaxSize().glassSource(homeBackdrop)) {
+                      CompositionLocalProvider(
+                          LocalFloatingBarInset provides if (floatingBar && isCurrentTabVisible) FloatingTabBarInset else 0.dp,
+                      ) {
+                      // YMR <--
                         AnimatedContent(
                             targetState = tabNavigator.current,
                             transitionSpec = {
@@ -252,6 +294,9 @@ object HomeScreen : Screen() {
                                 }
                             }
                         }
+                      // YMR -->
+                      }
+                      // YMR <--
 
                         // Explainability Layer (Smart Suggestions)
                         adaptiveDecision?.let { decision ->
@@ -292,6 +337,27 @@ object HomeScreen : Screen() {
                                 }
                             }
                         }
+                      // YMR -->
+                      }
+                      if (floatingBar) {
+                          AnimatedVisibility(
+                              visible = bottomNavVisible && isCurrentTabVisible,
+                              modifier = Modifier.align(Alignment.BottomCenter),
+                              enter = slideInVertically { it } + fadeIn(),
+                              exit = slideOutVertically { it } + fadeOut(),
+                          ) {
+                              FloatingHomeBar(
+                                  tabNavigator = tabNavigator,
+                                  navItems = visibleNavItems,
+                                  updatesCount = updatesCount,
+                                  extensionUpdatesCount = extensionUpdatesCount,
+                                  behaviorMap = behaviorMap,
+                                  executor = executor,
+                                  backdrop = homeBackdrop,
+                              )
+                          }
+                      }
+                      // YMR <--
                     }
                 }
             }
@@ -338,6 +404,89 @@ object HomeScreen : Screen() {
             }
         }
     }
+
+    // YMR -->
+    @Composable
+    private fun FloatingHomeBar(
+        tabNavigator: TabNavigator,
+        navItems: List<NavItem>,
+        updatesCount: Int,
+        extensionUpdatesCount: Int,
+        behaviorMap: Map<String, NavBehavior>,
+        executor: NavActionExecutor,
+        backdrop: com.kyant.backdrop.Backdrop?,
+    ) {
+        val navigator = LocalNavigator.currentOrThrow
+        val scope = rememberCoroutineScope()
+        val haptic = LocalHapticFeedback.current
+        val items = navItems.map { navItem ->
+            val badgeCount = when {
+                UpdatesTab::class.isInstance(navItem.tab) -> updatesCount
+                BrowseTab::class.isInstance(navItem.tab) -> extensionUpdatesCount
+                else -> 0
+            }
+            GlassTabItem(
+                key = navItem.id,
+                label = stringResource(navItem.titleRes),
+                icon = { selected -> navPainter(navItem, selected) },
+                badge = badgeCount.takeIf { it > 0 }?.let { if (it > 99) "99+" else it.toString() },
+            )
+        }
+        val selectedIndex = navItems.indexOfFirst { it.tab.key == tabNavigator.current.key }.coerceAtLeast(0)
+        FloatingGlassTabBar(
+            tabs = items,
+            selectedIndex = selectedIndex,
+            backdrop = backdrop,
+            onTabSelected = { index ->
+                val navItem = navItems[index]
+                if (index != selectedIndex) {
+                    executor.logClick(navItem.id)
+                    tabNavigator.current = navItem.tab
+                } else {
+                    scope.launch { navItem.tab.onReselect(navigator) }
+                }
+            },
+            onTabLongPress = { index ->
+                val navItem = navItems[index]
+                val behavior = behaviorMap[navItem.id] ?: NavBehavior()
+                if (behavior.onLongClick != NavAction.Default) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    executor.execute(behavior.onLongClick, navItem.id)
+                }
+            },
+            sideButton = {
+                GlassOrbButton(
+                    painter = rememberVectorPainter(Icons.Outlined.Search),
+                    contentDescription = stringResource(MR.strings.action_search),
+                    onClick = { navigator.push(GlobalSearchScreen()) },
+                    backdrop = backdrop,
+                )
+            },
+        )
+    }
+
+    @Composable
+    private fun navPainter(navItem: NavItem, selected: Boolean): Painter {
+        navItem.iconVector?.let { return rememberVectorPainter(it) }
+        val tab = navItem.tab
+        val animResId = when {
+            LibraryTab::class.isInstance(tab) -> R.drawable.anim_library_enter
+            UpdatesTab::class.isInstance(tab) -> R.drawable.anim_updates_enter
+            HistoryTab::class.isInstance(tab) -> R.drawable.anim_history_enter
+            BrowseTab::class.isInstance(tab) -> R.drawable.anim_browse_enter
+            MoreTab::class.isInstance(tab) -> R.drawable.anim_more_enter
+            else -> null
+        }
+        if (animResId != null) {
+            return rememberAnimatedVectorPainter(AnimatedImageVector.animatedVectorResource(animResId), selected)
+        }
+        return when {
+            FeedTab::class.isInstance(tab) -> painterResource(R.drawable.ic_dynamic_feed_24dp)
+            AiringScheduleTab::class.isInstance(tab) -> painterResource(R.drawable.ic_progress_clock_24dp)
+            else -> painterResource(R.drawable.ic_browse_filled_24dp)
+        }
+    }
+    // YMR <--
 
     @Composable
     private fun RowScope.HomeNavigationBarItem(

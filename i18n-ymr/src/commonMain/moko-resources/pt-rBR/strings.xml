@@ -111,4 +111,28 @@
 
     <string name="settings_screen_unavailable">Este aparelho não tem essa tela de configurações.</string>
     <string name="no_app_for_link">Nenhum app deste aparelho consegue abrir %1$s</string>
+
+    <string name="glass_settings">Liquid glass</string>
+    <string name="glass_quality">Qualidade</string>
+    <string name="glass_quality_auto">Automática (%1$s)</string>
+    <string name="glass_quality_off">Desligado (superfícies translúcidas)</string>
+    <string name="glass_quality_battery">Economia (só desfoque)</string>
+    <string name="glass_quality_balanced">Equilibrada</string>
+    <string name="glass_quality_ultra">Ultra</string>
+    <string name="glass_preview">Prévia</string>
+    <string name="glass_blur">Raio do desfoque</string>
+    <string name="glass_refraction_height">Profundidade da borda (refração)</string>
+    <string name="glass_refraction_amount">Força da lente</string>
+    <string name="glass_depth">Efeito de profundidade</string>
+    <string name="glass_depth_summary">Curva o centro como uma lupa. Só no Ultra.</string>
+    <string name="glass_chromatic">Bordas de prisma</string>
+    <string name="glass_chromatic_summary">Arco-íris nas bordas dos botões redondos. Só no Ultra.</string>
+    <string name="glass_vibrance">Vibrância</string>
+    <string name="glass_brightness">Brilho</string>
+    <string name="glass_tint">Opacidade da tinta</string>
+    <string name="glass_highlight">Luz da borda</string>
+    <string name="glass_shadow">Sombras</string>
+    <string name="glass_press">Resposta ao toque</string>
+    <string name="glass_reset">Restaurar padrões do vidro</string>
+    <string name="glass_device_note">O desfoque ao vivo precisa do Android 12 e a refração do Android 13. Em celulares mais antigos, ou com qualidade Desligado, as sobreposições são desenhadas como superfícies translúcidas, sem custo extra.</string>
 </resources>

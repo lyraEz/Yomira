@@ -112,4 +112,28 @@
 
     <string name="settings_screen_unavailable">This device does not have that settings screen.</string>
     <string name="no_app_for_link">No app on this device can open %1$s</string>
+
+    <string name="glass_settings">Liquid glass</string>
+    <string name="glass_quality">Quality</string>
+    <string name="glass_quality_auto">Automatic (%1$s)</string>
+    <string name="glass_quality_off">Off (translucent surfaces)</string>
+    <string name="glass_quality_battery">Battery saver (blur only)</string>
+    <string name="glass_quality_balanced">Balanced</string>
+    <string name="glass_quality_ultra">Ultra</string>
+    <string name="glass_preview">Preview</string>
+    <string name="glass_blur">Blur radius</string>
+    <string name="glass_refraction_height">Edge depth (refraction)</string>
+    <string name="glass_refraction_amount">Lens strength</string>
+    <string name="glass_depth">Depth effect</string>
+    <string name="glass_depth_summary">Bulges the centre like a magnifying lens. Ultra only.</string>
+    <string name="glass_chromatic">Prism edges</string>
+    <string name="glass_chromatic_summary">Rainbow fringe on small round buttons. Ultra only.</string>
+    <string name="glass_vibrance">Vibrance</string>
+    <string name="glass_brightness">Brightness</string>
+    <string name="glass_tint">Tint opacity</string>
+    <string name="glass_highlight">Edge light</string>
+    <string name="glass_shadow">Shadows</string>
+    <string name="glass_press">Press bounce</string>
+    <string name="glass_reset">Restore glass defaults</string>
+    <string name="glass_device_note">Live blur needs Android 12 and refraction needs Android 13. On older phones, or with quality Off, overlays are drawn as translucent surfaces with no extra cost.</string>
 </resources>

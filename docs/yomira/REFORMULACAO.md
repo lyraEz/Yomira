@@ -1,0 +1,48 @@
+# Reformulação da interface (liquid glass) — estado e próximos passos
+
+Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fazer" na ordem.
+
+## Regras combinadas com o dono
+- Foco em celulares Android 8 a 16, 32 e 64 bits. A TV continua funcionando (barra antiga em TV/tablet).
+- Interface nova e própria, inspirada no iOS 27, sem cara de Aniyomi/AniZen.
+- Liquid glass com a biblioteca do SimpMusic (`io.github.kyant0:backdrop`, Apache-2.0) em tudo que fica
+  por cima de conteúdo, com blur ao vivo, refração, vibrância e profundidade; configurável.
+- Zero travamentos: efeitos dependem do nível do aparelho (Off/Economia/Equilibrada/Ultra).
+- Não pesquisar pedidos de usuários nem usar agentes paralelos (gasto de tokens). Só código.
+- Commits sem atribuição de IA; autor lyraEz.
+
+## Feito
+| Área | O que | Onde |
+|---|---|---|
+| Base | Kotlin 2.3.21, Compose 1.10.6, backdrop 1.0.6 + shapes 1.2.0, R8 8.13 no buildSrc | `gradle/*.toml`, `buildSrc/build.gradle.kts` |
+| Base | R8 com `-dontoptimize` (VerifyError no `TextKt` do Material 3 com otimização ligada) | `app/proguard-rules.pro` |
+| Vidro | `GlassStyle`, níveis por aparelho, `Modifier.glass`, `glassBar`, interação de toque | `presentation-core/.../yomira/glass/` |
+| Vidro | Barra superior de vidro em todo `Scaffold` | `presentation-core/.../material/Scaffold.kt`, `AppBar.kt` |
+| Vidro | Barra de abas flutuante + botão de busca redondo (celular) | `GlassTabBar.kt`, `HomeScreen.kt` |
+| Vidro | Abas em cápsula (categorias, Navegar) | `CapsuleTabs.kt`, `LibraryTabs.kt`, `TabbedScreen.kt` |
+| Vidro | Selos das capas em pílula escura translúcida | `presentation-core/.../Badges.kt` |
+| Vidro | Card "Smart Suggestion" de vidro acima da barra (bug corrigido) | `HomeScreen.kt` |
+| Config | Aparência → Liquid glass (prévia ao vivo, qualidade, blur, refração, vibrância...) | `app/.../yomira/glass/` |
+| Player | Vidro ao vivo sobre o vídeo (cópia do quadro em miniatura via PixelCopy só com controles visíveis) | `app/.../yomira/player/VideoGlass.kt` |
+| Player | Botões e play/pause como vidro, com espaçamento | `ControlsButton.kt`, `MiddlePlayerControls.kt` |
+| Player | Fluidez: ajustar a tela ao vídeo (Surface.setFrameRate) e movimento suave (interpolação) | `yomira/player/Smoothness*.kt` |
+| Player | Anime4K: recomendação por aparelho, descrições simples, verificação de quadros perdidos | `yomira/player/Anime4KAdvisor.kt`, `VideoFiltersPanel.kt` |
+| Robustez | Relatório de falhas em processo próprio + modo seguro | `app/.../yomira/diagnostics/` |
+
+## Falta fazer (ordem sugerida)
+1. Tela de detalhes do anime: herói com capa desfocada, botões de vidro (voltar, favoritar, rastrear,
+   WebView) como irmãos da fonte, lista de episódios com cabeçalho de vidro (`AnimeScreen.kt`;
+   hoje usa `glassTopBar = false`).
+2. Folhas e diálogos: desfoque de janela (Android 12+, `blurBehindRadius`) nos `Dialog`/`AdaptiveSheet`,
+   e versões dentro da janela quando precisar refratar a página.
+3. Barra inferior do player: barra de progresso dentro de cápsula de vidro; agrupar botões da direita.
+4. Tela "Mais" e telas de configurações: título grande estilo iOS, grupos com cantos contínuos.
+5. Biblioteca: cabeçalho grande com recolhimento, cartões com cantos 20 dp e sombra suave.
+6. Atualizações/Histórico/Navegar: linhas em cartões de vidro claro (sem blur por item, por desempenho).
+7. Transições entre telas (Voyager) com mola e escala; retorno preditivo.
+8. Tema próprio "Yomira" (paleta noite/lua) como padrão em instalações novas.
+9. Medir no aparelho: `adb shell dumpsys gfxinfo com.lyraez.yomira` nas telas com vidro e no player.
+
+## Como gerar o APK assinado
+`signing.properties` na raiz (ignorado pelo Git) apontando para o keystore; depois
+`./gradlew :app:assembleRelease -Penable-updater=true` e `scripts/yomira/package-release.sh app/build/outputs/apk/release dist`.

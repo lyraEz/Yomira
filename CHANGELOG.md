@@ -10,6 +10,13 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.3.1] - 2026-10-13
+
+### Changed
+- Player: os botões perderam as bolhas; o próprio ícone é de vidro, com sombra suave para leitura.
+- Player: barra de progresso de vidro no estilo iOS; o polegar vira uma lente de vidro ao arrastar e a barra engrossa.
+- Barras de vidro e capa desfocada dos detalhes terminam em fade, sem linha reta.
+
 ## Yomira [1.3.0] - 2026-10-13
 
 ### Added

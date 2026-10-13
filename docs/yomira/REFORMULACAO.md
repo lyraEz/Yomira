@@ -33,19 +33,20 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Player | Tamanho e espaçamento dos botões com prévia | `yomira/player/PlayerButtons.kt`, `PlayerSettingsLayoutMainScreen.kt` |
 | Mais/Config | Cartão de perfil, ícones em blocos coloridos, grupos em cartões com divisórias | `MoreComponents.kt`, `LogoHeader.kt`, `PreferenceScreen.kt` |
 | Detalhes | Botões de vidro sobre a capa, barra que vira vidro, ações em blocos, episódios em cartões | `AnimeToolbar.kt`, `AnimeInfoHeader.kt`, `AnimeEpisodeListItem.kt` |
+| Player | Ícones como vidro (sem bolhas), barra de progresso de vidro com polegar que vira lente | `yomira/player/GlassIcon.kt`, `GlassSeekBar.kt`, `ControlsButton.kt`, `SeekBar.kt` |
+| Vidro | Barras de vidro com fade embaixo (sem linha reta) e capa desfocada com fade | `GlassSurface.kt` (`glassBarFaded`), `Scaffold.kt`, `AnimeToolbar.kt`, `AnimeInfoHeader.kt` |
 
 ## Falta fazer (ordem sugerida)
-0. Pedidos de 13/10 (prioridade):
-   a. Player: tirar as bolhas de vidro dos botões e aplicar o vidro direto no ícone (ícone mascarando o
-      backdrop do vídeo: camada offscreen + blur/brilho + máscara DstIn com o painter do ícone; sem blur:
-      ícone branco com sombra suave). Arquivo: `ControlsButton.kt` (`playerGlassChip`), `MiddlePlayerControls.kt`.
-   b. Barra de progresso de vidro estilo iOS 27: trilho em cápsula de vidro, polegar que vira lente ao
-      arrastar (CombinedBackdrop vídeo + trilho), molas só na fase de desenho. Arquivo: `SeekBar.kt`.
-   c. Microtravamentos nas abas (Biblioteca → Mais): ver relatório da análise; suspeitos: `-dontoptimize`
-      no R8, gravação dupla (backdrop da Home + do Scaffold), blur grande na barra superior, falta de
-      baseline profile/profileinstaller.
-   d. Blur com corte reto (detalhes do anime e barras de vidro): esmaecer com máscara em gradiente
-      (barra mais alta que o conteúdo, sem a linha de 1 px) e capa desfocada com fade.
+0. Pendências dos pedidos de 13/10 (1.3.1 já aplicou vidro nos ícones, barra de progresso de vidro e fade das barras):
+   a. Microtravamentos nas abas: testar no aparelho reativar a otimização do R8 (tirar `-dontoptimize` e,
+      se o VerifyError do `androidx.compose.material3.TextKt` voltar, manter só essa classe fora da
+      otimização com `-keep,allowshrinking,allowobfuscation class androidx.compose.material3.TextKt { *; }`);
+      medir com `adb shell dumpsys gfxinfo com.lyraez.yomira`; considerar uma só gravação de fundo para a
+      barra superior e a barra de abas (hoje a Home e o Scaffold gravam cada um) e pular a refração
+      enquanto a lista rola. Em APK instalado manualmente, `adb shell cmd package compile -m speed-profile
+      -f com.lyraez.yomira` aplica o perfil de inicialização na hora.
+   b. Ajustar no aparelho o visual dos ícones de vidro (`yomira/player/GlassIcon.kt`: brilho 0.32,
+      tinta branca 0.62, sombra 3 dp) e da barra de progresso (`yomira/player/GlassSeekBar.kt`).
 1. Detalhes do anime (restante): capa de fundo mais desfocada e cabeçalho "N episódios" de vidro.
 2. Folhas e diálogos: desfoque de janela (Android 12+, `blurBehindRadius`) nos `Dialog`/`AdaptiveSheet`,
    e versões dentro da janela quando precisar refratar a página.

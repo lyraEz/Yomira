@@ -14,9 +14,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.asImageBitmap
@@ -25,10 +25,10 @@ import androidx.compose.ui.unit.IntSize
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import kotlinx.coroutines.isActive
+import tachiyomi.presentation.core.util.collectAsState
 import yomira.glass.GlassQuality
 import yomira.glass.LocalGlassBackdrop
 import yomira.glass.LocalGlassStyle
-import tachiyomi.presentation.core.util.collectAsState
 
 /**
  * Live glass over the video. mpv draws into a SurfaceView, which no Compose layer can sample, so

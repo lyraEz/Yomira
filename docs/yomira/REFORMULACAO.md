@@ -28,15 +28,18 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Player | Fluidez: ajustar a tela ao vídeo (Surface.setFrameRate) e movimento suave (interpolação) | `yomira/player/Smoothness*.kt` |
 | Player | Anime4K: recomendação por aparelho, descrições simples, verificação de quadros perdidos | `yomira/player/Anime4KAdvisor.kt`, `VideoFiltersPanel.kt` |
 | Robustez | Relatório de falhas em processo próprio + modo seguro | `app/.../yomira/diagnostics/` |
+| Player | Vidro sem atraso: cópia do quadro sincronizada com a tela, buffer triplo, nunca duas cópias ao mesmo tempo | `VideoGlass.kt` |
+| Player | Qualidade da imagem (escaladores do mpv), buffer maior, taxa do vidro | `Smoothness.kt`, `SmoothnessCard.kt` |
+| Player | Tamanho e espaçamento dos botões com prévia | `yomira/player/PlayerButtons.kt`, `PlayerSettingsLayoutMainScreen.kt` |
+| Mais/Config | Cartão de perfil, ícones em blocos coloridos, grupos em cartões com divisórias | `MoreComponents.kt`, `LogoHeader.kt`, `PreferenceScreen.kt` |
+| Detalhes | Botões de vidro sobre a capa, barra que vira vidro, ações em blocos, episódios em cartões | `AnimeToolbar.kt`, `AnimeInfoHeader.kt`, `AnimeEpisodeListItem.kt` |
 
 ## Falta fazer (ordem sugerida)
-1. Tela de detalhes do anime: herói com capa desfocada, botões de vidro (voltar, favoritar, rastrear,
-   WebView) como irmãos da fonte, lista de episódios com cabeçalho de vidro (`AnimeScreen.kt`;
-   hoje usa `glassTopBar = false`).
+1. Detalhes do anime (restante): capa de fundo mais desfocada e cabeçalho "N episódios" de vidro.
 2. Folhas e diálogos: desfoque de janela (Android 12+, `blurBehindRadius`) nos `Dialog`/`AdaptiveSheet`,
    e versões dentro da janela quando precisar refratar a página.
 3. Barra inferior do player: barra de progresso dentro de cápsula de vidro; agrupar botões da direita.
-4. Tela "Mais" e telas de configurações: título grande estilo iOS, grupos com cantos contínuos.
+4. Configurações: título grande estilo iOS que encolhe ao rolar.
 5. Biblioteca: cabeçalho grande com recolhimento, cartões com cantos 20 dp e sombra suave.
 6. Atualizações/Histórico/Navegar: linhas em cartões de vidro claro (sem blur por item, por desempenho).
 7. Transições entre telas (Voyager) com mola e escala; retorno preditivo.

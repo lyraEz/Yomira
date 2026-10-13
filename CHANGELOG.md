@@ -10,6 +10,19 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.3.0] - 2026-10-13
+
+### Added
+- Player: qualidade da imagem (Auto, Rápida, Equilibrada, Máxima) com a recomendação automática pelo celular, aplicada na hora.
+- Player: buffer maior opcional (até dois minutos à frente) para conexões lentas.
+- Player: atualização do vidro sobre o vídeo (Auto, Ao vivo, 30 fps, 15 fps).
+- Configurações do player → Layout: tamanho e espaçamento dos botões, com prévia ao vivo.
+
+### Changed
+- Vidro do player sincronizado com cada quadro da tela, sem atraso perceptível em relação ao vídeo.
+- Tela "Mais" e configurações no estilo iOS: cartão de perfil, ícones em blocos coloridos e grupos em cartões com divisórias finas.
+- Detalhes do anime: botões de vidro sobre a capa, barra superior que vira vidro ao rolar, ações em blocos arredondados e episódios em cartões.
+
 ## Yomira [1.1.0] - 2026-10-13
 
 Primeira etapa da nova interface para celulares (Android 8 a 16, 32 e 64 bits).

@@ -494,6 +494,9 @@ private fun AnimeScreenSmallImpl(
             }
             Scaffold(
                 hazeEnabled = false,
+                // YMR --> the details header draws its own bar over the cover
+                glassTopBar = false,
+                // YMR <--
                 contentWindowInsets = scaffoldInsets,
                 floatingActionButtonPosition = FabPosition.Center,
                 floatingActionButton = {
@@ -991,6 +994,9 @@ fun AnimeScreenLargeImpl(
             }
             Scaffold(
                 hazeEnabled = false,
+                // YMR --> the details header draws its own bar over the cover
+                glassTopBar = false,
+                // YMR <--
                 contentWindowInsets = scaffoldInsets,
                 floatingActionButtonPosition = FabPosition.Center,
                 floatingActionButton = {

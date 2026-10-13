@@ -39,6 +39,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
@@ -54,6 +56,13 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
 import androidx.compose.ui.util.fastMapNotNull
 import androidx.compose.ui.util.fastMaxBy
+import yomira.glass.LocalFloatingBarInset
+import yomira.glass.LocalGlassBackdrop
+import yomira.glass.LocalGlassStyle
+import yomira.glass.LocalGlassTopBar
+import yomira.glass.glassBar
+import yomira.glass.glassSource
+import yomira.glass.rememberGlassBackdrop
 import dev.chrisbanes.haze.HazeDefaults
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
@@ -124,11 +133,25 @@ fun Scaffold(
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     hazeEnabled: Boolean = false,
+    // YMR -->
+    glassTopBar: Boolean = true,
+    // YMR <--
     content: @Composable (PaddingValues) -> Unit,
 ) {
     // Tachiyomi: Handle consumed window insets
     val remainingWindowInsets = remember { MutableWindowInsets() }
     val hazeState = remember { HazeState() }
+    // YMR --> Top bar as liquid glass over the scrolling content (Android 12+)
+    val glassStyle = LocalGlassStyle.current
+    val glassBackdrop = if (glassTopBar && !hazeEnabled && glassStyle.liveBlur) {
+        rememberGlassBackdrop(containerColor)
+    } else {
+        null
+    }
+    val glassBarTint = (glassStyle.tintAlpha + 0.32f).coerceAtMost(0.88f)
+    val glassBarEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    val floatingBarInset = LocalFloatingBarInset.current
+    // YMR <--
 
     androidx.compose.material3.Surface(
         modifier = Modifier
@@ -155,11 +178,19 @@ fun Scaffold(
                                 tint = HazeTint(Color.Transparent),
                             ),
                         )
+                    // YMR -->
+                    } else if (glassBackdrop != null) {
+                        Modifier.glassBar(glassBackdrop, glassStyle, glassBarTint, glassBarEdge)
+                    // YMR <--
                     } else {
                         Modifier
                     }
                 ) {
-                    topBar(topBarScrollBehavior)
+                    // YMR -->
+                    CompositionLocalProvider(LocalGlassTopBar provides (glassBackdrop != null)) {
+                        topBar(topBarScrollBehavior)
+                    }
+                    // YMR <--
                 }
             },
             startBar = startBar,
@@ -182,13 +213,28 @@ fun Scaffold(
                 }
             },
             content = {
-                Box(modifier = if (hazeEnabled) Modifier.haze(hazeState) else Modifier) {
-                    content(it)
+                Box(
+                    modifier = if (hazeEnabled) {
+                        Modifier.haze(hazeState)
+                    } else {
+                        // YMR -->
+                        Modifier.glassSource(glassBackdrop)
+                        // YMR <--
+                    },
+                ) {
+                    // YMR --> content must never sample a backdrop that records it
+                    CompositionLocalProvider(LocalGlassBackdrop provides null) {
+                        content(it)
+                    }
+                    // YMR <--
                 }
             },
             snackbar = snackbarHost,
             contentWindowInsets = remainingWindowInsets,
             fab = floatingActionButton,
+            // YMR -->
+            extraBottom = floatingBarInset,
+            // YMR <--
         )
     }
 }
@@ -215,6 +261,9 @@ private fun ScaffoldLayout(
     fab: @Composable () -> Unit,
     contentWindowInsets: WindowInsets,
     bottomBar: @Composable () -> Unit,
+    // YMR -->
+    extraBottom: Dp = 0.dp,
+    // YMR <--
 ) {
     SubcomposeLayout { constraints ->
         val layoutWidth = constraints.maxWidth
@@ -230,7 +279,9 @@ private fun ScaffoldLayout(
         layout(layoutWidth, layoutHeight) {
             val leftInset = contentWindowInsets.getLeft(this@SubcomposeLayout, layoutDirection)
             val rightInset = contentWindowInsets.getRight(this@SubcomposeLayout, layoutDirection)
-            val bottomInset = contentWindowInsets.getBottom(this@SubcomposeLayout)
+            // YMR --> a floating bar drawn over the content counts as part of the bottom inset
+            val bottomInset = contentWindowInsets.getBottom(this@SubcomposeLayout) + extraBottom.roundToPx()
+            // YMR <--
 
             // Tachiyomi: Add startBar slot for Navigation Rail
             val startBarPlaceables = subcompose(ScaffoldLayoutContent.StartBar, startBar).fastMap {
@@ -331,6 +382,9 @@ private fun ScaffoldLayout(
                 val insets = contentWindowInsets.asPaddingValues(this@SubcomposeLayout)
                 val fabOffsetDp = fabOffsetFromBottom?.let { it.toDp() } ?: 0.dp
                 val bottomBarHeightPx = bottomBarHeight ?: 0
+                // YMR -->
+                val extraBottomDp = extraBottom
+                // YMR <--
                 val innerPadding = PaddingValues(
                     top = if (topBarPlaceables.isEmpty()) {
                         insets.calculateTopPadding()
@@ -339,7 +393,7 @@ private fun ScaffoldLayout(
                     },
                     // Tachiyomi: Also take account of fab height when providing inner padding
                     bottom = if (bottomBarPlaceables.isEmpty() || bottomBarHeightPx == 0) {
-                        max(insets.calculateBottomPadding(), fabOffsetDp)
+                        max(insets.calculateBottomPadding() + extraBottomDp, fabOffsetDp)
                     } else {
                         max(bottomBarHeightPx.toDp(), fabOffsetDp)
                     },

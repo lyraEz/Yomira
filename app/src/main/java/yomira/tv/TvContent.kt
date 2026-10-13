@@ -29,6 +29,13 @@ import tachiyomi.presentation.core.util.collectAsState
  */
 @Composable
 fun TvContent(applySafeArea: Boolean = true, content: @Composable () -> Unit) {
+    yomira.glass.ProvideGlassStyle {
+        TvContentInner(applySafeArea, content)
+    }
+}
+
+@Composable
+private fun TvContentInner(applySafeArea: Boolean, content: @Composable () -> Unit) {
     if (!TvDevice.isTv) {
         content()
         return

@@ -160,11 +160,25 @@ fun AppBar(
             },
             title = titleContent,
             actions = actions,
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = backgroundColor ?: MaterialTheme.colorScheme.surfaceColorAtElevation(
-                    elevation = if (isActionMode) 3.dp else 0.dp,
-                ),
-            ),
+            // YMR --> inside a glass top bar the bar itself stays see-through
+            colors = if (yomira.glass.LocalGlassTopBar.current && backgroundColor == null) {
+                val glassColor = if (isActionMode) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                } else {
+                    androidx.compose.ui.graphics.Color.Transparent
+                }
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = glassColor,
+                    scrolledContainerColor = glassColor,
+                )
+            } else {
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor ?: MaterialTheme.colorScheme.surfaceColorAtElevation(
+                        elevation = if (isActionMode) 3.dp else 0.dp,
+                    ),
+                )
+            },
+            // YMR <--
             scrollBehavior = scrollBehavior,
         )
     }

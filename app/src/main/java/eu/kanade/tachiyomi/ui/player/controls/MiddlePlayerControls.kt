@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.player.controls
 
+import eu.kanade.tachiyomi.ui.player.controls.components.playerGlassChip
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -131,14 +132,15 @@ fun MiddlePlayerControls(
                             // YMR -->
                             .then(playPauseFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
                             .tvCircleFocusHighlight(focusedScale = 1.1f, focusedBackgroundAlpha = 0.35f)
+                            // big live glass orb
+                            .playerGlassChip(interaction, CircleShape)
                             // YMR <--
-                            .clip(CircleShape)
                             .clickable(
                                 interaction,
                                 ripple(),
                                 onClick = onPlayPauseClick,
                             )
-                            .padding(MaterialTheme.padding.medium),
+                            .padding(MaterialTheme.padding.large),
                         contentDescription = null,
                     )
                 }

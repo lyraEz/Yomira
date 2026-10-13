@@ -1,5 +1,6 @@
 package tachiyomi.presentation.core.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BadgeGroup(
     modifier: Modifier = Modifier,
-    shape: Shape = MaterialTheme.shapes.extraSmall,
+    // YMR --> capsule pills over covers
+    shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(percent = 50),
+    // YMR <--
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(
@@ -36,7 +39,11 @@ fun BadgeGroup(
                 this.shape = shape
                 clip = true
             }
-            .height(18.dp),
+            // YMR --> frosted dark pill with a light rim, readable on any cover
+            .drawBehind { drawRect(Color.Black.copy(alpha = 0.28f)) }
+            .border(0.5.dp, Color.White.copy(alpha = 0.22f), shape)
+            .height(20.dp),
+            // YMR <--
     ) {
         content()
     }
@@ -46,9 +53,11 @@ fun BadgeGroup(
 fun Badge(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.secondary,
-    textColor: Color = MaterialTheme.colorScheme.onSecondary,
-    shape: Shape = MaterialTheme.shapes.extraSmall,
+    // YMR --> translucent dark glass by default; callers that pass a colour keep it
+    color: Color = Color.Black.copy(alpha = 0.42f),
+    textColor: Color = Color.White,
+    shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(percent = 50),
+    // YMR <--
 ) {
     Text(
         text = text,
@@ -60,7 +69,7 @@ fun Badge(
             .drawBehind {
                 drawRect(color = color)
             }
-            .padding(horizontal = 4.dp, vertical = 1.dp),
+            .padding(horizontal = 7.dp, vertical = 1.dp),
         color = textColor,
         fontWeight = FontWeight.Medium,
         maxLines = 1,

@@ -85,26 +85,13 @@ fun TabbedScreen(
                 .fillMaxSize()
                 .padding(contentPadding),
         ) {
-            FlexibleTabRow(
-                scrollable = scrollable,
-                selectedTabIndex = state.currentPage.coerceIn(0, maxOf(0, tabs.lastIndex)),
-                tabsCount = tabs.size,
-            ) {
-                tabs.forEachIndexed { index, tab ->
-                    Tab(
-                        selected = state.currentPage == index,
-                        onClick = { scope.launch { state.animateScrollToPage(index) } },
-                        text = {
-                            TabText(
-                                text = stringResource(tab.titleRes),
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                badgeCount = tab.badgeNumber,
-                            )
-                        },
-                        unselectedContentColor = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-            }
+            // YMR --> capsule tabs instead of the Material tab row
+            yomira.glass.CapsuleTabs(
+                tabs = tabs.map { yomira.glass.CapsuleTab(stringResource(it.titleRes), it.badgeNumber) },
+                selectedIndex = state.currentPage.coerceIn(0, maxOf(0, tabs.lastIndex)),
+                onSelect = { index -> scope.launch { state.animateScrollToPage(index) } },
+            )
+            // YMR <--
 
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
@@ -132,27 +119,3 @@ data class TabContent(
     val navigateUp: (() -> Unit)? = null,
 )
 
-@Composable
-private fun FlexibleTabRow(
-    scrollable: Boolean,
-    selectedTabIndex: Int,
-    tabsCount: Int,
-    block: @Composable () -> Unit,
-) {
-    return if (scrollable || tabsCount > 3) {
-        ScrollableTabRow(
-            selectedTabIndex = selectedTabIndex,
-            edgePadding = 13.dp,
-            modifier = Modifier.zIndex(1f),
-        ) {
-            block()
-        }
-    } else {
-        SecondaryTabRow(
-            selectedTabIndex = selectedTabIndex,
-            modifier = Modifier.zIndex(1f),
-        ) {
-            block()
-        }
-    }
-}

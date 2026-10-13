@@ -12,6 +12,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -257,7 +258,7 @@ fun AnimeActionRow(
     mainTrackItem: eu.kanade.tachiyomi.ui.anime.track.TrackItem? = null,
     modifier: Modifier = Modifier,
 ) {
-    val defaultActionButtonColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    val defaultActionButtonColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val nextUpdateCountdown = remember(nextUpdate) {
         if (nextUpdate == null) return@remember null
@@ -294,13 +295,12 @@ fun AnimeActionRow(
         modifier = modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            shape = MaterialTheme.shapes.medium,
-        ) {
+        // YMR --> one rounded tile per action (iOS style)
+        run {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 AnimeActionButton(
                     title = if (favorite) stringResource(MR.strings.in_library) else stringResource(MR.strings.add_to_library),
@@ -947,34 +947,50 @@ private fun RowScope.AnimeActionButton(
     onLongClick: (() -> Unit)? = null,
     iconContent: (@Composable () -> Unit)? = null,
 ) {
-    TextButton(
-        onClick = onClick,
+    // YMR --> rounded tile with the icon in a tinted circle
+    val shape = RoundedCornerShape(20.dp)
+    androidx.compose.foundation.layout.Box(
         modifier = Modifier
             .weight(1f)
             .tvFocusHighlight(
-                shape = RoundedCornerShape(12.dp),
+                shape = shape,
                 focusedScale = 1.05f,
-            ),
-        onLongClick = onLongClick,
+            )
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .padding(vertical = 10.dp, horizontal = 4.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            if (iconContent != null) {
-                iconContent()
-            } else if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = color,
-                    modifier = Modifier.size(20.dp),
-                )
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(color.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (iconContent != null) {
+                    iconContent()
+                } else if (icon != null) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = title,
-                color = color,
-                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                fontSize = 11.sp,
                 textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             )
         }
     }
+    // YMR <--
 }

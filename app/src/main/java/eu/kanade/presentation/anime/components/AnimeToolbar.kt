@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.anime.DownloadAction
+import yomira.glass.glass
+import yomira.glass.glassBar
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DownloadDropdownMenu
@@ -84,14 +86,28 @@ fun AnimeToolbar(
 
     // Capture the surface color during composition; alpha is applied during draw only.
     val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+    // YMR --> liquid glass over the cover: the bar fades in as glass, buttons float in glass orbs
+    val backdrop = yomira.glass.LocalGlassBackdrop.current
+    val glassStyle = yomira.glass.LocalGlassStyle.current
+    val barTint = (glassStyle.tintAlpha + 0.32f).coerceAtMost(0.88f)
+    val barEdge = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+    androidx.compose.foundation.layout.Box(modifier = modifier) {
+        if (backdrop != null) {
+            androidx.compose.foundation.layout.Box(
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer { alpha = backgroundAlphaProvider() }
+                    .glassBar(backdrop, glassStyle, barTint, barEdge),
+            )
+        }
     Column(
-        modifier = modifier
+        modifier = Modifier
             .drawBehind {
                 // drawBehind reads backgroundAlphaProvider() in the draw phase — not
                 // composition — so the Column is NOT recomposed on every animation frame
                 // of the transparent-to-solid toolbar transition. Only the background
                 // fades; toolbar icons and content remain fully visible at all times.
-                drawRect(color = bgColor.copy(alpha = backgroundAlphaProvider()))
+                if (backdrop == null) drawRect(color = bgColor.copy(alpha = backgroundAlphaProvider()))
             }
             .padding(top = stableTopPadding),
     ) {
@@ -108,11 +124,22 @@ fun AnimeToolbar(
                 )
             },
             navigationIcon = {
-                IconButton(onClick = onBackClicked) {
-                    UpIcon(navigationIcon = Icons.Outlined.Close.takeIf { isActionMode })
+                androidx.compose.foundation.layout.Box(
+                    Modifier
+                        .padding(start = 6.dp)
+                        .glass(androidx.compose.foundation.shape.CircleShape, small = true),
+                ) {
+                    IconButton(onClick = onBackClicked) {
+                        UpIcon(navigationIcon = Icons.Outlined.Close.takeIf { isActionMode })
+                    }
                 }
             },
             actions = {
+                androidx.compose.foundation.layout.Row(
+                    Modifier
+                        .padding(end = 8.dp)
+                        .glass(androidx.compose.foundation.shape.RoundedCornerShape(percent = 50), small = true),
+                ) {
                 if (isActionMode) {
                     AppBarActions(
                         persistentListOf(
@@ -252,6 +279,7 @@ fun AnimeToolbar(
                             .build(),
                     )
                 }
+                }
             },
             windowInsets = WindowInsets(0, 0, 0, 0),
             colors = TopAppBarDefaults.topAppBarColors(
@@ -260,4 +288,6 @@ fun AnimeToolbar(
             ),
         )
     }
+    }
+    // YMR <--
 }

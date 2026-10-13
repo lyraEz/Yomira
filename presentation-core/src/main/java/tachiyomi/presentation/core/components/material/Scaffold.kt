@@ -135,6 +135,9 @@ fun Scaffold(
     hazeEnabled: Boolean = false,
     // YMR -->
     glassTopBar: Boolean = true,
+    // false: the content is still recorded, but the top bar paints its own glass through
+    // LocalGlassBackdrop (e.g. buttons floating over a cover)
+    glassTopBarSurface: Boolean = true,
     // YMR <--
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -179,7 +182,7 @@ fun Scaffold(
                             ),
                         )
                     // YMR -->
-                    } else if (glassBackdrop != null) {
+                    } else if (glassBackdrop != null && glassTopBarSurface) {
                         Modifier.glassBar(glassBackdrop, glassStyle, glassBarTint, glassBarEdge)
                     // YMR <--
                     } else {
@@ -187,7 +190,10 @@ fun Scaffold(
                     }
                 ) {
                     // YMR -->
-                    CompositionLocalProvider(LocalGlassTopBar provides (glassBackdrop != null)) {
+                    CompositionLocalProvider(
+                        LocalGlassTopBar provides (glassBackdrop != null && glassTopBarSurface),
+                        LocalGlassBackdrop provides glassBackdrop.takeUnless { glassTopBarSurface },
+                    ) {
                         topBar(topBarScrollBehavior)
                     }
                     // YMR <--

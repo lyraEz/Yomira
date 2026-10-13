@@ -133,10 +133,17 @@ fun AnimeEpisodeListItem(
     }
 
     val hasActions = start != null || end != null
+    // YMR --> each episode is a rounded card
+    val cardShape = RoundedCornerShape(18.dp)
+    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
+    val cardModifier = modifier
+        .padding(horizontal = 12.dp, vertical = 3.dp)
+        .clip(cardShape)
+    // YMR <--
 
     if (hasActions) {
         SwipeableActionsBox(
-            modifier = modifier.clipToBounds(),
+            modifier = cardModifier,
             startActions = listOfNotNull(start),
             endActions = listOfNotNull(end),
             swipeThreshold = swipeActionThreshold,
@@ -162,6 +169,7 @@ fun AnimeEpisodeListItem(
                 onClick = onClick,
                 onDownloadClick = onDownloadClick,
                 fileSize = fileSize,
+                modifier = Modifier.background(cardColor),
             )
         }
     } else {
@@ -185,7 +193,7 @@ fun AnimeEpisodeListItem(
             onClick = onClick,
             onDownloadClick = onDownloadClick,
             fileSize = fileSize,
-            modifier = modifier,
+            modifier = cardModifier.background(cardColor),
         )
     }
 }

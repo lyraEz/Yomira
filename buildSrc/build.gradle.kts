@@ -3,6 +3,10 @@ plugins {
 }
 
 dependencies {
+    // YMR --> R8 that understands Kotlin 2.3 metadata. AGP 8.11 bundles R8 8.11 (made for
+    // Kotlin 2.2), which cannot read the metadata of classes built with Kotlin 2.3.
+    implementation("com.android.tools:r8:8.13.25")
+    // YMR <--
     implementation(androidx.gradle)
     implementation(kotlinx.gradle)
     implementation(kotlinx.compose.compiler.gradle)

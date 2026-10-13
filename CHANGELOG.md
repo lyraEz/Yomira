@@ -10,6 +10,24 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.1.0] - 2026-10-13
+
+Primeira etapa da nova interface para celulares (Android 8 a 16, 32 e 64 bits).
+
+### Added
+- Liquid glass com a biblioteca backdrop (Kyant), a mesma usada pelo SimpMusic: desfoque ao vivo, vibrância, refração nas bordas e luz de borda em barras e controles que ficam sobre o conteúdo.
+- Barra de abas flutuante de vidro com lente de seleção que desliza (arraste pela barra para trocar de aba) e botão de busca redondo.
+- Barra superior de vidro em todas as telas que usam o Scaffold compartilhado, com o conteúdo rolando por baixo.
+- Configurações → Aparência → Liquid glass: prévia ao vivo, qualidade (automática, desligado, economia, equilibrada, ultra) e ajustes de desfoque, profundidade da borda, força da lente, vibrância, brilho, tinta, luz da borda, resposta ao toque, efeito de profundidade, bordas de prisma e sombras.
+- Anime4K: recomendação por celular com um toque, explicação de cada modo em linguagem simples e verificação de quadros perdidos que reduz a configuração quando o vídeo engasga.
+- Botões do player como fichas de vidro escuro.
+
+### Changed
+- Kotlin 2.3.21 e Compose 1.10.6.
+- Níveis de vidro por aparelho: abaixo do Android 12 as sobreposições viram superfícies translúcidas; a refração só roda no Android 13 ou mais novo; celulares de 32 bits, com pouca memória ou em economia de bateria usam efeitos mais leves.
+
+---
+
 ## Yomira [1.0.0] - 2026-10-10
 
 Primeira versão do fork, sobre o AniZen v0.5.215 (`becbe2d`).

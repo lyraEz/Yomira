@@ -147,6 +147,14 @@
             android:exported="false"
             android:process=":error_handler" />
 
+        <!-- YMR --> Plain-View crash report in its own process; see yomira.diagnostics.CrashGuard -->
+        <activity
+            android:name="yomira.diagnostics.CrashReportActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:process=":crash_report"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+
 
         <activity
             android:name=".ui.deeplink.DeepLinkActivity"

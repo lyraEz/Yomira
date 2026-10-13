@@ -188,7 +188,9 @@ object HomeScreen : Screen() {
         val executor = remember(context, scope, navigator) { NavActionExecutor(context, scope, navigator) }
 
         // YMR --> phones get the floating liquid glass tab bar; tablets and TVs keep rail/bar
-        val floatingBar = !isTabletUi() && !TvDevice.isTv
+        val floatingBar = !isTabletUi() &&
+            !TvDevice.isTv &&
+            !remember { yomira.diagnostics.CrashGuard.isSafeMode(context) }
         val glassStyle = LocalGlassStyle.current
         // YMR <--
 

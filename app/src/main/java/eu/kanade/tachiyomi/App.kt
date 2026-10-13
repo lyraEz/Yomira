@@ -43,8 +43,6 @@ import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.setAppCompatDelegateThemeMode
 import eu.kanade.presentation.anime.components.CoverSettings
 import eu.kanade.tachiyomi.core.security.PrivacyPreferences
-import eu.kanade.tachiyomi.crash.CrashActivity
-import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.coil.AnimeBackgroundKeyer
 import eu.kanade.tachiyomi.data.coil.AnimeCoverFetcher
 import eu.kanade.tachiyomi.data.coil.AnimeCoverKeyer
@@ -121,6 +119,11 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         registerActivityLifecycleCallbacks(eu.kanade.tachiyomi.network.interceptor.ActivityTracker)
 
         super<Application>.onCreate()
+        // YMR --> the crash report process needs nothing from the app; a crash anywhere in the
+        // start-up below must still be able to show it
+        if (yomira.diagnostics.CrashGuard.isReportProcess(this)) return
+        yomira.diagnostics.CrashGuard.install(this)
+        // YMR <--
         patchInjekt()
 
         Injekt.importModule(PreferenceModule(this))
@@ -194,7 +197,10 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
 
         if (isDebugBuildType) Timber.plant(Timber.DebugTree())
 
-        GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
+        // YMR --> crashes open the plain-View report (yomira.diagnostics) instead of the Compose
+        // CrashActivity, which could not open when the crash came from the UI layer it shares
+        yomira.diagnostics.CrashGuard.install(this)
+        // YMR <--
 
         // TLS 1.3 support for Android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

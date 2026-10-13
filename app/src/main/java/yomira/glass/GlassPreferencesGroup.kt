@@ -38,8 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.more.settings.Preference
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import yomira.i18n.YMR
@@ -70,7 +70,19 @@ fun glassPreferencesGroup(): Preference.PreferenceGroup {
 
     return Preference.PreferenceGroup(
         title = stringResource(YMR.strings.glass_settings),
-        preferenceItems = persistentListOf(
+        preferenceItems = listOfNotNull(
+            if (yomira.diagnostics.CrashGuard.isSafeMode(context)) {
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(YMR.strings.glass_safe_mode),
+                    subtitle = stringResource(YMR.strings.glass_safe_mode_summary),
+                    onClick = {
+                        yomira.diagnostics.CrashGuard.setSafeMode(context, false)
+                        (context as? android.app.Activity)?.recreate()
+                    },
+                )
+            } else {
+                null
+            },
             Preference.PreferenceItem.CustomPreference(
                 title = stringResource(YMR.strings.glass_preview),
             ) { GlassPreview() },
@@ -131,7 +143,7 @@ fun glassPreferencesGroup(): Preference.PreferenceGroup {
                 onClick = { prefs.resetLook() },
             ),
             Preference.PreferenceItem.InfoPreference(stringResource(YMR.strings.glass_device_note)),
-        ),
+        ).toImmutableList(),
     )
 }
 

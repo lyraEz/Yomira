@@ -82,7 +82,10 @@ fun ProvideGlassStyle(content: @Composable () -> Unit) {
     val press by prefs.pressScale().collectAsState()
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
-    val quality = remember(mode) { GlassDevice.resolve(context, mode) }
+    val safeMode = remember { yomira.diagnostics.CrashGuard.isSafeMode(context) }
+    val quality = remember(mode, safeMode) {
+        if (safeMode) GlassQuality.OFF else GlassDevice.resolve(context, mode)
+    }
     val style = remember(quality, blur, height, amount, depth, chromatic, vibrance, brightness, tint, highlight, shadow, press, dark) {
         GlassStyle(
             quality = quality,

@@ -151,4 +151,7 @@
     <string name="a4k_check_smooth">Liso: nenhum quadro perdido em %1$d s.</string>
     <string name="a4k_check_drops">%1$d quadros perdidos e %2$d atrasados em %3$d s. Mudei para uma configuração mais leve; verifique de novo.</string>
     <string name="a4k_check_drops_min">%1$d quadros perdidos em %2$d s mesmo na configuração mais leve. Desliguei o Anime4K para o vídeo rodar liso.</string>
+
+    <string name="glass_safe_mode">Modo seguro ativo: efeitos de vidro desligados</string>
+    <string name="glass_safe_mode_summary">Foi ligado pelo relatório de falha. Toque para desligar e reiniciar a tela.</string>
 </resources>

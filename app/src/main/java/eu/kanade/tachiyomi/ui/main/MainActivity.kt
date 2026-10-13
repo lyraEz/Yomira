@@ -164,6 +164,15 @@ class MainActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // YMR --> repeated launches that never got stable (e.g. a native renderer crash): show
+        // the crash report instead of crashing again
+        if (isLaunch && yomira.diagnostics.CrashGuard.onLaunch(this)) {
+            startActivity(android.content.Intent(this, yomira.diagnostics.CrashReportActivity::class.java))
+            finish()
+            return
+        }
+        // YMR <--
+
         val didMigration = Migrator.awaitAndRelease()
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -417,6 +426,9 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         mpvConfig.copyFiles()
+        // YMR --> a few seconds on screen without crashing counts as a stable launch
+        window.decorView.postDelayed({ yomira.diagnostics.CrashGuard.markStable(this) }, 8_000)
+        // YMR <--
     }
     // ANK <--
 

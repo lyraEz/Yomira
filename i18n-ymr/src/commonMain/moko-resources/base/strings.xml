@@ -152,4 +152,7 @@
     <string name="a4k_check_smooth">Smooth: no dropped frames in %1$d s.</string>
     <string name="a4k_check_drops">%1$d frames dropped and %2$d late in %3$d s. Switched to a lighter setting; check again.</string>
     <string name="a4k_check_drops_min">%1$d frames dropped in %2$d s even at the lightest setting. Anime4K was turned off for smooth playback.</string>
+
+    <string name="glass_safe_mode">Safe mode is on: glass effects are off</string>
+    <string name="glass_safe_mode_summary">It was turned on from the crash report. Tap to turn it off and restart the screen.</string>
 </resources>

@@ -136,4 +136,20 @@
     <string name="glass_press">Press bounce</string>
     <string name="glass_reset">Restore glass defaults</string>
     <string name="glass_device_note">Live blur needs Android 12 and refraction needs Android 13. On older phones, or with quality Off, overlays are drawn as translucent surfaces with no extra cost.</string>
+
+    <string name="a4k_recommended">Recommended for this phone: %1$s</string>
+    <string name="a4k_recommended_off">Recommended for this phone: off. It does not have the headroom to run Anime4K without dropping frames.</string>
+    <string name="a4k_apply">Apply</string>
+    <string name="a4k_mode_a">For HD anime (720p/1080p) that looks blurry or blocky: cleans compression artefacts and sharpens the lines.</string>
+    <string name="a4k_mode_b">For HD anime with only light blur: a softer restore that keeps the original line art.</string>
+    <string name="a4k_mode_c">For low-resolution or noisy video (480p and below): removes noise and enlarges. The lightest mode.</string>
+    <string name="a4k_mode_a_plus">A stronger A that restores twice. Heavy: flagship phones only.</string>
+    <string name="a4k_mode_b_plus">A stronger B. Heavy: flagship phones only.</string>
+    <string name="a4k_mode_c_plus">For very poor sources: removes noise, then restores. Heavy.</string>
+    <string name="a4k_quality_info">Fast uses the smallest network and costs almost nothing; High looks best but can drop frames on most phones.</string>
+    <string name="a4k_check">Check dropped frames</string>
+    <string name="a4k_checking">Measuring for %1$d s… keep the video playing</string>
+    <string name="a4k_check_smooth">Smooth: no dropped frames in %1$d s.</string>
+    <string name="a4k_check_drops">%1$d frames dropped and %2$d late in %3$d s. Switched to a lighter setting; check again.</string>
+    <string name="a4k_check_drops_min">%1$d frames dropped in %2$d s even at the lightest setting. Anime4K was turned off for smooth playback.</string>
 </resources>

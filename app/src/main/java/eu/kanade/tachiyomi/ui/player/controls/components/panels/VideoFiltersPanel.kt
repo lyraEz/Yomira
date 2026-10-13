@@ -17,6 +17,10 @@
 
 package eu.kanade.tachiyomi.ui.player.controls.components.panels
 
+import tachiyomi.core.common.i18n.stringResource
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import yomira.i18n.YMR
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.ui.res.painterResource
@@ -406,6 +410,19 @@ fun Anime4KCard() {
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
     // ANZ <--
+    // YMR -->
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val recommendation = remember { yomira.player.Anime4KAdvisor.recommend(ctx) }
+    var checkMessage by remember { mutableStateOf<String?>(null) }
+    var checking by remember { mutableStateOf(false) }
+    fun applyPreset(mode: Anime4KManager.Mode, quality: Anime4KManager.Quality) {
+        decoderPreferences.enableAnime4K().set(mode != Anime4KManager.Mode.OFF)
+        if (mode != Anime4KManager.Mode.OFF) decoderPreferences.anime4kMode().set(mode.name)
+        decoderPreferences.anime4kQuality().set(quality.name)
+        applyAnime4K(mpv, decoderPreferences, anime4kManager)
+    }
+    // YMR <--
 
     ExpandableCard(
         isExpanded = isExpanded,
@@ -444,6 +461,39 @@ fun Anime4KCard() {
                 )
             }
 
+            // YMR --> recommendation for this phone, in plain words
+            val qualityLabel = @Composable { q: Anime4KManager.Quality ->
+                when (q) {
+                    Anime4KManager.Quality.FAST -> stringResource(MR.strings.anime4k_quality_fast)
+                    Anime4KManager.Quality.BALANCED -> stringResource(MR.strings.anime4k_quality_balanced)
+                    Anime4KManager.Quality.HIGH -> stringResource(MR.strings.anime4k_quality_high)
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
+            ) {
+                Text(
+                    text = if (recommendation.mode == Anime4KManager.Mode.OFF) {
+                        stringResource(YMR.strings.a4k_recommended_off)
+                    } else {
+                        stringResource(
+                            YMR.strings.a4k_recommended,
+                            "${recommendation.mode.name.replace("_PLUS", "+A")} · ${qualityLabel(recommendation.quality)}",
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f),
+                )
+                androidx.compose.material3.FilledTonalButton(
+                    onClick = { applyPreset(recommendation.mode, recommendation.quality) },
+                ) {
+                    Text(stringResource(YMR.strings.a4k_apply))
+                }
+            }
+            // YMR <--
+
             if (enableAnime4K) {
                 val anime4kMode by decoderPreferences.anime4kMode().collectAsState()
                 val anime4kQuality by decoderPreferences.anime4kQuality().collectAsState()
@@ -472,6 +522,24 @@ fun Anime4KCard() {
                         )
                     }
                 }
+                // YMR -->
+                val modeDescription = when (anime4kMode) {
+                    Anime4KManager.Mode.A.name -> YMR.strings.a4k_mode_a
+                    Anime4KManager.Mode.B.name -> YMR.strings.a4k_mode_b
+                    Anime4KManager.Mode.C.name -> YMR.strings.a4k_mode_c
+                    Anime4KManager.Mode.A_PLUS.name -> YMR.strings.a4k_mode_a_plus
+                    Anime4KManager.Mode.B_PLUS.name -> YMR.strings.a4k_mode_b_plus
+                    Anime4KManager.Mode.C_PLUS.name -> YMR.strings.a4k_mode_c_plus
+                    else -> null
+                }
+                if (modeDescription != null) {
+                    Text(
+                        text = stringResource(modeDescription),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                // YMR <--
 
                 Text(
                     text = stringResource(MR.strings.pref_anime4k_quality),
@@ -501,6 +569,50 @@ fun Anime4KCard() {
                         )
                     }
                 }
+                // YMR --> confirm on the real video that no frames are dropped
+                Text(
+                    text = stringResource(YMR.strings.a4k_quality_info),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val checkingText = stringResource(YMR.strings.a4k_checking, 8)
+                val smoothText = stringResource(YMR.strings.a4k_check_smooth, 8)
+                androidx.compose.material3.OutlinedButton(
+                    enabled = mpv != null && !checking,
+                    onClick = {
+                        val player = mpv ?: return@OutlinedButton
+                        checking = true
+                        checkMessage = checkingText
+                        scope.launch {
+                            val result = yomira.player.Anime4KAdvisor.measureDroppedFrames(player, 8)
+                            checkMessage = if (result.smooth) {
+                                smoothText
+                            } else {
+                                val currentMode = runCatching {
+                                    Anime4KManager.Mode.valueOf(decoderPreferences.anime4kMode().get())
+                                }.getOrDefault(Anime4KManager.Mode.A)
+                                val currentQuality = runCatching {
+                                    Anime4KManager.Quality.valueOf(decoderPreferences.anime4kQuality().get())
+                                }.getOrDefault(Anime4KManager.Quality.FAST)
+                                val next = yomira.player.Anime4KAdvisor.lighter(currentMode, currentQuality)
+                                if (next != null && next.first != Anime4KManager.Mode.OFF) {
+                                    applyPreset(next.first, next.second)
+                                    ctx.stringResource(YMR.strings.a4k_check_drops, result.dropped, result.delayed, result.seconds)
+                                } else {
+                                    applyPreset(Anime4KManager.Mode.OFF, currentQuality)
+                                    ctx.stringResource(YMR.strings.a4k_check_drops_min, result.dropped + result.delayed, result.seconds)
+                                }
+                            }
+                            checking = false
+                        }
+                    },
+                ) {
+                    Text(stringResource(YMR.strings.a4k_check))
+                }
+                checkMessage?.let {
+                    Text(text = it, style = MaterialTheme.typography.bodySmall)
+                }
+                // YMR <--
             }
         }
     }

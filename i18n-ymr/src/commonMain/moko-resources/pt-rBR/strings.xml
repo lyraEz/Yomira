@@ -135,4 +135,20 @@
     <string name="glass_press">Resposta ao toque</string>
     <string name="glass_reset">Restaurar padrões do vidro</string>
     <string name="glass_device_note">O desfoque ao vivo precisa do Android 12 e a refração do Android 13. Em celulares mais antigos, ou com qualidade Desligado, as sobreposições são desenhadas como superfícies translúcidas, sem custo extra.</string>
+
+    <string name="a4k_recommended">Recomendado para este celular: %1$s</string>
+    <string name="a4k_recommended_off">Recomendado para este celular: desligado. Ele não tem folga para rodar o Anime4K sem perder quadros.</string>
+    <string name="a4k_apply">Aplicar</string>
+    <string name="a4k_mode_a">Para animes em HD (720p/1080p) borrados ou com blocos: limpa os artefatos de compressão e deixa o traço nítido.</string>
+    <string name="a4k_mode_b">Para animes em HD com pouco borrão: uma restauração mais suave que preserva o traço original.</string>
+    <string name="a4k_mode_c">Para vídeos de baixa resolução ou com chuvisco (480p ou menos): tira o ruído e amplia. É o modo mais leve.</string>
+    <string name="a4k_mode_a_plus">Um A mais forte, que restaura duas vezes. Pesado: só para celulares topo de linha.</string>
+    <string name="a4k_mode_b_plus">Um B mais forte. Pesado: só para celulares topo de linha.</string>
+    <string name="a4k_mode_c_plus">Para vídeos muito ruins: tira o ruído e depois restaura. Pesado.</string>
+    <string name="a4k_quality_info">Rápido usa a rede menor e quase não pesa; Alto fica mais bonito, mas pode perder quadros na maioria dos celulares.</string>
+    <string name="a4k_check">Verificar quadros perdidos</string>
+    <string name="a4k_checking">Medindo por %1$d s… deixe o vídeo tocando</string>
+    <string name="a4k_check_smooth">Liso: nenhum quadro perdido em %1$d s.</string>
+    <string name="a4k_check_drops">%1$d quadros perdidos e %2$d atrasados em %3$d s. Mudei para uma configuração mais leve; verifique de novo.</string>
+    <string name="a4k_check_drops_min">%1$d quadros perdidos em %2$d s mesmo na configuração mais leve. Desliguei o Anime4K para o vídeo rodar liso.</string>
 </resources>

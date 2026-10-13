@@ -330,3 +330,8 @@
 -dontwarn org.ietf.jgss.GSSManager
 -dontwarn org.ietf.jgss.GSSName
 -dontwarn org.ietf.jgss.Oid
+# YMR --> R8 optimizations produced bytecode that ART rejects (VerifyError in
+# androidx.compose.material3.TextKt, "copy-cat2 ... Long (High Half)") with Compose 1.10, so the
+# app could not open. Shrinking and obfuscation stay on; ART still optimizes at install time.
+-dontoptimize
+# YMR <--

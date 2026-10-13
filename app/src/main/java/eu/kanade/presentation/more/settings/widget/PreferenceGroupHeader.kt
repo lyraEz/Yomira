@@ -20,16 +20,18 @@ fun PreferenceGroupHeader(title: String) {
         contentAlignment = Alignment.CenterStart,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp, top = 14.dp, start = 12.dp),
+            .padding(bottom = 6.dp, top = 18.dp, start = 12.dp),
     ) {
+        // YMR --> iOS-style group caption
         Text(
             text = title.uppercase(),
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
             modifier = Modifier.padding(horizontal = PrefsHorizontalPadding),
             style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.6.sp,
             ),
+            // YMR <--
         )
     }
 }

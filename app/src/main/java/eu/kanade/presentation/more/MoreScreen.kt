@@ -63,7 +63,6 @@ import eu.kanade.domain.ai.AiPreferences
 import eu.kanade.domain.ui.model.NavItem
 import eu.kanade.presentation.more.settings.screen.ai.AiAssistantScreen
 import eu.kanade.presentation.more.settings.screen.NavigationSettingsScreen
-import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.home.HomeScreen
@@ -81,14 +80,11 @@ import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-import tachiyomi.presentation.core.util.collectAsState
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
-
 import eu.kanade.domain.ui.ContainerStyle
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.more.components.MoreItem
 import eu.kanade.presentation.more.components.MoreSection
+import eu.kanade.presentation.more.components.MoreSwitchItem
 
 @Composable
 fun MoreScreen(
@@ -129,7 +125,7 @@ fun MoreScreen(
         ScrollbarLazyColumn(
             modifier = Modifier.fillMaxSize().padding(contentPadding),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             item {
                 LogoHeader()
@@ -137,19 +133,21 @@ fun MoreScreen(
 
             item {
                 MoreSection(title = "Preferences") {
-                    SwitchPreferenceWidget(
+                    MoreSwitchItem(
                         title = stringResource(MR.strings.label_downloaded_only),
                         subtitle = stringResource(MR.strings.downloaded_only_summary),
                         icon = Icons.Outlined.CloudOff,
                         checked = downloadedOnly,
-                        onCheckedChanged = onDownloadedOnlyChange,
+                        onCheckedChange = onDownloadedOnlyChange,
+                        tileColor = androidx.compose.ui.graphics.Color(0xFF30B158),
                     )
-                    SwitchPreferenceWidget(
+                    MoreSwitchItem(
                         title = stringResource(MR.strings.pref_incognito_mode),
                         subtitle = stringResource(MR.strings.pref_incognito_mode_summary),
                         icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
                         checked = incognitoMode,
-                        onCheckedChanged = onIncognitoModeChange,
+                        onCheckedChange = onIncognitoModeChange,
+                        tileColor = androidx.compose.ui.graphics.Color(0xFF5E5CE6),
                     )
                 }
             }

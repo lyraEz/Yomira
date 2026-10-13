@@ -1,6 +1,5 @@
 package eu.kanade.presentation.more.settings
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -75,31 +74,21 @@ fun PreferenceScreen(
                         PreferenceGroupHeader(title = preference.title)
                     }
                     item(key = "group-content-${preference.title}") {
-                        if (useContainer) {
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp),
-                                shape = MaterialTheme.shapes.large,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                tonalElevation = 2.dp
-                            ) {
-                                Column {
-                                    preference.preferenceItems.forEach { item ->
-                                        key(item.title) {
-                                            PreferenceItem(
-                                                item = item,
-                                                highlightKey = highlightKey,
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp),
+                        // YMR --> grouped card with hairline dividers (iOS settings style)
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp),
+                            shape = RoundedCornerShape(22.dp),
+                            color = if (useContainer) {
+                                MaterialTheme.colorScheme.surfaceContainer
+                            } else {
+                                androidx.compose.ui.graphics.Color.Transparent
+                            },
+                        ) {
+                            eu.kanade.presentation.more.components.DividedColumn(
+                                inset = 16.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
                             ) {
                                 preference.preferenceItems.forEach { item ->
                                     key(item.title) {
@@ -111,6 +100,7 @@ fun PreferenceScreen(
                                 }
                             }
                         }
+                        // YMR <--
                     }
                     item(key = "group-spacer-${preference.title}") {
                         if (i < items.lastIndex) {

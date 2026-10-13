@@ -161,4 +161,17 @@
     <string name="smooth_match_summary">Asks the screen for a refresh rate that fits the video's frame rate (e.g. 24 fps on 120 Hz), removing judder at no cost. Android 11+.</string>
     <string name="smooth_motion">Smooth motion</string>
     <string name="smooth_motion_summary">Blends frames to the screen's refresh rate. Smoothest on 60 Hz screens; uses a little more GPU. Applies from the next video.</string>
+    <string name="smooth_auto">Auto</string>
+    <string name="smooth_quality">Image quality</string>
+    <string name="smooth_quality_fast">Fast</string>
+    <string name="smooth_quality_balanced">Balanced</string>
+    <string name="smooth_quality_high">Max</string>
+    <string name="smooth_quality_fast_summary">Simple scaling. Lightest on the GPU, never drops frames, slightly softer picture.</string>
+    <string name="smooth_quality_balanced_summary">Sharp scaling with clean downscaling. Good picture at a small GPU cost.</string>
+    <string name="smooth_quality_high_summary">Sharpest scaling (Lanczos) with smooth edges. Best picture; for strong phones.</string>
+    <string name="smooth_buffer">Bigger buffer</string>
+    <string name="smooth_buffer_summary">Loads up to two minutes ahead so slow or unstable connections do not pause playback. Uses more memory. Applies from the next video.</string>
+    <string name="smooth_glass_rate">Glass refresh</string>
+    <string name="smooth_glass_rate_summary">How often the glass buttons follow the video. Live updates every screen frame with no delay; lower rates save battery.</string>
+    <string name="smooth_glass_rate_live">Live</string>
 </resources>

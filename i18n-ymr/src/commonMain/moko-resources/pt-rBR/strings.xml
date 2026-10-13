@@ -160,4 +160,17 @@
     <string name="smooth_match_summary">Pede à tela uma taxa de atualização que combine com o vídeo (por exemplo 24 fps em 120 Hz), tirando os trancos sem custo. Android 11 ou mais novo.</string>
     <string name="smooth_motion">Movimento suave</string>
     <string name="smooth_motion_summary">Mistura quadros para acompanhar a taxa da tela. Fica mais liso em telas de 60 Hz; usa um pouco mais de GPU. Vale a partir do próximo vídeo.</string>
+    <string name="smooth_auto">Auto</string>
+    <string name="smooth_quality">Qualidade da imagem</string>
+    <string name="smooth_quality_fast">Rápida</string>
+    <string name="smooth_quality_balanced">Equilibrada</string>
+    <string name="smooth_quality_high">Máxima</string>
+    <string name="smooth_quality_fast_summary">Ampliação simples. Mais leve para a GPU, nunca perde quadros, imagem um pouco mais suave.</string>
+    <string name="smooth_quality_balanced_summary">Ampliação nítida e redução limpa. Boa imagem com pouco custo de GPU.</string>
+    <string name="smooth_quality_high_summary">Ampliação mais nítida (Lanczos) com bordas suaves. Melhor imagem; para celulares potentes.</string>
+    <string name="smooth_buffer">Buffer maior</string>
+    <string name="smooth_buffer_summary">Carrega até dois minutos à frente para que conexões lentas ou instáveis não pausem o vídeo. Usa mais memória. Vale a partir do próximo vídeo.</string>
+    <string name="smooth_glass_rate">Atualização do vidro</string>
+    <string name="smooth_glass_rate_summary">Com que frequência os botões de vidro acompanham o vídeo. Ao vivo atualiza a cada quadro da tela, sem atraso; taxas menores economizam bateria.</string>
+    <string name="smooth_glass_rate_live">Ao vivo</string>
 </resources>

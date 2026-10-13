@@ -1,12 +1,16 @@
 package yomira.player
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Speed
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -34,6 +38,10 @@ fun SmoothnessCard() {
     val mpv = (LocalContext.current as? PlayerActivity)?.viewModel?.mpv
     val match by prefs.matchFrameRate().collectAsState()
     val smooth by prefs.smoothMotion().collectAsState()
+    val quality by prefs.imageQuality().collectAsState()
+    val buffer by prefs.bigBuffer().collectAsState()
+    val glassRate by prefs.videoGlassRate().collectAsState()
+    val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
 
     ExpandableCard(
@@ -63,6 +71,47 @@ fun SmoothnessCard() {
                     Smoothness.setSmoothMotion(mpv, it)
                 },
             )
+            ChoiceRow(
+                title = stringResource(YMR.strings.smooth_quality),
+                summary = stringResource(
+                    when (Smoothness.resolve(context, quality)) {
+                        ImageQuality.FAST, ImageQuality.AUTO -> YMR.strings.smooth_quality_fast_summary
+                        ImageQuality.BALANCED -> YMR.strings.smooth_quality_balanced_summary
+                        ImageQuality.HIGH -> YMR.strings.smooth_quality_high_summary
+                    },
+                ),
+                options = listOf(
+                    stringResource(YMR.strings.smooth_auto),
+                    stringResource(YMR.strings.smooth_quality_fast),
+                    stringResource(YMR.strings.smooth_quality_balanced),
+                    stringResource(YMR.strings.smooth_quality_high),
+                ),
+                selected = quality.ordinal,
+                onSelect = {
+                    val value = ImageQuality.entries[it]
+                    prefs.imageQuality().set(value)
+                    Smoothness.setImageQuality(context, mpv, value)
+                },
+            )
+            SwitchRow(
+                title = stringResource(YMR.strings.smooth_buffer),
+                summary = stringResource(YMR.strings.smooth_buffer_summary),
+                checked = buffer,
+                onChange = { prefs.bigBuffer().set(it) },
+            )
+            val rates = listOf(-1, 0, 30, 15)
+            ChoiceRow(
+                title = stringResource(YMR.strings.smooth_glass_rate),
+                summary = stringResource(YMR.strings.smooth_glass_rate_summary),
+                options = listOf(
+                    stringResource(YMR.strings.smooth_auto),
+                    stringResource(YMR.strings.smooth_glass_rate_live),
+                    "30 fps",
+                    "15 fps",
+                ),
+                selected = rates.indexOf(glassRate).coerceAtLeast(0),
+                onSelect = { prefs.videoGlassRate().set(rates[it]) },
+            )
         }
     }
 }
@@ -79,5 +128,32 @@ private fun SwitchRow(title: String, summary: String, checked: Boolean, onChange
             Text(summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(checked = checked, onCheckedChange = onChange)
+    }
+}
+
+@Composable
+private fun ChoiceRow(
+    title: String,
+    summary: String,
+    options: List<String>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall)
+        Text(summary, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            options.forEachIndexed { index, label ->
+                FilterChip(
+                    selected = index == selected,
+                    onClick = { onSelect(index) },
+                    label = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1) },
+                    shape = RoundedCornerShape(percent = 50),
+                )
+            }
+        }
     }
 }

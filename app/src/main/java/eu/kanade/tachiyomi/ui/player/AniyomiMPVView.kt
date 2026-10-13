@@ -142,7 +142,7 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
 
         postInitOptions()
         // YMR --> smooth motion (display-resample + interpolation) when enabled
-        yomira.player.Smoothness.applyMpvOptions(mpv)
+        yomira.player.Smoothness.applyMpvOptions(context, mpv)
         // YMR <--
         setupSubtitlesOptions()
         setupAudioOptions()

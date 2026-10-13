@@ -1,11 +1,13 @@
 package yomira.player
 
+import android.content.Context
 import android.os.Build
 import android.view.Surface
 import android.view.SurfaceView
 import `is`.xyz.mpv.MPV
 import kotlinx.coroutines.delay
 import tachiyomi.core.common.preference.PreferenceStore
+import tachiyomi.core.common.preference.getEnum
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.abs
@@ -25,13 +27,80 @@ import kotlin.math.abs
 class SmoothnessPreferences(private val store: PreferenceStore = Injekt.get()) {
     fun matchFrameRate() = store.getBoolean("yomira_match_frame_rate", true)
     fun smoothMotion() = store.getBoolean("yomira_smooth_motion", false)
+
+    /** Video glass refresh: -1 automatic, 0 every display frame, otherwise copies per second. */
+    fun videoGlassRate() = store.getInt("yomira_video_glass_rate", -1)
+
+    fun imageQuality() = store.getEnum("yomira_image_quality", ImageQuality.AUTO)
+
+    /** Larger read-ahead so slow or unstable connections do not stall playback. */
+    fun bigBuffer() = store.getBoolean("yomira_big_buffer", false)
 }
+
+/** mpv scaler presets, from cheapest to sharpest. */
+enum class ImageQuality { AUTO, FAST, BALANCED, HIGH }
 
 object Smoothness {
 
-    /** Options read once when mpv starts. */
-    fun applyMpvOptions(mpv: MPV?, prefs: SmoothnessPreferences = SmoothnessPreferences()) {
+    /** Image quality the device can sustain without dropping frames. */
+    fun resolve(context: Context, quality: ImageQuality): ImageQuality = when (quality) {
+        ImageQuality.AUTO -> when (Anime4KAdvisor.tier(context)) {
+            Anime4KAdvisor.Tier.LOW -> ImageQuality.FAST
+            Anime4KAdvisor.Tier.MID -> ImageQuality.BALANCED
+            Anime4KAdvisor.Tier.HIGH, Anime4KAdvisor.Tier.FLAGSHIP -> ImageQuality.HIGH
+        }
+        else -> quality
+    }
+
+    private fun scalerOptions(quality: ImageQuality): List<Pair<String, String>> = when (quality) {
+        ImageQuality.FAST, ImageQuality.AUTO -> listOf(
+            "scale" to "bilinear",
+            "cscale" to "bilinear",
+            "dscale" to "bilinear",
+            "correct-downscaling" to "no",
+            "sigmoid-upscaling" to "no",
+        )
+        ImageQuality.BALANCED -> listOf(
+            "scale" to "spline36",
+            "cscale" to "spline36",
+            "dscale" to "mitchell",
+            "correct-downscaling" to "yes",
+            "sigmoid-upscaling" to "no",
+        )
+        ImageQuality.HIGH -> listOf(
+            "scale" to "ewa_lanczossharp",
+            "cscale" to "spline36",
+            "dscale" to "mitchell",
+            "correct-downscaling" to "yes",
+            "sigmoid-upscaling" to "yes",
+        )
+    }
+
+    /** Applies an image quality preset while playing. */
+    fun setImageQuality(context: Context, mpv: MPV?, quality: ImageQuality) {
         mpv ?: return
+        scalerOptions(resolve(context, quality)).forEach { (key, value) ->
+            runCatching { mpv.setPropertyString(key, value) }
+        }
+    }
+
+    /** Options read once when mpv starts. */
+    fun applyMpvOptions(context: Context, mpv: MPV?, prefs: SmoothnessPreferences = SmoothnessPreferences()) {
+        mpv ?: return
+        scalerOptions(resolve(context, prefs.imageQuality().get())).forEach { (key, value) ->
+            runCatching { mpv.setOptionString(key, value) }
+        }
+        if (prefs.bigBuffer().get()) {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
+            val lowRam = am?.isLowRamDevice == true
+            val megs = if (lowRam) 48 else 128
+            runCatching {
+                mpv.setOptionString("cache", "yes")
+                mpv.setOptionString("cache-secs", "120")
+                mpv.setOptionString("demuxer-readahead-secs", "60")
+                mpv.setOptionString("demuxer-max-bytes", "${megs * 1024 * 1024}")
+            }
+        }
         if (prefs.smoothMotion().get()) {
             mpv.setOptionString("video-sync", "display-resample")
             mpv.setOptionString("interpolation", "yes")

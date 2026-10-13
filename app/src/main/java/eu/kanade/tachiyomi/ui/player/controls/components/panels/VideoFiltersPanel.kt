@@ -153,6 +153,9 @@ fun VideoFiltersPanel(
                 FiltersCard()
                 DebandCard()
                 Anime4KCard()
+                // YMR -->
+                yomira.player.SmoothnessCard()
+                // YMR <--
             }
         }
     }

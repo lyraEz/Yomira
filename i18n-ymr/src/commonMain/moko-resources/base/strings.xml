@@ -155,4 +155,10 @@
 
     <string name="glass_safe_mode">Safe mode is on: glass effects are off</string>
     <string name="glass_safe_mode_summary">It was turned on from the crash report. Tap to turn it off and restart the screen.</string>
+
+    <string name="smooth_title">Smoothness</string>
+    <string name="smooth_match">Match screen to video</string>
+    <string name="smooth_match_summary">Asks the screen for a refresh rate that fits the video's frame rate (e.g. 24 fps on 120 Hz), removing judder at no cost. Android 11+.</string>
+    <string name="smooth_motion">Smooth motion</string>
+    <string name="smooth_motion_summary">Blends frames to the screen's refresh rate. Smoothest on 60 Hz screens; uses a little more GPU. Applies from the next video.</string>
 </resources>

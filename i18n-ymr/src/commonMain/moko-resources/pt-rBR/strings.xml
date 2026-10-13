@@ -154,4 +154,10 @@
 
     <string name="glass_safe_mode">Modo seguro ativo: efeitos de vidro desligados</string>
     <string name="glass_safe_mode_summary">Foi ligado pelo relatório de falha. Toque para desligar e reiniciar a tela.</string>
+
+    <string name="smooth_title">Fluidez</string>
+    <string name="smooth_match">Ajustar a tela ao vídeo</string>
+    <string name="smooth_match_summary">Pede à tela uma taxa de atualização que combine com o vídeo (por exemplo 24 fps em 120 Hz), tirando os trancos sem custo. Android 11 ou mais novo.</string>
+    <string name="smooth_motion">Movimento suave</string>
+    <string name="smooth_motion_summary">Mistura quadros para acompanhar a taxa da tela. Fica mais liso em telas de 60 Hz; usa um pouco mais de GPU. Vale a partir do próximo vídeo.</string>
 </resources>

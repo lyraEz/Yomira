@@ -17,6 +17,7 @@
 
 package eu.kanade.tachiyomi.ui.player.controls.components
 
+import yomira.glass.glass
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -204,19 +205,42 @@ fun Modifier.playerGlassChip(
     interactionSource: androidx.compose.foundation.interaction.InteractionSource,
     shape: androidx.compose.ui.graphics.Shape,
 ): Modifier {
+    val backdrop = yomira.glass.LocalGlassBackdrop.current
+    val base = yomira.glass.LocalGlassStyle.current
+    // Space between neighbouring chips so each reads as its own floating control.
+    val spaced = this.padding(horizontal = 3.dp, vertical = 2.dp)
+    if (backdrop != null && base.liveBlur) {
+        // Live glass over the copy of the video recorded by yomira.player.VideoGlassBackdrop.
+        val style = remember(base) {
+            base.copy(
+                dark = true,
+                shadow = false,
+                tintAlpha = 0.18f,
+                blurRadius = maxOf(base.blurRadius, 14.dp),
+                depthEffect = false,
+            )
+        }
+        return spaced.glass(
+            shape = shape,
+            backdrop = backdrop,
+            style = style,
+            interaction = yomira.glass.rememberGlassInteraction(),
+            small = true,
+        )
+    }
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (pressed) 1.1f else 1f,
         animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.5f, stiffness = 300f),
         label = "glassPress",
     )
-    return this
+    return spaced
         .graphicsLayer {
             scaleX = scale
             scaleY = scale
         }
         .clip(shape)
-        .background(Color.Black.copy(alpha = 0.3f))
+        .background(Color.Black.copy(alpha = 0.38f))
         .border(0.5.dp, Color.White.copy(alpha = 0.2f), shape)
 }
 // YMR <--

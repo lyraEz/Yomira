@@ -22,6 +22,7 @@
 
 package eu.kanade.tachiyomi.ui.player
 
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -445,6 +446,10 @@ class PlayerActivity : BaseActivity() {
                     // YMR --> controls stay inside the TV overscan margin
                     yomira.tv.TvSafeArea(modifier = Modifier.fillMaxSize()) {
                     // YMR <--
+                    // YMR --> live glass over a small copy of the video while the controls show
+                    val controlsVisible by viewModel.controlsShown.collectAsState()
+                    yomira.player.VideoGlassBackdrop(surfaceView = player, active = controlsVisible) {
+                    // YMR <--
                     PlayerControls(
                         viewModel = viewModel,
                         castManager = castManager, // Pass the castManager instance
@@ -455,12 +460,23 @@ class PlayerActivity : BaseActivity() {
                     // YMR -->
                     }
                     // YMR <--
+                    // YMR -->
+                    }
+                    // YMR <--
                 }
                 // YMR -->
                 }
                 // YMR <--
             }
         }
+
+        // YMR --> match the screen's refresh rate to the video's frame rate
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                yomira.player.Smoothness.frameRateLoop(player, { viewModel.mpv })
+            }
+        }
+        // YMR <--
 
         // ANK -->
         // Migrate system back gesture handling to OnBackPressedDispatcher

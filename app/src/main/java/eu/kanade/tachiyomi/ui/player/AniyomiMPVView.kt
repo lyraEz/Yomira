@@ -141,6 +141,9 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
         setSafeOptionString("vd-lavc-film-grain", "cpu")
 
         postInitOptions()
+        // YMR --> smooth motion (display-resample + interpolation) when enabled
+        yomira.player.Smoothness.applyMpvOptions(mpv)
+        // YMR <--
         setupSubtitlesOptions()
         setupAudioOptions()
         observeProperties()

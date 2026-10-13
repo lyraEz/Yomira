@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.home
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -101,6 +103,7 @@ import yomira.glass.GlassOrbButton
 import yomira.glass.GlassTabItem
 import yomira.glass.LocalFloatingBarInset
 import yomira.glass.LocalGlassStyle
+import yomira.glass.glass
 import yomira.glass.glassSource
 import yomira.glass.rememberGlassBackdrop
 import eu.kanade.tachiyomi.R
@@ -300,46 +303,38 @@ object HomeScreen : Screen() {
                       }
                       // YMR <--
 
-                        // Explainability Layer (Smart Suggestions)
-                        adaptiveDecision?.let { decision ->
-                            Surface(
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                shape = MaterialTheme.shapes.medium,
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                tonalElevation = 4.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(Icons.Outlined.AutoAwesome, contentDescription = null)
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(text = "Smart Suggestion", style = MaterialTheme.typography.labelSmall)
-                                        Text(text = decision.reason, style = MaterialTheme.typography.bodyMedium)
-                                    }
-                                    TextButton(
-                                        onClick = { adaptiveEngine.dismissDecision() },
-                                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimaryContainer)
-                                    ) {
-                                        Text("Dismiss")
-                                    }
-                                    Button(
-                                        onClick = { adaptiveEngine.applyDecision(decision) },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
-                                            contentColor = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    ) {
-                                        Text("Apply")
-                                    }
-                                }
-                            }
-                        }
                       // YMR -->
+                      }
+                      // Explainability Layer (Smart Suggestions): a glass card above the floating
+                      // bar, outside the recorded content so it can sample it
+                      adaptiveDecision?.let { decision ->
+                          Row(
+                              modifier = Modifier
+                                  .align(Alignment.BottomCenter)
+                                  .navigationBarsPadding()
+                                  .padding(
+                                      start = 16.dp,
+                                      end = 16.dp,
+                                      bottom = if (floatingBar) FloatingTabBarInset + 8.dp else 16.dp,
+                                  )
+                                  .fillMaxWidth()
+                                  .glass(RoundedCornerShape(24.dp), backdrop = homeBackdrop)
+                                  .padding(horizontal = 14.dp, vertical = 10.dp),
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.spacedBy(8.dp),
+                          ) {
+                              Icon(Icons.Outlined.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                              Column(modifier = Modifier.weight(1f)) {
+                                  Text(text = "Smart Suggestion", style = MaterialTheme.typography.labelSmall)
+                                  Text(text = decision.reason, style = MaterialTheme.typography.bodyMedium)
+                              }
+                              TextButton(onClick = { adaptiveEngine.dismissDecision() }) {
+                                  Text("Dismiss")
+                              }
+                              Button(onClick = { adaptiveEngine.applyDecision(decision) }) {
+                                  Text("Apply")
+                              }
+                          }
                       }
                       if (floatingBar) {
                           AnimatedVisibility(

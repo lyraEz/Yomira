@@ -173,4 +173,8 @@
     <string name="smooth_glass_rate">Atualização do vidro</string>
     <string name="smooth_glass_rate_summary">Com que frequência os botões de vidro acompanham o vídeo. Ao vivo atualiza a cada quadro da tela, sem atraso; taxas menores economizam bateria.</string>
     <string name="smooth_glass_rate_live">Ao vivo</string>
+    <string name="player_button_look">Tamanho e espaçamento dos botões</string>
+    <string name="player_button_size">Tamanho dos botões</string>
+    <string name="player_button_spacing">Espaço entre os botões</string>
+    <string name="player_button_reset">Restaurar</string>
 </resources>

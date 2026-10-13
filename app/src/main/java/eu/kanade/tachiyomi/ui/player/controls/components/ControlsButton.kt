@@ -67,6 +67,9 @@ fun ControlsButton(
     val interactionSource = remember { MutableInteractionSource() }
     val clickEvent = LocalPlayerButtonsClickEvent.current
     val iconColor = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
+    // YMR -->
+    val scale = yomira.player.LocalPlayerButtonLook.current.scale
+    // YMR <--
 
     Box(
         modifier = modifier
@@ -92,15 +95,15 @@ fun ControlsButton(
                 ripple(),
             )
             .padding(
-                vertical = MaterialTheme.padding.medium,
-                horizontal = horizontalSpacing,
+                vertical = MaterialTheme.padding.medium * scale,
+                horizontal = horizontalSpacing * scale,
             ),
     ) {
         Icon(
             icon,
             title,
             tint = iconColor,
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(iconSize * scale),
         )
     }
 }
@@ -116,6 +119,9 @@ fun ControlsButton(
     val interactionSource = remember { MutableInteractionSource() }
 
     val clickEvent = LocalPlayerButtonsClickEvent.current
+    // YMR -->
+    val scale = yomira.player.LocalPlayerButtonLook.current.scale
+    // YMR <--
     Box(
         modifier = modifier
             .tvCircleFocusHighlight(
@@ -139,12 +145,12 @@ fun ControlsButton(
                 interactionSource,
                 ripple(),
             )
-            .padding(MaterialTheme.padding.medium),
+            .padding(MaterialTheme.padding.medium * scale),
     ) {
         Text(
             text,
             color = color,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.let { it.copy(fontSize = it.fontSize * scale) },
         )
     }
 }
@@ -196,9 +202,9 @@ private fun PreviewControlsButton() {
 
 // YMR -->
 /**
- * Dark liquid glass chip for player controls. The video is a SurfaceView that no Compose layer can
- * sample, so the chip is a translucent tinted surface with a light rim and a springy press scale
- * instead of a live blur.
+ * Dark liquid glass chip for player controls. Over the video it blurs and bends the frame copy
+ * recorded by yomira.player.VideoGlassBackdrop; where no live blur is available it falls back to a
+ * translucent tinted surface with a light rim and a springy press scale.
  */
 @Composable
 fun Modifier.playerGlassChip(
@@ -208,7 +214,8 @@ fun Modifier.playerGlassChip(
     val backdrop = yomira.glass.LocalGlassBackdrop.current
     val base = yomira.glass.LocalGlassStyle.current
     // Space between neighbouring chips so each reads as its own floating control.
-    val spaced = this.padding(horizontal = 3.dp, vertical = 2.dp)
+    val gap = yomira.player.LocalPlayerButtonLook.current.spacing
+    val spaced = this.padding(horizontal = gap, vertical = gap * 2 / 3)
     if (backdrop != null && base.liveBlur) {
         // Live glass over the copy of the video recorded by yomira.player.VideoGlassBackdrop.
         val style = remember(base) {

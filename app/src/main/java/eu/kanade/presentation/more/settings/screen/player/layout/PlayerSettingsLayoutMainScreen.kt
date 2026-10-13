@@ -60,6 +60,24 @@ object PlayerSettingsLayoutMainScreen : Screen() {
                     .fillMaxSize()
                     .padding(paddingValues),
             ) {
+                // YMR -->
+                item {
+                    PreferenceSectionHeader(title = stringResource(yomira.i18n.YMR.strings.player_button_look))
+                }
+                item {
+                    androidx.compose.material3.Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = androidx.compose.material3.CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
+                    ) {
+                        yomira.player.PlayerButtonSizeCard(Modifier.padding(12.dp))
+                    }
+                }
+                // YMR <--
+
                 item {
                     PreferenceSectionHeader(title = "Landscape Controls")
                 }

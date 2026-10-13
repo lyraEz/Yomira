@@ -448,6 +448,7 @@ class PlayerActivity : BaseActivity() {
                     // YMR <--
                     // YMR --> live glass over a small copy of the video while the controls show
                     val controlsVisible by viewModel.controlsShown.collectAsState()
+                    yomira.player.ProvidePlayerButtonLook {
                     yomira.player.VideoGlassBackdrop(surfaceView = player, active = controlsVisible) {
                     // YMR <--
                     PlayerControls(
@@ -458,6 +459,7 @@ class PlayerActivity : BaseActivity() {
                         // ANZ <--
                     )
                     // YMR -->
+                    }
                     }
                     // YMR <--
                     // YMR -->

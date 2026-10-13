@@ -174,4 +174,8 @@
     <string name="smooth_glass_rate">Glass refresh</string>
     <string name="smooth_glass_rate_summary">How often the glass buttons follow the video. Live updates every screen frame with no delay; lower rates save battery.</string>
     <string name="smooth_glass_rate_live">Live</string>
+    <string name="player_button_look">Button size and spacing</string>
+    <string name="player_button_size">Button size</string>
+    <string name="player_button_spacing">Space between buttons</string>
+    <string name="player_button_reset">Reset</string>
 </resources>

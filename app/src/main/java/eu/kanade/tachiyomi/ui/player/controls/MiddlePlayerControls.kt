@@ -73,6 +73,9 @@ fun MiddlePlayerControls(
     playPauseFocusRequester: FocusRequester? = null,
     // YMR <--
 ) {
+    // YMR -->
+    val big = 96.dp * yomira.player.LocalPlayerButtonLook.current.scale
+    // YMR <--
     Row(
         modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -96,10 +99,10 @@ fun MiddlePlayerControls(
         // ANZ -->
         when {
             (isLoading || isLoadingEpisode) && showLoadingCircle -> {
-                CircularProgressIndicator(Modifier.size(96.dp))
+                CircularProgressIndicator(Modifier.size(big))
             }
             isStopped -> {
-                Spacer(Modifier.size(96.dp))
+                Spacer(Modifier.size(big))
             }
             gestureSeekAmount != null -> {
                 Text(
@@ -128,7 +131,7 @@ fun MiddlePlayerControls(
                     Image(
                         painter = rememberAnimatedVectorPainter(icon, !paused),
                         modifier = Modifier
-                            .size(96.dp)
+                            .size(big)
                             // YMR -->
                             .then(playPauseFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
                             .tvCircleFocusHighlight(focusedScale = 1.1f, focusedBackgroundAlpha = 0.35f)

@@ -17,6 +17,11 @@
 
 package eu.kanade.tachiyomi.ui.player.controls.components
 
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -78,7 +83,9 @@ fun ControlsButton(
                 interactionSource = interactionSource,
                 indication = null,
             )
-            .clip(CircleShape)
+            // YMR --> floating glass chip over the video
+            .playerGlassChip(interactionSource, CircleShape)
+            // YMR <--
             .indication(
                 interactionSource,
                 ripple(),
@@ -124,7 +131,9 @@ fun ControlsButton(
                 indication = null,
 
             )
-            .clip(CircleShape)
+            // YMR -->
+            .playerGlassChip(interactionSource, CircleShape)
+            // YMR <--
             .indication(
                 interactionSource,
                 ripple(),
@@ -183,3 +192,31 @@ private fun PreviewControlsButton() {
         onClick = {},
     )
 }
+
+// YMR -->
+/**
+ * Dark liquid glass chip for player controls. The video is a SurfaceView that no Compose layer can
+ * sample, so the chip is a translucent tinted surface with a light rim and a springy press scale
+ * instead of a live blur.
+ */
+@Composable
+fun Modifier.playerGlassChip(
+    interactionSource: androidx.compose.foundation.interaction.InteractionSource,
+    shape: androidx.compose.ui.graphics.Shape,
+): Modifier {
+    val pressed by interactionSource.collectIsPressedAsState()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (pressed) 1.1f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.5f, stiffness = 300f),
+        label = "glassPress",
+    )
+    return this
+        .graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        }
+        .clip(shape)
+        .background(Color.Black.copy(alpha = 0.3f))
+        .border(0.5.dp, Color.White.copy(alpha = 0.2f), shape)
+}
+// YMR <--

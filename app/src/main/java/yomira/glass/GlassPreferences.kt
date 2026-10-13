@@ -44,8 +44,14 @@ class GlassPreferences(private val store: PreferenceStore = Injekt.get()) {
     /** Puts every knob back to its default (the quality mode is kept). */
     fun resetLook() {
         listOf(
-            blurRadius(), refractionHeight(), refractionAmount(), vibrance(), brightness(), tintAlpha(),
-            highlight(), pressScale(),
+            blurRadius(),
+            refractionHeight(),
+            refractionAmount(),
+            vibrance(),
+            brightness(),
+            tintAlpha(),
+            highlight(),
+            pressScale(),
         ).forEach { it.delete() }
         depthEffect().delete()
         chromaticAberration().delete()

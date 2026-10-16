@@ -45,8 +45,10 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
       barra superior e a barra de abas (hoje a Home e o Scaffold gravam cada um) e pular a refração
       enquanto a lista rola. Em APK instalado manualmente, `adb shell cmd package compile -m speed-profile
       -f com.lyraez.yomira` aplica o perfil de inicialização na hora.
-   b. Ajustar no aparelho o visual dos ícones de vidro (`yomira/player/GlassIcon.kt`: brilho 0.32,
-      tinta branca 0.62, sombra 3 dp) e da barra de progresso (`yomira/player/GlassSeekBar.kt`).
+   b. 1.3.2: vidro do player mais leve (cópia a 30/s, para quando pausado, sem blur extra, lente só ao
+      arrastar), aba Qualidade e mais opções de Fluidez. Conferir no aparelho com o "Contador de
+      quadros" (Fluidez) se VO/DEC/LATE ficam parados; se ainda subirem com os controles visíveis,
+      testar "Atualização do vidro: 15 fps/Desligado" para isolar a causa.
 1. Detalhes do anime (restante): capa de fundo mais desfocada e cabeçalho "N episódios" de vidro.
 2. Folhas e diálogos: desfoque de janela (Android 12+, `blurBehindRadius`) nos `Dialog`/`AdaptiveSheet`,
    e versões dentro da janela quando precisar refratar a página.

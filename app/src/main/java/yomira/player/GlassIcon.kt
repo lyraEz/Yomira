@@ -15,13 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
@@ -32,7 +31,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.drawPlainBackdrop
-import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.colorControls
 import yomira.glass.LocalGlassBackdrop
 import yomira.glass.LocalGlassStyle
@@ -73,21 +71,24 @@ fun GlassIcon(
             },
         contentAlignment = Alignment.Center,
     ) {
-        // Soft shadow of the glyph keeps it readable over white frames.
+        // Soft shadow of the glyph (two offset copies, no blur pass) keeps it readable over
+        // bright frames at almost no cost.
         Box(
             Modifier
                 .matchParentSize()
-                .graphicsLayer {
-                    translationY = 1.dp.toPx()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        renderEffect = BlurEffect(3.dp.toPx(), 3.dp.toPx(), TileMode.Decal)
-                    }
-                }
                 .drawWithContent {
-                    with(painter) { draw(this@drawWithContent.size, alpha = 0.45f, colorFilter = ShadowFilter) }
+                    val d = 0.8.dp.toPx()
+                    translate(top = d) {
+                        with(painter) { draw(this@drawWithContent.size, alpha = 0.32f, colorFilter = ShadowFilter) }
+                    }
+                    translate(top = d * 2.2f) {
+                        with(painter) { draw(this@drawWithContent.size, alpha = 0.16f, colorFilter = ShadowFilter) }
+                    }
                 },
         )
         if (live && color == Color.White) {
+            // The glyph is a window onto the (already soft) video copy: brightened and more
+            // saturated, a light frost, and a specular sheen on the upper part.
             Box(
                 Modifier
                     .matchParentSize()
@@ -100,23 +101,19 @@ fun GlassIcon(
                         backdrop = backdrop!!,
                         shape = { RectangleShape },
                         effects = {
-                            colorControls(brightness = 0.32f, contrast = 1.1f, saturation = 1.6f)
-                            blur(4.dp.toPx())
+                            colorControls(brightness = 0.22f, contrast = 1.05f, saturation = 1.8f)
                         },
                         onDrawSurface = {
-                            drawRect(Color.White.copy(alpha = 0.62f))
+                            drawRect(Color.White.copy(alpha = 0.34f))
+                            drawRect(
+                                Brush.verticalGradient(
+                                    0f to Color.White.copy(alpha = 0.5f),
+                                    0.55f to Color.White.copy(alpha = 0.08f),
+                                    1f to Color.Transparent,
+                                ),
+                            )
                         },
                     ),
-            )
-            // Specular rim: a faint light copy nudged up so the top edges catch light.
-            Box(
-                Modifier
-                    .matchParentSize()
-                    .drawWithContent {
-                        translate(top = -0.6.dp.toPx()) {
-                            with(painter) { draw(this@drawWithContent.size, alpha = 0.22f, colorFilter = RimFilter) }
-                        }
-                    },
             )
         } else {
             Box(
@@ -143,7 +140,6 @@ fun GlassIcon(
 }
 
 private val ShadowFilter = ColorFilter.tint(Color.Black)
-private val RimFilter = ColorFilter.tint(Color.White)
 
 /** Keeps what was drawn so far only where [painter] has pixels. */
 private fun DrawScope.maskWith(painter: Painter) {

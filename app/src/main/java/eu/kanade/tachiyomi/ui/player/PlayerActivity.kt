@@ -449,7 +449,12 @@ class PlayerActivity : BaseActivity() {
                     // YMR --> live glass over a small copy of the video while the controls show
                     val controlsVisible by viewModel.controlsShown.collectAsState()
                     yomira.player.ProvidePlayerButtonLook {
-                    yomira.player.VideoGlassBackdrop(surfaceView = player, active = controlsVisible) {
+                    val videoPaused by viewModel.paused.collectAsState()
+                    yomira.player.VideoGlassBackdrop(
+                        surfaceView = player,
+                        active = controlsVisible,
+                        paused = videoPaused == true,
+                    ) {
                     // YMR <--
                     PlayerControls(
                         viewModel = viewModel,
@@ -461,6 +466,7 @@ class PlayerActivity : BaseActivity() {
                     // YMR -->
                     }
                     }
+                    yomira.player.FrameStatsOverlay(mpv = { viewModel.mpv })
                     // YMR <--
                     // YMR -->
                     }

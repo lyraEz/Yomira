@@ -10,6 +10,18 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.3.2] - 2026-10-16
+
+### Fixed
+- Player lento e quadros perdidos com os controles visíveis: a cópia do vídeo para o vidro agora roda a 30 por segundo (antes a cada quadro da tela), para quando o vídeo está pausado e não usa mais desfoque extra nos ícones e na barra; a lente da barra de progresso só roda enquanto você arrasta.
+
+### Added
+- Fluidez: manter sincronia em celulares fracos, decodificação rápida, busca rápida, vidro desligado e contador de quadros perdidos.
+- Nova aba Qualidade (separada da Fluidez): qualidade da imagem, reduzir halos, gradientes suaves, desentrelaçar e mapeamento HDR.
+
+### Changed
+- Ícones de vidro mostram mais o vídeo por trás (menos branco) com brilho na parte de cima.
+
 ## Yomira [1.3.1] - 2026-10-13
 
 ### Changed

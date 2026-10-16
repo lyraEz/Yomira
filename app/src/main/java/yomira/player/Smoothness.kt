@@ -35,7 +35,33 @@ class SmoothnessPreferences(private val store: PreferenceStore = Injekt.get()) {
 
     /** Larger read-ahead so slow or unstable connections do not stall playback. */
     fun bigBuffer() = store.getBoolean("yomira_big_buffer", false)
+
+    /** Drop late frames at the decoder too, so weak phones keep audio and video in sync. */
+    fun decoderFrameDrop() = store.getBoolean("yomira_decoder_framedrop", false)
+
+    /** Cheaper software decoding (skips the loop filter on non-reference frames). */
+    fun fastDecode() = store.getBoolean("yomira_fast_decode", false)
+
+    /** Seek to the nearest keyframe (instant) instead of the exact frame. */
+    fun fastSeek() = store.getBoolean("yomira_fast_seek", false)
+
+    /** Live counter of dropped and late frames over the video. */
+    fun frameStats() = store.getBoolean("yomira_frame_stats", false)
+
+    /** Quality: softens the ringing halos sharp scalers leave around lines. */
+    fun antiRing() = store.getBoolean("yomira_anti_ring", true)
+
+    /** Quality: dithering for smooth gradients. */
+    fun dither() = store.getBoolean("yomira_dither", true)
+
+    /** Quality: tone mapping for HDR video on SDR screens. */
+    fun toneMapping() = store.getEnum("yomira_tone_mapping", ToneMapping.AUTO)
+
+    /** Quality: automatic deinterlacing for interlaced (DVD/TV) sources. */
+    fun deinterlace() = store.getBoolean("yomira_deinterlace", false)
 }
+
+enum class ToneMapping(val mpvValue: String) { AUTO("auto"), BT2390("bt.2390"), HABLE("hable"), MOBIUS("mobius") }
 
 /** mpv scaler presets, from cheapest to sharpest. */
 enum class ImageQuality { AUTO, FAST, BALANCED, HIGH }
@@ -101,10 +127,39 @@ object Smoothness {
                 mpv.setOptionString("demuxer-max-bytes", "${megs * 1024 * 1024}")
             }
         }
+        playbackOptions(prefs).forEach { (key, value) -> runCatching { mpv.setOptionString(key, value) } }
+        qualityOptions(prefs).forEach { (key, value) -> runCatching { mpv.setOptionString(key, value) } }
         if (prefs.smoothMotion().get()) {
             mpv.setOptionString("video-sync", "display-resample")
             mpv.setOptionString("interpolation", "yes")
             mpv.setOptionString("tscale", "oversample")
+        }
+    }
+
+    private fun playbackOptions(prefs: SmoothnessPreferences): List<Pair<String, String>> = buildList {
+        add("framedrop" to if (prefs.decoderFrameDrop().get()) "decoder+vo" else "vo")
+        add("hr-seek" to if (prefs.fastSeek().get()) "no" else "default")
+        if (prefs.fastDecode().get()) {
+            add("vd-lavc-fast" to "yes")
+            add("vd-lavc-skiploopfilter" to "nonref")
+        } else {
+            add("vd-lavc-fast" to "no")
+            add("vd-lavc-skiploopfilter" to "default")
+        }
+    }
+
+    private fun qualityOptions(prefs: SmoothnessPreferences): List<Pair<String, String>> = listOf(
+        "scale-antiring" to if (prefs.antiRing().get()) "0.6" else "0",
+        "dither-depth" to if (prefs.dither().get()) "auto" else "no",
+        "tone-mapping" to prefs.toneMapping().get().mpvValue,
+        "deinterlace" to if (prefs.deinterlace().get()) "auto" else "no",
+    )
+
+    /** Re-applies the playback and quality options while playing (decoder ones apply to the next video). */
+    fun applyLive(mpv: MPV?, prefs: SmoothnessPreferences = SmoothnessPreferences()) {
+        mpv ?: return
+        (playbackOptions(prefs) + qualityOptions(prefs)).forEach { (key, value) ->
+            runCatching { mpv.setPropertyString(key, value) }
         }
     }
 

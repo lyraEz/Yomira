@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -40,7 +42,6 @@ import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.drawPlainBackdrop
-import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.colorControls
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.highlight.Highlight
@@ -72,6 +73,8 @@ fun GlassSeekBar(
     val bend = live && style.refraction && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     val press = remember { Animatable(0f) }
+    // The lens (refraction shader over the video and the track) only runs while dragging.
+    var dragging by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -109,7 +112,9 @@ fun GlassSeekBar(
                 }
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
+                    try {
                     down.consume()
+                    dragging = true
                     scope.launch { press.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 520f)) }
                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     onChange(toValue(down.position.x))
@@ -123,7 +128,10 @@ fun GlassSeekBar(
                         }
                     }
                     onFinished()
-                    scope.launch { press.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 380f)) }
+                    } finally {
+                        dragging = false
+                        scope.launch { press.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 380f)) }
+                    }
                 }
             },
         contentAlignment = Alignment.CenterStart,
@@ -144,8 +152,8 @@ fun GlassSeekBar(
                             backdrop = videoBackdrop!!,
                             shape = { RoundedCornerShape(percent = 50) },
                             effects = {
-                                colorControls(brightness = 0.1f, contrast = 1f, saturation = 1.5f)
-                                blur(8.dp.toPx())
+                                // The video copy is already soft; no blur pass needed.
+                                colorControls(brightness = 0.06f, contrast = 1f, saturation = 1.5f)
                             },
                             onDrawSurface = { drawRect(Color.White.copy(alpha = 0.16f)) },
                         )
@@ -189,7 +197,7 @@ fun GlassSeekBar(
                     }
                 }
                 .then(
-                    if (live) {
+                    if (live && dragging) {
                         Modifier.drawBackdrop(
                             backdrop = lensBackdrop,
                             shape = { RoundedCornerShape(percent = 50) },

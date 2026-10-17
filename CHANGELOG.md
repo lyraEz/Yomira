@@ -10,6 +10,17 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.4.0] - 2026-10-17
+
+### Added
+- Player: Otimizador inteligente. A cada vídeo ele lê os fps da fonte, a resolução, o codec e o decodificador, as taxas da tela do celular, o nível do aparelho e a bateria, e escolhe a taxa da tela múltipla exata do vídeo (24 fps → 48/72/120 Hz, 60 fps → 60/120 Hz...), o ritmo dos quadros travado na tela, a qualidade da imagem e o custo do vidro. Cada recomendação (✦) pode ser trocada; se quadros começarem a cair, ele reduz um nível por vez sozinho.
+- Player: Áudio e extras com modo noturno, diálogos claros, realce de graves e voltar alguns segundos ao retomar depois de uma pausa longa.
+- Estatísticas do vídeo com fps da fonte e de saída, taxa da tela e cadência, resolução e decodificador, sincronia A/V, buffer e velocidade da rede, escala, bateria, temperatura e hora.
+- Desfoque atrás das folhas (Android 12+).
+
+### Changed
+- O player não fixa mais a taxa máxima da tela: quem decide é o otimizador, por vídeo.
+
 ## Yomira [1.3.2] - 2026-10-16
 
 ### Fixed

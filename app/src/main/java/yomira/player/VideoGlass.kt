@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +50,10 @@ fun VideoGlassBackdrop(
 ) {
     val style = LocalGlassStyle.current
     val prefs = remember { SmoothnessPreferences() }
-    val rate by prefs.videoGlassRate().collectAsState()
+    val userRate by prefs.videoGlassRate().collectAsState()
+    val plan by PlaybackOptimizer.plan.collectAsState()
+    // "Auto" follows the optimizer's plan for this phone and video.
+    val rate = if (userRate == -1) plan?.glassRate ?: -1 else userRate
     if (!style.liveBlur || rate == VideoGlassOff) {
         CompositionLocalProvider(LocalGlassBackdrop provides null, content = content)
         return

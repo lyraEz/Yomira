@@ -231,45 +231,89 @@ fun QualityCard() {
 }
 
 /**
- * Small live counter of dropped/late frames in the top corner, shown only when enabled in the
- * smoothness card. Reads three mpv properties once per second.
+ * Live playback statistics in the top corner, shown only when enabled in the smoothness card:
+ * dropped/late frames, source vs display rate and cadence, resolution and decoder, A/V sync,
+ * buffer and network speed, scaler and glass, battery, temperature and clock. Reads a handful of
+ * mpv properties once per second.
  */
 @Composable
 fun FrameStatsOverlay(mpv: () -> MPV?) {
     val prefs = remember { SmoothnessPreferences() }
     val enabled by prefs.frameStats().collectAsState()
     if (!enabled) return
-    var text by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    var lines by remember { mutableStateOf(emptyList<String>()) }
     LaunchedEffect(Unit) {
+        val clock = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
         while (true) {
             val m = mpv()
             if (m != null) {
-                fun long(name: String) = runCatching { m.getPropertyInt(name) }.getOrNull() ?: 0
-                val dropped = long("frame-drop-count")
-                val decoder = long("decoder-frame-drop-count")
-                val late = long("vo-delayed-frame-count")
-                val fps = runCatching { m.getPropertyDouble("estimated-display-fps") }.getOrNull() ?: 0.0
-                text = "VO %d  DEC %d  LATE %d  %.0f fps".format(dropped, decoder, late, fps)
+                fun int(name: String) = runCatching { m.getPropertyInt(name) }.getOrNull() ?: 0
+                fun dbl(name: String) = runCatching { m.getPropertyDouble(name) }.getOrNull()
+                fun str(name: String) = runCatching { m.getPropertyString(name) }.getOrNull().orEmpty()
+                val plan = PlaybackOptimizer.plan.value
+                val sourceFps = dbl("container-fps") ?: 0.0
+                val outFps = dbl("estimated-vf-fps") ?: 0.0
+                val hz = PlaybackOptimizer.appliedHz.takeIf { it > 0f }?.toDouble() ?: dbl("display-fps") ?: 0.0
+                val k = if (sourceFps > 0) hz / sourceFps else 0.0
+                val cadence = if (sourceFps > 0 && hz > 0 && kotlin.math.abs(k - Math.round(k)) < 0.012) {
+                    "✓ %d×".format(Math.round(k))
+                } else {
+                    "≈ %.2f×".format(k)
+                }
+                val w = int("video-params/w")
+                val h = int("video-params/h")
+                val codec = str("video-format").uppercase()
+                val hw = str("hwdec-current").ifBlank { "sw" }
+                val avsync = dbl("avsync") ?: 0.0
+                val buffer = dbl("demuxer-cache-duration") ?: 0.0
+                val speed = int("cache-speed") / 1_000_000.0
+                val bitrate = (dbl("video-bitrate") ?: 0.0) / 1_000_000.0
+                val battery = context.registerReceiver(
+                    null,
+                    android.content.IntentFilter(android.content.Intent.ACTION_BATTERY_CHANGED),
+                )
+                val level = battery?.let {
+                    val l = it.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+                    val sc = it.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
+                    if (l >= 0) l * 100 / sc else -1
+                } ?: -1
+                val temp = (battery?.getIntExtra(android.os.BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0) / 10.0
+                lines = buildList {
+                    add("VO %d  DEC %d  LATE %d".format(int("frame-drop-count"), int("decoder-frame-drop-count"), int("vo-delayed-frame-count")))
+                    add("SRC %.3f  OUT %.2f  ⟶  %.0f Hz %s".format(sourceFps, outFps, hz, cadence))
+                    add("%d×%d %s  •  %s".format(w, h, codec, hw))
+                    add("SYNC %s  A/V %+.3f s".format(str("video-sync"), avsync))
+                    add("BUF %.0f s  NET %.1f MB/s  %.1f Mb/s".format(buffer, speed, bitrate))
+                    add("SCALE %s  •  %s".format(str("scale"), plan?.quality?.name ?: "-"))
+                    add("BAT %d%%  %.0f°C  •  %s".format(level, temp, clock.format(java.util.Date())))
+                }
             }
             delay(1_000)
         }
     }
     Box(Modifier.fillMaxSize().statusBarsPadding().padding(8.dp), contentAlignment = Alignment.TopStart) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
+        Column(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.Black.copy(alpha = 0.45f))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        )
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Black.copy(alpha = 0.5f))
+                .padding(horizontal = 8.dp, vertical = 5.dp),
+            verticalArrangement = Arrangement.spacedBy(1.dp),
+        ) {
+            lines.forEachIndexed { i, line ->
+                Text(
+                    text = line,
+                    color = if (i == 0) Color.White else Color.White.copy(alpha = 0.85f),
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                )
+            }
+        }
     }
 }
 
 @Composable
-private fun SwitchRow(title: String, summary: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(title: String, summary: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -284,12 +328,13 @@ private fun SwitchRow(title: String, summary: String, checked: Boolean, onChange
 }
 
 @Composable
-private fun ChoiceRow(
+internal fun ChoiceRow(
     title: String,
     summary: String,
     options: List<String>,
     selected: Int,
     onSelect: (Int) -> Unit,
+    recommended: Int? = null,
 ) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(title, style = MaterialTheme.typography.titleSmall)
@@ -302,7 +347,13 @@ private fun ChoiceRow(
                 FilterChip(
                     selected = index == selected,
                     onClick = { onSelect(index) },
-                    label = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1) },
+                    label = {
+                        Text(
+                            if (index == recommended) "$label  ✦" else label,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                        )
+                    },
                     shape = RoundedCornerShape(percent = 50),
                 )
             }

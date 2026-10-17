@@ -78,6 +78,9 @@ fun AdaptiveSheet(
         onDismissRequest = onDismissRequest,
         properties = dialogProperties,
     ) {
+        // YMR --> frosted background behind sheets (Android 12+)
+        yomira.glass.DialogWindowBlur()
+        // YMR <--
         AdaptiveSheetImpl(
             modifier = modifier,
             isTabletUi = isTabletUi,

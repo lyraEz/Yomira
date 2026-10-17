@@ -149,6 +149,9 @@ fun VideoFiltersPanel(
                     }
                 }
 
+                // YMR --> smart optimizer first
+                yomira.player.OptimizerCard()
+                // YMR <--
                 FilterPresetsCard()
                 FiltersCard()
                 DebandCard()
@@ -156,6 +159,7 @@ fun VideoFiltersPanel(
                 // YMR -->
                 yomira.player.SmoothnessCard()
                 yomira.player.QualityCard()
+                yomira.player.ExtrasCard()
                 // YMR <--
             }
         }

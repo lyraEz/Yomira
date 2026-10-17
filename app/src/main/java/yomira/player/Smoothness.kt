@@ -182,6 +182,8 @@ object Smoothness {
         var applied = 0f
         while (true) {
             delay(2_000)
+            // The playback optimizer handles the refresh rate itself when it is on.
+            if (OptimizerPreferences().enabled().get()) continue
             val enabled = prefs.matchFrameRate().get()
             val fps = if (enabled) {
                 runCatching { mpv()?.getPropertyDouble("container-fps") }.getOrNull()?.toFloat() ?: 0f

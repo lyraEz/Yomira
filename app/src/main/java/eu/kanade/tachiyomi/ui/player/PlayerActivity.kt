@@ -132,6 +132,11 @@ import kotlin.math.floor
 import kotlin.time.Duration.Companion.milliseconds
 
 class PlayerActivity : BaseActivity() {
+
+    // YMR --> refresh rate follows the video (yomira.player.PlaybackOptimizer)
+    override val pinHighRefreshRate: Boolean
+        get() = !yomira.player.OptimizerPreferences().enabled().get()
+    // YMR <--
     // ANZ -->
     private var httpServer: HttpServer? = null
 
@@ -481,7 +486,23 @@ class PlayerActivity : BaseActivity() {
         // YMR --> match the screen's refresh rate to the video's frame rate
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
-                yomira.player.Smoothness.frameRateLoop(player, { viewModel.mpv })
+                launch { yomira.player.Smoothness.frameRateLoop(player, { viewModel.mpv }) }
+                launch { yomira.player.PlaybackOptimizer.run(this@PlayerActivity, player, { viewModel.mpv }) }
+                // Rewind a few seconds when resuming after a long pause.
+                launch {
+                    val extras = yomira.player.PlayerExtrasPreferences()
+                    var pausedAt = 0L
+                    viewModel.paused.collect { paused ->
+                        if (paused == true) {
+                            if (pausedAt == 0L) pausedAt = System.currentTimeMillis()
+                        } else if (paused == false) {
+                            val long = pausedAt > 0L &&
+                                System.currentTimeMillis() - pausedAt >= yomira.player.PlayerExtras.LONG_PAUSE_MS
+                            pausedAt = 0L
+                            if (long) yomira.player.PlayerExtras.rewind(viewModel.mpv, extras.resumeRewind().get())
+                        }
+                    }
+                }
             }
         }
         // YMR <--

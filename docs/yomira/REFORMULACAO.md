@@ -34,6 +34,8 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Mais/Config | Cartão de perfil, ícones em blocos coloridos, grupos em cartões com divisórias | `MoreComponents.kt`, `LogoHeader.kt`, `PreferenceScreen.kt` |
 | Detalhes | Botões de vidro sobre a capa, barra que vira vidro, ações em blocos, episódios em cartões | `AnimeToolbar.kt`, `AnimeInfoHeader.kt`, `AnimeEpisodeListItem.kt` |
 | Player | Ícones como vidro (sem bolhas), barra de progresso de vidro com polegar que vira lente | `yomira/player/GlassIcon.kt`, `GlassSeekBar.kt`, `ControlsButton.kt`, `SeekBar.kt` |
+| Player | Otimizador inteligente por vídeo (taxa da tela múltipla dos fps, ritmo, qualidade, vidro, ajuste automático), extras de áudio, estatísticas completas | `yomira/player/PlaybackOptimizer.kt`, `OptimizerCard.kt`, `PlayerExtras.kt`, `SmoothnessCard.kt` |
+| Vidro | Desfoque atrás das folhas (Android 12+) | `yomira/glass/DialogBlur.kt`, `AdaptiveSheet.kt` |
 | Vidro | Barras de vidro com fade embaixo (sem linha reta) e capa desfocada com fade | `GlassSurface.kt` (`glassBarFaded`), `Scaffold.kt`, `AnimeToolbar.kt`, `AnimeInfoHeader.kt` |
 
 ## Falta fazer (ordem sugerida)
@@ -50,8 +52,7 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
       quadros" (Fluidez) se VO/DEC/LATE ficam parados; se ainda subirem com os controles visíveis,
       testar "Atualização do vidro: 15 fps/Desligado" para isolar a causa.
 1. Detalhes do anime (restante): capa de fundo mais desfocada e cabeçalho "N episódios" de vidro.
-2. Folhas e diálogos: desfoque de janela (Android 12+, `blurBehindRadius`) nos `Dialog`/`AdaptiveSheet`,
-   e versões dentro da janela quando precisar refratar a página.
+2. Diálogos simples (AlertDialog) com o mesmo desfoque das folhas (`DialogWindowBlur()`).
 3. Barra inferior do player: barra de progresso dentro de cápsula de vidro; agrupar botões da direita.
 4. Configurações: título grande estilo iOS que encolhe ao rolar.
 5. Biblioteca: cabeçalho grande com recolhimento, cartões com cantos 20 dp e sombra suave.

@@ -10,6 +10,11 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.4.1] - 2026-10-17
+
+### Fixed
+- Otimizador: não estica mais o vídeo para a taxa da tela (ex.: 23,976 fps em 90 Hz travava e perdia quadros). Agora tudo fica nos fps do próprio vídeo: o ritmo recomendado é "Fps do vídeo" (sem reamostrar para a tela e sem misturar quadros) e a tela só muda para a taxa do vídeo ou o múltiplo exato mais próximo; sem múltiplo exato, a tela fica na menor taxa. Na TV isso troca a saída HDMI para 23,976/24/25/50/60 Hz conforme o episódio.
+
 ## Yomira [1.4.0] - 2026-10-17
 
 ### Added

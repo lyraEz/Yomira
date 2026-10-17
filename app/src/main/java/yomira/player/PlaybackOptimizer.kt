@@ -81,11 +81,10 @@ data class PlaybackPlan(
  * refresh rates the panel supports, the phone's tier (SoC, RAM, 64-bit), battery saver and battery
  * level, and picks:
  *
- * - the refresh rate that is an exact multiple of the source (24 fps → 24/48/72/120 Hz, 30 → 60/90/
- *   120, 60 → 60/120...). Every video frame then stays on screen for the same number of refreshes,
- *   so motion has perfect cadence with no interpolation and no judder;
- * - frame pacing locked to the display (mpv display-resample with the exact rate), or interpolation
- *   when no exact multiple exists;
+ * - the screen refresh: the video's own frame rate, or the closest exact multiple the panel supports
+ *   (24 fps → 24/48/72/120 Hz, 30 → 30/60/90, 60 → 60/120). With none available the panel stays at
+ *   its lowest rate; the video is never stretched or blended to fit the screen;
+ * - frames presented at the source rate (audio clock), no display resampling, no interpolation;
  * - scaler quality from the pixel load (width × height × fps) against the tier;
  * - the cost of the live glass and decoder fallbacks.
  *
@@ -144,27 +143,26 @@ object PlaybackOptimizer {
     ): PlaybackPlan {
         val tier = Anime4KAdvisor.tier(context)
         val saver = prefs.batteryAware().get() && lowBattery(context)
-        val strong = tier >= Anime4KAdvisor.Tier.HIGH && !saver
         val fps = video.fps
 
         // Refresh rate: exact multiple of the source.
         val exact = modes.filter { isExact(it.hz, fps) }
+        // Everything follows the video's own frame rate: the screen only changes to that rate or
+        // the closest exact multiple of it. When the panel has none (e.g. 60/90 Hz for 23.976 fps),
+        // it stays at its lowest rate and the video is never stretched to the screen.
         val recommendedRefresh = when {
             modes.isEmpty() || fps <= 0.0 -> null
-            exact.isNotEmpty() && strong -> exact.filter { it.hz <= 121f }.maxByOrNull { it.hz } ?: exact.maxBy { it.hz }
-            exact.isNotEmpty() -> exact.firstOrNull { it.hz >= 47f } ?: exact.last()
-            else -> modes.maxBy { it.hz }
+            exact.isNotEmpty() -> exact.minBy { it.hz }
+            else -> modes.filter { it.hz >= fps - 0.5 }.minByOrNull { it.hz } ?: modes.minBy { it.hz }
         }
         val override = prefs.refreshOverride().get()
         val refresh = if (override > 0f) modes.minByOrNull { abs(it.hz - override) } ?: recommendedRefresh else recommendedRefresh
         val exactCadence = refresh != null && fps > 0 && isExact(refresh.hz, fps)
 
         // Pacing.
-        val recommendedSync = when {
-            exactCadence -> SyncMode.LOCKED
-            tier >= Anime4KAdvisor.Tier.MID && !saver -> SyncMode.LOCKED_SMOOTH
-            else -> SyncMode.AUDIO
-        }
+        // Frames are presented at the source rate (audio clock): no resampling to the display and
+        // no frame blending, which on a mismatched panel only adds GPU load and dropped frames.
+        val recommendedSync = SyncMode.AUDIO
         val sync = prefs.syncOverride().get().takeUnless { it == SyncMode.AUTO } ?: recommendedSync
             .let { if (stepDown >= 3 && it == SyncMode.LOCKED_SMOOTH) SyncMode.LOCKED else it }
 
@@ -354,7 +352,8 @@ object PlaybackOptimizer {
             val actual = activity.currentDisplay()?.refreshRate ?: 0f
             appliedHz = actual
             val desired = plan.refresh?.hz ?: 0f
-            val wanted = if (desired > 0f && abs(actual - desired) < 0.6f) desired else 0f
+            val locked = plan.sync == SyncMode.LOCKED || plan.sync == SyncMode.LOCKED_SMOOTH
+            val wanted = if (locked && desired > 0f && abs(actual - desired) < 0.6f) desired else 0f
             if (wanted != overrideHz) {
                 overrideHz = wanted
                 val value = "%.3f".format(java.util.Locale.ROOT, wanted)

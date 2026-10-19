@@ -26,7 +26,8 @@ import kotlin.math.roundToInt
 enum class SyncMode { AUTO, AUDIO, LOCKED, LOCKED_SMOOTH }
 
 class OptimizerPreferences(private val store: PreferenceStore = Injekt.get()) {
-    fun enabled() = store.getBoolean("yomira_optimizer", true)
+    /** Off by default: it only changes things when the user turns it on. */
+    fun enabled() = store.getBoolean("yomira_optimizer", false)
 
     /** Re-checks every video and steps down a level if frames start dropping. */
     fun adaptive() = store.getBoolean("yomira_optimizer_adaptive", true)
@@ -153,7 +154,8 @@ object PlaybackOptimizer {
         val recommendedRefresh = when {
             modes.isEmpty() || fps <= 0.0 -> null
             exact.isNotEmpty() -> exact.minBy { it.hz }
-            else -> modes.filter { it.hz >= fps - 0.5 }.minByOrNull { it.hz } ?: modes.minBy { it.hz }
+            // No exact multiple: the screen is left to the system.
+            else -> null
         }
         val override = prefs.refreshOverride().get()
         val refresh = if (override > 0f) modes.minByOrNull { abs(it.hz - override) } ?: recommendedRefresh else recommendedRefresh
@@ -170,11 +172,11 @@ object PlaybackOptimizer {
         val load = video.width.toLong() * video.height * fps.coerceAtLeast(1.0)
         val fhd30 = 1920L * 1080 * 30
         val software = video.hwdec.isBlank() || video.hwdec == "no"
+        // Conservative on purpose: sharper scalers run on every frame and heat the phone.
         var recommendedQuality = when (tier) {
-            Anime4KAdvisor.Tier.LOW -> ImageQuality.FAST
-            Anime4KAdvisor.Tier.MID -> if (load > fhd30 || software) ImageQuality.FAST else ImageQuality.BALANCED
-            Anime4KAdvisor.Tier.HIGH -> if (load > fhd30 * 2) ImageQuality.BALANCED else ImageQuality.HIGH
-            Anime4KAdvisor.Tier.FLAGSHIP -> if (load > fhd30 * 4) ImageQuality.BALANCED else ImageQuality.HIGH
+            Anime4KAdvisor.Tier.LOW, Anime4KAdvisor.Tier.MID -> ImageQuality.FAST
+            Anime4KAdvisor.Tier.HIGH -> if (load > fhd30) ImageQuality.FAST else ImageQuality.BALANCED
+            Anime4KAdvisor.Tier.FLAGSHIP -> if (load > fhd30 * 2) ImageQuality.FAST else ImageQuality.BALANCED
         }
         if (saver && recommendedQuality > ImageQuality.FAST) {
             recommendedQuality = ImageQuality.entries[recommendedQuality.ordinal - 1]
@@ -232,13 +234,11 @@ object PlaybackOptimizer {
         val fps = plan.video.fps
         val refresh = plan.refresh
         // 1. Screen: pin the display mode and tell the surface the source rate.
-        if (refresh != null) {
-            runCatching {
-                val params = activity.window.attributes
-                params.preferredDisplayModeId = refresh.id
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) params.preferredRefreshRate = refresh.hz
-                activity.window.attributes = params
-            }
+        runCatching {
+            val params = activity.window.attributes
+            params.preferredDisplayModeId = refresh?.id ?: 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) params.preferredRefreshRate = refresh?.hz ?: 0f
+            activity.window.attributes = params
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val surface = surfaceView.holder?.surface
@@ -323,7 +323,7 @@ object PlaybackOptimizer {
         var firstCheckAt = 0L
         pendingApply = true
         while (true) {
-            delay(1_000)
+            delay(2_000)
             val m = mpv() ?: continue
             if (!prefs.enabled().get()) {
                 _plan.value = null

@@ -188,6 +188,33 @@ fun OptimizerCard() {
     }
 }
 
+/** One tap back to the light defaults, for when playback stutters or the phone heats up. */
+@Composable
+fun ResetPlayerButton() {
+    val context = LocalContext.current
+    val mpv = (context as? PlayerActivity)?.viewModel?.mpv
+    val done = stringResource(YMR.strings.player_reset_done)
+    androidx.compose.material3.OutlinedButton(
+        onClick = {
+            PlayerDefaults.reset()
+            mpv?.let { m ->
+                listOf(
+                    "glsl-shaders" to "",
+                    "interpolation" to "no",
+                    "video-sync" to "audio",
+                    "deband" to "no",
+                ).forEach { (k, v) -> runCatching { m.setPropertyString(k, v) } }
+                Smoothness.setImageQuality(context, m, ImageQuality.AUTO)
+                PlayerExtras.applyAudio(m)
+            }
+            android.widget.Toast.makeText(context, done, android.widget.Toast.LENGTH_LONG).show()
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(stringResource(YMR.strings.player_reset))
+    }
+}
+
 @Composable
 private fun PlanSummary(p: PlaybackPlan) {
     val tier = stringResource(

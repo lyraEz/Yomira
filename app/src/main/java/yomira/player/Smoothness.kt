@@ -49,10 +49,10 @@ class SmoothnessPreferences(private val store: PreferenceStore = Injekt.get()) {
     fun frameStats() = store.getBoolean("yomira_frame_stats", false)
 
     /** Quality: softens the ringing halos sharp scalers leave around lines. */
-    fun antiRing() = store.getBoolean("yomira_anti_ring", true)
+    fun antiRing() = store.getBoolean("yomira_anti_ring", false)
 
     /** Quality: dithering for smooth gradients. */
-    fun dither() = store.getBoolean("yomira_dither", true)
+    fun dither() = store.getBoolean("yomira_dither", false)
 
     /** Quality: tone mapping for HDR video on SDR screens. */
     fun toneMapping() = store.getEnum("yomira_tone_mapping", ToneMapping.AUTO)
@@ -69,12 +69,12 @@ enum class ImageQuality { AUTO, FAST, BALANCED, HIGH }
 object Smoothness {
 
     /** Image quality the device can sustain without dropping frames. */
-    fun resolve(context: Context, quality: ImageQuality): ImageQuality = when (quality) {
-        ImageQuality.AUTO -> when (Anime4KAdvisor.tier(context)) {
-            Anime4KAdvisor.Tier.LOW -> ImageQuality.FAST
-            Anime4KAdvisor.Tier.MID -> ImageQuality.BALANCED
-            Anime4KAdvisor.Tier.HIGH, Anime4KAdvisor.Tier.FLAGSHIP -> ImageQuality.HIGH
-        }
+    /**
+     * Auto keeps the player's light "fast" profile (bilinear): sharper scalers cost GPU time on
+     * every frame and heat the phone, so they are only used when picked by hand.
+     */
+    fun resolve(@Suppress("UNUSED_PARAMETER") context: Context, quality: ImageQuality): ImageQuality = when (quality) {
+        ImageQuality.AUTO -> ImageQuality.FAST
         else -> quality
     }
 
@@ -113,8 +113,11 @@ object Smoothness {
     /** Options read once when mpv starts. */
     fun applyMpvOptions(context: Context, mpv: MPV?, prefs: SmoothnessPreferences = SmoothnessPreferences()) {
         mpv ?: return
-        scalerOptions(resolve(context, prefs.imageQuality().get())).forEach { (key, value) ->
-            runCatching { mpv.setOptionString(key, value) }
+        // Only what the user changed is applied; everything else stays on the player's light
+        // "fast" profile set in AniyomiMPVView.
+        val quality = prefs.imageQuality().get()
+        if (quality != ImageQuality.AUTO) {
+            scalerOptions(quality).forEach { (key, value) -> runCatching { mpv.setOptionString(key, value) } }
         }
         if (prefs.bigBuffer().get()) {
             val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
@@ -127,8 +130,18 @@ object Smoothness {
                 mpv.setOptionString("demuxer-max-bytes", "${megs * 1024 * 1024}")
             }
         }
-        playbackOptions(prefs).forEach { (key, value) -> runCatching { mpv.setOptionString(key, value) } }
-        qualityOptions(prefs).forEach { (key, value) -> runCatching { mpv.setOptionString(key, value) } }
+        buildList {
+            if (prefs.decoderFrameDrop().get()) add("framedrop" to "decoder+vo")
+            if (prefs.fastSeek().get()) add("hr-seek" to "no")
+            if (prefs.fastDecode().get()) {
+                add("vd-lavc-fast" to "yes")
+                add("vd-lavc-skiploopfilter" to "nonref")
+            }
+            if (prefs.antiRing().isSet() && prefs.antiRing().get()) add("scale-antiring" to "0.6")
+            if (prefs.dither().isSet() && prefs.dither().get()) add("dither-depth" to "auto")
+            if (prefs.toneMapping().get() != ToneMapping.AUTO) add("tone-mapping" to prefs.toneMapping().get().mpvValue)
+            if (prefs.deinterlace().get()) add("deinterlace" to "auto")
+        }.forEach { (key, value) -> runCatching { mpv.setOptionString(key, value) } }
         if (prefs.smoothMotion().get()) {
             mpv.setOptionString("video-sync", "display-resample")
             mpv.setOptionString("interpolation", "yes")

@@ -239,4 +239,7 @@
     <string name="extras_bass_summary">A gentle low-end lift for phone speakers and earbuds.</string>
     <string name="extras_rewind">Rewind on resume</string>
     <string name="extras_rewind_summary">After a pause longer than 30 seconds, goes back a few seconds so you do not lose the thread.</string>
+    <string name="thermal_light_mode">The phone is getting hot: switched the player to its lightest settings to avoid stutters.</string>
+    <string name="player_reset">Restore player defaults</string>
+    <string name="player_reset_done">Player settings restored to the light defaults. Some apply from the next video.</string>
 </resources>

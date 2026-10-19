@@ -286,7 +286,7 @@ fun FrameStatsOverlay(mpv: () -> MPV?) {
                     add("SYNC %s  A/V %+.3f s".format(str("video-sync"), avsync))
                     add("BUF %.0f s  NET %.1f MB/s  %.1f Mb/s".format(buffer, speed, bitrate))
                     add("SCALE %s  •  %s".format(str("scale"), plan?.quality?.name ?: "-"))
-                    add("BAT %d%%  %.0f°C  •  %s".format(level, temp, clock.format(java.util.Date())))
+                    add("BAT %d%%  %.0f°C  TEMP %s  •  %s".format(level, temp, ThermalGuard.label(), clock.format(java.util.Date())))
                 }
             }
             delay(1_000)

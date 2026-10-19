@@ -238,4 +238,7 @@
     <string name="extras_bass_summary">Um reforço leve nos graves para alto-falante do celular e fones.</string>
     <string name="extras_rewind">Voltar ao retomar</string>
     <string name="extras_rewind_summary">Depois de uma pausa de mais de 30 segundos, volta alguns segundos para você não perder o fio.</string>
+    <string name="thermal_light_mode">O celular está esquentando: o player passou para os ajustes mais leves para não travar.</string>
+    <string name="player_reset">Restaurar padrões do player</string>
+    <string name="player_reset_done">Ajustes do player restaurados para o padrão leve. Alguns valem a partir do próximo vídeo.</string>
 </resources>

@@ -54,7 +54,8 @@ fun VideoGlassBackdrop(
     val plan by PlaybackOptimizer.plan.collectAsState()
     // "Auto" follows the optimizer's plan for this phone and video.
     val rate = if (userRate == -1) plan?.glassRate ?: -1 else userRate
-    if (!style.liveBlur || rate == VideoGlassOff) {
+    val hot by ThermalGuard.hot.collectAsState()
+    if (!style.liveBlur || rate == VideoGlassOff || hot) {
         CompositionLocalProvider(LocalGlassBackdrop provides null, content = content)
         return
     }

@@ -133,9 +133,8 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class PlayerActivity : BaseActivity() {
 
-    // YMR --> refresh rate follows the video (yomira.player.PlaybackOptimizer)
-    override val pinHighRefreshRate: Boolean
-        get() = !yomira.player.OptimizerPreferences().enabled().get()
+    // YMR --> never pin the highest refresh rate during playback: the video sets the pace
+    override val pinHighRefreshRate: Boolean = false
     // YMR <--
     // ANZ -->
     private var httpServer: HttpServer? = null
@@ -312,6 +311,9 @@ class PlayerActivity : BaseActivity() {
         enableEdgeToEdge()
         registerSecureActivity(this)
         super.onCreate(savedInstanceState)
+        // YMR --> one-time return to the light player defaults (fixes the overheating presets)
+        yomira.player.PlayerDefaults.migrate()
+        // YMR <--
 
         // ANK -->
         // Registers before setupPlayerMPV() so MpvConfig stops wiping the config directory for as
@@ -488,6 +490,7 @@ class PlayerActivity : BaseActivity() {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch { yomira.player.Smoothness.frameRateLoop(player, { viewModel.mpv }) }
                 launch { yomira.player.PlaybackOptimizer.run(this@PlayerActivity, player, { viewModel.mpv }) }
+                launch { yomira.player.ThermalGuard.watch(this@PlayerActivity, { viewModel.mpv }) }
                 // Rewind a few seconds when resuming after a long pause.
                 launch {
                     val extras = yomira.player.PlayerExtrasPreferences()

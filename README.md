@@ -35,7 +35,7 @@ O Yomira é um **fork independente** do [AniZen](https://github.com/salmanbappi/
 
 ## Instalação
 
-Na página de [Releases](https://github.com/lyraEz/Yomira/releases) há APKs com o mesmo pacote e a mesma assinatura:
+Os APKs assinados ficam em [lyraEz/Yomira-releases](https://github.com/lyraEz/Yomira-releases/releases/latest), todos com o mesmo pacote e a mesma assinatura:
 
 | Arquivo | Quando usar |
 | --- | --- |
@@ -60,7 +60,7 @@ Se uma extensão não aparecer, use **Navegar → Extensões → menu → Recarr
 
 ## Atualizar o Yomira
 
-Instale o APK novo **por cima** do atual. Biblioteca, histórico e configurações são mantidos porque o pacote e a assinatura não mudam e o `versionCode` sempre aumenta. **Não desinstale** antes de atualizar.
+Use **Mais → Sobre → Verificar atualizações**, ou instale o APK novo **por cima** do atual. Biblioteca, histórico e configurações são mantidos porque o pacote e a assinatura não mudam e o `versionCode` sempre aumenta. **Não desinstale** antes de atualizar.
 
 Em APK instalado manualmente, o Android leva alguns dias para otimizar o app e isso pode causar engasgos no começo. Com o celular ligado ao computador, `adb shell cmd package compile -m speed-profile -f com.lyraez.yomira` faz isso na hora.
 

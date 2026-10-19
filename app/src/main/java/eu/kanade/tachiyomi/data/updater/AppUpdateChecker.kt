@@ -97,7 +97,9 @@ val GITHUB_REPO: String by lazy { getGithubRepo() }
 
 // YMR --> Yomira publishes every build (stable and preview) in its own repository.
 @Suppress("UNUSED_PARAMETER")
-fun getGithubRepo(peekIntoPreview: Boolean = false): String = "lyraEz/Yomira"
+// YMR --> the source is private; signed APKs are published in a public repository
+fun getGithubRepo(peekIntoPreview: Boolean = false): String = "lyraEz/Yomira-releases"
+// YMR <--
 // YMR <--
 
 val RELEASE_TAG: String by lazy { getReleaseTag() }

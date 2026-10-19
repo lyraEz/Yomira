@@ -23,7 +23,7 @@ const val RICH_PRESENCE_TAG = "discord_rpc"
 val RICH_PRESENCE_APPLICATION_ID: String = BuildConfig.DISCORD_RPC_APP_ID
 
 const val DOWNLOAD_BUTTON_LABEL = "Download"
-const val DOWNLOAD_BUTTON_URL = "https://github.com/lyraEz/Yomira/releases/latest"
+const val DOWNLOAD_BUTTON_URL = "https://github.com/lyraEz/Yomira-releases/releases/latest"
 const val DISCORD_BUTTON_LABEL = "GitHub"
 const val DISCORD_BUTTON_URL = "https://github.com/lyraEz/Yomira"
 // YMR <--

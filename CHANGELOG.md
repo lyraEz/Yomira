@@ -10,6 +10,11 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.5.1] - 2026-10-19
+
+### Changed
+- O atualizador do app busca as versões novas em `lyraEz/Yomira-releases`, o repositório público com os APKs assinados.
+
 ## Yomira [1.5.0] - 2026-10-19
 
 O Yomira agora é um app só para celulares.

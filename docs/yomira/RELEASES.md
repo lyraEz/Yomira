@@ -27,6 +27,9 @@ Em *Settings → Secrets and variables → Actions* do repositório, crie:
 | `YOMIRA_KEYSTORE_PASSWORD` | senha do keystore |
 | `YOMIRA_KEY_ALIAS` | `yomira` |
 | `YOMIRA_KEY_PASSWORD` | senha da chave |
+| `YOMIRA_RELEASES_TOKEN` | token *fine-grained* com acesso só a `lyraEz/Yomira-releases` e permissão *Contents: Read and write* |
+
+O código fica privado; os APKs são publicados no repositório público `lyraEz/Yomira-releases`, que é onde o atualizador do app procura versões novas.
 
 ## Versões
 
@@ -40,7 +43,7 @@ Ambos ficam em `app/build.gradle.kts` (`defaultConfig`).
 ## Publicar uma versão
 
 1. Atualize `versionName` e `versionCode`, e registre as mudanças em `CHANGELOG.md`.
-2. Envie para o branch de desenvolvimento. O fluxo *Release* roda sozinho: lê o `versionName`, e se ainda não existir a release `vX.Y.Z`, compila os APKs assinados, confere a assinatura contra o certificado registrado, gera `SHA256SUMS.txt` e **publica** a release.
+2. Envie para o branch de desenvolvimento. O fluxo *Release* roda sozinho: lê o `versionName`, e se ainda não existir a release `vX.Y.Z` em `lyraEz/Yomira-releases`, compila os APKs assinados, confere a assinatura contra o certificado registrado, gera `SHA256SUMS.txt` e **publica** a release.
 3. O atualizador do app (Mais → Sobre → Verificar atualizações) passa a oferecer a versão nova, com o APK da arquitetura do celular.
 
 Envios sem mudança de versão não publicam nada. Também dá para rodar o fluxo à mão em *Actions → Release → Run workflow* (com a opção de marcar como pré-release).

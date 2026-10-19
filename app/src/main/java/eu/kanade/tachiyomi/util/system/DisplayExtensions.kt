@@ -19,12 +19,6 @@ private const val TABLET_UI_MIN_SCREEN_WIDTH_PORTRAIT_DP = 700
 // make sure icons on the nav rail fit
 private const val TABLET_UI_MIN_SCREEN_WIDTH_LANDSCAPE_DP = 600
 
-fun Context.isTv(): Boolean {
-    // YMR --> one detection for the whole app, including the user's override
-    return yomira.tv.TvSettings.isTv(this)
-    // YMR <--
-}
-
 fun Configuration.isTabletUi(): Boolean {
     return smallestScreenWidthDp >= TABLET_UI_REQUIRED_SCREEN_WIDTH_DP
 }

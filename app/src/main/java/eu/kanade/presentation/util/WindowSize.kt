@@ -7,7 +7,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.TabletUiMode
-import eu.kanade.tachiyomi.util.system.isTv
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -15,7 +14,6 @@ import uy.kohesive.injekt.api.get
 @ReadOnlyComposable
 fun isTabletUi(): Boolean {
     val context = LocalContext.current
-    if (context.isTv()) return true
 
     val configuration = LocalConfiguration.current
     val tabletUiMode = Injekt.get<UiPreferences>().tabletUiMode().get()

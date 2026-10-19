@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
-import eu.kanade.tachiyomi.util.system.isTvBox
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.core.common.storage.AndroidStorageFolderProvider
@@ -27,8 +26,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Button
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.tvFocusHighlight
-import tachiyomi.presentation.core.util.tvGlowFocusHighlight
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -47,8 +44,6 @@ internal class StorageStep : OnboardingStep {
         val context = LocalContext.current
         val handler = LocalUriHandler.current
 
-        val isTvBox = isTvBox(LocalContext.current)
-
         val pickStorageLocation = SettingsDataScreen.storageLocationPicker(storagePref)
 
         Column(
@@ -66,8 +61,7 @@ internal class StorageStep : OnboardingStep {
             if (!storagePref.isSet()) {
                 Button(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .tvGlowFocusHighlight(),
+                        .fillMaxWidth(),
                     onClick = {
                         val storage = folderProvider.directory()
                         if (!storage.exists()) {
@@ -79,11 +73,10 @@ internal class StorageStep : OnboardingStep {
                     Text(stringResource(MR.strings.onboarding_storage_action_create_folder))
                 }
 
-                if (!isTvBox) {
+                run {
                     androidx.compose.material3.OutlinedButton(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .tvGlowFocusHighlight(),
+                            .fillMaxWidth(),
                         onClick = {
                             try {
                                 pickStorageLocation.launch(null)
@@ -98,8 +91,7 @@ internal class StorageStep : OnboardingStep {
             } else {
                 androidx.compose.material3.OutlinedButton(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .tvGlowFocusHighlight(),
+                        .fillMaxWidth(),
                     onClick = {
                         try {
                             pickStorageLocation.launch(null)
@@ -120,8 +112,7 @@ internal class StorageStep : OnboardingStep {
             Text(stringResource(MR.strings.onboarding_storage_help_info, stringResource(MR.strings.app_name)))
             androidx.compose.material3.OutlinedButton(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .tvGlowFocusHighlight(),
+                    .fillMaxWidth(),
                 onClick = { handler.openUri(SettingsDataScreen.HELP_URL) },
             ) {
                 Text(stringResource(MR.strings.onboarding_storage_help_action))

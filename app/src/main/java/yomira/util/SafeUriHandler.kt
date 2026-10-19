@@ -1,4 +1,4 @@
-package yomira.tv
+package yomira.util
 
 import android.content.Context
 import android.content.Intent
@@ -12,7 +12,7 @@ import yomira.i18n.YMR
 
 /**
  * Opens links like Compose's default handler, but shows a message instead of crashing when no
- * app can open them, which is common on TV devices without a browser.
+ * app can open them (for example when no browser is installed).
  */
 class SafeUriHandler(private val context: Context) : UriHandler {
 

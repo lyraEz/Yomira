@@ -47,7 +47,7 @@ class PlayerKeyRouterTest {
     }
 
     @Test
-    fun `with controls visible the D-pad moves focus and back only hides them`() {
+    fun `with controls visible the arrow keys move focus and back only hides them`() {
         listOf(
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_RIGHT,

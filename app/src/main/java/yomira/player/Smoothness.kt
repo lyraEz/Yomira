@@ -57,7 +57,7 @@ class SmoothnessPreferences(private val store: PreferenceStore = Injekt.get()) {
     /** Quality: tone mapping for HDR video on SDR screens. */
     fun toneMapping() = store.getEnum("yomira_tone_mapping", ToneMapping.AUTO)
 
-    /** Quality: automatic deinterlacing for interlaced (DVD/TV) sources. */
+    /** Quality: automatic deinterlacing for interlaced (DVD or broadcast) sources. */
     fun deinterlace() = store.getBoolean("yomira_deinterlace", false)
 }
 

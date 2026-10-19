@@ -41,7 +41,6 @@ import `is`.xyz.mpv.Utils
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.tvCircleFocusHighlight
 import kotlin.math.abs
 
 @Composable
@@ -68,9 +67,6 @@ fun MiddlePlayerControls(
     enter: EnterTransition,
     exit: ExitTransition,
     modifier: Modifier = Modifier,
-    // YMR --> receives the initial remote focus when the controls appear
-    playPauseFocusRequester: FocusRequester? = null,
-    // YMR <--
 ) {
     // YMR -->
     val big = 96.dp * yomira.player.LocalPlayerButtonLook.current.scale
@@ -131,8 +127,6 @@ fun MiddlePlayerControls(
                     Box(
                         modifier = Modifier
                             .size(big)
-                            .then(playPauseFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
-                            .tvCircleFocusHighlight(focusedScale = 1.1f, focusedBackgroundAlpha = 0.35f)
                             .clickable(
                                 interaction,
                                 indication = null,

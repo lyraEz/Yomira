@@ -102,7 +102,6 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.tvFocusHighlight
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
 import tachiyomi.source.localanime.LocalAnimeSource
@@ -238,7 +237,6 @@ data class BrowseSourceScreen(
                     )
 
                     val chipFocusModifier = Modifier
-                        .tvFocusHighlight(shape = FilterChipDefaults.shape)
                         .focusProperties {
                             down = firstItemFocusRequester
                         }

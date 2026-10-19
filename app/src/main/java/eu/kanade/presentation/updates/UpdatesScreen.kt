@@ -49,7 +49,6 @@ import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import yomira.tv.focus.tvFocusRestore
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.seconds
 
@@ -168,7 +167,7 @@ fun UpdateScreen(
                     ) {
                         FastScrollLazyColumn(
                             // YMR -->
-                            modifier = Modifier.fillMaxSize().tvFocusRestore(),
+                            modifier = Modifier.fillMaxSize(),
                             // YMR <--
                         ) {
                             updatesLastUpdatedItem(lastUpdated)

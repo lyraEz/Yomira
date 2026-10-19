@@ -47,8 +47,8 @@ body:
     id: device
     attributes:
       label: Aparelho, sistema e arquitetura
-      description: "Resultado de `adb shell getprop ro.product.model`, `ro.build.version.sdk` e `ro.product.cpu.abilist`, ou o modelo e a versão do Fire OS."
-      placeholder: "Fire TV Stick (3ª geração), Fire OS 7, API 28, armeabi-v7a"
+      description: "Modelo do celular, versão do Android e arquitetura (Configurações → Sobre o telefone)."
+      placeholder: "Galaxy A54, Android 14, arm64-v8a"
     validations:
       required: true
 

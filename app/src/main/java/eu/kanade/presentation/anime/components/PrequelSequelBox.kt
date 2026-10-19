@@ -30,7 +30,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.dp
 import tachiyomi.presentation.core.util.collectAsState
-import tachiyomi.presentation.core.util.tvFocusHighlight
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.i18n.MR
 import androidx.compose.runtime.getValue
@@ -117,12 +116,6 @@ private fun RelationBanner(
     Box(
         modifier = modifier
             .height(68.dp)
-            .tvFocusHighlight(
-                shape = RoundedCornerShape(12.dp),
-                focusedScale = 1.06f,
-                borderWidth = 3.dp,
-                focusedBackgroundAlpha = 0.25f,
-            )
             .clip(RoundedCornerShape(12.dp))
             .clickable { onRelationClick(title) }
             .border(

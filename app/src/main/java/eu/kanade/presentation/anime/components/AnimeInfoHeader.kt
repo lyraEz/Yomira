@@ -123,7 +123,6 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import androidx.compose.foundation.shape.RoundedCornerShape
-import tachiyomi.presentation.core.util.tvFocusHighlight
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.clickableNoIndication
 import tachiyomi.presentation.core.util.secondaryItemAlpha
@@ -512,12 +511,7 @@ private fun AnimeAndSourceTitlesLarge(
         val (entry, ratio) = AnimeCover.getEntry(anime.id)
         entry(
             modifier = Modifier
-                .width(if (entry == AnimeCover.Panorama) 200.dp else 160.dp)
-                .tvFocusHighlight(
-                    shape = MaterialTheme.shapes.medium,
-                    borderWidth = 2.5.dp,
-                    focusedScale = 1.03f,
-                ),
+                .width(if (entry == AnimeCover.Panorama) 200.dp else 160.dp),
             data = anime.asAnimeCover(),
             contentDescription = stringResource(MR.strings.manga_cover),
             onClick = onCoverClick,
@@ -567,12 +561,7 @@ private fun AnimeAndSourceTitlesSmall(
         val (entry, ratio) = AnimeCover.getEntry(anime.id)
         entry(
             modifier = Modifier
-                .width(if (entry == AnimeCover.Panorama) 140.dp else 100.dp)
-                .tvFocusHighlight(
-                    shape = MaterialTheme.shapes.medium,
-                    borderWidth = 2.5.dp,
-                    focusedScale = 1.03f,
-                ),
+                .width(if (entry == AnimeCover.Panorama) 140.dp else 100.dp),
             data = anime.asAnimeCover(),
             contentDescription = stringResource(MR.strings.manga_cover),
             onClick = onCoverClick,
@@ -619,10 +608,6 @@ private fun AnimeContentInfo(
         text = title.ifBlank { stringResource(MR.strings.unknown_title) },
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier
-            .tvFocusHighlight(
-                shape = RoundedCornerShape(8.dp),
-                focusedScale = 1.02f,
-            )
             .clickableNoIndication(
                 onLongClick = {
                     if (title.isNotBlank()) {
@@ -639,11 +624,7 @@ private fun AnimeContentInfo(
 
     Row(
         modifier = Modifier
-            .secondaryItemAlpha()
-            .tvFocusHighlight(
-                shape = RoundedCornerShape(8.dp),
-                focusedScale = 1.02f,
-            ),
+            .secondaryItemAlpha(),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -677,11 +658,7 @@ private fun AnimeContentInfo(
     if (!artist.isNullOrBlank() && author != artist) {
         Row(
             modifier = Modifier
-                .secondaryItemAlpha()
-                .tvFocusHighlight(
-                    shape = RoundedCornerShape(8.dp),
-                    focusedScale = 1.02f,
-                ),
+                .secondaryItemAlpha(),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -851,10 +828,6 @@ private fun AnimeSummary(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize()
-            .tvFocusHighlight(
-                shape = RoundedCornerShape(12.dp),
-                focusedScale = 1.01f,
-            )
             .clipToBounds()
             .clickableNoIndication(onClick = onExpand),
     ) {
@@ -933,10 +906,7 @@ private fun TagsChip(
 ) {
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
         androidx.compose.material3.SuggestionChip(
-            modifier = modifier.tvFocusHighlight(
-                shape = androidx.compose.material3.SuggestionChipDefaults.shape,
-                focusedScale = 1.05f,
-            ),
+            modifier = modifier,
             onClick = onClick,
             label = { Text(text = text, style = MaterialTheme.typography.bodySmall) },
             colors = androidx.compose.material3.SuggestionChipDefaults.suggestionChipColors(
@@ -962,10 +932,6 @@ private fun RowScope.AnimeActionButton(
     androidx.compose.foundation.layout.Box(
         modifier = Modifier
             .weight(1f)
-            .tvFocusHighlight(
-                shape = shape,
-                focusedScale = 1.05f,
-            )
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainer)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)

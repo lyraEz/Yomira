@@ -69,13 +69,13 @@ done
 cat > "$OUT/release-notes.md" <<EOF
 ## Yomira $version
 
-Escolha o APK pela arquitetura do aparelho (\`adb shell getprop ro.product.cpu.abilist\`):
+Escolha o APK pela arquitetura do celular (a maioria é arm64-v8a):
 
 | Arquivo | Para |
 | --- | --- |
-| \`Yomira-v$version-armeabi-v7a.apk\` | Fire TV Stick e TV Box de 32 bits |
-| \`Yomira-v$version-arm64-v8a.apk\` | Aparelhos com sistema de 64 bits |
-| \`Yomira-v$version-universal.apk\` | Qualquer aparelho ARM (arquivo maior) |
+| \`Yomira-v$version-arm64-v8a.apk\` | A maioria dos celulares (64 bits) |
+| \`Yomira-v$version-armeabi-v7a.apk\` | Celulares de 32 bits |
+| \`Yomira-v$version-universal.apk\` | Qualquer celular ARM (arquivo maior) |
 
 Todos os APKs usam o mesmo pacote (\`com.lyraez.yomira\`) e a mesma assinatura, então
 instalam por cima da versão anterior sem perder dados.

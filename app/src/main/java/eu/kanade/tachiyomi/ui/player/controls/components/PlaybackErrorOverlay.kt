@@ -34,14 +34,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.ui.player.PlaybackError
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.tvFocusHighlight
 import yomira.i18n.YMR
 
 // YMR -->
 /**
  * Shown instead of closing the player when an episode or stream fails.
  *
- * Every action is a button reachable with the D-pad; focus starts on "Try again".
+ * Every action is a plain button, so the user can always retry, switch servers or leave.
  */
 @Composable
 fun PlaybackErrorOverlay(
@@ -124,8 +123,7 @@ fun PlaybackErrorOverlay(
                 Button(
                     onClick = onRetry,
                     modifier = Modifier
-                        .focusRequester(retryFocus)
-                        .tvFocusHighlight(shape = RoundedCornerShape(50), borderWidth = 3.dp),
+                        .focusRequester(retryFocus),
                 ) {
                     ActionLabel(Icons.Outlined.Refresh, stringResource(YMR.strings.player_error_retry))
                 }
@@ -150,7 +148,7 @@ fun PlaybackErrorOverlay(
 private fun ErrorAction(icon: ImageVector, label: String, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
-        modifier = Modifier.tvFocusHighlight(shape = RoundedCornerShape(50), borderWidth = 3.dp),
+        modifier = Modifier,
     ) {
         ActionLabel(icon, label)
     }

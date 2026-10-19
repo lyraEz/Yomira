@@ -6,10 +6,11 @@ import android.view.KeyEvent
 /**
  * Decides who handles a key in the player: the Compose UI, the player logic or mpv.
  *
- * Before this, every key went to mpv first and mpv consumed the D-pad, so menus could not be
- * navigated with a remote, OK did nothing useful and MEDIA_STOP sent mpv's `quit`. The rules:
+ * Hardware keys (keyboards, headsets, game controllers, media buttons). Before this, every key
+ * went to mpv first, so arrow keys could not move through menus, Enter did nothing useful and
+ * MEDIA_STOP sent mpv's `quit`. The rules:
  *
- * | State                             | D-pad / OK                 | Back            |
+ * | State                             | Arrows / Enter             | Back            |
  * |-----------------------------------|----------------------------|-----------------|
  * | text field focused                | UI                         | UI              |
  * | sheet, panel, dialog or error     | UI (focus navigation)      | UI (closes it)  |

@@ -12,10 +12,7 @@ class DecoderPreferences(
     fun tryHWDecoding() = preferenceStore.getBoolean("pref_try_hwdec", true)
     fun gpuNext() = preferenceStore.getBoolean("pref_gpu_next", false)
     fun videoDebanding() = preferenceStore.getEnum("pref_video_debanding", Debanding.None)
-    // YMR --> forcing yuv420p adds a filter that keeps MediaCodec from rendering frames directly;
-    // on a low-end TV (32-bit Fire TV Stick) that costs dropped frames, so it starts off there.
-    fun useYUV420P() = preferenceStore.getBoolean("use_yuv420p", !yomira.tv.DeviceProfile.isLowEndTv)
-    // YMR <--
+    fun useYUV420P() = preferenceStore.getBoolean("use_yuv420p", true)
     fun highQualityScaling() = preferenceStore.getBoolean("pref_high_quality_scaling", false)
     fun smoothMotion() = preferenceStore.getBoolean("pref_smooth_motion", false)
     fun interpolationMode() = preferenceStore.getEnum("pref_interpolation_mode", InterpolationMode.Oversample)

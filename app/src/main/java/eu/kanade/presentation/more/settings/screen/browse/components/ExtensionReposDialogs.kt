@@ -33,11 +33,8 @@ import kotlinx.coroutines.delay
 import mihon.domain.extensionrepo.model.ExtensionRepo
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.TvDevice
 import yomira.i18n.YMR
-import yomira.tv.companion.CompanionDialog
-import yomira.tv.companion.CompanionServer
-import yomira.tv.repos.SuggestedRepos
+import yomira.extensions.SuggestedRepos
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
@@ -52,7 +49,6 @@ fun ExtensionRepoCreateDialog(
     val nameAlreadyExists = remember(name) { repoUrls.contains(name) }
     // YMR -->
     val context = LocalContext.current
-    var showCompanion by remember { mutableStateOf(false) }
     // YMR <--
 
     AlertDialog(
@@ -77,7 +73,7 @@ fun ExtensionRepoCreateDialog(
             Text(text = stringResource(MR.strings.action_add_repo))
         },
         text = {
-            // YMR --> scrollable, so the shortcuts below stay reachable with the D-pad on a TV
+            // YMR --> scrollable, so the shortcuts below stay reachable
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -115,9 +111,6 @@ fun ExtensionRepoCreateDialog(
                     ) {
                         Text(text = stringResource(YMR.strings.repo_paste))
                     }
-                    OutlinedButton(onClick = { showCompanion = true }) {
-                        Text(text = stringResource(YMR.strings.repo_from_phone))
-                    }
                 }
 
                 Text(
@@ -151,29 +144,11 @@ fun ExtensionRepoCreateDialog(
         },
     )
 
-    // YMR -->
-    if (showCompanion) {
-        CompanionDialog(
-            mode = CompanionServer.Mode.Text,
-            title = stringResource(YMR.strings.repo_from_phone),
-            description = stringResource(YMR.strings.repo_from_phone_description),
-            onDismissRequest = { showCompanion = false },
-            onText = { text ->
-                name = text.trim()
-                showCompanion = false
-            },
-        )
-    }
-    // YMR <--
 
     LaunchedEffect(focusRequester) {
         // TODO: https://issuetracker.google.com/issues/204502668
         delay(0.1.seconds)
-        // YMR --> on a TV, opening the keyboard straight away hides the shortcuts
-        if (!TvDevice.isTv) {
-            focusRequester.requestFocus()
-        }
-        // YMR <--
+        focusRequester.requestFocus()
     }
 }
 

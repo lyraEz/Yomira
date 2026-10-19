@@ -47,7 +47,6 @@ object SettingsAppearanceScreen : SearchableSettings {
         return listOf(
             // YMR -->
             yomira.glass.glassPreferencesGroup(),
-            yomira.tv.settings.tvPreferencesGroup(),
             // YMR <--
             getThemeGroup(uiPreferences = uiPreferences),
             getLayoutNavigationGroup(uiPreferences = uiPreferences),

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# Checks the TV-facing parts of every APK in a directory and writes apk-report.txt.
+# Summarises every APK in a directory (package, SDK levels, ABIs, launcher, size) and writes
+# apk-report.txt.
 #
-# Fails when an APK would not show up or install on a Fire TV / Android TV device:
-# missing LEANBACK_LAUNCHER, missing banner, required touchscreen or leanback feature,
-# or an ABI split without native libraries for its ABI.
+# Fails when an APK has no launcher activity or an ABI split carries no native libraries for
+# its ABI.
 #
 # Usage: scripts/yomira/inspect-apks.sh <apk-dir>
 set -euo pipefail
@@ -27,7 +27,6 @@ for apk in "$DIR"/*.apk; do
   [ -e "$apk" ] || { echo "no APKs in $DIR" >&2; exit 1; }
   name="$(basename "$apk")"
   badging="$("$AAPT2" dump badging "$apk")"
-  manifest="$("$AAPT2" dump xmltree --file AndroidManifest.xml "$apk")"
   libs="$(unzip -l "$apk" | awk '$4 ~ /^lib\// {split($4, p, "/"); print p[2]}' | sort -u | tr '\n' ' ')"
 
   {
@@ -35,22 +34,14 @@ for apk in "$DIR"/*.apk; do
     grep -E "^package:" <<<"$badging" | sed "s/ platformBuildVersion.*//"
     grep -E "^(minSdkVersion|sdkVersion|targetSdkVersion):" <<<"$badging"
     echo "native ABIs: ${libs:-none}"
-    grep -E "^(leanback-launchable-activity|launchable-activity):" <<<"$badging" | sed "s/  label=.*//"
-    grep -E "uses-feature(-not-required)?:.*(touchscreen|leanback)" <<<"$badging" || true
+    grep -E "^launchable-activity:" <<<"$badging" | sed "s/  label=.*//"
     echo "size: $(du -h "$apk" | cut -f1)"
     echo
   } >> "$REPORT"
 
   fail() { echo "FAIL $name: $1" | tee -a "$REPORT" >&2; status=1; }
 
-  grep -q "^leanback-launchable-activity:" <<<"$badging" || fail "no LEANBACK_LAUNCHER activity"
-  grep -q "android:banner" <<<"$manifest" || fail "application has no android:banner"
-  if grep -qE "^uses-feature: name='android.hardware.touchscreen'" <<<"$badging"; then
-    fail "touchscreen is required"
-  fi
-  if grep -qE "^uses-feature: name='android.software.leanback'" <<<"$badging"; then
-    fail "leanback is required (phones could not install it)"
-  fi
+  grep -q "^launchable-activity:" <<<"$badging" || fail "no launcher activity"
   for abi in armeabi-v7a arm64-v8a x86 x86_64; do
     case "$name" in
       *-"$abi"-*)

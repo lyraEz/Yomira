@@ -3,6 +3,6 @@
 ## Como foi testado
 
 - [ ] `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest spotlessCheck`
-- [ ] No aparelho (modelo, Fire OS/API, ABI):
+- [ ] No celular (modelo, Android/API, ABI):
 
 ## Observações

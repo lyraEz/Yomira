@@ -1,4 +1,4 @@
-package yomira.tv.extensions
+package yomira.extensions
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -334,7 +334,7 @@ class ExtensionManager(
         // YMR -->
         // The installer reporting success only means the APK is on the device. Read it back from
         // PackageManager and load it, so the list shows whether it is trusted and has sources even
-        // when the package broadcast is late or never arrives (seen on some TV firmwares).
+        // when the package broadcast is late or never arrives (seen on some firmwares).
         if (step == InstallStep.Installed) {
             installer.packageForDownload(downloadId)?.let { pkgName ->
                 scope.launch { refreshInstalledPackage(pkgName) }

@@ -844,7 +844,7 @@ private fun ExtensionDiagnosticsDialog(
     onUninstall: (() -> Unit)?,
     onDismissRequest: () -> Unit,
 ) {
-    yomira.tv.extensions.ExtensionDiagnosticsDialog(
+    yomira.extensions.ExtensionDiagnosticsDialog(
         title = request.title,
         summary = request.summary,
         buildReport = buildDiagnostics,

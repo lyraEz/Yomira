@@ -1,8 +1,8 @@
-package yomira.tv.repos
+package yomira.extensions
 
 /**
  * Repositories offered as one-press shortcuts in the "add repository" dialog, so they can be added
- * on a TV without typing. They are third-party repositories: adding one is still the user's choice,
+ * without typing. They are third-party repositories: adding one is still the user's choice,
  * and any other compatible repository can be typed, pasted or sent from a phone.
  */
 object SuggestedRepos {

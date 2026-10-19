@@ -12,7 +12,6 @@ import eu.kanade.domain.ui.model.ThemeMode
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.i18n.stringResource
 
-import tachiyomi.presentation.core.util.tvFocusHighlight
 
 private val options = mapOf(
     ThemeMode.SYSTEM to MR.strings.theme_system,
@@ -41,10 +40,7 @@ internal fun AppThemeModePreferenceWidget(
                         checked = mode == value,
                         onCheckedChange = { onItemClick(mode) },
                         shape = shape,
-                        modifier = Modifier.tvFocusHighlight(
-                            shape = shape,
-                            focusedScale = 1.04f,
-                        ),
+                        modifier = Modifier,
                     ) {
                         Text(stringResource(labelRes))
                     }

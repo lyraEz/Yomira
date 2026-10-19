@@ -82,7 +82,6 @@ import tachiyomi.i18n.ank.AMR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
-import tachiyomi.presentation.core.util.TvDevice
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -248,13 +247,6 @@ object SettingsDataScreen : SearchableSettings {
                                             if (DeviceUtil.isMiui && DeviceUtil.isMiuiOptimizationDisabled()) {
                                                 context.toast(MR.strings.restore_miui_warning)
                                             }
-
-                                            // YMR --> TV boxes often have no usable file picker
-                                            if (TvDevice.isTv || !yomira.tv.TvSettings.hasDocumentPicker(context)) {
-                                                navigator.push(yomira.tv.backup.TvRestoreBackupScreen())
-                                                return@SegmentedButton
-                                            }
-                                            // YMR <--
 
                                             // no need to catch because it's wrapped with a chooser
                                             chooseBackup.launch("*/*")

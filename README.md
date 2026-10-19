@@ -4,7 +4,7 @@
 
 # Yomira
 
-Cliente de animes, séries e filmes para **Fire TV e TV Box**, feito para ser usado do começo ao fim com o controle remoto.
+Cliente de animes, séries e filmes para **celulares Android**, com interface própria em liquid glass e um player ajustável para fluidez e qualidade.
 
 [![CI](https://github.com/lyraEz/Yomira/actions/workflows/ci.yml/badge.svg)](https://github.com/lyraEz/Yomira/actions/workflows/ci.yml)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-Apache--2.0-blue)](LICENSE)
@@ -14,63 +14,40 @@ Cliente de animes, séries e filmes para **Fire TV e TV Box**, feito para ser us
 O Yomira é um **fork independente** do [AniZen](https://github.com/salmanbappi/AniZen), que por sua vez descende do Anikku, do Aniyomi e do Mihon/Tachiyomi. **Não é uma versão oficial do AniZen** e não tem ligação com seus autores. O app não traz conteúdo próprio: os catálogos vêm de extensões instaladas a partir de repositórios escolhidos por quem usa.
 
 - Pacote: `com.lyraez.yomira` (instala ao lado do AniZen, sem conflito)
-- Versão atual: 1.0.0
 - Base do código: AniZen v0.5.215 (`becbe2d`, 30/09/2026)
-
-## Situação dos testes
-
-O código compila, os testes automatizados passam e os APKs foram inspecionados (launcher de TV, banner, ABIs, assinatura). **Ainda não foi feito o teste em um Fire TV Stick físico.** Até lá, a compatibilidade com o aparelho não está comprovada. A matriz de testes pendentes está em [docs/yomira/TESTES.md](docs/yomira/TESTES.md).
+- Histórico de versões: [CHANGELOG.md](CHANGELOG.md)
 
 ## O que muda em relação ao AniZen
 
-- **Controle remoto em todo o app**: foco bem visível, texto maior na TV, margem de segurança contra overscan, foco restaurado ao voltar de uma tela, tecla Menu como alternativa ao toque longo e um ponteiro controlado pelas setas no WebView (para verificações de site como Cloudflare).
-- **Player para TV**: OK mostra os controles, as setas buscam com os controles ocultos e navegam com eles visíveis, Voltar primeiro esconde os controles e as teclas de mídia funcionam sempre. Veja [docs/yomira/CONTROLE-REMOTO.md](docs/yomira/CONTROLE-REMOTO.md).
+- **Interface nova em liquid glass**: barra de abas flutuante, barras superiores de vidro com fade, abas em cápsula, tela "Mais" e configurações em grupos, detalhes do anime com botões de vidro sobre a capa e episódios em cartões. A intensidade do vidro se ajusta ao aparelho e pode ser configurada em **Aparência → Liquid glass**.
+- **Player**: ícones de vidro, barra de progresso de vidro, tamanho e espaçamento dos botões ajustáveis, cards de Fluidez, Qualidade, Áudio e extras, estatísticas do vídeo, otimizador opcional por vídeo e proteção contra aquecimento, que passa para os ajustes mais leves quando o celular esquenta.
 - **Próximo episódio sem fechar o player**: quando um episódio falha (servidor fora do ar, link expirado), o player mostra o erro com opções para tentar de novo, escolher outro servidor ou episódio, em vez de fechar.
 - **Extensões explicadas**: a lista mostra quando o sistema aguarda confirmação, quantas fontes cada extensão carregou e, para extensões instaladas que não carregaram, o motivo (biblioteca incompatível, assinatura, filtro adulto, erro de carregamento) com um diagnóstico que pode ser copiado.
-- **Repositórios pela TV**: colar, receber o endereço pelo celular (QR code na mesma rede Wi-Fi) ou escolher uma das sugestões, com mensagens de erro específicas.
-- **Backup sem seletor de arquivos**: no Fire OS o backup é salvo na pasta do app e pode ser baixado ou enviado pelo celular via QR code, ou copiado com `adb`.
-- **Padrões para aparelhos fracos**: em TVs de 32 bits ou com pouca memória, o player usa cache menor e não força conversão de pixel. Anime4K e outros shaders continuam desligados por padrão e podem ser ativados manualmente.
+- **Repositórios mais fáceis**: colar o endereço ou escolher uma sugestão, com mensagens de erro específicas.
+- **Relatório de falhas e modo seguro**: se o app fechar sozinho, uma tela simples mostra o erro, e depois de falhas seguidas ele oferece abrir em modo seguro.
 
 ## Requisitos
 
 | | |
 | --- | --- |
 | Android | 8.0 ou mais novo (API 26+) |
-| Fire OS | Fire OS 7 (Android 9, API 28) ou Fire OS 8 (Android 11, API 30). **Fire OS 6 (Android 7.1, API 25) não é compatível.** |
-| Arquitetura | ARM 32 bits (`armeabi-v7a`) ou 64 bits (`arm64-v8a`) |
-
-Para confirmar o seu aparelho, com a depuração ADB ativada (Configurações → Minha Fire TV → Opções do desenvolvedor):
-
-```sh
-adb connect IP_DO_FIRE_TV
-adb shell getprop ro.product.model
-adb shell getprop ro.build.version.sdk      # precisa ser 26 ou mais
-adb shell getprop ro.product.cpu.abilist    # define qual APK usar
-```
+| Arquitetura | ARM 64 bits (`arm64-v8a`, a maioria dos celulares) ou 32 bits (`armeabi-v7a`) |
 
 ## Instalação
 
-Na página de [Releases](https://github.com/lyraEz/Yomira/releases) há três APKs, todos com o mesmo pacote e a mesma assinatura:
+Na página de [Releases](https://github.com/lyraEz/Yomira/releases) há APKs com o mesmo pacote e a mesma assinatura:
 
 | Arquivo | Quando usar |
 | --- | --- |
-| `Yomira-vX.Y.Z-armeabi-v7a.apk` | Fire TV Stick e TV Boxes cujo `abilist` começa com `armeabi-v7a` (a maioria dos Fire TV) |
-| `Yomira-vX.Y.Z-arm64-v8a.apk` | Aparelhos cujo `abilist` começa com `arm64-v8a` |
-| `Yomira-vX.Y.Z-universal.apk` | Se tiver dúvida; funciona em ARM 32 e 64 bits, mas é maior |
+| `Yomira-vX.Y.Z-arm64-v8a.apk` | A maioria dos celulares |
+| `Yomira-vX.Y.Z-armeabi-v7a.apk` | Celulares de 32 bits |
+| `Yomira-vX.Y.Z-universal.apk` | Se tiver dúvida; funciona nos dois, mas é maior |
 
-**Pelo próprio Fire TV:** instale o app *Downloader*, permita que ele instale apps desconhecidos (Configurações → Minha Fire TV → Opções do desenvolvedor → Instalar apps desconhecidos) e abra o link do APK. O Yomira aparece em *Seus apps e canais*.
-
-**Pelo computador:**
-
-```sh
-adb install -r Yomira-v1.0.0-armeabi-v7a.apk
-```
-
-Confira o arquivo antes de instalar com o `SHA256SUMS.txt` da release (`sha256sum -c SHA256SUMS.txt`, ou `certutil -hashfile ARQUIVO SHA256` no Windows). O certificado de assinatura do Yomira tem SHA-256 `e4d0adb9369971bfbe862554d8e7d418b43c17321e2694719d0efeb0f1d677ce`.
+Confira o arquivo antes de instalar com o `SHA256SUMS.txt` da release (`sha256sum -c SHA256SUMS.txt`). O certificado de assinatura do Yomira tem SHA-256 `e4d0adb9369971bfbe862554d8e7d418b43c17321e2694719d0efeb0f1d677ce`.
 
 ## Primeiros passos
 
-1. Na primeira abertura, siga o assistente com as setas e o OK.
+1. Na primeira abertura, siga o assistente.
 2. Em **Navegar → Extensões → menu → Repositórios de extensões**, adicione um repositório. Estes dois têm o formato compatível conferido:
    - Rede: `https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json`
    - Project Nox Anime: `https://raw.githubusercontent.com/Awerkori/anime-extensoes/repo/index.min.json`
@@ -83,19 +60,18 @@ Se uma extensão não aparecer, use **Navegar → Extensões → menu → Recarr
 
 ## Atualizar o Yomira
 
-Instale o APK novo **por cima** do atual (mesmo pelo Downloader ou com `adb install -r`). Biblioteca, histórico e configurações são mantidos porque o pacote e a assinatura não mudam e o `versionCode` sempre aumenta. **Não desinstale** antes de atualizar.
+Instale o APK novo **por cima** do atual. Biblioteca, histórico e configurações são mantidos porque o pacote e a assinatura não mudam e o `versionCode` sempre aumenta. **Não desinstale** antes de atualizar.
+
+Em APK instalado manualmente, o Android leva alguns dias para otimizar o app e isso pode causar engasgos no começo. Com o celular ligado ao computador, `adb shell cmd package compile -m speed-profile -f com.lyraez.yomira` faz isso na hora.
 
 ## Backup e migração do AniZen
 
 O Yomira tem pacote próprio, então não enxerga os dados do AniZen. Para levar biblioteca, histórico, categorias, configurações, fontes e repositórios:
 
 1. No AniZen: **Mais → Configurações → Dados e armazenamento → Criar backup**.
-2. Leve o arquivo `.tachibk` para a TV: pelo Yomira em **Restaurar backup → Receber do celular** (QR code), ou com `adb push arquivo.tachibk /sdcard/Android/data/com.lyraez.yomira/files/backups/`.
-3. No Yomira: **Mais → Configurações → Dados e armazenamento → Restaurar backup** e escolha o arquivo.
+2. No Yomira: **Mais → Configurações → Dados e armazenamento → Restaurar backup** e escolha o arquivo `.tachibk`.
 
 O AniZen continua instalado e intacto. As extensões precisam ser instaladas de novo pelo Yomira, a partir dos repositórios restaurados.
-
-Para guardar um backup do Yomira, use **Criar backup**: na TV ele vai para a pasta do app e pode ser baixado no celular pelo QR code ou com `adb pull`. Essa pasta é apagada se o app for desinstalado.
 
 ## Serviços desativados
 

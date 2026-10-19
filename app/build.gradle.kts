@@ -75,8 +75,8 @@ android {
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
         // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
-        versionCode = 10410
-        versionName = "1.4.1"
+        versionCode = 10500
+        versionName = "1.5.0"
 
         manifestPlaceholders["author"] = "@lyraEz"
         // YMR <--
@@ -177,7 +177,7 @@ android {
             isEnable = true
             isUniversalApk = true
             reset()
-            // YMR --> Fire TV / TV boxes: 32-bit ARM first; x86 only on request (emulators).
+            // YMR --> ARM phones (32 and 64 bits); x86 only on request (emulators).
             include(*yomiraAbis.toTypedArray())
             // YMR <--
         }
@@ -465,7 +465,7 @@ androidComponents {
         it.packaging.resources.excludes.add("META-INF/*.version")
     }
     // YMR --> Keep x86 libraries out of the release universal APK unless they were asked for:
-    // Fire TV and TV boxes are ARM, and the x86 mpv libraries add about 100 MB.
+    // phones are ARM, and the x86 mpv libraries add about 100 MB.
     onVariants(selector().withBuildType("release")) { variant ->
         listOf("x86", "x86_64").filterNot { it in yomiraAbis }.forEach { abi ->
             variant.packaging.jniLibs.excludes.add("lib/$abi/**")

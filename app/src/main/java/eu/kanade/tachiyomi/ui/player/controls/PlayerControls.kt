@@ -119,7 +119,6 @@ import androidx.compose.ui.platform.LocalDensity
 import android.content.res.Configuration
 import eu.kanade.tachiyomi.ui.player.PlayerButton
 import eu.kanade.tachiyomi.ui.player.parseButtons
-import tachiyomi.presentation.core.util.TvDevice
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -200,25 +199,13 @@ fun PlayerControls(
 
     // YMR -->
     val controlsInteraction by viewModel.controlsInteraction.collectAsState()
-
-    // With a remote, opening the controls puts focus on Play/Pause so OK acts at once and the
-    // D-pad moves from there. Touch devices never take this path (nothing is focusable by touch).
-    val playPauseFocus = remember { FocusRequester() }
-    LaunchedEffect(controlsShown, areControlsLocked) {
-        if (TvDevice.isTv && controlsShown && !areControlsLocked) {
-            repeat(5) {
-                delay(60)
-                if (runCatching { playPauseFocus.requestFocus() }.isSuccess) return@LaunchedEffect
-            }
-        }
-    }
     // YMR <--
     LaunchedEffect(
         controlsShown,
         paused,
         isSeekingUI,
         resetControls,
-        // YMR --> remote navigation keeps the controls on screen
+        // YMR --> key navigation keeps the controls on screen
         controlsInteraction,
         // YMR <--
     ) {
@@ -464,9 +451,6 @@ fun PlayerControls(
                         onPlayPauseClick = viewModel::pauseUnpause,
                         enter = fadeIn(playerControlsEnterAnimationSpec()),
                         exit = fadeOut(playerControlsExitAnimationSpec()),
-                        // YMR -->
-                        playPauseFocusRequester = playPauseFocus,
-                        // YMR <--
                     )
                 }
                 // ANZ <--
@@ -597,9 +581,6 @@ fun PlayerControls(
                                 }
                             },
                             timersInverted = Pair(false, invertDuration),
-                            // YMR -->
-                            onKeySeek = { forward -> if (forward) viewModel.rightSeek() else viewModel.leftSeek() },
-                            // YMR <--
                             durationTimerOnCLick = { playerPreferences.invertDuration().set(!invertDuration) },
                             positionTimerOnClick = {},
                             onDurationTextLayout = { layoutResult ->

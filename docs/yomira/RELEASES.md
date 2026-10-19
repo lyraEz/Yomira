@@ -58,4 +58,4 @@ scripts/yomira/package-release.sh app/build/outputs/apk/release dist
 
 ## O que o CI faz
 
-`ci.yml` roda em todo push e pull request, sem publicar nada: formatação dos arquivos novos do Yomira, detekt, testes unitários, build dos APKs de release sem assinatura e inspeção dos APKs (launcher de TV, banner, touchscreen opcional, ABIs). Os APKs ficam como artefato da execução por 7 dias.
+`ci.yml` roda em todo push e pull request, sem publicar nada: formatação dos arquivos novos do Yomira, detekt, testes unitários, build dos APKs de release sem assinatura e inspeção dos APKs (launcher, níveis de SDK, ABIs). Os APKs ficam como artefato da execução por 7 dias.

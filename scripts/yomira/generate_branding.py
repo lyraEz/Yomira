@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates the Yomira launcher icon, TV banner and splash assets.
+"""Generates the Yomira launcher icon, README banner and splash assets.
 
 The artwork is built from simple geometry (a crescent moon holding a play
 button) so it can be reproduced exactly from this script. Requires Pillow.
@@ -262,8 +262,7 @@ def main():
         os.makedirs(folder, exist_ok=True)
         legacy_icon(int(48 * factor)).save(os.path.join(folder, "ic_launcher.png"), optimize=True)
 
-    # Android TV / Fire TV banner: 320x180 px at xhdpi.
-    banner(320, 180).convert("RGB").save(os.path.join(RES, "mipmap-xhdpi", "ic_banner.png"), optimize=True)
+    # Wide banner used at the top of the README.
 
     splash(288, dark=False).save(os.path.join(RES, "drawable", "ic_splash_logo_raw.png"), optimize=True)
     splash(288, dark=True).save(os.path.join(RES, "drawable", "ic_splash_logo_raw_dark.png"), optimize=True)

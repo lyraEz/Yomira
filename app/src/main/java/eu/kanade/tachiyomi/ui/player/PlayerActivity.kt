@@ -432,8 +432,8 @@ class PlayerActivity : BaseActivity() {
 
         setContent {
             TachiyomiTheme {
-                // YMR --> TV text scale and focus indication; the video itself stays full-bleed
-                yomira.tv.TvContent(applySafeArea = false) {
+                // YMR --> liquid glass style for the controls
+                yomira.glass.ProvideGlassStyle {
                 // YMR <--
                 Box(modifier = Modifier.fillMaxSize()) {
                     AndroidView(
@@ -450,8 +450,8 @@ class PlayerActivity : BaseActivity() {
                             }
                         },
                     )
-                    // YMR --> controls stay inside the TV overscan margin
-                    yomira.tv.TvSafeArea(modifier = Modifier.fillMaxSize()) {
+                    // YMR -->
+                    Box(modifier = Modifier.fillMaxSize()) {
                     // YMR <--
                     // YMR --> live glass over a small copy of the video while the controls show
                     val controlsVisible by viewModel.controlsShown.collectAsState()
@@ -1829,7 +1829,7 @@ class PlayerActivity : BaseActivity() {
     private fun isTextInputActive(): Boolean = inputMethodManager.isActive
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // YMR --> remote-control routing; see PlayerKeyRouter for the rules
+        // YMR --> hardware key routing (keyboards, headsets, media keys); see PlayerKeyRouter
         val state = PlayerKeyRouter.State(
             textInputActive = isTextInputActive(),
             overlayOpen = viewModel.sheetShown.value != Sheets.None ||

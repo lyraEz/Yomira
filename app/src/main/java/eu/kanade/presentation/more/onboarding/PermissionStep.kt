@@ -109,7 +109,7 @@ internal class PermissionStep : OnboardingStep {
                     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                         data = Uri.parse("package:${context.packageName}")
                     }
-                    // YMR --> Fire OS may not offer this screen; never crash the first-run setup
+                    // YMR --> some firmwares do not offer this screen; never crash the first-run setup
                     val opened = context.startFirstAvailableActivity(
                         intent,
                         Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),

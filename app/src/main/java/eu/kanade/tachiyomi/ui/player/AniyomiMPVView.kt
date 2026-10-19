@@ -114,16 +114,9 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
         mpv?.setOptionString("aid", "no")
 
         // Limit demuxer cache since the defaults are too high for mobile devices
-        // YMR --> about 1 GB of RAM on a Fire TV Stick: keep the cache small there
-        val cacheMegs = when {
-            yomira.tv.DeviceProfile.isLowEndTv -> 32
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 -> 64
-            else -> 32
-        }
-        val backCacheMegs = if (yomira.tv.DeviceProfile.isLowEndTv) 16 else cacheMegs
+        val cacheMegs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) 64 else 32
         setSafeOptionString("demuxer-max-bytes", "${cacheMegs * 1024 * 1024}")
-        setSafeOptionString("demuxer-max-back-bytes", "${backCacheMegs * 1024 * 1024}")
-        // YMR <--
+        setSafeOptionString("demuxer-max-back-bytes", "${cacheMegs * 1024 * 1024}")
 
         val screenshotDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         screenshotDir.mkdirs()

@@ -38,8 +38,6 @@ import androidx.compose.ui.zIndex
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.util.secondaryItemAlpha
-import tachiyomi.presentation.core.util.tvFocusHighlight
-import tachiyomi.presentation.core.util.tvGlowFocusHighlight
 
 @Composable
 fun InfoScreen(
@@ -107,8 +105,7 @@ fun InfoScreen(
                     ) {
                         Button(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .tvGlowFocusHighlight(),
+                                .fillMaxWidth(),
                             enabled = canAccept,
                             onClick = onAcceptClick,
                         ) {
@@ -117,8 +114,7 @@ fun InfoScreen(
                         if (rejectText != null && onRejectClick != null) {
                             OutlinedButton(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .tvGlowFocusHighlight(),
+                                    .fillMaxWidth(),
                                 onClick = onRejectClick,
                             ) {
                                 Text(text = rejectText)
@@ -164,8 +160,7 @@ fun InfoScreen(
                 ) {
                     Button(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .tvGlowFocusHighlight(),
+                            .fillMaxWidth(),
                         enabled = canAccept,
                         onClick = onAcceptClick,
                     ) {
@@ -174,8 +169,7 @@ fun InfoScreen(
                     if (rejectText != null && onRejectClick != null) {
                         OutlinedButton(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .tvGlowFocusHighlight(),
+                                .fillMaxWidth(),
                             onClick = onRejectClick,
                         ) {
                             Text(text = rejectText)

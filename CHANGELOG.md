@@ -10,10 +10,27 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.5.0] - 2026-10-19
+
+O Yomira agora é um app só para celulares.
+
+### Fixed
+- Player travando e esquentando o celular. A qualidade "Auto" voltou a usar o perfil leve do player (escala bilinear) em vez de escaladores mais pesados, e opções de qualidade e fluidez só são aplicadas quando você as muda. Na primeira abertura do player desta versão, os ajustes do player voltam ao padrão leve.
+
+### Added
+- Proteção contra aquecimento: quando o Android avisa que o celular está esquentando, o player passa sozinho para os ajustes mais leves (sem Anime4K, sem mistura de quadros, escala simples, sem vidro ao vivo) e avisa. As estatísticas mostram o estado térmico.
+- Botão "Restaurar padrões do player" no painel de vídeo.
+
+### Changed
+- O otimizador vem desligado e só troca a taxa da tela quando existe um múltiplo exato dos fps do vídeo; o player não fixa mais a taxa máxima da tela.
+
+### Removed
+- Suporte a TV: launcher de TV, banner, modo de controle remoto, ponteiro no WebView, celular como controle e backup sem seletor de arquivos.
+
 ## Yomira [1.4.1] - 2026-10-17
 
 ### Fixed
-- Otimizador: não estica mais o vídeo para a taxa da tela (ex.: 23,976 fps em 90 Hz travava e perdia quadros). Agora tudo fica nos fps do próprio vídeo: o ritmo recomendado é "Fps do vídeo" (sem reamostrar para a tela e sem misturar quadros) e a tela só muda para a taxa do vídeo ou o múltiplo exato mais próximo; sem múltiplo exato, a tela fica na menor taxa. Na TV isso troca a saída HDMI para 23,976/24/25/50/60 Hz conforme o episódio.
+- Otimizador: não estica mais o vídeo para a taxa da tela (ex.: 23,976 fps em 90 Hz travava e perdia quadros). Agora tudo fica nos fps do próprio vídeo: o ritmo recomendado é "Fps do vídeo" (sem reamostrar para a tela e sem misturar quadros) e a tela só muda para a taxa do vídeo ou o múltiplo exato mais próximo; sem múltiplo exato, a tela fica na menor taxa. 
 
 ## Yomira [1.4.0] - 2026-10-17
 
@@ -81,24 +98,19 @@ Primeira etapa da nova interface para celulares (Android 8 a 16, 32 e 64 bits).
 Primeira versão do fork, sobre o AniZen v0.5.215 (`becbe2d`).
 
 ### Added
-- Interface para controle remoto: detecção de TV com opção manual, texto maior, margem contra overscan, foco visível em todos os componentes, foco restaurado ao voltar e tecla Menu como toque longo.
-- Ponteiro controlado pelo D-pad no WebView, para verificações de site.
-- Player: roteamento de teclas do controle (menus navegáveis, busca com as setas, Voltar esconde os controles, teclas de mídia), foco inicial em Reproduzir/Pausar e barra de progresso controlável.
+- Player: roteamento de teclas físicas (teclados, fones e botões de mídia).
 - Tela de erro dentro do player com Tentar de novo, Servidores, Episódios, Próximo episódio e Sair.
 - Extensões: estado "aguardando confirmação do sistema", contagem de fontes carregadas, seção de extensões instaladas com problemas e diagnóstico copiável.
-- Repositórios: colar, enviar do celular por QR code e sugestões; verificação do repositório antes de salvar e mensagens de erro específicas.
-- Backup e restauração sem seletor de arquivos, com transferência pelo celular.
+- Repositórios: colar e sugestões; verificação do repositório antes de salvar e mensagens de erro específicas.
 
 ### Fixed
 - Avançar para o próximo episódio podia fechar o player.
 - Extensões instaladas que não carregavam sumiam sem explicação.
-- Criar backup falhava em aparelhos sem seletor de arquivos.
-- Telas do sistema ausentes no Fire OS (bateria, apps desconhecidos) e links sem navegador fechavam o app.
+- Telas do sistema ausentes em alguns firmwares (bateria, apps desconhecidos) e links sem navegador fechavam o app.
 
 ### Changed
-- Pacote `com.lyraez.yomira`, nome, ícone, banner e assinatura próprios; atualizador aponta para `lyraEz/Yomira`.
+- Pacote `com.lyraez.yomira`, nome, ícone e assinatura próprios; atualizador aponta para `lyraEz/Yomira`.
 - Discord Rich Presence, sincronização com Google Drive e a verificação remota do assistente de IA desligados por dependerem de credenciais do autor do AniZen.
-- Em TVs de baixo desempenho, cache do mpv menor e conversão `yuv420p` desligada por padrão.
 - O APK universal de release traz só as bibliotecas ARM (32 e 64 bits).
 
 ---

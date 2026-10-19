@@ -44,7 +44,6 @@
     <string name="ext_failure_manifest">Manifesto inválido</string>
     <string name="ext_diagnostics">Diagnóstico</string>
     <string name="ext_diagnostics_copy">Copiar diagnóstico</string>
-    <string name="ext_diagnostics_copied">Diagnóstico copiado</string>
     <string name="ext_install_failed">Falha na instalação</string>
     <string name="ext_reload">Recarregar extensões</string>
     <string name="ext_nsfw_settings_hint">Fontes adultas podem ser ligadas em Configurações → Navegar.</string>
@@ -52,8 +51,6 @@
     <!-- Repositórios -->
     <string name="repo_add_message">Cole o endereço de um repositório no formato legado do AniZen/Aniyomi (termina em index.min.json). Qualquer repositório compatível funciona.</string>
     <string name="repo_paste">Colar</string>
-    <string name="repo_from_phone">Enviar do celular</string>
-    <string name="repo_from_phone_description">Leia o código com um celular na mesma rede Wi-Fi e envie o endereço do repositório. Ele será preenchido aqui.</string>
     <string name="repo_suggestions">Sugestões</string>
     <string name="repo_suggestions_note">Os repositórios sugeridos são mantidos por terceiros, não pelo Yomira.</string>
     <string name="repo_added">Repositório %1$s adicionado (extensões: %2$d)</string>
@@ -61,53 +58,6 @@
     <string name="repo_error_unreachable">O repositório não respondeu. Confira o endereço e a conexão de rede.</string>
     <string name="repo_error_not_repository">O endereço respondeu, mas não é um repositório que o Yomira consiga ler: ele precisa de repo.json e index.min.json na mesma pasta.</string>
     <string name="repo_error_store_v2">Este endereço é um índice store-v2, o formato das versões novas do Aniyomi, que o Yomira não lê. Use o endereço index.min.json do mesmo repositório (para a Rede: https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json).</string>
-
-    <!-- Celular como controle auxiliar -->
-    <string name="companion_text_label">Texto para enviar à TV</string>
-    <string name="companion_file_label">Arquivo de backup (.tachibk)</string>
-    <string name="companion_send">Enviar para a TV</string>
-    <string name="companion_sent">Enviado. Pode voltar para a TV.</string>
-    <string name="companion_download">Baixar o backup</string>
-    <string name="companion_waiting">Aguardando o celular…</string>
-    <string name="companion_received">Recebido</string>
-    <string name="companion_no_network">Este aparelho não está em uma rede local, então o celular não consegue acessá-lo.</string>
-
-    <!-- TV -->
-    <string name="tv_settings">TV</string>
-    <string name="tv_mode">Interface</string>
-    <string name="tv_mode_auto">Automática (%1$s)</string>
-    <string name="tv_mode_tv">TV, para o controle remoto</string>
-    <string name="tv_mode_phone">Celular ou tablet, para toque</string>
-    <string name="tv_text_scale">Tamanho do texto na TV</string>
-    <string name="tv_safe_area">Margem das bordas da tela</string>
-    <string name="tv_safe_area_summary">%s. Mantém os menus longe das bordas em TVs que cortam a imagem (overscan).</string>
-    <string name="tv_safe_area_none">Nenhuma</string>
-    <string name="tv_menu_long_press">Tecla menu = segurar OK</string>
-    <string name="tv_menu_long_press_summary">O botão de menu do controle abre as opções que, no celular, abrem com um toque longo.</string>
-    <string name="tv_restart_note">A mudança de interface vale depois de reiniciar o app.</string>
-
-    <!-- WebView na TV -->
-    <string name="webview_cursor_hint">As setas movem o ponteiro e o OK clica. Empurre contra a borda de cima ou de baixo para rolar.</string>
-    <string name="webview_cursor_on">Usar ponteiro</string>
-    <string name="webview_cursor_off">Usar navegação da página</string>
-
-    <!-- Backups sem seletor de arquivos -->
-    <string name="backup_receive_from_phone">Receber do celular</string>
-    <string name="backup_receive_from_phone_summary">Envie um arquivo .tachibk de um celular na mesma rede Wi-Fi</string>
-    <string name="backup_receive_from_phone_description">Leia o código com um celular na mesma rede Wi-Fi e escolha o arquivo de backup. A restauração começa quando ele chegar.</string>
-    <string name="backup_system_picker">Escolher com o seletor de arquivos do sistema</string>
-    <string name="backup_found_title">Backups encontrados neste aparelho</string>
-    <string name="backup_none_found">Nenhum backup encontrado. Backups criados aqui ficam em %1$s; você também pode copiar um para lá com adb push.</string>
-    <string name="backup_location_app">Pasta do Yomira</string>
-    <string name="backup_location_storage">Backups automáticos</string>
-    <string name="backup_location_downloads">Downloads</string>
-    <string name="backup_location_received">Recebido do celular</string>
-    <string name="backup_saved">Backup salvo (%1$s)</string>
-    <string name="backup_send_to_phone">Enviar para o celular</string>
-    <string name="backup_send_to_phone_summary">Baixe o arquivo em um celular na mesma rede Wi-Fi</string>
-    <string name="backup_send_to_phone_description">Leia o código com um celular na mesma rede Wi-Fi para baixar o backup.</string>
-    <string name="backup_adb_hint">Com um computador e a depuração ADB ativada:</string>
-    <string name="backup_keep_note">O arquivo fica na pasta do app e é apagado se o %1$s for desinstalado. Guarde uma cópia em outro lugar.</string>
 
     <string name="settings_screen_unavailable">Este aparelho não tem essa tela de configurações.</string>
     <string name="no_app_for_link">Nenhum app deste aparelho consegue abrir %1$s</string>
@@ -172,7 +122,6 @@
     <string name="smooth_buffer_summary">Carrega até dois minutos à frente para que conexões lentas ou instáveis não pausem o vídeo. Usa mais memória. Vale a partir do próximo vídeo.</string>
     <string name="smooth_glass_rate">Atualização do vidro</string>
     <string name="smooth_glass_rate_summary">Com que frequência os controles de vidro acompanham o vídeo. 30 fps é fluido e leve; Desligado tira o vidro ao vivo para o máximo de desempenho.</string>
-    <string name="smooth_glass_rate_live">Ao vivo</string>
     <string name="player_button_look">Tamanho e espaçamento dos botões</string>
     <string name="player_button_size">Tamanho dos botões</string>
     <string name="player_button_spacing">Espaço entre os botões</string>
@@ -192,7 +141,7 @@
     <string name="quality_dither">Gradientes suaves</string>
     <string name="quality_dither_summary">O dithering esconde faixas de cor em céus e cenas escuras quase sem custo.</string>
     <string name="quality_deinterlace">Desentrelaçar</string>
-    <string name="quality_deinterlace_summary">Remove as linhas de pente de fontes entrelaçadas de DVD ou TV. Deixe desligado para anime normal.</string>
+    <string name="quality_deinterlace_summary">Remove as linhas de pente de fontes entrelaçadas de DVD ou de transmissão. Deixe desligado para anime normal.</string>
     <string name="quality_tone_mapping">Mapeamento HDR</string>
     <string name="quality_tone_mapping_summary">Como o vídeo HDR é ajustado à tela. Auto é o melhor na maioria; Hable tem mais contraste, Mobius preserva mais cor.</string>
     <string name="optimizer_title">Otimizador inteligente</string>

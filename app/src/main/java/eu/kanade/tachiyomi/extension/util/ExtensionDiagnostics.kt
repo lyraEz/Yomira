@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.ExtensionLoadFailure
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.util.system.isTv
 import mihon.domain.extensionrepo.repository.ExtensionRepoRepository
 import tachiyomi.core.common.util.lang.withIOContext
 import uy.kohesive.injekt.Injekt
@@ -39,9 +38,6 @@ object ExtensionDiagnostics {
                 appendLine("device: ${Build.MANUFACTURER} ${Build.MODEL} (${Build.DEVICE})")
                 appendLine("android: ${Build.VERSION.RELEASE} / API ${Build.VERSION.SDK_INT}")
                 appendLine("abis: ${Build.SUPPORTED_ABIS.joinToString()}")
-                appendLine(
-                    "tv: ${context.isTv()} fire_tv=${context.packageManager.hasSystemFeature(FIRE_TV_FEATURE)}",
-                )
                 appendLine("installer: ${Injekt.get<BasePreferences>().extensionInstaller().get()}")
                 appendLine("adult sources enabled: ${Injekt.get<SourcePreferences>().showNsfwSource().get()}")
                 appendLine("supported extension lib: ${ExtensionLoader.LIB_VERSION_MIN}..${ExtensionLoader.LIB_VERSION_MAX}")
@@ -111,6 +107,5 @@ object ExtensionDiagnostics {
             }
         }
 
-    private const val FIRE_TV_FEATURE = "amazon.hardware.fire_tv"
 }
 // YMR <--

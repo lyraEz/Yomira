@@ -96,7 +96,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import tachiyomi.presentation.core.util.TvDevice
 import yomira.glass.FloatingGlassTabBar
 import yomira.glass.FloatingTabBarInset
 import yomira.glass.GlassOrbButton
@@ -192,7 +191,6 @@ object HomeScreen : Screen() {
 
         // YMR --> phones get the floating liquid glass tab bar; tablets and TVs keep rail/bar
         val floatingBar = !isTabletUi() &&
-            !TvDevice.isTv &&
             !remember { yomira.diagnostics.CrashGuard.isSafeMode(context) }
         val glassStyle = LocalGlassStyle.current
         // YMR <--

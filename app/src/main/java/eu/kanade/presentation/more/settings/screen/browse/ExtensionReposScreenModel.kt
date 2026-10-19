@@ -73,8 +73,7 @@ class ExtensionReposScreenModel(
                 // YMR -->
                 is CreateExtensionRepo.Result.Added -> {
                     _events.send(RepoEvent.Formatted(YMR.strings.repo_added, listOf(result.repo.name, result.extensionCount)))
-                    // The extension list only learns about new repositories when it is refreshed,
-                    // which on a TV has no pull-to-refresh gesture to trigger it.
+                    // The extension list only learns about new repositories when it is refreshed.
                     extensionManager.findAvailableExtensions()
                 }
                 is CreateExtensionRepo.Result.Unreachable ->

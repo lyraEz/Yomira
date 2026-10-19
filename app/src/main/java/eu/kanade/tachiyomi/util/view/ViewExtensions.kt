@@ -34,11 +34,11 @@ inline fun ComponentActivity.setComposeContent(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
             ) {
-                // YMR --> TV text scale, overscan margin and focus indication; links never crash
+                // YMR --> liquid glass style; links never crash
                 CompositionLocalProvider(
-                    LocalUriHandler provides yomira.tv.SafeUriHandler(this@setComposeContent),
+                    LocalUriHandler provides yomira.util.SafeUriHandler(this@setComposeContent),
                 ) {
-                    yomira.tv.TvContent {
+                    yomira.glass.ProvideGlassStyle {
                         content()
                     }
                 }

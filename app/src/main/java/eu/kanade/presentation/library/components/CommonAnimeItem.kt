@@ -68,8 +68,6 @@ import eu.kanade.domain.ui.UiPreferences
 import androidx.compose.runtime.collectAsState
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
-import tachiyomi.presentation.core.util.tvFocusHighlight
-import tachiyomi.presentation.core.util.tvListItemFocusHighlight
 import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.anime.model.AnimeCover as EntryCoverModel
 
@@ -390,11 +388,6 @@ internal fun GridItemSelectable(
 
     Box(
         modifier = modifier
-            .tvFocusHighlight(
-                shape = shape,
-                focusedScale = 1.04f,
-                borderWidth = 2.5.dp,
-            )
             .then(
                 if (scale < 1f) {
                     Modifier.graphicsLayer {
@@ -479,7 +472,6 @@ fun AnimeListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .tvListItemFocusHighlight()
             .then(modifier)
             .selectedBackground(isSelected)
             .height(height)

@@ -31,7 +31,6 @@ import tachiyomi.presentation.core.components.LazyColumnWithAction
 import tachiyomi.presentation.core.components.SectionCard
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.util.TvDevice
 
 class CreateBackupScreen : Screen() {
 
@@ -71,15 +70,6 @@ class CreateBackupScreen : Screen() {
                 actionEnabled = state.options.canCreate(),
                 onClickAction = {
                     if (!BackupCreateJob.isManualJobRunning(context)) {
-                        // YMR --> on TV (or without a file picker) save into the app folder and
-                        // offer to send the file to a phone afterwards.
-                        if (TvDevice.isTv || !yomira.tv.TvSettings.hasDocumentPicker(context)) {
-                            val file = yomira.tv.backup.BackupFiles.newBackupFile(context, BackupCreator.getFilename())
-                            model.createBackup(context, android.net.Uri.fromFile(file))
-                            navigator.replace(yomira.tv.backup.TvBackupExportScreen(file.absolutePath))
-                            return@LazyColumnWithAction
-                        }
-                        // YMR <--
                         try {
                             chooseBackupDir.launch(BackupCreator.getFilename())
                         } catch (e: ActivityNotFoundException) {

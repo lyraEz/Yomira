@@ -131,7 +131,6 @@ fun GestureHandler(
     val volumeBoostingCap = audioPreferences.volumeBoostCap().get()
 
     val context = LocalContext.current
-    val isTv = remember { context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK) }
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     

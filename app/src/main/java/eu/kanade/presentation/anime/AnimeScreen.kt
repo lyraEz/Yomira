@@ -72,7 +72,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.FabPosition
-import yomira.tv.focus.tvFocusRestore
 import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.luminance
@@ -145,7 +144,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import tachiyomi.presentation.core.util.plus
 import tachiyomi.presentation.core.util.shouldExpandFAB
-import tachiyomi.presentation.core.util.tvFocusHighlight
 import tachiyomi.source.localanime.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -1229,9 +1227,7 @@ fun AnimeScreenLargeImpl(
                                     endContentPadding = contentPadding.calculateEndPadding(layoutDirection),
                                 ) {
                                     LazyColumn(
-                                        // YMR --> on TV focus starts (and returns) on the episodes
-                                        modifier = Modifier.fillMaxHeight().tvFocusRestore(),
-                                        // YMR <--
+                                        modifier = Modifier.fillMaxHeight(),
                                         state = episodeListState,
                                         contentPadding = PaddingValues(
                                             top = contentPadding.calculateTopPadding(),
@@ -1761,12 +1757,6 @@ private fun DraggableAnimeFAB(
             modifier = Modifier
                 .onSizeChanged { fabWidth = it.width.toFloat() }
                 .offset { IntOffset(x = animatedDragOffset.roundToInt(), y = 0) }
-                .tvFocusHighlight(
-                    shape = RoundedCornerShape(16.dp),
-                    focusedScale = 1.08f,
-                    borderWidth = 3.dp,
-                    focusedBackgroundAlpha = 0.2f,
-                )
                 .pointerInput(isFabOnLeft, containerWidth, fabWidth) {
                     detectHorizontalDragGestures(
                         onDragStart = {

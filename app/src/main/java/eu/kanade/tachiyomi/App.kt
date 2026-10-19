@@ -66,7 +66,6 @@ import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.system.cancelNotification
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
 import eu.kanade.tachiyomi.util.system.isPreviewBuildType
-import eu.kanade.tachiyomi.util.system.isTv
 import eu.kanade.tachiyomi.util.system.notify
 import exh.log.CrashlyticsPrinter
 import exh.log.EHLogLevel
@@ -94,7 +93,6 @@ import tachiyomi.domain.source.service.SourceManager
 import tachiyomi.data.Database
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import tachiyomi.i18n.MR
-import tachiyomi.presentation.core.util.TvDevice
 import tachiyomi.presentation.widget.WidgetManager
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
@@ -135,14 +133,6 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
 
         setupExhLogging()
         LogcatLogger.install(XLogLogcatLogger())
-
-        // Resolved once here so the D-pad focus-highlight modifiers, which are applied to
-        // every grid cell and list row, can short-circuit on touch devices without doing
-        // per-item work.
-        // YMR --> honours the TV / phone override from Settings → Appearance
-        TvDevice.isTv = yomira.tv.TvSettings.isTv(this)
-        yomira.tv.DeviceProfile.init(this, TvDevice.isTv)
-        // YMR <--
 
         // Mirror the cover-related preferences into snapshot state once, instead of every
         // cover composable doing a DI lookup + SharedPreferences read per item.

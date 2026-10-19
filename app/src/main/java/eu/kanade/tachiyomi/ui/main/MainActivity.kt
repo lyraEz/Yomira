@@ -128,7 +128,6 @@ import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.util.collectAsState
-import tachiyomi.presentation.core.util.TvDevice
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -381,37 +380,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    // YMR -->
-    private var menuLongPressPending = false
-
-    /**
-     * On a TV the MENU key acts as "hold OK" on the focused item, so every long-press action
-     * (selection mode, context options) is reachable without holding the select button.
-     */
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (event.keyCode == KeyEvent.KEYCODE_MENU && TvDevice.isTv && yomira.tv.TvSettings.menuKeyLongPress().get()) {
-            if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0 && !menuLongPressPending) {
-                menuLongPressPending = true
-                val downTime = SystemClock.uptimeMillis()
-                super.dispatchKeyEvent(
-                    KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0),
-                )
-                window.decorView.postDelayed(
-                    {
-                        val upTime = SystemClock.uptimeMillis()
-                        super.dispatchKeyEvent(
-                            KeyEvent(downTime, upTime, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0),
-                        )
-                        menuLongPressPending = false
-                    },
-                    ViewConfiguration.getLongPressTimeout() + MENU_LONG_PRESS_EXTRA_MS,
-                )
-            }
-            return true
-        }
-        return super.dispatchKeyEvent(event)
-    }
-    // YMR <--
 
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
@@ -675,8 +643,7 @@ class MainActivity : BaseActivity() {
             videoIndex: Int = -1,
             hosterList: List<Hoster>? = null,
         ) {
-            val isTv = context.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
-            if (extPlayer && !isTv) {
+            if (extPlayer) {
                 val intent = try {
                     ExternalIntents.newIntent(context, animeId, episodeId, video)
                 } catch (e: Exception) {
@@ -719,5 +686,4 @@ private const val SPLASH_MAX_DURATION = 5000 // ms
 private const val SPLASH_EXIT_ANIM_DURATION = 400L // ms
 
 // YMR -->
-private const val MENU_LONG_PRESS_EXTRA_MS = 150L
 // YMR <--

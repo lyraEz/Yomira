@@ -52,7 +52,6 @@ import eu.kanade.tachiyomi.animesource.model.ChapterType
 import eu.kanade.tachiyomi.ui.player.controls.LocalPlayerButtonsClickEvent
 import `is`.xyz.mpv.Utils
 import tachiyomi.presentation.core.components.material.padding
-import tachiyomi.presentation.core.util.tvFocusHighlight
 
 /**
  * Width of the video timer slots flanking the seekbar.
@@ -88,9 +87,6 @@ fun SeekbarWithTimers(
     onDurationTextLayout: (TextLayoutResult) -> Unit = {},
     chapters: List<Segment>,
     modifier: Modifier = Modifier,
-    // YMR --> seeking from the remote while the bar has focus (true = forward)
-    onKeySeek: ((Boolean) -> Unit)? = null,
-    // YMR <--
 ) {
     val clickEvent = LocalPlayerButtonsClickEvent.current
     Row(
@@ -119,39 +115,7 @@ fun SeekbarWithTimers(
                     .filter { it.start in 0f..duration }
                     .map { it.start }
             },
-            // YMR <--
-            // YMR -->
-            modifier = Modifier
-                .weight(1f)
-                .then(
-                    if (onKeySeek == null) {
-                        Modifier
-                    } else {
-                        Modifier
-                            .tvFocusHighlight(
-                                shape = RoundedCornerShape(50),
-                                borderWidth = 2.dp,
-                                focusedBackgroundAlpha = 0.2f,
-                            )
-                            .onKeyEvent { event ->
-                                if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
-                                when (event.key) {
-                                    Key.DirectionLeft -> {
-                                        clickEvent()
-                                        onKeySeek(false)
-                                        true
-                                    }
-                                    Key.DirectionRight -> {
-                                        clickEvent()
-                                        onKeySeek(true)
-                                        true
-                                    }
-                                    else -> false
-                                }
-                            }
-                            .focusable()
-                    },
-                ),
+            modifier = Modifier.weight(1f),
             // YMR <--
         )
         VideoTimer(

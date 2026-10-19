@@ -3,7 +3,7 @@
 Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fazer" na ordem.
 
 ## Regras combinadas com o dono
-- Foco em celulares Android 8 a 16, 32 e 64 bits. A TV continua funcionando (barra antiga em TV/tablet).
+- App só para celulares Android 8 a 16, 32 e 64 bits.
 - Interface nova e própria, inspirada no iOS 27, sem cara de Aniyomi/AniZen.
 - Liquid glass com a biblioteca do SimpMusic (`io.github.kyant0:backdrop`, Apache-2.0) em tudo que fica
   por cima de conteúdo, com blur ao vivo, refração, vibrância e profundidade; configurável.
@@ -39,7 +39,9 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Vidro | Barras de vidro com fade embaixo (sem linha reta) e capa desfocada com fade | `GlassSurface.kt` (`glassBarFaded`), `Scaffold.kt`, `AnimeToolbar.kt`, `AnimeInfoHeader.kt` |
 
 ## Falta fazer (ordem sugerida)
-0. Pendências dos pedidos de 13/10 (1.3.1 já aplicou vidro nos ícones, barra de progresso de vidro e fade das barras):
+0. 1.5.0: app só para celular (suporte a TV removido); player com padrão leve, proteção contra
+   aquecimento e botão "Restaurar padrões do player"; otimizador desligado por padrão.
+   Pendências dos pedidos de 13/10 (1.3.1 já aplicou vidro nos ícones, barra de progresso de vidro e fade das barras):
    a. Microtravamentos nas abas: testar no aparelho reativar a otimização do R8 (tirar `-dontoptimize` e,
       se o VerifyError do `androidx.compose.material3.TextKt` voltar, manter só essa classe fora da
       otimização com `-keep,allowshrinking,allowobfuscation class androidx.compose.material3.TextKt { *; }`);

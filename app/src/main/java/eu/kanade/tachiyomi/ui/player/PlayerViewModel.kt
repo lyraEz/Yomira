@@ -1038,7 +1038,7 @@ class PlayerViewModel @JvmOverloads constructor(
     // YMR -->
     private val _controlsInteraction = MutableStateFlow(0)
 
-    /** Bumped on every remote key handled by the visible controls, to restart their auto-hide. */
+    /** Bumped on every hardware key handled by the visible controls, to restart their auto-hide. */
     val controlsInteraction = _controlsInteraction.asStateFlow()
 
     fun onControlsInteraction() {

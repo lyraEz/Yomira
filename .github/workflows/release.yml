@@ -62,7 +62,7 @@ jobs:
           YOMIRA_KEY_PASSWORD: ${{ secrets.YOMIRA_KEY_PASSWORD }}
         run: ./gradlew --no-daemon :app:assembleRelease -Penable-updater=true
 
-      - name: Inspect APKs (TV launcher, banner, features, ABIs)
+      - name: Inspect APKs (launcher, SDK levels, ABIs)
         run: scripts/yomira/inspect-apks.sh app/build/outputs/apk/release
 
       - name: Collect, verify and checksum

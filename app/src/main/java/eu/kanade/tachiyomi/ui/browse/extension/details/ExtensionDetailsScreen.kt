@@ -58,7 +58,7 @@ data class ExtensionDetailsScreen(
         // YMR -->
         if (showDiagnostics) {
             val extension = state.extension
-            yomira.tv.extensions.ExtensionDiagnosticsDialog(
+            yomira.extensions.ExtensionDiagnosticsDialog(
                 title = extension?.name ?: pkgName,
                 summary = null,
                 buildReport = {

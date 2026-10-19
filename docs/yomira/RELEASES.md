@@ -40,10 +40,10 @@ Ambos ficam em `app/build.gradle.kts` (`defaultConfig`).
 ## Publicar uma versão
 
 1. Atualize `versionName` e `versionCode`, e registre as mudanças em `CHANGELOG.md`.
-2. Confirme que o CI passou no commit.
-3. Em *Actions → Release → Run workflow*, rode o fluxo no branch principal.
-4. O fluxo compila os APKs assinados, confere a assinatura contra o certificado registrado, gera `SHA256SUMS.txt` e cria um **rascunho** de release com a tag `vX.Y.Z`.
-5. Revise o rascunho, teste o APK num aparelho e só então publique. O atualizador do app só enxerga releases publicadas.
+2. Envie para o branch de desenvolvimento. O fluxo *Release* roda sozinho: lê o `versionName`, e se ainda não existir a release `vX.Y.Z`, compila os APKs assinados, confere a assinatura contra o certificado registrado, gera `SHA256SUMS.txt` e **publica** a release.
+3. O atualizador do app (Mais → Sobre → Verificar atualizações) passa a oferecer a versão nova, com o APK da arquitetura do celular.
+
+Envios sem mudança de versão não publicam nada. Também dá para rodar o fluxo à mão em *Actions → Release → Run workflow* (com a opção de marcar como pré-release).
 
 ## Compilar e assinar localmente
 

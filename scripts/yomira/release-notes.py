@@ -3,10 +3,10 @@
 
 The section "## Yomira [<version>]" is turned into short, friendly notes:
   intro paragraph   -> lead line in bold
-  ### Added         -> Novidades
-  ### Changed/Improved -> Melhorias
-  ### Fixed         -> Correções
-  ### Removed       -> Removido (only when the section exists, i.e. something big went away)
+  ### Added         -> ✨ Novidades
+  ### Changed/Improved -> 🚀 Melhorias
+  ### Fixed         -> 🐛 Correções
+  ### Removed       -> 🗑️ Removido (only when the section exists, i.e. something big went away)
   ### Other         -> left out (technical)
 followed by a short "how to update" footer.
 
@@ -20,11 +20,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 CHANGELOG = ROOT / "CHANGELOG.md"
 CERT_FILE = ROOT / "docs" / "yomira" / "signing-certificate.sha256"
 
+# Section titles carry an emoji; the items themselves stay plain text.
 SECTIONS = [
-    ("Novidades", ("added",)),
-    ("Melhorias", ("changed", "improved")),
-    ("Correções", ("fixed",)),
-    ("Removido", ("removed",)),
+    ("✨ Novidades", ("added",)),
+    ("🚀 Melhorias", ("changed", "improved")),
+    ("🐛 Correções", ("fixed",)),
+    ("🗑️ Removido", ("removed",)),
 ]
 
 
@@ -83,7 +84,7 @@ def notes(version: str) -> str:
     cert = CERT_FILE.read_text(encoding="utf-8").strip().lower() if CERT_FILE.exists() else ""
     footer = [
         "---",
-        "**Como atualizar:** no app, em *Mais → Sobre → Verificar atualizações*, ou baixe um dos APKs abaixo. "
+        "**📲 Como atualizar:** no app, em *Mais → Sobre → Verificar atualizações*, ou baixe um dos APKs abaixo. "
         "Instala por cima da versão anterior sem perder nada.",
         "\n".join([
             f"- `Yomira-v{version}-arm64-v8a.apk`: a maioria dos celulares",

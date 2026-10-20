@@ -152,6 +152,8 @@ fun VideoFiltersPanel(
                 // YMR --> reset to the light defaults, then the optimizer
                 yomira.player.ResetPlayerButton()
                 yomira.player.OptimizerCard()
+                yomira.player.ToolsCard()
+                yomira.player.DisplayCard()
                 // YMR <--
                 FilterPresetsCard()
                 FiltersCard()
@@ -161,6 +163,7 @@ fun VideoFiltersPanel(
                 yomira.player.SmoothnessCard()
                 yomira.player.QualityCard()
                 yomira.player.ExtrasCard()
+                yomira.player.SoundCard()
                 // YMR <--
             }
         }

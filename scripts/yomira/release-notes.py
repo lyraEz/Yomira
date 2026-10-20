@@ -56,6 +56,9 @@ def parse(section: str) -> tuple[str, dict[str, list[str]]]:
             continue
         if line.startswith("- "):
             groups[current].append(line)
+        elif line.lstrip().startswith("- ") and groups[current]:
+            # Nested bullet under the previous item.
+            groups[current][-1] += "\n  " + line.lstrip()
         elif line.strip() and groups[current]:
             # Continuation of the previous bullet.
             groups[current][-1] += " " + line.strip()

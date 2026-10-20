@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/sc_continue_48dp">
+    <background android:drawable="@color/yomira_shortcut_background"/>
+    <foreground>
+        <vector
+            android:width="120dp"
+            android:height="120dp"
+            android:viewportWidth="56.0"
+            android:viewportHeight="56.0">
+            <group
+                android:translateX="16"
+                android:translateY="16">
+                <path
+                    android:fillColor="#FFF"
+                    android:pathData="M9,5.5v13l10.5,-6.5z" />
+            </group>
+        </vector>
+    </foreground>
+</adaptive-icon>

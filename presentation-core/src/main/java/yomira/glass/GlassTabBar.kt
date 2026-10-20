@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -183,6 +184,8 @@ private fun RowScope.GlassCapsule(
                     }
                 },
         ) {
+            val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+            val tickOnTap = LocalGlassStyle.current.haptics
             tabs.forEachIndexed { index, tab ->
                 val selected = index == selectedIndex
                 Column(
@@ -193,8 +196,14 @@ private fun RowScope.GlassCapsule(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                             role = Role.Tab,
-                            onLongClick = { onTabLongPress(index) },
-                            onClick = { onTabSelected(index) },
+                            onLongClick = {
+                                if (tickOnTap) haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onTabLongPress(index)
+                            },
+                            onClick = {
+                                if (tickOnTap && !selected) haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                                onTabSelected(index)
+                            },
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,

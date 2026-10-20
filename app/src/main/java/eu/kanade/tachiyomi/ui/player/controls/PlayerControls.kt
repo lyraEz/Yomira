@@ -488,9 +488,7 @@ fun PlayerControls(
                         // (slotWidth - inkWidth) / 2 left of the slot's right edge
                         var durationInkWidthPx by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
                         val pillEndInset = with(LocalDensity.current) {
-                            // YMR --> plus the inset of the glass capsule around the seekbar
-                            (videoTimerWidth - durationInkWidthPx.toDp()) / 2 + 12.dp
-                            // YMR <--
+                            (videoTimerWidth - durationInkWidthPx.toDp()) / 2
                         }.coerceAtLeast(0.dp)
                         AnimatedVisibility(
                             visible = skipIntroButton != null ||
@@ -625,6 +623,9 @@ fun PlayerControls(
                         mediaTitle = mediaTitle,
                         onTitleClick = { viewModel.showEpisodeListDialog() },
                         onBackClick = onBackPress,
+                        // YMR -->
+                        info = { yomira.player.PlayerInfoLine(viewModel) },
+                        // YMR <--
                     )
                 }
                 // Top right controls

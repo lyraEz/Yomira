@@ -451,6 +451,7 @@ class PlayerActivity : BaseActivity() {
                         },
                     )
                     // YMR -->
+                    yomira.player.WarmFilterOverlay()
                     Box(modifier = Modifier.fillMaxSize()) {
                     // YMR <--
                     // YMR --> live glass over a small copy of the video while the controls show
@@ -491,6 +492,25 @@ class PlayerActivity : BaseActivity() {
                 launch { yomira.player.Smoothness.frameRateLoop(player, { viewModel.mpv }) }
                 launch { yomira.player.PlaybackOptimizer.run(this@PlayerActivity, player, { viewModel.mpv }) }
                 launch { yomira.player.ThermalGuard.watch(this@PlayerActivity, { viewModel.mpv }) }
+                // Watch time of the day (only while the video plays).
+                launch { yomira.player.WatchLog.track({ viewModel.paused.value == false }) }
+                // Remember the speed per anime when that option is on.
+                launch {
+                    while (true) {
+                        kotlinx.coroutines.delay(5_000)
+                        yomira.player.PlayerTools.saveSpeed(viewModel.mpv, viewModel.currentAnime.value?.id)
+                    }
+                }
+                // Keep the "Continue" launcher shortcut on the episode being watched.
+                launch {
+                    viewModel.currentEpisode.collect { episode ->
+                        val anime = viewModel.currentAnime.value
+                        val episodeId = episode?.id
+                        if (episodeId != null && anime != null) {
+                            yomira.ui.ContinueShortcut.publish(this@PlayerActivity, anime.id, episodeId, anime.title)
+                        }
+                    }
+                }
                 // Rewind a few seconds when resuming after a long pause.
                 launch {
                     val extras = yomira.player.PlayerExtrasPreferences()
@@ -1666,6 +1686,9 @@ class PlayerActivity : BaseActivity() {
         // ANZ -->
         viewModel.restoreAspectRatio()
         // ANZ <--
+        // YMR --> audio extras, A-B loop reset and per-anime speed for every file
+        yomira.player.PlayerTools.onFileLoaded(viewModel.mpv, viewModel.currentAnime.value?.id)
+        // YMR <--
 
         // aniSkip stuff
         viewModel.viewModelScope.launchIO {
@@ -1752,6 +1775,9 @@ class PlayerActivity : BaseActivity() {
     }
 
     private fun endFile(eofReached: Boolean) {
+        // YMR --> "stop at the end of this episode" skips autoplay once
+        if (eofReached && yomira.player.PlayerTools.consumeStopAfterEpisode()) return
+        // YMR <--
         if (eofReached && playerPreferences.autoplayEnabled().get()) {
             viewModel.changeEpisode(previous = false, autoPlay = true)
         }

@@ -131,6 +131,12 @@ fun MoreScreen(
                 LogoHeader()
             }
 
+            // YMR -->
+            item {
+                yomira.ui.WatchTimeCard()
+            }
+            // YMR <--
+
             item {
                 MoreSection(title = "Preferences") {
                     MoreSwitchItem(

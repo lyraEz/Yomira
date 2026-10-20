@@ -53,6 +53,8 @@ data class GlassStyle(
     val pressScale: Float = 1.08f,
     /** Darker glass for dark themes, frosted white for light themes. */
     val dark: Boolean = true,
+    /** Light tick when switching tabs and pressing glass controls. */
+    val haptics: Boolean = true,
 ) {
     /** Live blur needs RenderEffect (Android 12, API 31). */
     val liveBlur: Boolean

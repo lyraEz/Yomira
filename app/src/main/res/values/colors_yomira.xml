@@ -30,4 +30,5 @@
     <color name="yomira_surfaceContainer">#EBEBF7</color>
     <color name="yomira_surfaceContainerHigh">#E5E5F2</color>
     <color name="yomira_surfaceContainerHighest">#DFDFED</color>
+    <color name="yomira_shortcut_background">#3A4BA0</color>
 </resources>

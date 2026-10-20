@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -98,6 +99,15 @@ fun AnimeEpisodeListItem(
     // <-- AM (FILE_SIZE)
     modifier: Modifier = Modifier,
 ) {
+    // YMR --> spoiler protection: unwatched episodes show only their number, no summary, blurred thumbnail
+    val spoilerHidden = yomira.ui.rememberHideSpoilers() && !seen
+    val shownTitle = if (spoilerHidden) {
+        yomira.ui.SpoilerShield.maskTitle(title, stringResource(MR.strings.episodes))
+    } else {
+        title
+    }
+    val shownSummary = summary.takeUnless { spoilerHidden }
+    // YMR <--
     val downloadState = downloadStateProvider()
     val fillermarkIcon = ImageVector.vectorResource(id = R.drawable.ic_fillermark_24dp)
     val fillermarkBorderIcon = ImageVector.vectorResource(id = R.drawable.ic_fillermark_border_24dp)
@@ -140,6 +150,9 @@ fun AnimeEpisodeListItem(
         .clip(cardShape)
     // YMR <--
 
+    // YMR -->
+    androidx.compose.runtime.CompositionLocalProvider(yomira.ui.LocalSpoilerBlur provides spoilerHidden) {
+    // YMR <--
     if (hasActions) {
         SwipeableActionsBox(
             modifier = cardModifier,
@@ -149,7 +162,7 @@ fun AnimeEpisodeListItem(
             backgroundUntilSwipeThreshold = MaterialTheme.colorScheme.surfaceContainerLowest,
         ) {
             EpisodeItemRow(
-                title = title,
+                title = shownTitle,
                 date = date,
                 watchProgress = watchProgress,
                 scanlator = scanlator,
@@ -157,7 +170,7 @@ fun AnimeEpisodeListItem(
                 bookmark = bookmark,
                 fillermark = fillermark,
                 isAutoFiller = isAutoFiller,
-                summary = summary,
+                summary = shownSummary,
                 previewUrl = previewUrl,
                 selected = selected,
                 isAnyEpisodeSelected = isAnyEpisodeSelected,
@@ -173,7 +186,7 @@ fun AnimeEpisodeListItem(
         }
     } else {
         EpisodeItemRow(
-            title = title,
+            title = shownTitle,
             date = date,
             watchProgress = watchProgress,
             scanlator = scanlator,
@@ -181,7 +194,7 @@ fun AnimeEpisodeListItem(
             bookmark = bookmark,
             fillermark = fillermark,
             isAutoFiller = isAutoFiller,
-            summary = summary,
+            summary = shownSummary,
             previewUrl = previewUrl,
             selected = selected,
             isAnyEpisodeSelected = isAnyEpisodeSelected,
@@ -195,6 +208,9 @@ fun AnimeEpisodeListItem(
             modifier = cardModifier.background(cardColor),
         )
     }
+    // YMR -->
+    }
+    // YMR <--
 }
 
 @Composable
@@ -387,7 +403,16 @@ private fun EpisodeThumbnail(
             data = previewUrl,
             modifier = Modifier
                 .width(targetWidth.dp)
-                .padding(end = 8.dp),
+                .padding(end = 8.dp)
+                // YMR --> unwatched episode with spoiler protection: blurred thumbnail
+                .then(
+                    if (yomira.ui.LocalSpoilerBlur.current) {
+                        Modifier.blur(16.dp, androidx.compose.ui.draw.BlurredEdgeTreatment.Rectangle)
+                    } else {
+                        Modifier
+                    },
+                ),
+                // YMR <--
             ratio = 16f / 9f,
             shape = MaterialTheme.shapes.small,
         )

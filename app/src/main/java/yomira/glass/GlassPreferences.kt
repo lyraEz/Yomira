@@ -41,6 +41,8 @@ class GlassPreferences(private val store: PreferenceStore = Injekt.get()) {
 
     fun pressScale() = store.getFloat("yomira_glass_press_scale", DEFAULT.pressScale)
 
+    fun haptics() = store.getBoolean("yomira_glass_haptics", DEFAULT.haptics)
+
     /** Puts every knob back to its default (the quality mode is kept). */
     fun resetLook() {
         listOf(
@@ -80,13 +82,16 @@ fun ProvideGlassStyle(content: @Composable () -> Unit) {
     val highlight by prefs.highlight().collectAsState()
     val shadow by prefs.shadow().collectAsState()
     val press by prefs.pressScale().collectAsState()
+    val haptics by prefs.haptics().collectAsState()
     val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     val safeMode = remember { yomira.diagnostics.CrashGuard.isSafeMode(context) }
     val quality = remember(mode, safeMode) {
         if (safeMode) GlassQuality.OFF else GlassDevice.resolve(context, mode)
     }
-    val style = remember(quality, blur, height, amount, depth, chromatic, vibrance, brightness, tint, highlight, shadow, press, dark) {
+    val style = remember(
+        quality, blur, height, amount, depth, chromatic, vibrance, brightness, tint, highlight, shadow, press, dark, haptics,
+    ) {
         GlassStyle(
             quality = quality,
             blurRadius = blur.dp,
@@ -101,6 +106,7 @@ fun ProvideGlassStyle(content: @Composable () -> Unit) {
             shadow = shadow,
             pressScale = press,
             dark = dark,
+            haptics = haptics,
         )
     }
     CompositionLocalProvider(LocalGlassStyle provides style, content = content)

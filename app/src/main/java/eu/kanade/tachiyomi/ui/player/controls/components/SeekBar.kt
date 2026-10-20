@@ -17,8 +17,6 @@
 
 package eu.kanade.tachiyomi.ui.player.controls.components
 
-import androidx.compose.foundation.layout.padding
-import yomira.player.playerCapsule
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -92,13 +90,7 @@ fun SeekbarWithTimers(
 ) {
     val clickEvent = LocalPlayerButtonsClickEvent.current
     Row(
-        // YMR --> timers and progress bar share one glass capsule (iOS 27 player)
-        modifier = modifier
-            .padding(horizontal = 8.dp)
-            .playerCapsule()
-            .padding(horizontal = 4.dp)
-            .height(48.dp),
-        // YMR <--
+        modifier = modifier.height(48.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
     ) {

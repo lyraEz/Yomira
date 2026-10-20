@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.more.settings.Preference
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState
 import yomira.i18n.YMR
@@ -137,6 +138,11 @@ fun glassPreferencesGroup(): Preference.PreferenceGroup {
             Preference.PreferenceItem.SwitchPreference(
                 pref = prefs.shadow(),
                 title = stringResource(YMR.strings.glass_shadow),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                pref = prefs.haptics(),
+                title = stringResource(YMR.strings.glass_haptics),
+                subtitle = stringResource(YMR.strings.glass_haptics_summary),
             ),
             Preference.PreferenceItem.TextPreference(
                 title = stringResource(YMR.strings.glass_reset),
@@ -243,4 +249,40 @@ private fun GlassPreview() {
             }
         }
     }
+}
+
+/** Settings → Appearance → Experience: comfort options outside the player. */
+@Composable
+fun experiencePreferencesGroup(): Preference.PreferenceGroup {
+    val prefs = remember { yomira.ui.ExperiencePreferences() }
+    val watch = remember { yomira.player.WatchLogPreferences() }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val goals = listOf(0, 15, 30, 45, 60, 90, 120, 180)
+    val none = stringResource(YMR.strings.watch_goal_none)
+    return Preference.PreferenceGroup(
+        title = stringResource(YMR.strings.experience_title),
+        preferenceItems = listOf(
+            Preference.PreferenceItem.SwitchPreference(
+                pref = prefs.hideSpoilers(),
+                title = stringResource(YMR.strings.experience_spoilers),
+                subtitle = stringResource(YMR.strings.experience_spoilers_summary),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                pref = prefs.continueShortcut(),
+                title = stringResource(YMR.strings.experience_shortcut),
+                subtitle = stringResource(YMR.strings.experience_shortcut_summary),
+                onValueChanged = {
+                    if (!it) yomira.ui.ContinueShortcut.remove(context)
+                    true
+                },
+            ),
+            Preference.PreferenceItem.ListPreference(
+                pref = watch.dailyGoal(),
+                title = stringResource(YMR.strings.watch_goal_title),
+                entries = goals.associateWith { minutes ->
+                    if (minutes == 0) none else "$minutes min"
+                }.toImmutableMap(),
+            ),
+        ).toImmutableList(),
+    )
 }

@@ -46,6 +46,8 @@ fun CapsuleTabs(
     modifier: Modifier = Modifier,
 ) {
     val scroll = rememberScrollState()
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val tickOnTap = LocalGlassStyle.current.haptics
     val offsets = remember(tabs.size) { IntArray(tabs.size) }
     val widths = remember(tabs.size) { IntArray(tabs.size) }
     LaunchedEffect(selectedIndex, tabs.size) {
@@ -89,7 +91,12 @@ fun CapsuleTabs(
                     .clip(RoundedCornerShape(percent = 50))
                     .background(background)
                     .border(0.5.dp, border, RoundedCornerShape(percent = 50))
-                    .clickable(role = Role.Tab) { onSelect(index) }
+                    .clickable(role = Role.Tab) {
+                        if (tickOnTap && index != selectedIndex) {
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.SegmentTick)
+                        }
+                        onSelect(index)
+                    }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),

@@ -44,7 +44,9 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Listas | Cartões de vidro claro (sem blur por item); Biblioteca de ponta a ponta por padrão | `yomira/ui/GlassCard.kt`, `UiPreferences.containerStyles()` |
 | Diálogos | AlertDialog com fundo desfocado e cartão translúcido (troca de import) | `yomira/glass/GlassAlertDialog.kt` |
 | Detalhes | Fundo da capa bem desfocado; cabeçalho de episódios em cápsula | `AnimeInfoHeader.kt`, `EpisodeHeader.kt` |
-| Player | Barra de progresso numa cápsula de vidro fumê; botões da direita agrupados | `yomira/player/PlayerCapsule.kt`, `SeekBar.kt`, `BottomRightPlayerControls.kt` |
+| Player | (1.7.0) Cápsulas da barra de progresso e dos botões removidas a pedido do dono: nada de contorno em volta de grupos de controles | `SeekBar.kt`, `BottomRightPlayerControls.kt` |
+| Player | Linha de informações (relógio, bateria, termina às), filtro de luz azul, cartões Ferramentas (A-B, quadro a quadro, girar, parar no fim, velocidade por anime), Som (mono, espacial, agudos, equilíbrio) e Na tela | `yomira/player/PlayerTools.kt`, `PlayerToolsCards.kt` |
+| App | Tempo assistido com meta diária (aba Mais), proteção contra spoilers, atalho "Continuar", vibração nas abas | `yomira/player/WatchLog.kt`, `yomira/ui/WatchTimeCard.kt`, `yomira/ui/YomiraExperience.kt` |
 
 ## Falta fazer (ordem sugerida)
 1. Medir no aparelho: `adb shell dumpsys gfxinfo com.lyraez.yomira` nas telas com vidro, nas transições e no player.

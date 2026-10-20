@@ -10,6 +10,31 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.7.0] - 2026-10-21
+
+Um monte de opções novas dentro e fora do player.
+
+### Added
+- Linha de informações embaixo do título do episódio: relógio, bateria (em vermelho quando estiver acabando) e a hora em que o episódio termina na velocidade atual. Cada item liga e desliga em *Na tela*, no painel de vídeo.
+- Filtro de luz azul no player, com três intensidades, para assistir à noite.
+- Cartão *Ferramentas* no painel de vídeo:
+  - repetir um trecho (marque o início A e o fim B);
+  - avançar e voltar quadro a quadro;
+  - girar o vídeo em 90°, 180° ou 270°;
+  - parar ao fim do episódio atual sem começar o próximo;
+  - lembrar a velocidade de cada anime.
+- Cartão *Som* no painel de vídeo: áudio mono, som espacial para fones, realce de agudos e equilíbrio entre esquerda e direita.
+- *Seu tempo assistido* na aba Mais: tempo de hoje, gráfico dos últimos 7 dias, total da semana, sequência de dias seguidos e melhor dia. Dá para definir uma meta diária. Só conta o tempo com o vídeo tocando, e tudo fica no celular.
+- Proteção contra spoilers (Configurações → Aparência → Experiência): episódios que você ainda não viu mostram só o número, sem resumo e com a imagem desfocada.
+- Atalho "Continuar" no ícone do app: segure o ícone para voltar direto ao último episódio aberto.
+- Vibração leve ao trocar de aba (pode desligar em Aparência → Liquid glass).
+
+### Changed
+- Barra de progresso e botões de baixo do player sem a cápsula em volta.
+
+### Fixed
+- Modo noite, voz clara e graves voltam a valer ao abrir o player mesmo com o otimizador desligado.
+
 ## Yomira [1.6.0] - 2026-10-20
 
 Visual próprio do Yomira, longe do padrão do Aniyomi.

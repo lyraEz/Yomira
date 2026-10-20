@@ -106,6 +106,8 @@ object PlayerDefaults {
             "yomira_optimizer", "yomira_optimizer_adaptive", "yomira_optimizer_battery",
             "yomira_optimizer_mode_switch", "yomira_optimizer_refresh", "yomira_optimizer_sync",
             "yomira_night_mode", "yomira_dialogue_boost", "yomira_bass_boost", "yomira_resume_rewind",
+            "yomira_audio_mono", "yomira_audio_balance", "yomira_audio_spatial", "yomira_audio_treble",
+            "yomira_blue_light", "yomira_speed_per_anime",
         )
         keys.forEach { key -> runCatching { store.getString(key).delete() } }
         runCatching { decoder.smoothMotion().delete() }

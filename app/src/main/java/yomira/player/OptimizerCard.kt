@@ -127,7 +127,7 @@ fun OptimizerCard() {
                         replan()
                     },
                 )
-                val rates = listOf(-1, 0, 30, 15, VideoGlassOff)
+                val rates = listOf(-1, 0, 30, 15, VIDEO_GLASS_OFF)
                 ChoiceRow(
                     title = stringResource(YMR.strings.smooth_glass_rate),
                     summary = stringResource(YMR.strings.optimizer_glass_summary),

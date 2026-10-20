@@ -23,7 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
+import yomira.glass.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -158,8 +158,11 @@ fun SourcesScreen(
                                         .fillMaxWidth()
                                         .padding(horizontal = 12.dp, vertical = 2.dp),
                                     shape = MaterialTheme.shapes.large,
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    tonalElevation = 2.dp,
+                                    // YMR -->
+                                    color = yomira.ui.GlassCard.color(),
+                                    border = yomira.ui.GlassCard.border(),
+                                    tonalElevation = 0.dp,
+                                    // YMR <--
                                 ) {
                                     SourceItem(
                                         item = model,

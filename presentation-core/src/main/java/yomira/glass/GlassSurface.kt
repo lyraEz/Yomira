@@ -18,22 +18,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -60,6 +60,9 @@ val LocalGlassBackdrop = compositionLocalOf<Backdrop?> { null }
 
 /** True inside a [tachiyomi.presentation.core.components.material.Scaffold] top bar drawn as glass. */
 val LocalGlassTopBar = compositionLocalOf { false }
+
+/** True inside the top bar of a Scaffold that asked for an iOS-style large, collapsing title. */
+val LocalLargeTopBar = compositionLocalOf { false }
 
 /**
  * Extra bottom space reserved by a floating bar drawn over the content (the home tab bar). Scaffolds

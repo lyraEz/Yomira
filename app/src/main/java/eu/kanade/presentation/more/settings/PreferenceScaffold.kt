@@ -35,6 +35,9 @@ fun PreferenceScaffold(
         },
         containerColor = MaterialTheme.colorScheme.background,
         hazeEnabled = hazeEnabled,
+        // YMR -->
+        largeTopBar = true,
+        // YMR <--
         content = { contentPadding ->
             PreferenceScreen(
                 items = itemsProvider(),

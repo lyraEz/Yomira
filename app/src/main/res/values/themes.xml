@@ -542,6 +542,40 @@
         <item name="colorPrimaryInverse">@color/matrix_primaryInverse</item>
     </style>
 
+    <!--== Yomira Theme ==-->
+    <style name="Theme.Tachiyomi.Yomira">
+        <!-- Theme Colors -->
+        <item name="colorPrimary">@color/yomira_primary</item>
+        <item name="colorOnPrimary">@color/yomira_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/yomira_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/yomira_onPrimaryContainer</item>
+        <item name="colorPrimaryInverse">@color/yomira_inversePrimary</item>
+        <item name="colorSecondary">@color/yomira_secondary</item>
+        <item name="colorOnSecondary">@color/yomira_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/yomira_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/yomira_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/yomira_tertiary</item>
+        <item name="colorOnTertiary">@color/yomira_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/yomira_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/yomira_onTertiaryContainer</item>
+        <item name="android:colorBackground">@color/yomira_background</item>
+        <item name="colorOnBackground">@color/yomira_onBackground</item>
+        <item name="colorSurface">@color/yomira_surface</item>
+        <item name="colorOnSurface">@color/yomira_onSurface</item>
+        <item name="colorSurfaceVariant">@color/yomira_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/yomira_onSurfaceVariant</item>
+        <item name="elevationOverlayColor">@color/yomira_surfaceTint</item>
+        <item name="colorSurfaceInverse">@color/yomira_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/yomira_inverseOnSurface</item>
+        <item name="colorOutline">@color/yomira_outline</item>
+        <item name="colorOutlineVariant">@color/yomira_outlineVariant</item>
+        <item name="colorSurfaceContainer">@color/yomira_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/yomira_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/yomira_surfaceContainerHighest</item>
+        <item name="colorSurfaceContainerLow">@color/yomira_surfaceContainerLow</item>
+        <item name="colorSurfaceContainerLowest">@color/yomira_surfaceContainerLowest</item>
+    </style>
+
     <!--== Tidal Wave Theme ==-->
     <style name="Theme.Tachiyomi.TidalWave">
         <!-- Theme Colors -->

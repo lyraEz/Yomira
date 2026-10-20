@@ -17,7 +17,6 @@ import cafe.adriel.voyager.core.model.ScreenModelStore
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
-import cafe.adriel.voyager.core.stack.StackEvent
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.ScreenTransitionContent
 import eu.kanade.domain.ui.UiPreferences
@@ -28,8 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.plus
-import soup.compose.material.motion.animation.materialSharedAxisX
-import soup.compose.material.motion.animation.rememberSlideDistance
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -88,21 +85,20 @@ fun DefaultNavigatorScreenTransition(
     modifier: Modifier = Modifier,
 ) {
     val animatedTransitions by uiPreferences.animatedTransitions().collectAsState()
-    val slideDistance = rememberSlideDistance()
+    // YMR -->
     ScreenTransition(
         navigator = navigator,
         transition = {
             if (animatedTransitions) {
-                materialSharedAxisX(
-                    forward = navigator.lastEvent != StackEvent.Pop,
-                    slideDistance = slideDistance,
-                )
+                yomira.ui.YomiraTransitions.push(navigator, initialState, targetState)
             } else {
                 fadeIn() togetherWith fadeOut()
             }
         },
         modifier = modifier,
+        predictiveBack = animatedTransitions,
     )
+    // YMR <--
 }
 
 @Composable
@@ -110,8 +106,17 @@ fun ScreenTransition(
     navigator: Navigator,
     transition: AnimatedContentTransitionScope<Screen>.() -> ContentTransform,
     modifier: Modifier = Modifier,
+    // YMR -->
+    predictiveBack: Boolean = false,
+    // YMR <--
     content: ScreenTransitionContent = { it.Content() },
 ) {
+    // YMR -->
+    if (predictiveBack) {
+        yomira.ui.PredictiveScreenTransition(navigator, transition, modifier, content)
+        return
+    }
+    // YMR <--
     AnimatedContent(
         targetState = navigator.lastItem,
         transitionSpec = transition,

@@ -1,6 +1,6 @@
 package eu.kanade.presentation.more.settings.screen.player.editor.components
 
-import androidx.compose.material3.AlertDialog
+import yomira.glass.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton

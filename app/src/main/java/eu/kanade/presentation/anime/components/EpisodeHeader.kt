@@ -1,6 +1,16 @@
 package eu.kanade.presentation.anime.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,32 +37,48 @@ fun EpisodeHeader(
     modifier: Modifier = Modifier,
     fetchType: FetchType = FetchType.Episodes,
 ) {
+    // YMR --> episode count in a frosted capsule, with a hint that tapping it opens the filters
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-            )
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
     ) {
-        Text(
-            text = if (episodeCount == null) {
-                stringResource(MR.strings.episodes)
-            } else {
-                val pluralCount = when (fetchType) {
-                    FetchType.Seasons -> MR.plurals.anime_num_seasons
-                    FetchType.Episodes -> MR.plurals.anime_num_episodes
-                }
-                pluralStringResource(pluralCount, count = episodeCount, episodeCount)
-            },
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(CircleShape)
+                .background(yomira.ui.GlassCard.color())
+                .border(yomira.ui.GlassCard.border(), CircleShape)
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = if (episodeCount == null) {
+                    stringResource(MR.strings.episodes)
+                } else {
+                    val pluralCount = when (fetchType) {
+                        FetchType.Seasons -> MR.plurals.anime_num_seasons
+                        FetchType.Episodes -> MR.plurals.anime_num_episodes
+                    }
+                    pluralStringResource(pluralCount, count = episodeCount, episodeCount)
+                },
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                imageVector = Icons.Outlined.FilterList,
+                contentDescription = stringResource(MR.strings.action_filter),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
 
         MissingEpisodesWarning(fetchType, missingEpisodeCount)
     }
+    // YMR <--
 }
 
 @Composable

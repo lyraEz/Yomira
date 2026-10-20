@@ -106,6 +106,5 @@ object ExtensionDiagnostics {
                 repos.forEach { appendLine("${it.name}: ${it.baseUrl} key=${it.signingKeyFingerprint}") }
             }
         }
-
 }
 // YMR <--

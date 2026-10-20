@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.ui.browse.extension
 
-import androidx.compose.material3.AlertDialog
+import yomira.glass.AlertDialog
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

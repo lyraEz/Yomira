@@ -148,8 +148,11 @@ fun LibraryContent(
                         .fillMaxSize()
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    tonalElevation = 2.dp
+                    // YMR -->
+                    color = yomira.ui.GlassCard.color(),
+                    border = yomira.ui.GlassCard.border(),
+                    tonalElevation = 0.dp,
+                    // YMR <--
                 ) {
                     pagerContent()
                 }

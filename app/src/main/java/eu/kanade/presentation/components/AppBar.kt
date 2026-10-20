@@ -39,6 +39,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -139,47 +140,73 @@ fun AppBar(
     onCancelActionMode: () -> Unit = {},
 
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    // YMR -->
+    large: Boolean = yomira.glass.LocalLargeTopBar.current,
+    // YMR <--
 ) {
+    // YMR -->
+    val colors = if (yomira.glass.LocalGlassTopBar.current && backgroundColor == null) {
+        val glassColor = if (isActionMode) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+        } else {
+            androidx.compose.ui.graphics.Color.Transparent
+        }
+        TopAppBarDefaults.topAppBarColors(
+            containerColor = glassColor,
+            scrolledContainerColor = glassColor,
+        )
+    } else {
+        TopAppBarDefaults.topAppBarColors(
+            containerColor = backgroundColor ?: MaterialTheme.colorScheme.surfaceColorAtElevation(
+                elevation = if (isActionMode) 3.dp else 0.dp,
+            ),
+        )
+    }
+    val navigation: @Composable () -> Unit = {
+        if (isActionMode) {
+            IconButton(onClick = onCancelActionMode) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = stringResource(MR.strings.action_cancel),
+                )
+            }
+        } else if (navigateUp != null) {
+            IconButton(onClick = navigateUp) {
+                UpIcon(navigationIcon = navigationIcon)
+            }
+        }
+    }
+    if (large && !isActionMode) {
+        yomira.ui.LargeTitleBar(
+            title = titleContent,
+            navigationIcon = navigation,
+            actions = actions,
+            colors = colors,
+            scrollBehavior = scrollBehavior,
+            modifier = modifier,
+        )
+        return
+    }
+    // In a large-title screen the small bar (selection, search) stays put while the list scrolls
+    val inLargeScreen = yomira.glass.LocalLargeTopBar.current
+    if (inLargeScreen && scrollBehavior != null) {
+        SideEffect {
+            scrollBehavior.state.heightOffsetLimit = 0f
+            scrollBehavior.state.heightOffset = 0f
+        }
+    }
+    // YMR <--
     Column(
         modifier = modifier,
     ) {
         TopAppBar(
-            navigationIcon = {
-                if (isActionMode) {
-                    IconButton(onClick = onCancelActionMode) {
-                        Icon(
-                            imageVector = Icons.Outlined.Close,
-                            contentDescription = stringResource(MR.strings.action_cancel),
-                        )
-                    }
-                } else if (navigateUp != null) {
-                    IconButton(onClick = navigateUp) {
-                        UpIcon(navigationIcon = navigationIcon)
-                    }
-                }
-            },
+            navigationIcon = navigation,
             title = titleContent,
             actions = actions,
-            // YMR --> inside a glass top bar the bar itself stays see-through
-            colors = if (yomira.glass.LocalGlassTopBar.current && backgroundColor == null) {
-                val glassColor = if (isActionMode) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
-                } else {
-                    androidx.compose.ui.graphics.Color.Transparent
-                }
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = glassColor,
-                    scrolledContainerColor = glassColor,
-                )
-            } else {
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = backgroundColor ?: MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        elevation = if (isActionMode) 3.dp else 0.dp,
-                    ),
-                )
-            },
+            // YMR -->
+            colors = colors,
+            scrollBehavior = scrollBehavior.takeUnless { inLargeScreen },
             // YMR <--
-            scrollBehavior = scrollBehavior,
         )
     }
 }
@@ -428,6 +455,9 @@ fun SearchToolbar(
         },
         isActionMode = false,
         scrollBehavior = scrollBehavior,
+        // YMR -->
+        large = yomira.glass.LocalLargeTopBar.current && searchQuery == null,
+        // YMR <--
     )
 }
 

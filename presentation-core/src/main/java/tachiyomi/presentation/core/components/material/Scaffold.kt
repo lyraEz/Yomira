@@ -60,6 +60,8 @@ import yomira.glass.LocalFloatingBarInset
 import yomira.glass.LocalGlassBackdrop
 import yomira.glass.LocalGlassStyle
 import yomira.glass.LocalGlassTopBar
+import yomira.glass.LocalLargeTopBar
+import androidx.compose.ui.graphics.graphicsLayer
 import yomira.glass.glassBarFaded
 import yomira.glass.glassSource
 import yomira.glass.rememberGlassBackdrop
@@ -120,9 +122,9 @@ import dev.chrisbanes.haze.hazeChild
 @Composable
 fun Scaffold(
     modifier: Modifier = Modifier,
-    topBarScrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(
-        rememberTopAppBarState(),
-    ),
+    // YMR --> null picks pinned, or collapse-on-scroll when [largeTopBar] is set
+    topBarScrollBehavior: TopAppBarScrollBehavior? = null,
+    // YMR <--
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     startBar: @Composable () -> Unit = {},
@@ -138,9 +140,18 @@ fun Scaffold(
     // false: the content is still recorded, but the top bar paints its own glass through
     // LocalGlassBackdrop (e.g. buttons floating over a cover)
     glassTopBarSurface: Boolean = true,
+    // iOS-style large title that shrinks into the bar while the content scrolls up
+    largeTopBar: Boolean = false,
     // YMR <--
     content: @Composable (PaddingValues) -> Unit,
 ) {
+    // YMR -->
+    val scrollBehavior = topBarScrollBehavior ?: if (largeTopBar) {
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    } else {
+        TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    }
+    // YMR <--
     // Tachiyomi: Handle consumed window insets
     val remainingWindowInsets = remember { MutableWindowInsets() }
     val hazeState = remember { HazeState() }
@@ -157,7 +168,7 @@ fun Scaffold(
 
     androidx.compose.material3.Surface(
         modifier = Modifier
-            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
             .onConsumedWindowInsetsChanged {
                 remainingWindowInsets.insets = contentWindowInsets.exclude(
                     it,
@@ -187,13 +198,29 @@ fun Scaffold(
                 ) {
                     // YMR --> glass that fades out below the bar instead of ending in a line
                     if (glassBackdrop != null && glassTopBarSurface) {
-                        Box(Modifier.matchParentSize().glassBarFaded(glassBackdrop, glassStyle, glassBarTint))
+                        // A large title starts clear over the page and turns into glass as it collapses
+                        val fade = if (largeTopBar) {
+                            Modifier.graphicsLayer {
+                                val state = scrollBehavior.state
+                                // Clear while the large title sits over an unscrolled page; frosted as soon
+                                // as it shrinks or something is under it (or a small bar replaced it).
+                                alpha = if (state.heightOffsetLimit == 0f) {
+                                    1f
+                                } else {
+                                    maxOf(state.collapsedFraction, state.overlappedFraction).coerceIn(0f, 1f)
+                                }
+                            }
+                        } else {
+                            Modifier
+                        }
+                        Box(Modifier.matchParentSize().then(fade).glassBarFaded(glassBackdrop, glassStyle, glassBarTint))
                     }
                     CompositionLocalProvider(
                         LocalGlassTopBar provides (glassBackdrop != null && glassTopBarSurface),
                         LocalGlassBackdrop provides glassBackdrop.takeUnless { glassTopBarSurface },
+                        LocalLargeTopBar provides largeTopBar,
                     ) {
-                        topBar(topBarScrollBehavior)
+                        topBar(scrollBehavior)
                     }
                     // YMR <--
                 }

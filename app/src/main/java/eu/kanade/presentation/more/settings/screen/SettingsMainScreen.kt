@@ -3,7 +3,6 @@ package eu.kanade.presentation.more.settings.screen
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -27,7 +26,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -180,7 +178,10 @@ object SettingsMainScreen : Screen() {
         val hazeEnabled by uiPreferences.hazeEnabled().collectAsStatePref()
 
         Scaffold(
-            topBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState),
+            // YMR -->
+            topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topBarState),
+            largeTopBar = true,
+            // YMR <--
             topBar = { scrollBehavior ->
                 AppBar(
                     title = stringResource(MR.strings.label_settings),
@@ -204,10 +205,16 @@ object SettingsMainScreen : Screen() {
             content = { contentPadding ->
                 val state = rememberLazyListState()
 
+                // YMR --> the list scrolls under the glass bar
                 LazyColumn(
                     state = state,
-                    contentPadding = PaddingValues(16.dp),
-                    modifier = Modifier.padding(top = contentPadding.calculateTopPadding()),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 16.dp + contentPadding.calculateTopPadding(),
+                        bottom = 16.dp + contentPadding.calculateBottomPadding(),
+                    ),
+                    // YMR <--
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     groupedItems.forEach { (category, items) ->

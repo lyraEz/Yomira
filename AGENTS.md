@@ -1,12 +1,14 @@
 # Yomira — guia do fork
 
-Este repositório é o **Yomira**, um fork independente do AniZen voltado a Fire TV e TV Box
-(`applicationId = com.lyraez.yomira`). O texto abaixo da linha descreve o processo do AniZen e
-fica como referência para sincronizações; onde ele conflitar com isto, vale esta seção.
+Este repositório é o **Yomira**, um fork independente do AniZen só para celulares Android
+(`applicationId = com.lyraez.yomira`). O app de TV é outro projeto (`lyraEz/yomiratv`).
+O texto abaixo da linha descreve o processo do AniZen e fica como referência para
+sincronizações; onde ele conflitar com isto, vale esta seção.
 
 - Não publique no repositório do AniZen, não use credenciais dele e não recrie seus workflows de
-  release/Discord. CI e release do Yomira: `.github/workflows/ci.yml` e `release.yml` (manual,
-  gera rascunho). Processo em `docs/yomira/RELEASES.md`.
+  release/Discord. CI e release do Yomira: `.github/workflows/ci.yml` e `release.yml`
+  (publica sozinho em `lyraEz/Yomira-releases` quando a versão muda). Processo em
+  `docs/yomira/RELEASES.md`.
 - Pull requests são o caminho normal de integração no Yomira.
 - O Yomira mantém o histórico completo do AniZen: sincronize com `git merge upstream/master`
   (veja `docs/yomira/SINCRONIZACAO.md`). Base registrada em `.yomira/upstream.json`.

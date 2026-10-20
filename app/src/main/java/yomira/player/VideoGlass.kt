@@ -55,7 +55,7 @@ fun VideoGlassBackdrop(
     // "Auto" follows the optimizer's plan for this phone and video.
     val rate = if (userRate == -1) plan?.glassRate ?: -1 else userRate
     val hot by ThermalGuard.hot.collectAsState()
-    if (!style.liveBlur || rate == VideoGlassOff || hot) {
+    if (!style.liveBlur || rate == VIDEO_GLASS_OFF || hot) {
         CompositionLocalProvider(LocalGlassBackdrop provides null, content = content)
         return
     }
@@ -106,7 +106,7 @@ fun VideoGlassBackdrop(
 }
 
 /** [SmoothnessPreferences.videoGlassRate] value that turns the live glass off. */
-const val VideoGlassOff = -2
+const val VIDEO_GLASS_OFF = -2
 
 /**
  * Triple-buffered frame copies: PixelCopy writes into a buffer the renderer is not using, and a

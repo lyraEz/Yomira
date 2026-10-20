@@ -190,7 +190,7 @@ object PlaybackOptimizer {
         // Live glass cost.
         val userGlass = smooth.videoGlassRate().get()
         val recommendedGlass = when {
-            stepDown >= 2 || tier == Anime4KAdvisor.Tier.LOW || saver -> VideoGlassOff
+            stepDown >= 2 || tier == Anime4KAdvisor.Tier.LOW || saver -> VIDEO_GLASS_OFF
             tier == Anime4KAdvisor.Tier.MID -> 15
             else -> 30
         }

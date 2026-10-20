@@ -134,6 +134,9 @@ data object BrowseTab : Tab {
             searchQuery = searchQuery,
             onChangeSearchQuery = extensionsScreenModel::search,
             scrollable = false,
+            // YMR -->
+            largeTitle = true,
+            // YMR <--
         )
         LaunchedEffect(state, showFeedInBrowse) {
             switchToExtensionTabChannel.receiveAsFlow()

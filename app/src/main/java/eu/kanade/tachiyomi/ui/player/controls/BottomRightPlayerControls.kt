@@ -17,6 +17,9 @@
 
 package eu.kanade.tachiyomi.ui.player.controls
 
+import yomira.player.playerCapsule
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +40,13 @@ fun BottomRightPlayerControls(
     onCastClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // YMR --> the buttons at the bottom right share one glass capsule
+    if (buttons.isEmpty()) return
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .playerCapsule()
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        // YMR <--
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)
     ) {

@@ -46,6 +46,9 @@ fun TabbedScreen(
     scrollable: Boolean = false,
     searchQuery: String? = null,
     onChangeSearchQuery: (String?) -> Unit = {},
+    // YMR -->
+    largeTitle: Boolean = false,
+    // YMR <--
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -53,7 +56,10 @@ fun TabbedScreen(
     val hazeEnabled by uiPreferences.hazeEnabled().collectAsStatePref()
 
     Scaffold(
-        topBar = {
+        // YMR -->
+        largeTopBar = largeTitle,
+        // YMR <--
+        topBar = { scrollBehavior ->
             val tab = tabs.getOrNull(state.currentPage) ?: tabs.getOrNull(0)
             val currentTitleRes = titleRes ?: tab?.titleRes
             if (currentTitleRes != null) {
@@ -73,6 +79,9 @@ fun TabbedScreen(
                     onChangeSearchQuery = onChangeSearchQuery,
                     actions = { AppBarActions(tab?.actions ?: persistentListOf()) },
                     navigateUp = tab?.navigateUp,
+                    // YMR -->
+                    scrollBehavior = scrollBehavior.takeIf { largeTitle },
+                    // YMR <--
                 )
             }
         },

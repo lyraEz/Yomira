@@ -36,6 +36,7 @@ import eu.kanade.presentation.theme.colorscheme.YotsubaColorScheme
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import yomira.theme.YomiraColorScheme
 
 @Composable
 fun TachiyomiTheme(
@@ -55,7 +56,7 @@ fun TachiyomiTheme(
 
 @Composable
 fun TachiyomiPreviewTheme(
-    appTheme: AppTheme = AppTheme.DEFAULT,
+    appTheme: AppTheme = AppTheme.YOMIRA,
     isAmoled: Boolean = false,
     content: @Composable () -> Unit,
 ) = BaseTachiyomiTheme(appTheme, isAmoled, content)
@@ -86,7 +87,7 @@ private fun getThemeColorScheme(
     } else if (appTheme == AppTheme.CUSTOM) {
         CustomColorScheme(uiPreferences)
     } else {
-        colorSchemes.getOrDefault(appTheme, TachiyomiColorScheme)
+        colorSchemes.getOrDefault(appTheme, YomiraColorScheme)
     }
     return colorScheme.getColorScheme(
         isSystemInDarkTheme(),
@@ -111,6 +112,9 @@ val playerRippleConfiguration
     )
 
 private val colorSchemes: Map<AppTheme, BaseColorScheme> = mapOf(
+    // YMR -->
+    AppTheme.YOMIRA to YomiraColorScheme,
+    // YMR <--
     AppTheme.DEFAULT to TachiyomiColorScheme,
     AppTheme.CLOUDFLARE to CloudflareColorScheme,
     AppTheme.COTTONCANDY to CottoncandyColorScheme,

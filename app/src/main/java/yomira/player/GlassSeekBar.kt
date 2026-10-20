@@ -12,10 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -113,21 +113,21 @@ fun GlassSeekBar(
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     try {
-                    down.consume()
-                    dragging = true
-                    scope.launch { press.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 520f)) }
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onChange(toValue(down.position.x))
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                        if (!change.pressed) break
-                        if (change.positionChanged()) {
-                            onChange(toValue(change.position.x))
-                            change.consume()
+                        down.consume()
+                        dragging = true
+                        scope.launch { press.animateTo(1f, spring(dampingRatio = 0.55f, stiffness = 520f)) }
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onChange(toValue(down.position.x))
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if (!change.pressed) break
+                            if (change.positionChanged()) {
+                                onChange(toValue(change.position.x))
+                                change.consume()
+                            }
                         }
-                    }
-                    onFinished()
+                        onFinished()
                     } finally {
                         dragging = false
                         scope.launch { press.animateTo(0f, spring(dampingRatio = 0.7f, stiffness = 380f)) }

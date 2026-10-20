@@ -198,7 +198,7 @@ fun AnimeInfoBox(
                 .clipToBounds()
                 // YMR --> the blurred cover fades out smoothly instead of ending in a straight line
                 .graphicsLayer {
-                    alpha = 0.25f
+                    alpha = 0.42f
                     compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
                 }
                 .drawWithContent {
@@ -212,7 +212,8 @@ fun AnimeInfoBox(
                         blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
                     )
                 }
-                .blur(4.dp, androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded),
+                // A strong blur turns the cover into a soft glow of its colours (drawn once, then cached)
+                .blur(24.dp, androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded),
                 // YMR <--
         )
 

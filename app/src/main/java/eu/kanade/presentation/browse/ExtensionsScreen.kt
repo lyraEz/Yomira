@@ -33,7 +33,7 @@ import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.VerifiedUser
-import androidx.compose.material3.AlertDialog
+import yomira.glass.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -331,8 +331,11 @@ private fun ExtensionContent(
                         bottomStart = if (isLast) 16.dp else 0.dp,
                         bottomEnd = if (isLast) 16.dp else 0.dp,
                     ),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    tonalElevation = 2.dp
+                    // YMR -->
+                    color = yomira.ui.GlassCard.color(),
+                    border = yomira.ui.GlassCard.border(),
+                    tonalElevation = 0.dp,
+                    // YMR <--
                 ) {
                     ExtensionItem(
                         modifier = Modifier,

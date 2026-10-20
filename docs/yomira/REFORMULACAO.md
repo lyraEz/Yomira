@@ -37,31 +37,24 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Player | Otimizador inteligente por vídeo (taxa da tela múltipla dos fps, ritmo, qualidade, vidro, ajuste automático), extras de áudio, estatísticas completas | `yomira/player/PlaybackOptimizer.kt`, `OptimizerCard.kt`, `PlayerExtras.kt`, `SmoothnessCard.kt` |
 | Vidro | Desfoque atrás das folhas (Android 12+) | `yomira/glass/DialogBlur.kt`, `AdaptiveSheet.kt` |
 | Vidro | Barras de vidro com fade embaixo (sem linha reta) e capa desfocada com fade | `GlassSurface.kt` (`glassBarFaded`), `Scaffold.kt`, `AnimeToolbar.kt`, `AnimeInfoHeader.kt` |
+| Tema | Tema próprio "Yomira" (noite/lua; aurora no claro) como padrão | `yomira/theme/YomiraColorScheme.kt`, `colors_yomira.xml`, `UiPreferences.appTheme()` |
+| Navegação | Transições com mola e escala; gesto de voltar preditivo arrasta a transição | `yomira/ui/YomiraTransitions.kt`, `Navigator.kt` |
+| Barras | Título grande que encolhe ao rolar (vidro só quando encolhe) | `yomira/ui/LargeTitleBar.kt`, `Scaffold(largeTopBar)`, `AppBar.kt` |
+| Formas | Cantos mais suaves no app inteiro; sombra suave nas capas | `Style.kt`, `CommonAnimeItem.kt` |
+| Listas | Cartões de vidro claro (sem blur por item); Biblioteca de ponta a ponta por padrão | `yomira/ui/GlassCard.kt`, `UiPreferences.containerStyles()` |
+| Diálogos | AlertDialog com fundo desfocado e cartão translúcido (troca de import) | `yomira/glass/GlassAlertDialog.kt` |
+| Detalhes | Fundo da capa bem desfocado; cabeçalho de episódios em cápsula | `AnimeInfoHeader.kt`, `EpisodeHeader.kt` |
+| Player | Barra de progresso numa cápsula de vidro fumê; botões da direita agrupados | `yomira/player/PlayerCapsule.kt`, `SeekBar.kt`, `BottomRightPlayerControls.kt` |
 
 ## Falta fazer (ordem sugerida)
-0. 1.5.0: app só para celular (suporte a TV removido); player com padrão leve, proteção contra
-   aquecimento e botão "Restaurar padrões do player"; otimizador desligado por padrão.
-   Pendências dos pedidos de 13/10 (1.3.1 já aplicou vidro nos ícones, barra de progresso de vidro e fade das barras):
-   a. Microtravamentos nas abas: testar no aparelho reativar a otimização do R8 (tirar `-dontoptimize` e,
-      se o VerifyError do `androidx.compose.material3.TextKt` voltar, manter só essa classe fora da
-      otimização com `-keep,allowshrinking,allowobfuscation class androidx.compose.material3.TextKt { *; }`);
-      medir com `adb shell dumpsys gfxinfo com.lyraez.yomira`; considerar uma só gravação de fundo para a
-      barra superior e a barra de abas (hoje a Home e o Scaffold gravam cada um) e pular a refração
-      enquanto a lista rola. Em APK instalado manualmente, `adb shell cmd package compile -m speed-profile
-      -f com.lyraez.yomira` aplica o perfil de inicialização na hora.
-   b. 1.3.2: vidro do player mais leve (cópia a 30/s, para quando pausado, sem blur extra, lente só ao
-      arrastar), aba Qualidade e mais opções de Fluidez. Conferir no aparelho com o "Contador de
-      quadros" (Fluidez) se VO/DEC/LATE ficam parados; se ainda subirem com os controles visíveis,
-      testar "Atualização do vidro: 15 fps/Desligado" para isolar a causa.
-1. Detalhes do anime (restante): capa de fundo mais desfocada e cabeçalho "N episódios" de vidro.
-2. Diálogos simples (AlertDialog) com o mesmo desfoque das folhas (`DialogWindowBlur()`).
-3. Barra inferior do player: barra de progresso dentro de cápsula de vidro; agrupar botões da direita.
-4. Configurações: título grande estilo iOS que encolhe ao rolar.
-5. Biblioteca: cabeçalho grande com recolhimento, cartões com cantos 20 dp e sombra suave.
-6. Atualizações/Histórico/Navegar: linhas em cartões de vidro claro (sem blur por item, por desempenho).
-7. Transições entre telas (Voyager) com mola e escala; retorno preditivo.
-8. Tema próprio "Yomira" (paleta noite/lua) como padrão em instalações novas.
-9. Medir no aparelho: `adb shell dumpsys gfxinfo com.lyraez.yomira` nas telas com vidro e no player.
+1. Medir no aparelho: `adb shell dumpsys gfxinfo com.lyraez.yomira` nas telas com vidro, nas transições e no player.
+2. Microtravamentos nas abas: testar reativar a otimização do R8 (tirar `-dontoptimize` e, se o VerifyError do
+   `androidx.compose.material3.TextKt` voltar, manter só essa classe fora com
+   `-keep,allowshrinking,allowobfuscation class androidx.compose.material3.TextKt { *; }`); considerar uma só
+   gravação de fundo para a barra superior e a barra de abas e pular a refração enquanto a lista rola.
+3. Player: conferir com o "Contador de quadros" se VO/DEC/LATE ficam parados com os controles visíveis; se subirem,
+   testar "Atualização do vidro: 15 fps/Desligado".
+4. Novas ideias quando o dono pedir: tela "Mais" com título grande, busca global em cartões, ícones próprios.
 
 ## Como gerar o APK assinado
 `signing.properties` na raiz (ignorado pelo Git) apontando para o keystore; depois

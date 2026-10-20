@@ -319,6 +319,8 @@ private fun AnimeGridCover(
     badgesEnd: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable (BoxScope.() -> Unit)? = null,
 ) {
+    // YMR --> soft shadow under the cover (a hardware shadow, drawn once per layer)
+    val shadowColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.32f)
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -326,8 +328,12 @@ private fun AnimeGridCover(
             .graphicsLayer {
                 this.shape = shape
                 this.clip = true
+                shadowElevation = 3.dp.toPx()
+                ambientShadowColor = shadowColor
+                spotShadowColor = shadowColor
             },
     ) {
+        // YMR <--
         cover()
         content?.invoke(this)
         if (badgesStart != null) {
@@ -382,7 +388,9 @@ internal fun GridItemSelectable(
     content: @Composable () -> Unit,
 ) {
     val scale = if (isSelected) 0.95f else 1f
-    val shape = MaterialTheme.shapes.medium
+    // YMR --> a little rounder than the cover it surrounds (4 dp padding)
+    val shape = RoundedCornerShape(20.dp)
+    // YMR <--
     val borderColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
@@ -405,7 +413,9 @@ internal fun GridItemSelectable(
                     drawRoundRect(
                         color = borderColor,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx()),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(12.dp.toPx()),
+                        // YMR -->
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(20.dp.toPx()),
+                        // YMR <--
                     )
                 }
             }
@@ -529,7 +539,9 @@ private fun ContinueWatchingButton(
     Box(modifier = modifier) {
         FilledIconButton(
             onClick = onClick,
-            shape = MaterialTheme.shapes.small,
+            // YMR -->
+            shape = androidx.compose.foundation.shape.CircleShape,
+            // YMR <--
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                 contentColor = contentColorFor(MaterialTheme.colorScheme.primaryContainer),

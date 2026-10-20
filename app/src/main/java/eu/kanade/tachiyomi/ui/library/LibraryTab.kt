@@ -186,13 +186,15 @@ data object LibraryTab : Tab {
 
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
+                // YMR -->
+                largeTopBar = true,
+                // YMR <--
                 topBar = { scrollBehavior ->
                     val title = state.getToolbarTitle(
                         defaultTitle = defaultTitle,
                         defaultCategoryTitle = defaultCategoryTitle,
                         page = screenModel.activeCategoryIndex,
                     )
-                    val tabVisible = state.showCategoryTabs && state.categories.isNotEmpty() && (state.categories.size > 1 || !state.categories.first().isSystemCategory)
                     LibraryToolbar(
                         hasActiveFilters = state.hasActiveFilters,
                         selectedCount = state.selection.size,
@@ -232,7 +234,9 @@ data object LibraryTab : Tab {
                         },
                         searchQuery = state.searchQuery,
                         onSearchQueryChange = screenModel::search,
-                        scrollBehavior = scrollBehavior.takeIf { !tabVisible }, // For scroll overlay when no tab
+                        // YMR --> the large title always follows the scroll
+                        scrollBehavior = scrollBehavior,
+                        // YMR <--
                     )
                 },
                 bottomBar = {

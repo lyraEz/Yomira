@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Yomira theme (dark). Kept in sync with yomira/theme/YomiraColorScheme.kt. -->
+<resources>
+    <color name="yomira_primary">#A8B9FF</color>
+    <color name="yomira_onPrimary">#0D1648</color>
+    <color name="yomira_primaryContainer">#2D3C80</color>
+    <color name="yomira_onPrimaryContainer">#DDE2FF</color>
+    <color name="yomira_inversePrimary">#4155B0</color>
+    <color name="yomira_secondary">#C9B8FF</color>
+    <color name="yomira_onSecondary">#261A52</color>
+    <color name="yomira_secondaryContainer">#3A2F6B</color>
+    <color name="yomira_onSecondaryContainer">#E7DEFF</color>
+    <color name="yomira_tertiary">#7FE3C9</color>
+    <color name="yomira_onTertiary">#00382B</color>
+    <color name="yomira_tertiaryContainer">#0F5243</color>
+    <color name="yomira_onTertiaryContainer">#A3F6DF</color>
+    <color name="yomira_background">#0A0C17</color>
+    <color name="yomira_onBackground">#E4E6F3</color>
+    <color name="yomira_surface">#0A0C17</color>
+    <color name="yomira_onSurface">#E4E6F3</color>
+    <color name="yomira_surfaceVariant">#1B1F35</color>
+    <color name="yomira_onSurfaceVariant">#C3C6DB</color>
+    <color name="yomira_surfaceTint">#A8B9FF</color>
+    <color name="yomira_inverseSurface">#E4E6F3</color>
+    <color name="yomira_inverseOnSurface">#2A2D3C</color>
+    <color name="yomira_outline">#8C90A7</color>
+    <color name="yomira_outlineVariant">#3B3F56</color>
+    <color name="yomira_surfaceContainerLowest">#070910</color>
+    <color name="yomira_surfaceContainerLow">#10131F</color>
+    <color name="yomira_surfaceContainer">#151927</color>
+    <color name="yomira_surfaceContainerHigh">#1B2031</color>
+    <color name="yomira_surfaceContainerHighest">#22283C</color>
+</resources>

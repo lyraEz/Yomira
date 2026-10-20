@@ -157,8 +157,11 @@ internal fun LazyListScope.updatesUiItems(
                                 .padding(top = topPadding, bottom = bottomPadding)
                                 .fillMaxWidth(),
                             shape = shape,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow,
-                            tonalElevation = 2.dp,
+                            // YMR -->
+                            color = yomira.ui.GlassCard.color(),
+                            border = yomira.ui.GlassCard.border(),
+                            tonalElevation = 0.dp,
+                            // YMR <--
                         ) {
                             UpdatesUiItem(
                                 modifier = Modifier.clip(shape),

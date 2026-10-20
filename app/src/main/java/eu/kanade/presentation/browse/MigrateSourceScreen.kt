@@ -185,8 +185,11 @@ private fun MigrateSourceList(
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp, vertical = 2.dp),
                         shape = MaterialTheme.shapes.large,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        tonalElevation = 2.dp,
+                        // YMR -->
+                        color = yomira.ui.GlassCard.color(),
+                        border = yomira.ui.GlassCard.border(),
+                        tonalElevation = 0.dp,
+                        // YMR <--
                     ) {
                         MigrateSourceItem(
                             modifier = Modifier.animateItemFastScroll(),

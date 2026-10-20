@@ -13,7 +13,6 @@ import eu.kanade.domain.ui.model.PanoramaMode
 import eu.kanade.domain.ui.model.StartScreen
 import eu.kanade.domain.ui.model.TabletUiMode
 import eu.kanade.domain.ui.model.ThemeMode
-import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.isDynamicColorAvailable
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -30,14 +29,9 @@ class UiPreferences(
 
     fun themeMode() = preferenceStore.getEnum("pref_theme_mode_key", ThemeMode.SYSTEM)
 
-    fun appTheme() = preferenceStore.getEnum(
-        "pref_app_theme",
-        if (DeviceUtil.isDynamicColorAvailable) {
-            AppTheme.MONET
-        } else {
-            AppTheme.DEFAULT
-        },
-    )
+    // YMR -->
+    fun appTheme() = preferenceStore.getEnum("pref_app_theme", AppTheme.YOMIRA)
+    // YMR <--
 
     fun colorTheme() = preferenceStore.getInt("pref_color_theme", 0)
 
@@ -210,13 +204,14 @@ class UiPreferences(
 
     fun containerStyles() = preferenceStore.getStringSet(
         "pref_ui_container_styles",
+        // YMR --> the library grid runs edge to edge under the glass bars; lists keep their cards
         setOf(
-            ContainerStyle.LIBRARY,
             ContainerStyle.UPDATES,
             ContainerStyle.HISTORY,
             ContainerStyle.SETTINGS,
             ContainerStyle.BROWSE,
         ),
+        // YMR <--
     )
 
     fun animatedTransitions() = preferenceStore.getBoolean("pref_animated_transitions_key", true)

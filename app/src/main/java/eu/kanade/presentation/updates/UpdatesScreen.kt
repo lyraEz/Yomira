@@ -89,6 +89,9 @@ fun UpdateScreen(
     BackHandler(enabled = state.selectionMode, onBack = { onSelectAll(false) })
 
     Scaffold(
+        // YMR -->
+        largeTopBar = true,
+        // YMR <--
         topBar = { scrollBehavior ->
             UpdatesAppBar(
                 onUpdateLibrary = { onUpdateLibrary() },

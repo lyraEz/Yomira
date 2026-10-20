@@ -4,7 +4,7 @@
 #   - renames them to Yomira-v<version>-<abi>.apk
 #   - verifies the signature and checks the certificate against
 #     docs/yomira/signing-certificate.sha256 (so a different key is never published)
-#   - writes SHA256SUMS.txt and release-notes.md
+#   - writes SHA256SUMS.txt and release-notes.md (from the CHANGELOG.md section, see release-notes.py)
 #
 # Usage: scripts/yomira/package-release.sh <apk-dir> <out-dir>
 set -euo pipefail
@@ -66,27 +66,7 @@ done
 
 (cd "$OUT" && sha256sum Yomira-*.apk > SHA256SUMS.txt)
 
-cat > "$OUT/release-notes.md" <<EOF
-## Yomira $version
-
-Escolha o APK pela arquitetura do celular (a maioria é arm64-v8a):
-
-| Arquivo | Para |
-| --- | --- |
-| \`Yomira-v$version-arm64-v8a.apk\` | A maioria dos celulares (64 bits) |
-| \`Yomira-v$version-armeabi-v7a.apk\` | Celulares de 32 bits |
-| \`Yomira-v$version-universal.apk\` | Qualquer celular ARM (arquivo maior) |
-
-Todos os APKs usam o mesmo pacote (\`com.lyraez.yomira\`) e a mesma assinatura, então
-instalam por cima da versão anterior sem perder dados.
-
-Certificado de assinatura (SHA-256): \`$cert\`
-
-### SHA-256
-\`\`\`
-$(cat "$OUT/SHA256SUMS.txt")
-\`\`\`
-EOF
+python3 -I "$ROOT/scripts/yomira/release-notes.py" "$version" "$OUT/release-notes.md" > /dev/null
 
 echo "version=$version" >> "${GITHUB_OUTPUT:-/dev/null}"
 cat "$OUT/SHA256SUMS.txt"

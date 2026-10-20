@@ -42,11 +42,14 @@ Ambos ficam em `app/build.gradle.kts` (`defaultConfig`).
 
 ## Publicar uma versão
 
-1. Atualize `versionName` e `versionCode`, e registre as mudanças em `CHANGELOG.md`.
+1. Atualize `versionName` e `versionCode`, e registre as mudanças em `CHANGELOG.md` numa seção
+   `## Yomira [X.Y.Z] - AAAA-MM-DD`, escrita para quem usa o app: uma frase de abertura e os grupos
+   `### Added` (Novidades), `### Changed`/`### Improved` (Melhorias), `### Fixed` (Correções) e, só quando
+   algo grande sair, `### Removed` (Removido). `### Other` fica fora do texto da release.
 2. Envie para o branch de desenvolvimento. O fluxo *Release* roda sozinho: lê o `versionName`, e se ainda não existir a release `vX.Y.Z` em `lyraEz/Yomira-releases`, compila os APKs assinados, confere a assinatura contra o certificado registrado, gera `SHA256SUMS.txt` e **publica** a release.
-3. O atualizador do app (Mais → Sobre → Verificar atualizações) passa a oferecer a versão nova, com o APK da arquitetura do celular.
+3. O atualizador do app (Mais → Sobre → Verificar atualizações) passa a oferecer a versão nova, com o APK da arquitetura do celular. O texto mostrado no app e na página da release vem dessa seção do `CHANGELOG.md` (`scripts/yomira/release-notes.py`).
 
-Envios sem mudança de versão não publicam nada. Também dá para rodar o fluxo à mão em *Actions → Release → Run workflow* (com a opção de marcar como pré-release).
+Envios sem mudança de versão não publicam nada. Também dá para rodar o fluxo à mão em *Actions → Release → Run workflow* (com a opção de marcar como pré-release). Para corrigir o texto de uma release já publicada, edite o `CHANGELOG.md`, envie e rode o fluxo à mão com **update_notes** marcado: só o texto da versão atual é reescrito.
 
 ## Compilar e assinar localmente
 

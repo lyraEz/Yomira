@@ -18,11 +18,11 @@ Visual próprio do Yomira, longe do padrão do Aniyomi.
 - Tema "Yomira" (noite e lua no escuro, aurora no claro), padrão para quem não escolheu outro tema.
 - Títulos grandes no estilo iOS que encolhem ao rolar: Biblioteca, Atualizações, Histórico, Navegar e Configurações. O vidro da barra só aparece quando o título encolhe.
 - Transições entre telas com mola: a tela nova desliza por cima e a anterior recua, encolhe e escurece. O gesto de voltar do Android 14+ arrasta a transição junto com o dedo.
-- Diálogos com o fundo desfocado (Android 12+), como as folhas.
+- Janelas de confirmação com o fundo desfocado (Android 12+), igual aos painéis que sobem de baixo.
 
 ### Changed
-- Cantos mais arredondados em todo o app (capas 16 dp, cartões 20 dp, diálogos 28 dp) e sombra suave nas capas da Biblioteca.
-- Biblioteca de ponta a ponta por padrão (sem o painel em volta da grade); linhas de Atualizações, Histórico e Navegar em cartões de vidro claro.
+- Cantos mais arredondados em todo o app e sombra suave nas capas da Biblioteca.
+- Biblioteca ocupando a tela toda (sem o painel em volta da grade) e listas de Atualizações, Histórico e Navegar em cartões de vidro claro.
 - Detalhes do anime: capa de fundo bem mais desfocada e cabeçalho de episódios em cápsula com atalho para os filtros.
 - Player: barra de progresso e tempos dentro de uma cápsula de vidro fumê; botões do canto inferior direito agrupados numa cápsula.
 

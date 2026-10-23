@@ -148,6 +148,8 @@ import tachiyomi.source.localanime.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import yomira.details.streamingEpisodeItems
+import yomira.details.streamingTopItems
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
@@ -506,6 +508,29 @@ private fun AnimeScreenSmallImpl(
     }
     val vibrantColor = deferredVibrantColor ?: state.anime.asAnimeCover().vibrantCoverColor
 
+    // YMR --> streaming-style details: big cover with play button, characters, season tabs
+    val streaming = yomira.details.rememberStreamingLayout() && state.anime.fetchType != FetchType.Seasons
+    val streamingModel = if (streaming) yomira.details.rememberStreamingDetails(state) else null
+    val (cardsView, toggleCardsView) = yomira.details.rememberEpisodeCardsView()
+    val streamingActions = yomira.details.StreamingDetailsActions(
+        onPlay = { episode -> if (episode != null) onEpisodeClicked(episode, false) else onContinueWatching(null) },
+        onEpisodeClicked = { onEpisodeClicked(it, false) },
+        onToggleFavorite = onAddToLibraryClicked,
+        onCoverClicked = onCoverClicked,
+        onFilterClicked = onFilterClicked,
+        onTrackingClicked = onTrackingClicked,
+        onWebViewClicked = onWebViewClicked,
+        onEditCategoryClicked = onEditCategoryClicked,
+        onEditNotesClicked = onEditNotesClicked,
+        onEditIntervalClicked = onEditIntervalClicked,
+        onShareClicked = onShareClicked,
+        onDownloadEpisode = onDownloadEpisode,
+        onMarkSeen = onMultiMarkAsSeenClicked,
+        onBookmark = onMultiBookmarkClicked,
+        onMarkPreviousSeen = onMarkPreviousAsSeenClicked,
+    )
+    // YMR <--
+
     DynamicTachiyomiTheme(colorSeed = vibrantColor) {
         Box(
             modifier = Modifier
@@ -513,9 +538,11 @@ private fun AnimeScreenSmallImpl(
                 .background(MaterialTheme.colorScheme.background),
         ) {
             val scaffoldInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-            val isFABVisible = remember(state.anime.fetchType, state.hasUnseenEpisodes, isAnySelected) {
-                state.anime.fetchType != FetchType.Seasons && !isAnySelected && state.hasUnseenEpisodes
+            // YMR --> the streaming layout has its own play button
+            val isFABVisible = remember(state.anime.fetchType, state.hasUnseenEpisodes, isAnySelected, streaming) {
+                state.anime.fetchType != FetchType.Seasons && !isAnySelected && state.hasUnseenEpisodes && !streaming
             }
+            // YMR <--
             Scaffold(
                 hazeEnabled = false,
                 // YMR --> the details toolbar paints its own glass buttons over the cover
@@ -625,6 +652,11 @@ private fun AnimeScreenSmallImpl(
                                     bottom = contentPadding.calculateBottomPadding(),
                                 ),
                             ) {
+                                // YMR --> streaming layout: cover with play button, overview and characters
+                                if (streamingModel != null) {
+                                    streamingTopItems(streamingModel, state, streamingActions)
+                                } else {
+                                // YMR <--
                                 // item[0]: info-box only — drives isFirstItemVisible for the
                                 // toolbar transparent→solid transition. Must stay separate.
                                 item(key = "info-box-small", contentType = AnimeScreenItem.INFO_BOX) {
@@ -677,6 +709,9 @@ private fun AnimeScreenSmallImpl(
                                         onCopyTagToClipboard = onCopyTagToClipboard,
                                     )
                                 }
+                                // YMR -->
+                                }
+                                // YMR <--
 
                                 item(key = "relations-small") {
                                     eu.kanade.presentation.anime.components.PrequelSequelBox(
@@ -687,7 +722,9 @@ private fun AnimeScreenSmallImpl(
                                 }
 
                                 val castInner = state.anime.cast
-                                if (!castInner.isNullOrEmpty()) {
+                                // YMR --> (the streaming layout shows characters at the top)
+                                if (!castInner.isNullOrEmpty() && streamingModel == null) {
+                                // YMR <--
                                     item(key = "cast-small") {
                                         eu.kanade.presentation.anime.components.CastRow(
                                             cast = castInner,
@@ -752,6 +789,35 @@ private fun AnimeScreenSmallImpl(
                                     }
                                 }
 
+                                // YMR --> streaming layout: season tabs, episode cards (or the list) and details
+                                if (streamingModel != null) {
+                                    streamingEpisodeItems(
+                                        model = streamingModel,
+                                        state = state,
+                                        actions = streamingActions,
+                                        cardsView = cardsView,
+                                        onToggleView = toggleCardsView,
+                                        listItems = { seasonItems: List<EpisodeList> ->
+                                            sharedEpisodeItems(
+                                                anime = state.anime,
+                                                source = state.source,
+                                                showFileSize = showFileSize,
+                                                showEpisodeSummary = state.showEpisodeSummary,
+                                                showEpisodeThumbnail = state.showEpisodeThumbnail,
+                                                episodes = seasonItems,
+                                                fillerEpisodes = state.fillerEpisodes,
+                                                isAnyEpisodeSelected = episodes.fastAny { it.selected },
+                                                episodeSwipeStartAction = episodeSwipeStartAction,
+                                                episodeSwipeEndAction = episodeSwipeEndAction,
+                                                onEpisodeClicked = onEpisodeClicked,
+                                                onDownloadEpisode = onDownloadEpisode,
+                                                onEpisodeSelected = onEpisodeSelected,
+                                                onEpisodeSwipe = onEpisodeSwipe,
+                                            )
+                                        },
+                                    )
+                                } else {
+                                // YMR <--
                                 if (state.anime.seasonGroupingMode == LibraryPreferences.SeasonGrouping.Tabs && state.availableSeasons.size > 1) {
                                     item(key = "season-selector-small") {
                                         SeasonSelector(
@@ -876,6 +942,9 @@ private fun AnimeScreenSmallImpl(
                                         onEpisodeSwipe = onEpisodeSwipe,
                                     )
                                 }
+                                // YMR -->
+                                }
+                                // YMR <--
                             }
                         }
                     }

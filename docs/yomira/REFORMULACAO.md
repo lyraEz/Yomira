@@ -51,6 +51,11 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Player | (1.8.0) Tela "Você está assistindo" ao pausar e botão de pular em vidro escuro (esconde em PiP/tela pequena) | `yomira/player/PauseOverlay.kt` |
 | Metadados | (1.8.0) TMDB: nomes, descrições, miniaturas e logo em pt-BR (cache em `files/yomira/meta`), temporada pela data de estreia do AniList, correção manual no menu do anime | `yomira/metadata/` |
 | Player | (1.8.0) Pular abertura sem rastrear (AniList pelo título), AniSkip corrigido e Anime Skip como segunda fonte | `yomira/player/SkipTimes.kt`, `yomira/metadata/AniListIds.kt` |
+| Início | (1.9.0) Aba catálogo: destaques com logo, continuar assistindo, novos episódios, biblioteca e listas das fontes fixadas; primeira aba e tela de abertura (migração única em `HomeTabSetup`) | `yomira/home/` |
+| Detalhes | (1.9.0) Página estilo streaming: imagem grande, logo, botão de reproduzir, personagens com dublador (AniList, idioma escolhido), cartões de episódio por temporada e fatos do TMDB/AniList | `yomira/details/`, `yomira/metadata/AniListDetails.kt`, `AnimeScreen.kt` |
+| Detalhes | (1.9.0) Temporadas pelo nome (números e romanos), pela numeração que recomeça ou pelo TMDB; especiais à parte | `yomira/details/EpisodeSeasons.kt` |
+| Barras | (1.9.0) Barra de abas flutuante encolhe ao rolar para baixo (só ícones) e volta ao rolar para cima | `GlassTabBar.kt` (`collapsed`), `HomeScreen.kt` |
+| Player | (1.9.0) Formas arredondadas no player inteiro e linhas das folhas com destaque em pílula | `yomira/player/PlayerShapes.kt` |
 
 ## Falta fazer (ordem sugerida)
 1. Medir no aparelho: `adb shell dumpsys gfxinfo com.lyraez.yomira` nas telas com vidro, nas transições e no player.
@@ -62,7 +67,8 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
    testar "Atualização do vidro: 15 fps/Desligado".
 4. Conferir no aparelho o layout premium (paisagem e retrato), a tela de pausa e o botão de pular; os tempos do
    Anime Skip podem vir deslocados em fontes com abertura em outro ponto do vídeo.
-5. Novas ideias quando o dono pedir: tela "Mais" com título grande, busca global em cartões, ícones próprios.
+5. Conferir no aparelho a aba Início, a página nova do anime (temporadas de extensões diferentes) e a barra que encolhe.
+6. Novas ideias quando o dono pedir: tela "Mais" com título grande, busca global em cartões, ícones próprios.
 
 ## Como gerar o APK assinado
 `signing.properties` na raiz (ignorado pelo Git) apontando para o keystore; depois

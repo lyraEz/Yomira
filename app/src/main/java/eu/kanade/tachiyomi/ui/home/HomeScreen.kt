@@ -144,7 +144,11 @@ object HomeScreen : Screen() {
     private const val TAB_NAVIGATOR_KEY = "HomeTabs"
 
     private val uiPreferences: UiPreferences by injectLazy()
-    private val defaultTab = uiPreferences.startScreen().get().tab.let { 
+    private val defaultTab = uiPreferences.also {
+        // YMR --> the catalog tab, first and as the start screen, once per install
+        yomira.home.HomeTabSetup.ensure(it)
+        // YMR <--
+    }.startScreen().get().tab.let { 
         if (it.isEnabled()) it else LibraryTab
     }
 
@@ -171,6 +175,9 @@ object HomeScreen : Screen() {
         val preferences = Injekt.get<PreferenceStore>()
 
         var bottomNavVisible by rememberSaveable { mutableStateOf(true) }
+        // YMR --> the floating bar shrinks to its icons while scrolling down
+        var barCollapsed by rememberSaveable { mutableStateOf(false) }
+        // YMR <--
 
         val nestedScrollConnection = remember(hideOnScroll) {
             object : NestedScrollConnection {
@@ -180,6 +187,13 @@ object HomeScreen : Screen() {
                     } else if (hideOnScroll && available.y > 10f && !bottomNavVisible) {
                         bottomNavVisible = true
                     }
+                    // YMR -->
+                    if (available.y < -10f && !barCollapsed) {
+                        barCollapsed = true
+                    } else if (available.y > 10f && barCollapsed) {
+                        barCollapsed = false
+                    }
+                    // YMR <--
                     return Offset.Zero
                 }
             }
@@ -204,6 +218,9 @@ object HomeScreen : Screen() {
             val isCurrentTabVisible = remember(visibleNavItems, tabNavigator.current) {
                 visibleNavItems.any { it.tab::class == tabNavigator.current::class }
             }
+            // YMR -->
+            LaunchedEffect(tabNavigator.current) { barCollapsed = false }
+            // YMR <--
 
             // Provide usable navigator to content screen
             CompositionLocalProvider(LocalNavigator provides navigator) {
@@ -258,8 +275,10 @@ object HomeScreen : Screen() {
                     val continuePrefs = remember { yomira.ui.ContinueWatchingPreferences() }
                     val showContinueCard by continuePrefs.showOnHome().collectAsStatePref()
                     val continueItem = yomira.ui.rememberContinueWatching()
+                    // The Home tab has its own "Continue watching" row.
                     val continueVisible = showContinueCard && continueItem != null && bottomNavVisible &&
-                        tabNavigator.current::class == defaultTab::class
+                        !barCollapsed && tabNavigator.current::class == defaultTab::class &&
+                        tabNavigator.current !is yomira.home.HomeCatalogTab
                     val homeBackdrop = if (floatingBar && glassStyle.liveBlur) {
                         rememberGlassBackdrop(MaterialTheme.colorScheme.background)
                     } else {
@@ -351,6 +370,7 @@ object HomeScreen : Screen() {
                                   behaviorMap = behaviorMap,
                                   executor = executor,
                                   backdrop = homeBackdrop,
+                                  collapsed = barCollapsed,
                               )
                           }
                       }
@@ -376,6 +396,9 @@ object HomeScreen : Screen() {
                 launch {
                     openTabEvent.receiveAsFlow().collectLatest {
                         tabNavigator.current = when (it) {
+                            // YMR -->
+                            is HomeTab.Home -> yomira.home.HomeCatalogTab
+                            // YMR <--
                             is HomeTab.AnimeLib -> LibraryTab
                             is HomeTab.Feed -> FeedTab
                             is HomeTab.Updates -> UpdatesTab
@@ -412,6 +435,7 @@ object HomeScreen : Screen() {
         behaviorMap: Map<String, NavBehavior>,
         executor: NavActionExecutor,
         backdrop: com.kyant.backdrop.Backdrop?,
+        collapsed: Boolean,
     ) {
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
@@ -434,6 +458,7 @@ object HomeScreen : Screen() {
             tabs = items,
             selectedIndex = selectedIndex,
             backdrop = backdrop,
+            collapsed = collapsed,
             onTabSelected = { index ->
                 val navItem = navItems[index]
                 if (index != selectedIndex) {
@@ -451,11 +476,12 @@ object HomeScreen : Screen() {
                     executor.execute(behavior.onLongClick, navItem.id)
                 }
             },
-            sideButton = {
+            sideButton = { size ->
                 GlassOrbButton(
                     painter = rememberVectorPainter(Icons.Outlined.Search),
                     contentDescription = stringResource(MR.strings.action_search),
                     onClick = { navigator.push(GlobalSearchScreen()) },
+                    size = size,
                     backdrop = backdrop,
                 )
             },
@@ -779,6 +805,9 @@ object HomeScreen : Screen() {
     }
 
     sealed interface HomeTab {
+        // YMR -->
+        data object Home : HomeTab
+        // YMR <--
         data class AnimeLib(val animeIdToOpen: Long? = null) : HomeTab
         data object Feed : HomeTab
         data object Updates : HomeTab

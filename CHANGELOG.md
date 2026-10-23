@@ -10,6 +10,33 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.9.0] - 2026-10-23
+
+Tela inicial em forma de catálogo, página do anime no estilo dos apps de streaming e temporadas separadas certinho.
+
+### Added
+- Aba *Início*: destaques grandes que passam sozinhos (logo do anime, gêneros, ano e *Ver detalhes*), *Continuar assistindo* com quanto falta ("Faltam 22m"), *Novos episódios*, *Adicionados à biblioteca* e as listas populares e recentes das fontes fixadas (ou da última usada). Vira a primeira aba e a tela de abertura; dá para mudar em Configurações → Navegação.
+- Página do anime nova:
+  - imagem grande no topo com o logo, gêneros, botão branco "Reproduzir T1 E1" (ou "Continuar T1 E5") e atalhos para a biblioteca e mais opções;
+  - anos, duração, nota do TMDB ou do AniList, criador e estúdio, sinopse com "mais";
+  - personagens com foto e nome; ao tocar aparecem a foto e o nome do personagem e do dublador;
+  - abas de temporada com episódios em cartões grandes (miniatura, nome, resumo, nota e data) ou em lista;
+  - *Detalhes* no fim: status, lançamento, temporada de exibição, episódios, duração, formato, estúdio, criação, direção, obra original, emissora, país de origem, nota e fonte.
+- Os dados da página vêm também do TMDB e do AniList, então aparecem gêneros, estúdio, criador e elenco mesmo quando a extensão não os informa.
+- Aparência → Experiência: *Página do anime no estilo streaming* (liga e desliga o layout novo) e *Idioma dos dubladores* (japonês, português, inglês, espanhol e outros; volta para o japonês quando não há dublagem no idioma escolhido).
+
+### Changed
+- A barra de navegação flutuante encolhe ao rolar para baixo: vira uma cápsula menor só com os ícones, e os nomes somem com um fade. Volta ao tamanho cheio ao rolar para cima, ao chegar no topo ou ao trocar de aba.
+- Player com tudo arredondado: chips, menus, campos, cartões e diálogos com cantos suaves e as linhas das listas (áudio, legendas, capítulos, qualidade) com destaque em pílula.
+- Nomes das abas da barra diminuem um pouco antes de serem cortados.
+
+### Fixed
+- Temporadas: episódios marcados de jeitos diferentes ("Temporada 2", "TEMPORADA II", "2ª Temporada", "Season 3", "T2E5", "S01E02") vão para a temporada certa; quando a extensão não marca nada, a numeração que recomeça ou os dados do TMDB separam as temporadas. Especiais, OVAs e filmes ficam numa aba própria.
+- Números enormes no nome e no número dos episódios em algumas extensões (ids e datas usados como número, hashes e "[1080p]" no nome): o número escrito no nome é usado no lugar, e o nome aparece limpo.
+
+### Other
+- Testes para a separação de temporadas e a limpeza dos nomes dos episódios.
+
 ## Yomira [1.8.2] - 2026-10-23
 
 Correção da tela de relatório que abria sem parar.

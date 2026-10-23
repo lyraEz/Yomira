@@ -43,7 +43,9 @@ class UiPreferences(
 
     fun tabletUiMode() = preferenceStore.getEnum("tablet_ui_mode", TabletUiMode.AUTOMATIC)
 
-    fun startScreen() = preferenceStore.getEnum("start_screen", StartScreen.LIBRARY)
+    // YMR --> the catalog is the start screen
+    fun startScreen() = preferenceStore.getEnum("start_screen", StartScreen.HOME)
+    // YMR <--
 
     // Keep the default bottom bar compact while making the schedule available from More.
     fun navStyle() = preferenceStore.getEnum("bottom_rail_nav_style", NavStyle.MOVE_SCHEDULE_TO_MORE)

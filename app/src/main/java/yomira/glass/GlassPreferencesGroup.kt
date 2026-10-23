@@ -268,6 +268,20 @@ fun experiencePreferencesGroup(): Preference.PreferenceGroup {
                 subtitle = stringResource(YMR.strings.experience_spoilers_summary),
             ),
             Preference.PreferenceItem.SwitchPreference(
+                pref = remember { yomira.details.DetailsPreferences() }.streamingLayout(),
+                title = stringResource(YMR.strings.experience_streaming_details),
+                subtitle = stringResource(YMR.strings.experience_streaming_details_summary),
+            ),
+            Preference.PreferenceItem.ListPreference(
+                pref = remember { yomira.details.DetailsPreferences() }.voiceLanguage(),
+                title = stringResource(YMR.strings.experience_voice_language),
+                entries = remember {
+                    yomira.metadata.AniListDetails.voiceLanguages.keys
+                        .associateWith { yomira.details.languageName(it) }
+                        .toImmutableMap()
+                },
+            ),
+            Preference.PreferenceItem.SwitchPreference(
                 pref = remember { yomira.ui.ContinueWatchingPreferences() }.showOnHome(),
                 title = stringResource(YMR.strings.experience_continue_card),
                 subtitle = stringResource(YMR.strings.experience_continue_card_summary),

@@ -28,6 +28,24 @@ object EpisodeDisplays {
     fun number(value: Double): String =
         if (value == floor(value)) value.toLong().toString() else value.toString().trimEnd('0').trimEnd('.')
 
+    /** Highest episode number taken as is; above it the number in the name is preferred. */
+    private const val LARGE_NUMBER = 1000.0
+    private const val MAX_NUMBER = 20000.0
+
+    /**
+     * Number to show for an episode. Some extensions give ids or timestamps as the episode number;
+     * then the number written in the name ("Episódio 5") is used, or none at all.
+     */
+    fun displayNumber(value: Double, name: String): String? {
+        val fromName = yomira.details.EpisodeSeasons.episodeIn(name)
+        val sane = value >= 0 && value <= MAX_NUMBER && !value.isNaN()
+        return when {
+            sane && (value <= LARGE_NUMBER || fromName == null || fromName.toDouble() == value) -> number(value)
+            fromName != null -> fromName.toString()
+            else -> null
+        }
+    }
+
     fun build(
         context: Context,
         show: ShowMeta?,
@@ -44,11 +62,11 @@ object EpisodeDisplays {
         // fall back to what the extension gave.
         logcat(LogPriority.ERROR, e) { "Episode display failed" }
         EpisodeDisplay(
-            title = extensionName.ifBlank { number(episodeNumber) },
+            title = extensionName,
             name = extensionName.takeIf { it.isNotBlank() },
             summary = extensionSummary?.takeIf { it.isNotBlank() },
             previewUrl = extensionPreview?.takeIf { it.isNotBlank() },
-            label = number(episodeNumber),
+            label = "",
             runtimeMinutes = null,
         )
     }
@@ -65,22 +83,26 @@ object EpisodeDisplays {
     ): EpisodeDisplay {
         val enabled = prefs.tmdbEnabled().get()
         val meta = if (enabled) EpisodeMetadata.episode(show, episodeNumber, extensionName) else null
-        val numberText = number(episodeNumber)
-        val numberLabel = context.stringResource(YMR.strings.episode_number_label, numberText)
+        val cleanName = TitleMatch.cleanEpisodeName(extensionName)
+        val numberText = displayNumber(episodeNumber, cleanName)
+        val numberLabel = numberText?.let { context.stringResource(YMR.strings.episode_number_label, it) }
+            ?: context.stringResource(YMR.strings.episode_plain)
 
         val tmdbName = meta?.name?.takeUnless { TitleMatch.isGenericName(it) }
-        val ownName = extensionName.takeUnless { TitleMatch.isGenericName(it) || it.isBlank() }
+        val ownName = cleanName.takeUnless { TitleMatch.isGenericName(it) || it.isBlank() }
         val name = if (prefs.episodeNames().get()) tmdbName ?: ownName else ownName ?: tmdbName
 
         val title = when {
-            prefs.episodeNames().get() && tmdbName != null ->
+            prefs.episodeNames().get() && tmdbName != null && numberText != null ->
                 context.stringResource(YMR.strings.episode_title_format, numberText, tmdbName)
-            else -> extensionName.ifBlank { numberLabel }
+            prefs.episodeNames().get() && tmdbName != null -> tmdbName
+            else -> cleanName.ifBlank { numberLabel }
         }
         val summary = meta?.overview?.takeIf { it.isNotBlank() } ?: extensionSummary?.takeIf { it.isNotBlank() }
         val preview = extensionPreview?.takeIf { it.isNotBlank() }
             ?: meta?.stillUrl(previewSize)?.takeIf { prefs.episodeThumbnails().get() }
         val label = (if (enabled) EpisodeMetadata.seasonEpisodeLabel(show, episodeNumber, extensionName) else null)
+            ?.takeIf { numberText != null }
             ?: TitleMatch.seasonEpisodeIn(extensionName)?.let { "T${it.first} E${it.second}" }
             ?: numberLabel
         return EpisodeDisplay(title, name, summary, preview, label, meta?.runtime)

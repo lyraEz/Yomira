@@ -241,6 +241,9 @@ fun MoreScreen(
                             onClick = {
                                 scope.launch {
                                     val homeTab = when (navItem) {
+                                        // YMR -->
+                                        NavItem.HOME -> HomeScreen.HomeTab.Home
+                                        // YMR <--
                                         NavItem.LIBRARY -> HomeScreen.HomeTab.AnimeLib()
                                         NavItem.FEED -> HomeScreen.HomeTab.Feed
                                         NavItem.UPDATES -> HomeScreen.HomeTab.Updates

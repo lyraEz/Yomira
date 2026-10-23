@@ -510,6 +510,9 @@ fun HosterTrack(
     Row(
         modifier = modifier
             .height(32.dp)
+            // YMR -->
+            .clip(RoundedCornerShape(percent = 50))
+            // YMR <--
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -597,6 +600,9 @@ fun VideoTrack(
             .fillMaxWidth()
             .padding(vertical = MaterialTheme.padding.extraSmall)
             .then(highlightModifier)
+            // YMR -->
+            .clip(DefaultHighlightShape)
+            // YMR <--
             .clickable(onClick = onClick)
             .padding(
                 horizontal = MaterialTheme.padding.small,

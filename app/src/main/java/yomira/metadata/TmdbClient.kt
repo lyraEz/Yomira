@@ -63,7 +63,7 @@ class TmdbClient(
             "/tv/$id",
             mapOf(
                 "language" to language,
-                "append_to_response" to "images",
+                "append_to_response" to "images,aggregate_credits",
                 "include_image_language" to "pt,en,null",
             ),
         )
@@ -73,7 +73,7 @@ class TmdbClient(
             "/movie/$id",
             mapOf(
                 "language" to language,
-                "append_to_response" to "images",
+                "append_to_response" to "images,credits",
                 "include_image_language" to "pt,en,null",
             ),
         )
@@ -106,5 +106,7 @@ internal fun JsonObject.array(name: String): List<JsonObject> =
     (this[name] as? JsonArray)?.mapNotNull { it as? JsonObject }.orEmpty()
 internal fun JsonObject.longs(name: String): List<Long> =
     (this[name] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.longOrNull }.orEmpty()
+internal fun JsonObject.ints(name: String): List<Int> =
+    (this[name] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.longOrNull?.toInt() }.orEmpty()
 internal fun JsonObject.strings(name: String): List<String> =
     (this[name] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull }.orEmpty()

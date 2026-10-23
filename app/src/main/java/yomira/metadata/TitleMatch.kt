@@ -113,6 +113,22 @@ object TitleMatch {
         return season to episode
     }
 
+    private val fileNoise = Regex(
+        """\[[0-9A-Fa-f]{8}\]|\((?:\d{3,4}p|[0-9A-Fa-f]{8})\)|\[(?:\d{3,4}p|HEVC|x26[45]|AAC|FLAC|WEB-?DL|BD)[^\]]*\]""" +
+            """|\.(?:mkv|mp4|avi|webm|m4v)$""",
+    )
+    private val longNumber = Regex("""(?<![\d.,])\d{7,}(?![\d.,])""")
+    private val dangling = Regex("""^[\s\-–|:.,]+|[\s\-–|:.,]+$""")
+
+    /**
+     * Episode name without what some extensions leave in it: release hashes ("[A1B2C3D4]"),
+     * quality tags, file extensions and long ids or timestamps ("1697405673").
+     */
+    fun cleanEpisodeName(name: String): String {
+        val cleaned = name.replace(fileNoise, " ").replace(longNumber, " ").collapse().replace(dangling, "")
+        return cleaned.ifBlank { name.trim() }
+    }
+
     /** Words, numbers and markers that say nothing about the episode itself. */
     private val filler = Regex(
         """(?i)\b[TS]\d{1,2}\s*[:._-]?\s*E[Pp]?\s*\d{1,4}\b""" +

@@ -36,6 +36,8 @@ data class ShowMeta(
     val logoPath: String? = null,
     val backdropPath: String? = null,
     val posterPath: String? = null,
+    /** Poster without text (TMDB "no language" poster), for the big cover with the logo on top. */
+    val keyArtPath: String? = null,
     val seasons: List<SeasonInfo> = emptyList(),
     /** TMDB season this library entry is (from its title or the manual match); null = absolute numbering. */
     val seasonHint: Int? = null,
@@ -46,9 +48,40 @@ data class ShowMeta(
     val fetchedAt: Long = 0,
     val language: String = "",
     val overrideKey: String = "",
+    /** Show-level details for the details screen; null on data saved by older versions. */
+    val details: ShowDetails? = null,
+    val detailsVersion: Int = 0,
 ) {
     val logoUrl: String? get() = TmdbClient.image(logoPath, "w500")
     val backdropUrl: String? get() = TmdbClient.image(backdropPath, "w1280")
+    val posterUrl: String? get() = TmdbClient.image(posterPath, "w500")
+    val keyArtUrl: String? get() = TmdbClient.image(keyArtPath, "w780")
+}
+
+/** TMDB show (or movie) details: genres in the chosen language, dates, people and score. */
+@Serializable
+data class ShowDetails(
+    val genres: List<String> = emptyList(),
+    val firstAirDate: String? = null,
+    val lastAirDate: String? = null,
+    val runtimeMinutes: Int? = null,
+    /** TMDB status: "Returning Series", "Ended", "Canceled", "In Production", "Released"... */
+    val status: String? = null,
+    val studios: List<String> = emptyList(),
+    val networks: List<String> = emptyList(),
+    /** ISO 3166 codes. */
+    val countries: List<String> = emptyList(),
+    val creators: List<String> = emptyList(),
+    val voteAverage: Double? = null,
+    val voteCount: Int? = null,
+    val seasonOverviews: Map<Int, String> = emptyMap(),
+    val cast: List<CastMember> = emptyList(),
+)
+
+/** An actor and the character they play (TMDB credits). */
+@Serializable
+data class CastMember(val name: String, val character: String? = null, val profilePath: String? = null) {
+    val profileUrl: String? get() = TmdbClient.image(profilePath, "w185")
 }
 
 @Serializable
@@ -62,6 +95,8 @@ data class EpisodeMeta(
     val overview: String = "",
     val still: String? = null,
     val runtime: Int? = null,
+    val airDate: String? = null,
+    val voteAverage: Double? = null,
 ) {
     fun stillUrl(size: String = "w300"): String? = TmdbClient.image(still, size)
 }
@@ -79,6 +114,10 @@ object EpisodeMetadata {
     private const val MISSING_RETRY = 12 * HOUR
     private const val NO_MATCH_RETRY = 6 * HOUR
     private const val MAX_SEASONS_PER_PASS = 30
+    private const val MAX_CAST = 24
+
+    /** Raise when ShowMeta gains fields: older saved data is fetched again. */
+    private const val DETAILS_VERSION = 1
 
     /** A season that starts this many days after the entry still counts as its season. */
     private const val DATE_SLACK_DAYS = 20
@@ -211,6 +250,7 @@ object EpisodeMetadata {
         val stale = cached == null ||
             cached.language != language ||
             cached.overrideKey != overrideRaw ||
+            cached.detailsVersion < DETAILS_VERSION ||
             now - cached.fetchedAt > SHOW_TTL
         if (stale) {
             val recentlyMissed = now - (noMatch[animeId] ?: 0L) < NO_MATCH_RETRY
@@ -222,7 +262,8 @@ object EpisodeMetadata {
                 show = if (cached != null &&
                     cached.tmdbId == fresh.tmdbId &&
                     cached.isMovie == fresh.isMovie &&
-                    cached.language == language
+                    cached.language == language &&
+                    cached.detailsVersion == DETAILS_VERSION
                 ) {
                     fresh.copy(episodes = cached.episodes, fetchedSeasons = cached.fetchedSeasons)
                 } else {
@@ -297,12 +338,34 @@ object EpisodeMetadata {
                 logoPath = pickLogo(movie),
                 backdropPath = movie.string("backdrop_path"),
                 posterPath = movie.string("poster_path"),
+                keyArtPath = pickKeyArt(movie),
                 episodes = mapOf(
-                    "1:1" to EpisodeMeta(1, 1, name, overview, movie.string("backdrop_path"), movie.int("runtime")),
+                    "1:1" to EpisodeMeta(
+                        season = 1,
+                        number = 1,
+                        name = name,
+                        overview = overview,
+                        still = movie.string("backdrop_path"),
+                        runtime = movie.int("runtime"),
+                        airDate = movie.string("release_date"),
+                        voteAverage = movie.double("vote_average"),
+                    ),
                 ),
                 fetchedAt = System.currentTimeMillis(),
                 language = language,
                 overrideKey = overrideRaw,
+                details = ShowDetails(
+                    genres = movie.array("genres").mapNotNull { it.string("name") },
+                    firstAirDate = movie.string("release_date"),
+                    runtimeMinutes = movie.int("runtime"),
+                    status = movie.string("status"),
+                    studios = movie.array("production_companies").mapNotNull { it.string("name") },
+                    countries = movie.array("production_countries").mapNotNull { it.string("iso_3166_1") },
+                    voteAverage = movie.double("vote_average"),
+                    voteCount = movie.int("vote_count"),
+                    cast = castOf(movie.obj("credits")),
+                ),
+                detailsVersion = DETAILS_VERSION,
             )
         }
 
@@ -333,14 +396,44 @@ object EpisodeMetadata {
             logoPath = pickLogo(tv),
             backdropPath = tv.string("backdrop_path"),
             posterPath = tv.string("poster_path"),
+            keyArtPath = pickKeyArt(tv),
             seasons = seasons,
             seasonHint = hint,
             offset = offset,
             fetchedAt = System.currentTimeMillis(),
             language = language,
             overrideKey = overrideRaw,
+            details = ShowDetails(
+                genres = tv.array("genres").mapNotNull { it.string("name") },
+                firstAirDate = tv.string("first_air_date"),
+                lastAirDate = tv.string("last_air_date"),
+                runtimeMinutes = tv.ints("episode_run_time").firstOrNull { it > 0 }
+                    ?: tv.obj("last_episode_to_air")?.int("runtime"),
+                status = tv.string("status"),
+                studios = tv.array("production_companies").mapNotNull { it.string("name") },
+                networks = tv.array("networks").mapNotNull { it.string("name") },
+                countries = tv.strings("origin_country"),
+                creators = tv.array("created_by").mapNotNull { it.string("name") },
+                voteAverage = tv.double("vote_average"),
+                voteCount = tv.int("vote_count"),
+                seasonOverviews = tv.array("seasons").mapNotNull { season ->
+                    val number = season.int("season_number") ?: return@mapNotNull null
+                    season.string("overview")?.let { number to it }
+                }.toMap(),
+                cast = castOf(tv.obj("aggregate_credits")),
+            ),
+            detailsVersion = DETAILS_VERSION,
         )
     }
+
+    /** Main cast from TMDB credits: plain ("cast[].character") or aggregated ("cast[].roles[]"). */
+    private fun castOf(credits: JsonObject?): List<CastMember> =
+        credits?.array("cast").orEmpty().take(MAX_CAST).mapNotNull { person ->
+            val name = person.string("name") ?: return@mapNotNull null
+            val character = person.string("character")
+                ?: person.array("roles").firstNotNullOfOrNull { it.string("character") }
+            CastMember(name, character, person.string("profile_path"))
+        }
 
     /**
      * TMDB keeps an anime's seasons under one show while extensions list each season apart. When the
@@ -417,6 +510,13 @@ object EpisodeMetadata {
         }.maxByOrNull { it.second }?.takeIf { it.second >= 0.62 }
     }
 
+    /** Best-rated poster without text, if TMDB has one. */
+    private fun pickKeyArt(details: JsonObject): String? =
+        details.obj("images")?.array("posters").orEmpty()
+            .filter { it.string("iso_639_1") == null }
+            .maxByOrNull { it.double("vote_average") ?: 0.0 }
+            ?.string("file_path")
+
     private fun pickLogo(details: JsonObject): String? {
         val logos = details.obj("images")?.array("logos").orEmpty()
             .filter { it.string("file_path")?.endsWith(".png", ignoreCase = true) == true }
@@ -469,6 +569,8 @@ object EpisodeMetadata {
             overview = string("overview").orEmpty(),
             still = string("still_path"),
             runtime = int("runtime"),
+            airDate = string("air_date"),
+            voteAverage = double("vote_average")?.takeIf { (int("vote_count") ?: 0) > 0 },
         )
     }
 

@@ -120,41 +120,43 @@ fun rememberContinueWatching(): ContinueItem? {
     val dismissed by prefs.dismissedEpisode().collectPref()
     val item by produceState<ContinueItem?>(initialValue = null) {
         val getHistory = Injekt.get<GetHistory>()
-        val getNextEpisodes = Injekt.get<GetNextEpisodes>()
-        val getAnime = Injekt.get<GetAnime>()
         getHistory.subscribe("")
             .map { list -> list.firstOrNull() }
             .distinctUntilChanged { old, new -> old?.episodeId == new?.episodeId && old?.seenAt == new?.seenAt }
             .collectLatest { history ->
-                value = history?.let {
-                    withContext(Dispatchers.IO) {
-                        runCatching {
-                            val anime = getAnime.await(it.animeId) ?: return@runCatching null
-                            val episode = getNextEpisodes.await(it.animeId, it.episodeId, onlyUnseen = false)
-                                .firstOrNull() ?: return@runCatching null
-                            val isNext = episode.id != it.episodeId
-                            val total = episode.totalSeconds
-                            val watched = episode.lastSecondSeen.coerceIn(0L, total.coerceAtLeast(0L))
-                            ContinueItem(
-                                animeId = anime.id,
-                                episodeId = episode.id,
-                                animeTitle = anime.title,
-                                cover = anime.asAnimeCover(),
-                                background = anime.backgroundUrl,
-                                episodeNumber = episode.episodeNumber,
-                                episodeName = episode.name,
-                                summary = episode.summary,
-                                preview = episode.previewUrl,
-                                remainingMs = if (!isNext && total > 0) total - watched else 0L,
-                                progress = if (!isNext && total > 0) watched.toFloat() / total else 0f,
-                                isNext = isNext,
-                            )
-                        }.getOrNull()
-                    }
-                }
+                value = history?.let { loadContinueItem(it.animeId, it.episodeId) }
             }
     }
     return item?.takeIf { it.episodeId != dismissed }
+}
+
+/**
+ * What to continue in an anime after [episodeId] was the last one opened: that episode when it is
+ * unfinished, otherwise the one after it. Null when there is nothing left.
+ */
+suspend fun loadContinueItem(animeId: Long, episodeId: Long): ContinueItem? = withContext(Dispatchers.IO) {
+    runCatching {
+        val anime = Injekt.get<GetAnime>().await(animeId) ?: return@runCatching null
+        val episode = Injekt.get<GetNextEpisodes>().await(animeId, episodeId, onlyUnseen = false)
+            .firstOrNull() ?: return@runCatching null
+        val isNext = episode.id != episodeId
+        val total = episode.totalSeconds
+        val watched = episode.lastSecondSeen.coerceIn(0L, total.coerceAtLeast(0L))
+        ContinueItem(
+            animeId = anime.id,
+            episodeId = episode.id,
+            animeTitle = anime.title,
+            cover = anime.asAnimeCover(),
+            background = anime.backgroundUrl,
+            episodeNumber = episode.episodeNumber,
+            episodeName = episode.name,
+            summary = episode.summary,
+            preview = episode.previewUrl,
+            remainingMs = if (!isNext && total > 0) total - watched else 0L,
+            progress = if (!isNext && total > 0) watched.toFloat() / total else 0f,
+            isNext = isNext,
+        )
+    }.getOrNull()
 }
 
 /**

@@ -37,6 +37,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 
 // ANZ -->
 import kotlinx.collections.immutable.ImmutableList
+import yomira.player.playerRow
 // ANZ <--
 
 @Composable
@@ -81,6 +82,9 @@ fun ChapterTrack(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            // YMR -->
+            .playerRow()
+            // YMR <--
             .clickable(onClick = onClick)
             .padding(vertical = MaterialTheme.padding.small, horizontal = MaterialTheme.padding.medium),
         horizontalArrangement = Arrangement.SpaceBetween,

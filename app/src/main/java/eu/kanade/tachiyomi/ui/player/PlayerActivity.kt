@@ -432,7 +432,8 @@ class PlayerActivity : BaseActivity() {
 
         setContent {
             TachiyomiTheme {
-                // YMR --> liquid glass style for the controls
+                // YMR --> liquid glass style and rounded shapes for the controls
+                yomira.player.ProvidePlayerShapes {
                 yomira.glass.ProvideGlassStyle {
                 // YMR <--
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -483,6 +484,7 @@ class PlayerActivity : BaseActivity() {
                     // YMR <--
                 }
                 // YMR -->
+                }
                 }
                 // YMR <--
             }

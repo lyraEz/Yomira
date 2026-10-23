@@ -1,6 +1,7 @@
 package yomira.glass
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,12 +44,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -67,10 +72,19 @@ val FloatingTabBarHeight: Dp = 64.dp
 /** Space the floating bar takes from the bottom of the content (bar + gap above the system bar). */
 val FloatingTabBarInset: Dp = FloatingTabBarHeight + 14.dp
 
+/** Height and tab width of the bar while it is collapsed (icons only). */
+private val CompactTabBarHeight: Dp = 48.dp
+private val CompactTabWidth: Dp = 44.dp
+private val CapsuleInset: Dp = 5.dp
+private val SideGap: Dp = 10.dp
+
 /**
  * Floating liquid glass tab bar in the style of iOS: a capsule with a selection lens that slides
  * between tabs with a spring (and follows the finger when dragged along the bar), plus an optional
  * round glass button on the side (search).
+ *
+ * When [collapsed] (while the content scrolls down) the capsule shrinks to the icons and the
+ * labels fade out; it grows back when the flag clears.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -79,38 +93,56 @@ fun FloatingGlassTabBar(
     selectedIndex: Int,
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    collapsed: Boolean = false,
     onTabLongPress: (Int) -> Unit = {},
     backdrop: com.kyant.backdrop.Backdrop? = LocalGlassBackdrop.current,
-    sideButton: (@Composable () -> Unit)? = null,
+    sideButton: (@Composable (size: Dp) -> Unit)? = null,
 ) {
-    Row(
+    val progress by animateFloatAsState(
+        targetValue = if (collapsed) 1f else 0f,
+        animationSpec = spring(dampingRatio = 0.82f, stiffness = 420f),
+        label = "tabBarCollapse",
+    )
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        contentAlignment = Alignment.BottomCenter,
     ) {
-        GlassCapsule(
-            tabs = tabs,
-            selectedIndex = selectedIndex,
-            onTabSelected = onTabSelected,
-            onTabLongPress = onTabLongPress,
-            backdrop = backdrop,
-            modifier = Modifier.weight(1f),
-        )
-        sideButton?.invoke()
+        val height = lerp(FloatingTabBarHeight, CompactTabBarHeight, progress)
+        val side = if (sideButton != null) height + SideGap else 0.dp
+        val fullWidth = maxWidth - side
+        val compactWidth = (CompactTabWidth * tabs.size + CapsuleInset * 2).coerceAtMost(fullWidth)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(SideGap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GlassCapsule(
+                tabs = tabs,
+                selectedIndex = selectedIndex,
+                onTabSelected = onTabSelected,
+                onTabLongPress = onTabLongPress,
+                backdrop = backdrop,
+                labelFraction = { 1f - progress },
+                modifier = Modifier
+                    .width(lerp(fullWidth, compactWidth, progress))
+                    .height(height),
+            )
+            sideButton?.invoke(height)
+        }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun RowScope.GlassCapsule(
+private fun GlassCapsule(
     tabs: List<GlassTabItem>,
     selectedIndex: Int,
     onTabSelected: (Int) -> Unit,
     onTabLongPress: (Int) -> Unit,
     backdrop: com.kyant.backdrop.Backdrop?,
+    labelFraction: () -> Float,
     modifier: Modifier,
 ) {
     if (tabs.isEmpty()) return
@@ -134,10 +166,9 @@ private fun RowScope.GlassCapsule(
 
     BoxWithConstraints(
         modifier = modifier
-            .height(FloatingTabBarHeight)
             .glass(RoundedCornerShape(percent = 50), backdrop = backdrop, interaction = interaction),
     ) {
-        val inset = 5.dp
+        val inset = CapsuleInset
         val tabWidth = (maxWidth - inset * 2) / tabs.size
         val tabWidthPx = with(LocalDensity.current) { tabWidth.toPx() }
         val last = (tabs.size - 1).toFloat()
@@ -230,18 +261,35 @@ private fun RowScope.GlassCapsule(
                             )
                         }
                     }
-                    Text(
+                    // Long labels ("Biblioteca") shrink a little before they get cut.
+                    BasicText(
                         text = tab.label,
-                        color = if (selected) accent else onGlass.copy(alpha = 0.78f),
-                        fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                        style = TextStyle(
+                            color = if (selected) accent else onGlass.copy(alpha = 0.78f),
+                            fontSize = 11.sp,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        autoSize = TextAutoSize.StepBased(minFontSize = 8.sp, maxFontSize = 11.sp, stepSize = 0.5.sp),
+                        modifier = Modifier
+                            .collapsible(labelFraction)
+                            .graphicsLayer {
+                                // Fades out faster than it shrinks, so it never shows cut off.
+                                alpha = ((labelFraction() - 0.4f) / 0.6f).coerceIn(0f, 1f)
+                            },
                     )
                 }
             }
         }
     }
+}
+
+/** Lays the label out with a share of its height, so the icon re-centers as it goes away. */
+private fun Modifier.collapsible(fraction: () -> Float): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val height = (placeable.height * fraction().coerceIn(0f, 1f)).roundToInt()
+    layout(placeable.width, height) { placeable.placeRelative(0, 0) }
 }
 
 /** Round glass button the size of the tab bar, used beside it (search). */

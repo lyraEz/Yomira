@@ -40,6 +40,32 @@ A chave digitada em Configurações → Player → *Metadados e pular abertura* 
 
 O código fica privado; os APKs são publicados no repositório público `lyraEz/Yomira-releases`, que é onde o atualizador do app procura versões novas.
 
+## Build pelo repositório público
+
+O Actions do repositório privado é cobrado: quando a cota do plano gratuito estoura (minutos ou os
+500 MB de armazenamento), os jobs nem começam e falham em segundos, sem log. Para não depender disso,
+`lyraEz/Yomira-releases` tem o fluxo *Build and publish* (`.github/workflows/build.yml`), que roda de
+graça por ser público: clona este repositório com um token só de leitura, compila os APKs assinados e
+publica a release lá mesmo.
+
+Ele roda à mão (*Actions → Build and publish → Run workflow*, escolhendo o branch) ou quando recebe um
+`repository_dispatch` do tipo `build`. Como o fluxo daqui, para sozinho quando a release da versão já
+existe e tem a opção **update_notes** para só reescrever o texto.
+
+Segredos em `lyraEz/Yomira-releases` (*Settings → Secrets and variables → Actions*):
+
+| Segredo | Conteúdo |
+| --- | --- |
+| `YOMIRA_SOURCE_TOKEN` | token *fine-grained* com acesso só a `lyraEz/Yomira` e permissão *Contents: Read-only* |
+| `YOMIRA_KEYSTORE_BASE64` | o mesmo daqui |
+| `YOMIRA_KEYSTORE_PASSWORD` | o mesmo daqui |
+| `YOMIRA_KEY_ALIAS` | `yomira` |
+| `YOMIRA_KEY_PASSWORD` | o mesmo daqui |
+| `YOMIRA_TMDB_API_KEY`, `YOMIRA_ANIME_SKIP_CLIENT_ID` | opcionais, como aqui |
+
+Os logs desse fluxo são públicos; os segredos aparecem mascarados e o código-fonte não é publicado,
+só os APKs, como já acontecia.
+
 ## Versões
 
 - `versionName` segue `MAIOR.MENOR.CORREÇÃO` (por exemplo `1.0.1`).

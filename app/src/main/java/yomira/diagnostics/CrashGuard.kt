@@ -1,10 +1,13 @@
 package yomira.diagnostics
 
+import android.app.ActivityManager
 import android.app.Application
+import android.app.ApplicationExitInfo
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Process
+import eu.kanade.tachiyomi.BuildConfig
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -22,13 +25,11 @@ import kotlin.system.exitProcess
  * - safe mode turns the liquid glass effects off, so the app can still be used while the cause
  *   is investigated.
  *
- * Only plain SharedPreferences and files are used here on purpose.
+ * Only plain files are used here on purpose.
  */
 object CrashGuard {
 
-    private const val PREFS = "yomira_crash_guard"
-    private const val KEY_LAUNCHES = "unstable_launches"
-    private const val KEY_SAFE_MODE = "safe_mode"
+    private const val STATE_DIR = "crash_guard"
     private const val REPORT_PROCESS_SUFFIX = ":crash_report"
     private const val CRASH_FILE = "last_crash.txt"
 
@@ -72,8 +73,6 @@ object CrashGuard {
         }
     }
 
-    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-
     private fun crashFile(context: Context) = File(context.filesDir, CRASH_FILE)
 
     private fun writeCrash(context: Context, thread: Thread, throwable: Throwable) {
@@ -95,25 +94,76 @@ object CrashGuard {
         crashFile(context).delete()
     }
 
+    /*
+     * The launch count and safe mode live in small files read on every call, not in
+     * SharedPreferences: the report runs in another process, and SharedPreferences keep a copy in
+     * memory per process, so a value written there was not seen by a main process still alive
+     * (the report then opened again on every launch).
+     */
+    private fun stateDir(context: Context) = File(context.filesDir, STATE_DIR).apply { mkdirs() }
+
+    private fun launchesFile(context: Context) = File(stateDir(context), "launches")
+
+    private fun safeModeFile(context: Context) = File(stateDir(context), "safe_mode")
+
+    /** Launches counted for this app version ("versionCode:count"); another version starts at 0. */
+    private fun readLaunches(context: Context): Int {
+        val (version, count) = runCatching {
+            launchesFile(context).readText().trim().split(':').let { it[0].toLong() to it[1].toInt() }
+        }.getOrDefault(-1L to 0)
+        return if (version == BuildConfig.VERSION_CODE.toLong()) count else 0
+    }
+
+    private fun writeLaunches(context: Context, count: Int) {
+        runCatching { launchesFile(context).writeText("${BuildConfig.VERSION_CODE}:$count") }
+    }
+
+    /**
+     * True when the main process last ended in a crash (Java crashes end as SIGNALED, killed by
+     * the handler above), false when it ended normally (closed by the user, killed for memory),
+     * null when Android cannot tell (before Android 11).
+     */
+    private fun lastExitWasCrash(context: Context): Boolean? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        return runCatching {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val last = am.getHistoricalProcessExitReasons(context.packageName, 0, 10)
+                .firstOrNull { it.processName == context.packageName }
+                ?: return null
+            last.reason in crashReasons
+        }.getOrNull()
+    }
+
+    private val crashReasons = setOf(
+        ApplicationExitInfo.REASON_CRASH,
+        ApplicationExitInfo.REASON_CRASH_NATIVE,
+        ApplicationExitInfo.REASON_ANR,
+        ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
+        ApplicationExitInfo.REASON_SIGNALED,
+    )
+
     /** Called when the main screen is created. Returns true when the report should open instead. */
     fun onLaunch(context: Context): Boolean {
-        val launches = prefs(context).getInt(KEY_LAUNCHES, 0) + 1
-        prefs(context).edit().putInt(KEY_LAUNCHES, launches).commit()
+        val previous = if (lastExitWasCrash(context) == false) 0 else readLaunches(context)
+        val launches = previous + 1
+        writeLaunches(context, launches)
         return launches > LAUNCHES_BEFORE_REPORT
     }
 
     /** Called once the main screen has been visible for a few seconds. */
     fun markStable(context: Context) {
-        prefs(context).edit().putInt(KEY_LAUNCHES, 0).apply()
+        writeLaunches(context, 0)
     }
 
     fun resetLaunches(context: Context) {
-        prefs(context).edit().putInt(KEY_LAUNCHES, 0).commit()
+        writeLaunches(context, 0)
     }
 
-    fun isSafeMode(context: Context): Boolean = prefs(context).getBoolean(KEY_SAFE_MODE, false)
+    fun isSafeMode(context: Context): Boolean = safeModeFile(context).exists()
 
     fun setSafeMode(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SAFE_MODE, enabled).commit()
+        runCatching {
+            if (enabled) safeModeFile(context).writeText("on") else safeModeFile(context).delete()
+        }
     }
 }

@@ -10,6 +10,13 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.8.2] - 2026-10-23
+
+Correção da tela de relatório que abria sem parar.
+
+### Fixed
+- Depois de atualizar da 1.8.0, a tela "O Yomira fechou inesperadamente" abria toda vez, mesmo sem nenhuma falha nova e mesmo em modo seguro. O botão para abrir de novo zerava o contador de aberturas em outro processo, e o processo principal, ainda aberto, continuava usando o valor antigo. Agora esse estado fica em arquivo lido na hora, o contador recomeça a cada versão nova e só conta aberturas que terminaram em falha (fechar o app arrastando não conta mais).
+
 ## Yomira [1.8.1] - 2026-10-23
 
 Correção urgente da 1.8.0.

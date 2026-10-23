@@ -168,6 +168,8 @@ class MainActivity : BaseActivity() {
         if (isLaunch && yomira.diagnostics.CrashGuard.onLaunch(this)) {
             startActivity(android.content.Intent(this, yomira.diagnostics.CrashReportActivity::class.java))
             finish()
+            // The report runs in its own process; leaving this one alive kept stale state around.
+            android.os.Process.killProcess(android.os.Process.myPid())
             return
         }
         // YMR <--

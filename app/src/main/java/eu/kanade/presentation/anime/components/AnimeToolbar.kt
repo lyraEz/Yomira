@@ -241,6 +241,16 @@ fun AnimeToolbar(
                                         ),
                                     )
                                 }
+                                // YMR --> pick the right TMDB show, season and numbering
+                                yomira.metadata.LocalTmdbMatchAction.current?.let { openTmdbMatch ->
+                                    add(
+                                        AppBar.OverflowAction(
+                                            title = stringResource(yomira.i18n.YMR.strings.tmdb_match_title),
+                                            onClick = openTmdbMatch,
+                                        ),
+                                    )
+                                }
+                                // YMR <--
                                 if (onClickOpenAnimeFolder != null) {
                                     add(
                                         AppBar.OverflowAction(

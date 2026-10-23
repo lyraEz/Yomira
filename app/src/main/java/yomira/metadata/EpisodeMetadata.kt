@@ -1,0 +1,504 @@
+package yomira.metadata
+
+import android.app.Application
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import logcat.LogPriority
+import tachiyomi.core.common.util.system.logcat
+import tachiyomi.domain.track.interactor.GetTracks
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.io.File
+import java.time.LocalDate
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.abs
+import kotlin.math.floor
+
+/** What Yomira knows about an anime from TMDB, cached on the device. */
+@Serializable
+data class ShowMeta(
+    val animeId: Long,
+    val tmdbId: Long,
+    val isMovie: Boolean = false,
+    val name: String = "",
+    val overview: String = "",
+    val logoPath: String? = null,
+    val backdropPath: String? = null,
+    val posterPath: String? = null,
+    val seasons: List<SeasonInfo> = emptyList(),
+    /** TMDB season this library entry is (from its title or the manual match); null = absolute numbering. */
+    val seasonHint: Int? = null,
+    /** Added to the extension's episode numbers (manual match). */
+    val offset: Int = 0,
+    val episodes: Map<String, EpisodeMeta> = emptyMap(),
+    val fetchedSeasons: Map<Int, Long> = emptyMap(),
+    val fetchedAt: Long = 0,
+    val language: String = "",
+    val overrideKey: String = "",
+) {
+    val logoUrl: String? get() = TmdbClient.image(logoPath, "w500")
+    val backdropUrl: String? get() = TmdbClient.image(backdropPath, "w1280")
+}
+
+@Serializable
+data class SeasonInfo(val number: Int, val episodeCount: Int, val airDate: String? = null)
+
+@Serializable
+data class EpisodeMeta(
+    val season: Int,
+    val number: Int,
+    val name: String = "",
+    val overview: String = "",
+    val still: String? = null,
+    val runtime: Int? = null,
+) {
+    fun stillUrl(size: String = "w300"): String? = TmdbClient.image(still, size)
+}
+
+/**
+ * Episode names, descriptions, stills and title logos from TMDB, in the user's language. The data
+ * from the extension is never changed in the database (downloads are named after it); screens
+ * show these values on top of it.
+ */
+object EpisodeMetadata {
+
+    private const val HOUR = 60 * 60 * 1000L
+    private const val SHOW_TTL = 7 * 24 * HOUR
+    private const val SEASON_TTL = 3 * 24 * HOUR
+    private const val MISSING_RETRY = 12 * HOUR
+    private const val NO_MATCH_RETRY = 6 * HOUR
+    private const val MAX_SEASONS_PER_PASS = 30
+
+    /** A season that starts this many days after the entry still counts as its season. */
+    private const val DATE_SLACK_DAYS = 20
+
+    /** Start dates this close mean the entry is that whole season. */
+    private const val SAME_START_DAYS = 45
+
+    private val movieWords = Regex("""(?i)\b(?:movie|filme|gekijouban|the movie|film)\b""")
+
+    private val _shows = MutableStateFlow<Map<Long, ShowMeta>>(emptyMap())
+    val shows: StateFlow<Map<Long, ShowMeta>> = _shows.asStateFlow()
+
+    private val locks = ConcurrentHashMap<Long, Mutex>()
+    private val noMatch = ConcurrentHashMap<Long, Long>()
+
+    fun show(animeId: Long): ShowMeta? = _shows.value[animeId]
+
+    /**
+     * TMDB (season, episode) of an episode of this library entry.
+     *
+     * A known season (from the title, the air dates or the manual match) wins over a "T1E2" in the
+     * episode name, because many extensions call every entry "T1". Without one, the name decides,
+     * and then the running number is counted across the seasons.
+     */
+    fun locate(show: ShowMeta, episodeNumber: Double, episodeName: String): Pair<Int, Int>? {
+        if (show.isMovie) return 1 to 1
+        val named = TitleMatch.seasonEpisodeIn(episodeName)
+        val whole = episodeNumber.takeIf { it == floor(it) }?.toInt()
+        show.seasonHint?.let { hint ->
+            val number = whole ?: named?.second ?: return null
+            val count = show.seasons.firstOrNull { it.number == hint }?.episodeCount ?: Int.MAX_VALUE
+            val shifted = number + show.offset
+            if (shifted in 1..count) return hint to shifted
+            // The extension already counts from the start of this season.
+            if (show.offset != 0 && number in 1..count) return hint to number
+            // The extension keeps counting from the earlier seasons.
+            val continued = absolute(show, number)
+            return if (continued != null && continued.first >= hint) continued else hint to shifted
+        }
+        named?.let { (season, episode) -> return if (episode >= 1) season to episode else null }
+        return absolute(show, (whole ?: return null) + show.offset)
+    }
+
+    /** Running number counted across the regular seasons. */
+    private fun absolute(show: ShowMeta, number: Int): Pair<Int, Int>? {
+        if (number < 1) return null
+        val regular = show.seasons.filter { it.number >= 1 }.sortedBy { it.number }
+        if (regular.isEmpty()) return 1 to number
+        var remaining = number
+        for (season in regular) {
+            if (remaining <= season.episodeCount) return season.number to remaining
+            remaining -= season.episodeCount
+        }
+        return null
+    }
+
+    fun episode(show: ShowMeta?, episodeNumber: Double, episodeName: String): EpisodeMeta? {
+        show ?: return null
+        val (season, number) = locate(show, episodeNumber, episodeName) ?: return null
+        return show.episodes["$season:$number"]
+    }
+
+    /** "T1 E2" for the player; null when the season is unknown. */
+    fun seasonEpisodeLabel(show: ShowMeta?, episodeNumber: Double, episodeName: String): String? {
+        val located = show?.takeUnless { it.isMovie }?.let { locate(it, episodeNumber, episodeName) }
+            ?: TitleMatch.seasonEpisodeIn(episodeName)
+            ?: return null
+        return "T${located.first} E${located.second}"
+    }
+
+    /** Drops everything in memory (the settings also delete the files). */
+    fun forgetAll() {
+        _shows.value = emptyMap()
+        noMatch.clear()
+    }
+
+    /** Loads an anime's saved data from the device without going online (for long lists). */
+    suspend fun peek(animeId: Long) {
+        if (show(animeId) != null) return
+        withContext(Dispatchers.IO) { readDisk(animeId) }?.let(::publish)
+    }
+
+    /** The user picked another TMDB match: allow a new search right away (the data reloads itself). */
+    fun matchChanged(animeId: Long) {
+        noMatch.remove(animeId)
+    }
+
+    /** Drops what is known about an anime. */
+    fun forget(animeId: Long) {
+        _shows.update { it - animeId }
+        noMatch.remove(animeId)
+        runCatching { file(animeId).delete() }
+    }
+
+    /**
+     * Makes sure the show and the seasons of [episodes] (number, name from the extension) are
+     * loaded. Cheap when everything is cached; safe to call from every screen that shows them.
+     */
+    suspend fun ensure(animeId: Long, title: String, episodes: List<Pair<Double, String>>) {
+        withContext(Dispatchers.IO) {
+            val prefs = MetadataPreferences()
+            if (!prefs.tmdbEnabled().get()) return@withContext
+            val key = MetadataKeys.tmdb(prefs)
+            if (key.isBlank()) return@withContext
+            locks.getOrPut(animeId) { Mutex() }.withLock {
+                try {
+                    load(animeId, title, episodes, prefs, TmdbClient(key))
+                } catch (e: TmdbAuthException) {
+                    logcat(LogPriority.WARN) { "TMDB: the API key was rejected" }
+                } catch (e: Exception) {
+                    logcat(LogPriority.WARN, e) { "TMDB: could not load metadata for anime $animeId" }
+                }
+            }
+        }
+    }
+
+    private suspend fun load(
+        animeId: Long,
+        title: String,
+        episodes: List<Pair<Double, String>>,
+        prefs: MetadataPreferences,
+        client: TmdbClient,
+    ) {
+        val now = System.currentTimeMillis()
+        val language = prefs.language().get()
+        val overrideRaw = prefs.tmdbOverride(animeId).get()
+        val cached = show(animeId) ?: readDisk(animeId)?.also(::publish)
+
+        var show: ShowMeta? = cached
+        val stale = cached == null ||
+            cached.language != language ||
+            cached.overrideKey != overrideRaw ||
+            now - cached.fetchedAt > SHOW_TTL
+        if (stale) {
+            val recentlyMissed = now - (noMatch[animeId] ?: 0L) < NO_MATCH_RETRY
+            if (cached == null && recentlyMissed) return
+            val fresh = fetchShow(client, animeId, title, overrideRaw, language, prefs)
+            if (fresh == null) {
+                noMatch[animeId] = now
+            } else {
+                show = if (cached != null &&
+                    cached.tmdbId == fresh.tmdbId &&
+                    cached.isMovie == fresh.isMovie &&
+                    cached.language == language
+                ) {
+                    fresh.copy(episodes = cached.episodes, fetchedSeasons = cached.fetchedSeasons)
+                } else {
+                    fresh
+                }
+                publish(show)
+                writeDisk(show)
+            }
+        }
+        val current = show ?: return
+        if (current.isMovie) return
+
+        val wanted = episodes.mapNotNull { (number, name) -> locate(current, number, name) }
+        val seasons = wanted.map { it.first }.distinct().filter { season ->
+            val fetched = current.fetchedSeasons[season] ?: 0L
+            val missing = wanted.any { it.first == season && current.episodes["${it.first}:${it.second}"] == null }
+            now - fetched > SEASON_TTL || (missing && now - fetched > MISSING_RETRY)
+        }.take(MAX_SEASONS_PER_PASS)
+        if (seasons.isEmpty()) return
+
+        var updated = current
+        for (season in seasons) {
+            val list = fetchSeason(client, current.tmdbId, season, language, prefs) ?: continue
+            updated = updated.copy(
+                episodes = updated.episodes + list.associateBy { "${it.season}:${it.number}" },
+                fetchedSeasons = updated.fetchedSeasons + (season to now),
+            )
+        }
+        publish(updated)
+        writeDisk(updated)
+    }
+
+    private suspend fun fetchShow(
+        client: TmdbClient,
+        animeId: Long,
+        title: String,
+        overrideRaw: String,
+        language: String,
+        prefs: MetadataPreferences,
+    ): ShowMeta? {
+        val override = TmdbOverride.decode(overrideRaw)
+        val (query, titleSeason) = TitleMatch.forShowSearch(title)
+        val tracks = runCatching { Injekt.get<GetTracks>().await(animeId) }.getOrDefault(emptyList())
+        val aniList = suspend { AniListIds.forAnime(animeId, title, tracks, allowSearch = true) }
+
+        val (tmdbId, isMovie) = if (override != null) {
+            override.tmdbId to override.isMovie
+        } else {
+            TitleMatch.searchVariants(query).firstNotNullOfOrNull { findMatch(client, it, title, language) }
+                ?: aniList()?.let { media ->
+                    listOfNotNull(media.english, media.romaji)
+                        .flatMap { TitleMatch.searchVariants(TitleMatch.forShowSearch(it).first) }
+                        .distinct()
+                        .firstNotNullOfOrNull { findMatch(client, it, it, language) }
+                }
+                ?: return null
+        }
+
+        if (isMovie) {
+            val movie = client.movie(tmdbId, language) ?: return null
+            var overview = movie.string("overview").orEmpty()
+            if (overview.isBlank() && prefs.englishFallback().get() && !language.startsWith("en")) {
+                overview = client.movie(tmdbId, "en-US")?.string("overview").orEmpty()
+            }
+            val name = movie.string("title").orEmpty()
+            return ShowMeta(
+                animeId = animeId,
+                tmdbId = tmdbId,
+                isMovie = true,
+                name = name,
+                overview = overview,
+                logoPath = pickLogo(movie),
+                backdropPath = movie.string("backdrop_path"),
+                posterPath = movie.string("poster_path"),
+                episodes = mapOf(
+                    "1:1" to EpisodeMeta(1, 1, name, overview, movie.string("backdrop_path"), movie.int("runtime")),
+                ),
+                fetchedAt = System.currentTimeMillis(),
+                language = language,
+                overrideKey = overrideRaw,
+            )
+        }
+
+        val tv = client.tv(tmdbId, language) ?: return null
+        val seasons = tv.array("seasons").mapNotNull { season ->
+            val number = season.int("season_number") ?: return@mapNotNull null
+            val count = season.int("episode_count") ?: 0
+            SeasonInfo(number, count, season.string("air_date")).takeIf { count > 0 }
+        }
+        var offset = override?.offset ?: 0
+        val hint = override?.season?.takeIf { it >= 0 }
+            ?: titleSeason?.takeIf { season -> seasons.any { it.number == season } }
+            ?: if (seasons.count { it.number >= 1 } > 1) {
+                aniList()?.startDate?.let { start -> seasonFromDate(client, tmdbId, seasons, start, language) }
+                    ?.let { (season, before) ->
+                        if (offset == 0) offset = before
+                        season
+                    }
+            } else {
+                null
+            }
+        return ShowMeta(
+            animeId = animeId,
+            tmdbId = tmdbId,
+            isMovie = false,
+            name = tv.string("name").orEmpty(),
+            overview = tv.string("overview").orEmpty(),
+            logoPath = pickLogo(tv),
+            backdropPath = tv.string("backdrop_path"),
+            posterPath = tv.string("poster_path"),
+            seasons = seasons,
+            seasonHint = hint,
+            offset = offset,
+            fetchedAt = System.currentTimeMillis(),
+            language = language,
+            overrideKey = overrideRaw,
+        )
+    }
+
+    /**
+     * TMDB keeps an anime's seasons under one show while extensions list each season apart. When the
+     * title names no season, the entry's AniList start date picks the TMDB season that aired then
+     * (season, episodes before it). For a second cour inside one TMDB season, the episodes that
+     * aired before it become the offset. Null means counting from the first season.
+     */
+    private fun seasonFromDate(
+        client: TmdbClient,
+        tmdbId: Long,
+        seasons: List<SeasonInfo>,
+        start: String,
+        language: String,
+    ): Pair<Int, Int>? {
+        val startDay = epochDay(start) ?: return null
+        val regular = seasons.filter { it.number >= 1 }.sortedBy { it.number }
+        val first = regular.firstOrNull()?.number ?: return null
+        val (season, airedOn) = regular
+            .mapNotNull { season -> epochDay(season.airDate)?.let { season to it } }
+            .lastOrNull { it.second <= startDay + DATE_SLACK_DAYS }
+            ?: return null
+        if (abs(startDay - airedOn) <= SAME_START_DAYS) {
+            return if (season.number == first) null else season.number to 0
+        }
+        val episodes = client.season(tmdbId, season.number, language)?.array("episodes").orEmpty()
+        val before = episodes.count { episode ->
+            epochDay(episode.string("air_date"))?.let { it < startDay - 3 } == true
+        }
+        return when {
+            before in 1 until season.episodeCount -> season.number to before
+            season.number == first -> null
+            else -> season.number to 0
+        }
+    }
+
+    private fun epochDay(date: String?): Long? =
+        date?.takeIf { it.length >= 10 }?.let { runCatching { LocalDate.parse(it.take(10)).toEpochDay() }.getOrNull() }
+
+    /** Best TMDB match for a title: (id, isMovie). Searches in English and in the user's language. */
+    private fun findMatch(client: TmdbClient, query: String, fullTitle: String, language: String): Pair<Long, Boolean>? {
+        if (query.isBlank()) return null
+        val tv = best(query, client.searchTv(query, "en-US"), client.searchTv(query, language), movie = false)
+        val looksLikeMovie = movieWords.containsMatchIn(fullTitle)
+        val movie = if (tv == null || looksLikeMovie) {
+            best(query, client.searchMovie(query, "en-US"), client.searchMovie(query, language), movie = true)
+        } else {
+            null
+        }
+        return when {
+            movie != null && (tv == null || movie.second >= tv.second - 0.05) -> movie.first to true
+            tv != null -> tv.first to false
+            else -> null
+        }
+    }
+
+    private fun best(query: String, english: List<JsonObject>, local: List<JsonObject>, movie: Boolean): Pair<Long, Double>? {
+        val nameKey = if (movie) "title" else "name"
+        val originalKey = if (movie) "original_title" else "original_name"
+        val localById = local.associateBy { it.long("id") }
+        val ranked = english.ifEmpty { local }
+        if (ranked.isEmpty()) return null
+        return ranked.mapIndexedNotNull { index, item ->
+            val id = item.long("id") ?: return@mapIndexedNotNull null
+            val names = listOfNotNull(
+                item.string(nameKey),
+                item.string(originalKey),
+                localById[id]?.string(nameKey),
+            )
+            var score = names.maxOfOrNull { TitleMatch.similarity(query, it) } ?: 0.0
+            if (16L in item.longs("genre_ids")) score += 0.12
+            if (item.string("original_language") == "ja") score += 0.08
+            score += 0.06 * (ranked.size - index) / ranked.size
+            id to score
+        }.maxByOrNull { it.second }?.takeIf { it.second >= 0.62 }
+    }
+
+    private fun pickLogo(details: JsonObject): String? {
+        val logos = details.obj("images")?.array("logos").orEmpty()
+            .filter { it.string("file_path")?.endsWith(".png", ignoreCase = true) == true }
+        if (logos.isEmpty()) return null
+        val byLanguage = listOf("pt", "en", null)
+        for (language in byLanguage) {
+            logos.filter { it.string("iso_639_1") == language }
+                .maxByOrNull { it.double("vote_average") ?: 0.0 }
+                ?.let { return it.string("file_path") }
+        }
+        return logos.maxByOrNull { it.double("vote_average") ?: 0.0 }?.string("file_path")
+    }
+
+    private fun fetchSeason(
+        client: TmdbClient,
+        tmdbId: Long,
+        season: Int,
+        language: String,
+        prefs: MetadataPreferences,
+    ): List<EpisodeMeta>? {
+        val local = client.season(tmdbId, season, language)?.array("episodes")?.mapNotNull { it.toEpisode(season) }
+            ?: return null
+        val needsFallback = prefs.englishFallback().get() &&
+            !language.startsWith("en") &&
+            local.any { TitleMatch.isGenericName(it.name) || it.overview.isBlank() }
+        if (!needsFallback) return local
+        val english = client.season(tmdbId, season, "en-US")?.array("episodes")
+            ?.mapNotNull { it.toEpisode(season) }
+            ?.associateBy { it.number }
+            .orEmpty()
+        return local.map { episode ->
+            val fallback = english[episode.number] ?: return@map episode
+            episode.copy(
+                name = if (TitleMatch.isGenericName(episode.name) && !TitleMatch.isGenericName(fallback.name)) {
+                    fallback.name
+                } else {
+                    episode.name
+                },
+                overview = episode.overview.ifBlank { fallback.overview },
+            )
+        }
+    }
+
+    private fun JsonObject.toEpisode(season: Int): EpisodeMeta? {
+        val number = int("episode_number") ?: return null
+        return EpisodeMeta(
+            season = int("season_number") ?: season,
+            number = number,
+            name = string("name").orEmpty(),
+            overview = string("overview").orEmpty(),
+            still = string("still_path"),
+            runtime = int("runtime"),
+        )
+    }
+
+    private fun publish(show: ShowMeta) {
+        _shows.update { it + (show.animeId to show) }
+    }
+
+    private fun file(animeId: Long): File =
+        File(Injekt.get<Application>().filesDir, "yomira/meta/$animeId.json")
+
+    private fun readDisk(animeId: Long): ShowMeta? = runCatching {
+        val file = file(animeId)
+        if (!file.exists()) return null
+        TmdbClient.json.decodeFromString(ShowMeta.serializer(), file.readText())
+    }.getOrNull()
+
+    private fun writeDisk(show: ShowMeta) {
+        runCatching {
+            val file = file(show.animeId)
+            file.parentFile?.mkdirs()
+            val tmp = File(file.parentFile, "${file.name}.tmp")
+            tmp.writeText(TmdbClient.json.encodeToString(ShowMeta.serializer(), show))
+            tmp.renameTo(file)
+        }
+    }
+}
+
+/** The cached TMDB data of an anime, updated when it arrives. */
+@Composable
+fun rememberShowMeta(animeId: Long?): ShowMeta? {
+    val shows by EpisodeMetadata.shows.collectAsState()
+    return animeId?.let { shows[it] }
+}

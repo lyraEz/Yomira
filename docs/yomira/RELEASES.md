@@ -29,6 +29,15 @@ Em *Settings → Secrets and variables → Actions* do repositório, crie:
 | `YOMIRA_KEY_PASSWORD` | senha da chave |
 | `YOMIRA_RELEASES_TOKEN` | token *fine-grained* com acesso só a `lyraEz/Yomira-releases` e permissão *Contents: Read and write* |
 
+Opcionais (chaves padrão que entram no APK; sem elas, cada pessoa digita a sua no app):
+
+| Segredo | Conteúdo |
+| --- | --- |
+| `YOMIRA_TMDB_API_KEY` | chave da API v3 do TMDB ou o token de leitura v4 (começa com `eyJ`) |
+| `YOMIRA_ANIME_SKIP_CLIENT_ID` | client ID da API do Anime Skip |
+
+A chave digitada em Configurações → Player → *Metadados e pular abertura* sempre vale mais que a do APK. Qualquer chave embutida num APK pode ser extraída por quem baixar o arquivo; use chaves que você aceite expor (as duas APIs são gratuitas e só leem dados públicos).
+
 O código fica privado; os APKs são publicados no repositório público `lyraEz/Yomira-releases`, que é onde o atualizador do app procura versões novas.
 
 ## Versões
@@ -64,4 +73,4 @@ scripts/yomira/package-release.sh app/build/outputs/apk/release dist
 
 ## O que o CI faz
 
-`ci.yml` roda em todo push e pull request, sem publicar nada: formatação dos arquivos novos do Yomira, detekt, testes unitários, build dos APKs de release sem assinatura e inspeção dos APKs (launcher, níveis de SDK, ABIs). Os APKs ficam como artefato da execução por 7 dias.
+`ci.yml` roda em todo push e pull request, sem publicar nada: formatação dos arquivos novos do Yomira, detekt e testes unitários. O build dos APKs sem assinatura, a inspeção (launcher, níveis de SDK, ABIs) e o envio dos APKs como artefato (guardado por 1 dia) só acontecem ao rodar o fluxo à mão (*Actions → CI → Run workflow*). Assim os ~160 MB de APKs por execução não enchem o armazenamento de Actions do plano gratuito (500 MB).

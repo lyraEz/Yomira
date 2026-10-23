@@ -223,6 +223,29 @@ fun AnimeScreen(
         navigator.push(eu.kanade.tachiyomi.ui.browse.source.browse.RelatedAnimeScreen(state.anime.id))
     }
 
+    // YMR --> episode names, descriptions and stills from TMDB (loaded once, then cached)
+    var tmdbMatchVersion by remember { mutableIntStateOf(0) }
+    var showTmdbMatch by remember { mutableStateOf(false) }
+    LaunchedEffect(state.anime.id, state.anime.title, state.episodes.size, tmdbMatchVersion) {
+        yomira.metadata.EpisodeMetadata.ensure(
+            animeId = state.anime.id,
+            title = state.anime.title,
+            episodes = state.episodes.map { it.episode.episodeNumber to it.episode.name },
+        )
+    }
+    if (showTmdbMatch) {
+        yomira.metadata.TmdbMatchDialog(
+            animeId = state.anime.id,
+            animeTitle = state.anime.title,
+            onDismiss = { showTmdbMatch = false },
+            onChanged = { tmdbMatchVersion++ },
+        )
+    }
+    androidx.compose.runtime.CompositionLocalProvider(
+        yomira.metadata.LocalTmdbMatchAction provides { showTmdbMatch = true },
+    ) {
+    // YMR <--
+
     if (!isTabletUi) {
         AnimeScreenSmallImpl(
             state = state,
@@ -336,6 +359,9 @@ fun AnimeScreen(
             onCastClick = { credit -> activeCreditIndex = state.anime.cast?.indexOf(credit)?.takeIf { it >= 0 } },
         )
     }
+    // YMR -->
+    }
+    // YMR <--
 
     activeCreditIndex?.let { index ->
         val castList = state.anime.cast ?: emptyList()
@@ -1432,6 +1458,15 @@ private fun EpisodeItemWrapper(
                 { action: LibraryPreferences.EpisodeSwipeAction -> onEpisodeSwipe(item, action) }
             }
 
+            // YMR --> TMDB name, description and still in the user's language when available
+            val display = yomira.metadata.rememberEpisodeDisplay(
+                animeId = anime.id,
+                episodeNumber = item.episode.episodeNumber,
+                extensionName = item.episode.name,
+                extensionSummary = item.episode.summary,
+                extensionPreview = item.episode.previewUrl,
+            )
+            // YMR <--
             AnimeEpisodeListItem(
                 title = if (anime.displayMode == Anime.EPISODE_DISPLAY_NUMBER) {
                     stringResource(
@@ -1439,7 +1474,9 @@ private fun EpisodeItemWrapper(
                         formatEpisodeNumber(item.episode.episodeNumber),
                     )
                 } else {
-                    item.episode.name
+                    // YMR -->
+                    display.title
+                    // YMR <--
                 },
                 date = relativeDateTimeText(item.episode.dateUpload),
                 watchProgress = item.episode.lastSecondSeen
@@ -1452,8 +1489,10 @@ private fun EpisodeItemWrapper(
                 bookmark = item.episode.bookmark,
                 fillermark = item.episode.fillermark,
                 isAutoFiller = fillerEpisodes.contains(item.episode.episodeNumber.toFloat()),
-                summary = item.episode.summary.takeIf { showEpisodeSummary },
-                previewUrl = item.episode.previewUrl.takeIf { showEpisodeThumbnail },
+                // YMR -->
+                summary = display.summary.takeIf { showEpisodeSummary },
+                previewUrl = display.previewUrl.takeIf { showEpisodeThumbnail },
+                // YMR <--
                 selected = item.selected,
                 isAnyEpisodeSelected = isAnyEpisodeSelected,
                 downloadIndicatorEnabled = !isAnyEpisodeSelected && !anime.isLocal(),

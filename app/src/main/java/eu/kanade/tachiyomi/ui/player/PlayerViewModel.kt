@@ -68,9 +68,6 @@ import eu.kanade.tachiyomi.data.saver.Image
 import eu.kanade.tachiyomi.data.saver.ImageSaver
 import eu.kanade.tachiyomi.data.saver.Location
 import eu.kanade.tachiyomi.data.sync.SyncDataJob
-import eu.kanade.tachiyomi.data.track.TrackerManager
-import eu.kanade.tachiyomi.data.track.anilist.Anilist
-import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.player.controls.components.IndexedSegment
 import eu.kanade.tachiyomi.ui.player.controls.components.sheets.HosterState
@@ -85,7 +82,6 @@ import eu.kanade.tachiyomi.ui.player.settings.DecoderPreferences
 import eu.kanade.tachiyomi.ui.player.settings.GesturePreferences
 import eu.kanade.tachiyomi.ui.player.settings.PlayerPreferences
 import eu.kanade.tachiyomi.ui.player.settings.SubtitlePreferences
-import eu.kanade.tachiyomi.ui.player.utils.AniSkipApi
 import eu.kanade.tachiyomi.ui.player.utils.ChapterUtils
 import eu.kanade.tachiyomi.ui.player.utils.ChapterUtils.Companion.getStringRes
 import eu.kanade.tachiyomi.ui.reader.SaveImageNotifier
@@ -2762,33 +2758,23 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     /**
-     * Returns the response of the AniSkipApi for this episode.
-     * just works if tracking is enabled.
+     * Skip times (opening, ending, recap, preview) for this episode.
      */
+    // YMR --> works without tracking (AniList lookup by title), reads every tracker instead of only
+    // the first one, accepts "mixed-ed" results and falls back to Anime Skip; see yomira.player.SkipTimes
     suspend fun aniSkipResponse(playerDuration: Int?): List<TimeStamp>? {
-        val animeId = anime?.id ?: return null
-        val trackerManager = Injekt.get<TrackerManager>()
-        var malId: Long?
-        val episodeNumber = currentEpisode.value?.episode_number?.toInt() ?: return null
-        if (getTracks.await(animeId).isEmpty()) {
-            logcat { "AniSkip: No tracks found for anime $animeId" }
-            return null
-        }
-
-        getTracks.await(animeId).forEach { track ->
-            val tracker = trackerManager.get(track.trackerId)
-            malId = when (tracker) {
-                is MyAnimeList -> track.remoteId
-                is Anilist -> AniSkipApi().getMalIdFromAL(track.remoteId)
-                else -> null
-            }
-            val duration = playerDuration ?: return null
-            return malId?.let {
-                AniSkipApi().getResult(it.toInt(), episodeNumber, duration.toLong())
-            }
-        }
-        return null
+        val currentAnime = anime ?: return null
+        val episode = currentEpisode.value ?: return null
+        return yomira.player.SkipTimes.fetch(
+            animeId = currentAnime.id,
+            animeTitle = currentAnime.title,
+            episodeNumber = episode.episode_number.toDouble(),
+            episodeName = episode.name,
+            durationSeconds = playerDuration,
+            tracks = getTracks.await(currentAnime.id),
+        )
     }
+    // YMR <--
 
     val introSkipEnabled = playerPreferences.enableSkipIntro().get()
     private val autoSkip = playerPreferences.autoSkipIntro().get()

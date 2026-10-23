@@ -76,6 +76,21 @@ object PlayerSettingsLayoutMainScreen : Screen() {
                         yomira.player.PlayerButtonSizeCard(Modifier.padding(12.dp))
                     }
                 }
+                item {
+                    PreferenceSectionHeader(title = stringResource(yomira.i18n.YMR.strings.cinema_section))
+                }
+                item {
+                    androidx.compose.material3.Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = androidx.compose.material3.CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
+                    ) {
+                        yomira.player.CinemaSettingsCard(Modifier.padding(12.dp))
+                    }
+                }
                 // YMR <--
 
                 item {

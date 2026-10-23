@@ -1,7 +1,8 @@
 name: CI
 
-# Builds and checks every push and pull request. Nothing is published from here:
-# the APKs are unsigned and only kept as workflow artifacts for a few days.
+# Checks every push and pull request (formatting, detekt, unit tests). Building the unsigned
+# APKs is left to manual runs: the signed ones come from release.yml, and keeping ~160 MB of
+# APKs per push as artifacts filled the 500 MB of Actions storage included in the free plan.
 on:
   push:
     branches-ignore:
@@ -24,7 +25,7 @@ permissions:
 
 jobs:
   check:
-    name: Check and build
+    name: Check
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -61,16 +62,19 @@ jobs:
         run: ./gradlew --no-daemon :domain:testDebugUnitTest
 
       - name: Build unsigned release APKs
+        if: github.event_name == 'workflow_dispatch'
         run: ./gradlew --no-daemon :app:assembleRelease
 
       - name: Inspect APKs
+        if: github.event_name == 'workflow_dispatch'
         run: scripts/yomira/inspect-apks.sh app/build/outputs/apk/release
 
       - name: Upload APKs
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: yomira-unsigned-${{ github.sha }}
           path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/apk/release/apk-report.txt
-          retention-days: 7
+          retention-days: 1

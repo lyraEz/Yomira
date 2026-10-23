@@ -36,6 +36,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -197,6 +199,18 @@ fun PlayerControls(
     val customButtons by viewModel.customButtons.collectAsState()
     val customButton by viewModel.primaryButton.collectAsState()
 
+    // YMR --> premium ("Cinema") layout and its pause screen
+    val cinemaPrefs = remember { yomira.player.CinemaPreferences() }
+    val cinema by cinemaPrefs.enabled().collectAsState()
+    val pauseScreen by cinemaPrefs.pauseScreen().collectAsState()
+    val pauseDelay by cinemaPrefs.pauseDelay().collectAsState()
+    val sheetForPause by viewModel.sheetShown.collectAsState()
+    val panelForPause by viewModel.panelShown.collectAsState()
+    val dialogForPause by viewModel.dialogShown.collectAsState()
+    val noOverlayOpen = sheetForPause == Sheets.None && panelForPause == Panels.None &&
+        dialogForPause == Dialogs.None
+    // YMR <--
+
     // YMR -->
     val controlsInteraction by viewModel.controlsInteraction.collectAsState()
     // YMR <--
@@ -215,6 +229,25 @@ fun PlayerControls(
         }
     }
 
+    // YMR --> paused and untouched for a few seconds: hide the controls so the pause screen shows
+    LaunchedEffect(
+        controlsShown,
+        paused,
+        isSeekingUI,
+        resetControls,
+        controlsInteraction,
+        noOverlayOpen,
+        cinema,
+        pauseScreen,
+        pauseDelay,
+    ) {
+        if (cinema && pauseScreen && controlsShown && paused == true && !isSeekingUI && noOverlayOpen) {
+            delay(pauseDelay.coerceIn(2, 60) * 1000L)
+            viewModel.hideControls()
+        }
+    }
+    // YMR <--
+
     val transparentOverlay by animateFloatAsState(
         if (controlsShown && !areControlsLocked) .8f else 0f,
         animationSpec = playerControlsExitAnimationSpec(),
@@ -232,6 +265,13 @@ fun PlayerControls(
         showSeekTime = showSeekTime,
         interactionSource = interactionSource,
     )
+    // YMR --> "You are watching" while paused with the controls hidden
+    yomira.player.PauseOverlay(
+        viewModel = viewModel,
+        visible = cinema && pauseScreen && paused == true && !controlsShown && !areControlsLocked &&
+            !isLoadingEpisode && (duration ?: 0) > 0 && noOverlayOpen,
+    )
+    // YMR <--
     CompositionLocalProvider(
         LocalRippleConfiguration provides playerRippleConfiguration,
         LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
@@ -244,12 +284,23 @@ fun PlayerControls(
                 modifier = modifier
                     .fillMaxSize()
                     .background(
-                        Brush.verticalGradient(
-                            Pair(0f, Color.Black),
-                            Pair(.2f, Color.Transparent),
-                            Pair(.7f, Color.Transparent),
-                            Pair(1f, Color.Black),
-                        ),
+                        // YMR --> the premium layout keeps the middle clear and darkens the bottom more
+                        if (cinema) {
+                            Brush.verticalGradient(
+                                Pair(0f, Color.Black.copy(alpha = 0.72f)),
+                                Pair(.24f, Color.Transparent),
+                                Pair(.48f, Color.Transparent),
+                                Pair(1f, Color.Black),
+                            )
+                        } else {
+                            Brush.verticalGradient(
+                                Pair(0f, Color.Black),
+                                Pair(.2f, Color.Transparent),
+                                Pair(.7f, Color.Transparent),
+                                Pair(1f, Color.Black),
+                            )
+                        },
+                        // YMR <--
                         alpha = transparentOverlay,
                     )
                     .padding(horizontal = MaterialTheme.padding.medium),
@@ -433,8 +484,28 @@ fun PlayerControls(
                         start.linkTo(parent.absoluteLeft)
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
+                        // YMR -->
+                        if (cinema) width = Dimension.fillToConstraints
+                        // YMR <--
                     },
                 ) {
+                    // YMR --> side buttons spread with the screen width
+                    if (cinema) {
+                        yomira.player.CinemaCenterControls(
+                            viewModel = viewModel,
+                            controlsShown = controlsShown,
+                            areControlsLocked = areControlsLocked,
+                            isLoading = isBuffering,
+                            isLoadingEpisode = isLoadingEpisode,
+                            showLoadingCircle = showLoadingCircle,
+                            isStopped = isStopped,
+                            paused = paused == true,
+                            gestureSeekAmount = gestureSeekAmount,
+                            hasPrevious = hasPreviousEpisode,
+                            hasNext = hasNextEpisode,
+                        )
+                    } else {
+                    // YMR <--
                     MiddlePlayerControls(
                         hasPrevious = hasPreviousEpisode,
                         onSkipPrevious = { viewModel.changeEpisode(true) },
@@ -452,6 +523,9 @@ fun PlayerControls(
                         enter = fadeIn(playerControlsEnterAnimationSpec()),
                         exit = fadeOut(playerControlsExitAnimationSpec()),
                     )
+                    // YMR -->
+                    }
+                    // YMR <--
                 }
                 // ANZ <--
                 AnimatedVisibility(
@@ -469,18 +543,24 @@ fun PlayerControls(
                         fadeOut(playerControlsExitAnimationSpec())
                     },
                     modifier = Modifier.constrainAs(seekbar) {
-                        if (isLandscape) {
+                        // YMR --> premium layout: title, bar and buttons in one block at the bottom
+                        if (cinema) {
+                            bottom.linkTo(parent.bottom, spacing.small)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            width = Dimension.fillToConstraints
+                        } else if (isLandscape) {
+                            // YMR <--
                             bottom.linkTo(bottomLeftControls.top)
                         } else {
                             bottom.linkTo(portraitBottomBar.top)
                         }
-                    }.offset(y = spacing.medium),
+                    }.offset(y = if (cinema) 0.dp else spacing.medium),
                 ) {
                     Column {
                         // Skip intro prompt / custom action button, anchored to the seekbar:
                         // it slides in and out with it, right edge aligned with the duration
                         // time text, body extending left of it
-                        val skipIntroButton by viewModel.skipIntroText.collectAsState()
                         val customButtonTitle by viewModel.primaryButtonTitle.collectAsState()
                         val actionButton = customButton
                         // Ink width of the duration time text, reported by the seekbar's timer;
@@ -491,8 +571,9 @@ fun PlayerControls(
                             (videoTimerWidth - durationInkWidthPx.toDp()) / 2
                         }.coerceAtLeast(0.dp)
                         AnimatedVisibility(
-                            visible = skipIntroButton != null ||
-                                (actionButton != null && customButtonTitle.isNotEmpty()),
+                            // YMR --> skip prompts use the glass button (SkipSegmentButton); only the custom action stays here
+                            visible = actionButton != null && customButtonTitle.isNotEmpty(),
+                            // YMR <--
                             enter = fadeIn(playerControlsEnterAnimationSpec()) +
                                 expandVertically(expandFrom = Alignment.Bottom),
                             exit = fadeOut(playerControlsExitAnimationSpec()) +
@@ -502,14 +583,9 @@ fun PlayerControls(
                                 .padding(end = pillEndInset)
                                 .offset(y = spacing.small),
                         ) {
-                            val skipIntroLabel = skipIntroButton
-                            if (skipIntroLabel != null) {
-                                FilledControlsButton(
-                                    text = skipIntroLabel,
-                                    onClick = viewModel::onSkipIntro,
-                                    onLongClick = viewModel::onSkipIntro,
-                                )
-                            } else if (actionButton != null && customButtonTitle.isNotEmpty()) {
+                            // YMR --> (the skip prompt is the glass SkipSegmentButton now)
+                            if (actionButton != null && customButtonTitle.isNotEmpty()) {
+                            // YMR <--
                                 // ANZ -->
                                 FilledControlsButton(
                                     text = customButtonTitle,
@@ -555,31 +631,56 @@ fun PlayerControls(
                         }
                     }
 
+                        // YMR --> one set of seek callbacks for both layouts
+                        val onSeekChange: (Float) -> Unit = {
+                            if (!viewModel.isSeekingUI.value) {
+                                wasPlayerAlreadyPause = viewModel.paused.value == true
+                                viewModel.pause()
+                                viewModel.updateIsSeeking(true)
+                            }
+                            sliderPosition = it
+                            lastTargetSeekPos = it
+                            viewModel.updateSeekPos(it)
+                            viewModel.scrubSeekTo(it.toInt(), false)
+                        }
+                        val onSeekFinished: () -> Unit = {
+                            val target = sliderPosition
+                            lastTargetSeekPos = target
+                            viewModel.updateSeekPos(target)
+                            viewModel.updateIsSeeking(false)
+                            viewModel.seekTo(target.toInt(), preciseSeeking)
+                            if (!wasPlayerAlreadyPause) {
+                                viewModel.unpause()
+                            }
+                        }
+                        if (cinema) {
+                            yomira.player.CinemaBottomSection(
+                                viewModel = viewModel,
+                                position = sliderPosition,
+                                duration = totalDuration,
+                                readAhead = readAhead ?: 0f,
+                                chapters = chaptersList,
+                                onValueChange = onSeekChange,
+                                onValueChangeFinished = onSeekFinished,
+                                buttons = if (isLandscape) {
+                                    bottomLeftButtonsList + bottomRightButtonsList
+                                } else {
+                                    portraitBottomButtonsList
+                                },
+                                castManager = castManager,
+                                onBackPress = onBackPress,
+                                onCastClick = { showCastSheet = true },
+                                landscape = isLandscape,
+                                modifier = Modifier.padding(horizontal = if (isLandscape) 28.dp else 4.dp),
+                            )
+                        } else {
+                        // YMR <--
                         SeekbarWithTimers(
                             position = sliderPosition,
                             duration = totalDuration,
                             readAheadValue = readAhead ?: 0f,
-                            onValueChange = {
-                                if (!viewModel.isSeekingUI.value) {
-                                    wasPlayerAlreadyPause = viewModel.paused.value == true
-                                    viewModel.pause()
-                                    viewModel.updateIsSeeking(true)
-                                }
-                                sliderPosition = it
-                                lastTargetSeekPos = it
-                                viewModel.updateSeekPos(it)
-                                viewModel.scrubSeekTo(it.toInt(), false)
-                            },
-                            onValueChangeFinished = {
-                                val target = sliderPosition
-                                lastTargetSeekPos = target
-                                viewModel.updateSeekPos(target)
-                                viewModel.updateIsSeeking(false)
-                                viewModel.seekTo(target.toInt(), preciseSeeking)
-                                if (!wasPlayerAlreadyPause) {
-                                    viewModel.unpause()
-                                }
-                            },
+                            onValueChange = onSeekChange,
+                            onValueChangeFinished = onSeekFinished,
                             timersInverted = Pair(false, invertDuration),
                             durationTimerOnCLick = { playerPreferences.invertDuration().set(!invertDuration) },
                             positionTimerOnClick = {},
@@ -591,6 +692,9 @@ fun PlayerControls(
                             },
                             chapters = chaptersList,
                         )
+                        // YMR -->
+                        }
+                        // YMR <--
                     }
                 }
                 val mediaTitle by viewModel.mediaTitle.collectAsState()
@@ -616,6 +720,18 @@ fun PlayerControls(
                         end.linkTo(topRightControls.start)
                     },
                 ) {
+                    // YMR --> premium layout: the title moves to the bottom; clock and battery stay here,
+                    // centred on the buttons at the right
+                    if (cinema) {
+                        val look = yomira.player.LocalPlayerButtonLook.current
+                        Box(
+                            modifier = Modifier.height(52.dp * look.scale + look.spacing * 4 / 3),
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            yomira.player.PlayerInfoLine(viewModel, Modifier.padding(start = 8.dp, bottom = 6.dp))
+                        }
+                    } else {
+                    // YMR <--
                     val animeTitle by viewModel.animeTitle.collectAsState()
                     val mediaTitle by viewModel.mediaTitle.collectAsState()
                     TopLeftPlayerControls(
@@ -627,6 +743,9 @@ fun PlayerControls(
                         info = { yomira.player.PlayerInfoLine(viewModel) },
                         // YMR <--
                     )
+                    // YMR -->
+                    }
+                    // YMR <--
                 }
                 // Top right controls
                 AnimatedVisibility(
@@ -648,6 +767,17 @@ fun PlayerControls(
                         end.linkTo(parent.end)
                     },
                 ) {
+                    // YMR --> premium layout: buttons, then back at the far right
+                    if (cinema) {
+                        yomira.player.CinemaTopRow(
+                            buttons = topRightButtonsList,
+                            viewModel = viewModel,
+                            castManager = castManager,
+                            onBackPress = onBackPress,
+                            onCastClick = { showCastSheet = true },
+                        )
+                    } else {
+                    // YMR <--
                     TopRightPlayerControls(
                         buttons = topRightButtonsList,
                         viewModel = viewModel,
@@ -655,11 +785,16 @@ fun PlayerControls(
                         onBackPress = onBackPress,
                         onCastClick = { showCastSheet = true },
                     )
+                    // YMR -->
+                    }
+                    // YMR <--
                 }
 
                 // Portrait bottom bar
                 AnimatedVisibility(
-                    visible = controlsShown && !areControlsLocked && !isLongPressing && !isLandscape,
+                    // YMR --> (premium layout draws its own bottom row)
+                    visible = controlsShown && !areControlsLocked && !isLongPressing && !isLandscape && !cinema,
+                    // YMR <--
                     enter = fadeIn(),
                     exit = fadeOut(),
                     modifier = Modifier.constrainAs(portraitBottomBar) {
@@ -690,7 +825,9 @@ fun PlayerControls(
 
                 // Bottom right controls
                 AnimatedVisibility(
-                    controlsShown && !areControlsLocked && !isLongPressing && isLandscape,
+                    // YMR --> (premium layout draws its own bottom row)
+                    controlsShown && !areControlsLocked && !isLongPressing && isLandscape && !cinema,
+                    // YMR <--
                     enter = if (!reduceMotion) {
                         slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
                             fadeIn(playerControlsEnterAnimationSpec())
@@ -718,7 +855,9 @@ fun PlayerControls(
                 }
                 // Bottom left controls
                 AnimatedVisibility(
-                    controlsShown && !areControlsLocked && !isLongPressing && isLandscape,
+                    // YMR --> (premium layout draws its own bottom row)
+                    controlsShown && !areControlsLocked && !isLongPressing && isLandscape && !cinema,
+                    // YMR <--
                     enter = if (!reduceMotion) {
                         slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } +
                             fadeIn(playerControlsEnterAnimationSpec())
@@ -763,6 +902,10 @@ fun PlayerControls(
                 )
             }
         }
+
+        // YMR --> glass "Skip opening" button, with or without the controls
+        yomira.player.SkipSegmentButton(viewModel = viewModel, controlsShown = controlsShown && !areControlsLocked)
+        // YMR <--
 
         val sheetShown by viewModel.sheetShown.collectAsState()
         val dismissSheet by viewModel.dismissSheet.collectAsState()

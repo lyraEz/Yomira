@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -255,6 +254,12 @@ object HomeScreen : Screen() {
                     contentWindowInsets = WindowInsets(0),
                 ) { contentPadding ->
                     // YMR -->
+                    // "Continue watching" card above the tab bar on the start tab
+                    val continuePrefs = remember { yomira.ui.ContinueWatchingPreferences() }
+                    val showContinueCard by continuePrefs.showOnHome().collectAsStatePref()
+                    val continueItem = yomira.ui.rememberContinueWatching()
+                    val continueVisible = showContinueCard && continueItem != null && bottomNavVisible &&
+                        tabNavigator.current::class == defaultTab::class
                     val homeBackdrop = if (floatingBar && glassStyle.liveBlur) {
                         rememberGlassBackdrop(MaterialTheme.colorScheme.background)
                     } else {
@@ -275,7 +280,10 @@ object HomeScreen : Screen() {
                       // YMR -->
                       Box(Modifier.fillMaxSize().glassSource(homeBackdrop)) {
                       CompositionLocalProvider(
-                          LocalFloatingBarInset provides if (floatingBar && isCurrentTabVisible) FloatingTabBarInset else 0.dp,
+                          LocalFloatingBarInset provides (
+                              (if (floatingBar && isCurrentTabVisible) FloatingTabBarInset else 0.dp) +
+                                  (if (continueVisible) yomira.ui.continueCardInset() else 0.dp)
+                              ),
                       ) {
                       // YMR <--
                         AnimatedContent(
@@ -303,36 +311,30 @@ object HomeScreen : Screen() {
 
                       // YMR -->
                       }
-                      // Explainability Layer (Smart Suggestions): a glass card above the floating
-                      // bar, outside the recorded content so it can sample it
-                      adaptiveDecision?.let { decision ->
-                          Row(
-                              modifier = Modifier
-                                  .align(Alignment.BottomCenter)
-                                  .navigationBarsPadding()
-                                  .padding(
-                                      start = 16.dp,
-                                      end = 16.dp,
-                                      bottom = if (floatingBar) FloatingTabBarInset + 8.dp else 16.dp,
-                                  )
-                                  .fillMaxWidth()
-                                  .glass(RoundedCornerShape(24.dp), backdrop = homeBackdrop)
-                                  .padding(horizontal = 14.dp, vertical = 10.dp),
-                              verticalAlignment = Alignment.CenterVertically,
-                              horizontalArrangement = Arrangement.spacedBy(8.dp),
-                          ) {
-                              Icon(Icons.Outlined.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                              Column(modifier = Modifier.weight(1f)) {
-                                  Text(text = "Smart Suggestion", style = MaterialTheme.typography.labelSmall)
-                                  Text(text = decision.reason, style = MaterialTheme.typography.bodyMedium)
-                              }
-                              TextButton(onClick = { adaptiveEngine.dismissDecision() }) {
-                                  Text("Dismiss")
-                              }
-                              Button(onClick = { adaptiveEngine.applyDecision(decision) }) {
-                                  Text("Apply")
-                              }
-                          }
+                      // The smart suggestion card is gone; its place shows the episode to continue.
+                      AnimatedVisibility(
+                          visible = continueVisible,
+                          modifier = Modifier
+                              .align(Alignment.BottomCenter)
+                              .navigationBarsPadding()
+                              .padding(
+                                  start = 12.dp,
+                                  end = 12.dp,
+                                  bottom = if (floatingBar) FloatingTabBarInset + 6.dp else 16.dp,
+                              ),
+                          enter = slideInVertically { it / 2 } + fadeIn(),
+                          exit = slideOutVertically { it / 2 } + fadeOut(),
+                      ) {
+                          val item = continueItem ?: return@AnimatedVisibility
+                          yomira.ui.ContinueWatchingCard(
+                              item = item,
+                              backdrop = homeBackdrop,
+                              onPlay = {
+                                  scope.launch { yomira.ui.openContinueEpisode(context, item) }
+                              },
+                              onOpenAnime = { navigator.push(AnimeScreen(item.animeId)) },
+                              onDismiss = { continuePrefs.dismissedEpisode().set(item.episodeId) },
+                          )
                       }
                       if (floatingBar) {
                           AnimatedVisibility(

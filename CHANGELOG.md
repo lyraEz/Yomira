@@ -10,6 +10,38 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.8.0] - 2026-10-23
+
+Player novo no estilo dos apps de streaming, episódios com nome e descrição em português e o pular abertura funcionando sem rastrear o anime.
+
+### Added
+- Layout premium do player:
+  - título do anime embaixo à esquerda, com "T1 E2 • nome do episódio" e o servidor ("Via ...");
+  - barra de progresso fina na largura toda, com os botões e o tempo logo abaixo;
+  - voltar, play e avançar grandes no meio, afastados conforme a largura da tela;
+  - botões no canto superior direito e a seta de voltar no fim.
+- Tela "Você está assistindo" ao pausar: logo do anime, temporada e episódio, nome e descrição. Aparece ao tocar fora dos controles com o vídeo pausado ou depois de alguns segundos pausado sem mexer.
+- Nomes, descrições e miniaturas dos episódios pelo TMDB, em português, na lista de episódios, no player, no cartão da tela inicial e em Atualizações. Substitui nomes genéricos como "Episódio 1" ou "T1E2 episódios 2"; o que falta em português vem em inglês.
+- Opção *Dados do TMDB* no menu do anime para escolher outra série, temporada ou ajuste da numeração quando a correspondência automática errar.
+- Configurações → Player → *Metadados e pular abertura*: chave do TMDB (com botão de teste), idioma, nomes, miniaturas, client ID do Anime Skip e limpeza dos dados salvos.
+- Anime Skip como segunda fonte de tempos de abertura, encerramento, recapitulação e prévia.
+- Cartão *Continuar assistindo* na tela inicial, em liquid glass: pôster, miniatura do episódio, temporada e episódio, quanto falta ("Restam X min") e play. Segure para abrir o anime; o X esconde até o próximo episódio. Liga e desliga em Aparência → Experiência.
+- Configurações → Player → Layout → *Player premium*: ligar o layout, distância dos botões do meio, botões laterais (segundos ou episódios), espessura da barra, servidor, tempo restante, tela de pausa, quanto esperar e logo do título, com prévia ao vivo.
+
+### Changed
+- Botão de pular abertura/encerramento em liquid glass escuro, no estilo da Netflix: aparece com ou sem os controles e sobe para cima da barra quando eles aparecem.
+- Pular abertura vem ligado.
+
+### Fixed
+- Pular abertura não aparecia em muitos animes: só funcionava com o anime rastreado no MyAnimeList ou AniList, falhava com encerramentos mistos e quando a duração do vídeo ainda não era conhecida. Agora o anime é encontrado pelo título no AniList, e quando a extensão continua a numeração da temporada anterior (temporada 2 começando no episódio 13) o número dentro da temporada também é tentado.
+
+### Removed
+- Cartão "Smart Suggestion" da tela inicial e a seção *Adaptive Navigation* das configurações de navegação, que só servia para ele.
+
+### Other
+- CI: os APKs de teste só são gerados ao rodar o workflow manualmente e ficam guardados por um dia, para não encher o armazenamento de Actions.
+- Release: chaves opcionais `YOMIRA_TMDB_API_KEY` e `YOMIRA_ANIME_SKIP_CLIENT_ID` (secrets do GitHub) entram no APK como chaves padrão.
+
 ## Yomira [1.7.0] - 2026-10-21
 
 Um monte de opções novas dentro e fora do player.

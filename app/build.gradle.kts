@@ -75,8 +75,8 @@ android {
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
         // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
-        versionCode = 10700
-        versionName = "1.7.0"
+        versionCode = 10800
+        versionName = "1.8.0"
 
         manifestPlaceholders["author"] = "@lyraEz"
         // YMR <--
@@ -97,6 +97,13 @@ android {
         buildConfigField("boolean", "DISCORD_RPC_ENABLED", "${discordAppId.isNotBlank()}")
         val hasGoogleDriveClient = file("src/main/assets/client_secrets.json").exists()
         buildConfigField("boolean", "GOOGLE_DRIVE_SYNC_ENABLED", "$hasGoogleDriveClient")
+        // YMR <--
+        // YMR --> optional built-in API keys from the build environment (GitHub secrets);
+        // empty means the user types their own in Settings
+        val apiKeyPattern = Regex("[A-Za-z0-9._-]*")
+        fun envKey(name: String) = System.getenv(name).orEmpty().trim().takeIf { apiKeyPattern.matches(it) }.orEmpty()
+        buildConfigField("String", "YOMIRA_TMDB_KEY", "\"${envKey("YOMIRA_TMDB_API_KEY")}\"")
+        buildConfigField("String", "YOMIRA_ANIME_SKIP_CLIENT_ID", "\"${envKey("YOMIRA_ANIME_SKIP_CLIENT_ID")}\"")
         // YMR <--
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

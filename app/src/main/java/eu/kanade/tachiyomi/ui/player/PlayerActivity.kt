@@ -456,11 +456,13 @@ class PlayerActivity : BaseActivity() {
                     // YMR <--
                     // YMR --> live glass over a small copy of the video while the controls show
                     val controlsVisible by viewModel.controlsShown.collectAsState()
+                    // The "Skip opening" button is glass too, even with the controls hidden.
+                    val skipVisible by viewModel.skipIntroText.collectAsState()
                     yomira.player.ProvidePlayerButtonLook {
                     val videoPaused by viewModel.paused.collectAsState()
                     yomira.player.VideoGlassBackdrop(
                         surfaceView = player,
-                        active = controlsVisible,
+                        active = controlsVisible || skipVisible != null,
                         paused = videoPaused == true,
                     ) {
                     // YMR <--

@@ -307,66 +307,8 @@ class NavigationSettingsScreen(
                     )
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    PreferenceGroupHeader(title = "Adaptive Navigation (Beta)")
-                    val adaptiveNavEnabled by uiPreferences.adaptiveNavEnabled().collectAsStatePref()
-                    SwitchPreferenceWidget(
-                        title = "Enable Adaptive Navigation",
-                        subtitle = "Allow the app to suggest layout changes based on context.",
-                        checked = adaptiveNavEnabled,
-                        onCheckedChanged = { uiPreferences.adaptiveNavEnabled().set(it) },
-                        icon = null
-                    )
-                    if (adaptiveNavEnabled) {
-                        val connectivityRule by uiPreferences.adaptiveConnectivityRule().collectAsStatePref()
-                        SwitchPreferenceWidget(
-                            title = "Offline Suggestions",
-                            subtitle = "Suggest offline layouts when internet connection is lost.",
-                            checked = connectivityRule,
-                            onCheckedChanged = { uiPreferences.adaptiveConnectivityRule().set(it) },
-                            icon = null
-                        )
-                        val timeRule by uiPreferences.adaptiveTimeRule().collectAsStatePref()
-                        SwitchPreferenceWidget(
-                            title = "Late-Night Suggestions",
-                            subtitle = "Simplify navigation during late hours.",
-                            checked = timeRule,
-                            onCheckedChanged = { uiPreferences.adaptiveTimeRule().set(it) },
-                            icon = null
-                        )
-                        if (timeRule) {
-                            val formatHour = { h: Int -> 
-                                when (h) {
-                                    0 -> "12 AM"
-                                    12 -> "12 PM"
-                                    in 1..11 -> "$h AM"
-                                    else -> "${h - 12} PM"
-                                }
-                            }
-                            val hoursMap = (0..23).associateWith { formatHour(it) }.toImmutableMap()
-                            
-                            val startHour by uiPreferences.adaptiveTimeRuleStart().collectAsStatePref()
-                            ListPreferenceWidget(
-                                value = startHour,
-                                title = "Start time",
-                                subtitle = formatHour(startHour),
-                                icon = null,
-                                entries = hoursMap,
-                                onValueChange = { uiPreferences.adaptiveTimeRuleStart().set(it) }
-                            )
-                            val endHour by uiPreferences.adaptiveTimeRuleEnd().collectAsStatePref()
-                            ListPreferenceWidget(
-                                value = endHour,
-                                title = "End time",
-                                subtitle = formatHour(endHour),
-                                icon = null,
-                                entries = hoursMap,
-                                onValueChange = { uiPreferences.adaptiveTimeRuleEnd().set(it) }
-                            )
-                        }
-                    }
-                }
+                // YMR --> "Adaptive Navigation" only fed the Smart Suggestion card, which Yomira removed
+                // YMR <--
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))

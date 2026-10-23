@@ -18,6 +18,9 @@ name: Release
 #   YOMIRA_KEY_PASSWORD       key password (may be the same as the keystore password)
 #   YOMIRA_RELEASES_TOKEN     fine-grained token with Contents: read and write on
 #                             lyraEz/Yomira-releases
+# Optional (become the app's default keys; users can still type their own):
+#   YOMIRA_TMDB_API_KEY       TMDB API key (v3) or read access token (v4)
+#   YOMIRA_ANIME_SKIP_CLIENT_ID  Anime Skip API client id
 on:
   push:
     branches:
@@ -120,6 +123,9 @@ jobs:
           YOMIRA_KEYSTORE_PASSWORD: ${{ secrets.YOMIRA_KEYSTORE_PASSWORD }}
           YOMIRA_KEY_ALIAS: ${{ secrets.YOMIRA_KEY_ALIAS }}
           YOMIRA_KEY_PASSWORD: ${{ secrets.YOMIRA_KEY_PASSWORD }}
+          # Optional built-in API keys (empty when the secrets do not exist: users set them in the app)
+          YOMIRA_TMDB_API_KEY: ${{ secrets.YOMIRA_TMDB_API_KEY }}
+          YOMIRA_ANIME_SKIP_CLIENT_ID: ${{ secrets.YOMIRA_ANIME_SKIP_CLIENT_ID }}
         run: ./gradlew --no-daemon :app:assembleRelease -Penable-updater=true
 
       - name: Inspect APKs (launcher, SDK levels, ABIs)

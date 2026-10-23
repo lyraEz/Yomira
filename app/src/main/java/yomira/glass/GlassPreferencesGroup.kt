@@ -268,6 +268,11 @@ fun experiencePreferencesGroup(): Preference.PreferenceGroup {
                 subtitle = stringResource(YMR.strings.experience_spoilers_summary),
             ),
             Preference.PreferenceItem.SwitchPreference(
+                pref = remember { yomira.ui.ContinueWatchingPreferences() }.showOnHome(),
+                title = stringResource(YMR.strings.experience_continue_card),
+                subtitle = stringResource(YMR.strings.experience_continue_card_summary),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
                 pref = prefs.continueShortcut(),
                 title = stringResource(YMR.strings.experience_shortcut),
                 subtitle = stringResource(YMR.strings.experience_shortcut_summary),

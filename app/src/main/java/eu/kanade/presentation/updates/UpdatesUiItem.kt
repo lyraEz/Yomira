@@ -277,6 +277,18 @@ private fun UpdatesUiItem(
 ) {
     val haptic = LocalHapticFeedback.current
     val textAlpha = if (update.seen) DISABLED_ALPHA else 1f
+    // YMR --> TMDB episode name when this anime's data is already on the device
+    androidx.compose.runtime.LaunchedEffect(update.animeId) {
+        yomira.metadata.EpisodeMetadata.peek(update.animeId)
+    }
+    val episodeDisplay = yomira.metadata.rememberEpisodeDisplay(
+        animeId = update.animeId,
+        episodeNumber = update.episodeNumber,
+        extensionName = update.episodeName,
+        extensionSummary = null,
+        extensionPreview = null,
+    )
+    // YMR <--
 
     val itemHeight = if (isLeader) 96.dp else 48.dp
     val verticalPadding = if (isLeader) MaterialTheme.padding.small else 0.dp
@@ -355,7 +367,9 @@ private fun UpdatesUiItem(
                     DotSeparatorText()
                 }
                 Text(
-                    text = update.episodeName,
+                    // YMR -->
+                    text = episodeDisplay.title,
+                    // YMR <--
                     maxLines = 1,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),

@@ -21,7 +21,7 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Vidro | Barra de abas flutuante + botão de busca redondo (celular) | `GlassTabBar.kt`, `HomeScreen.kt` |
 | Vidro | Abas em cápsula (categorias, Navegar) | `CapsuleTabs.kt`, `LibraryTabs.kt`, `TabbedScreen.kt` |
 | Vidro | Selos das capas em pílula escura translúcida | `presentation-core/.../Badges.kt` |
-| Vidro | Card "Smart Suggestion" de vidro acima da barra (bug corrigido) | `HomeScreen.kt` |
+| Vidro | (1.8.0) Card "Smart Suggestion" removido; no lugar, cartão "Continuar assistindo" de vidro | `yomira/ui/ContinueWatchingCard.kt`, `HomeScreen.kt` |
 | Config | Aparência → Liquid glass (prévia ao vivo, qualidade, blur, refração, vibrância...) | `app/.../yomira/glass/` |
 | Player | Vidro ao vivo sobre o vídeo (cópia do quadro em miniatura via PixelCopy só com controles visíveis) | `app/.../yomira/player/VideoGlass.kt` |
 | Player | Botões e play/pause como vidro, com espaçamento | `ControlsButton.kt`, `MiddlePlayerControls.kt` |
@@ -47,6 +47,10 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Player | (1.7.0) Cápsulas da barra de progresso e dos botões removidas a pedido do dono: nada de contorno em volta de grupos de controles | `SeekBar.kt`, `BottomRightPlayerControls.kt` |
 | Player | Linha de informações (relógio, bateria, termina às), filtro de luz azul, cartões Ferramentas (A-B, quadro a quadro, girar, parar no fim, velocidade por anime), Som (mono, espacial, agudos, equilíbrio) e Na tela | `yomira/player/PlayerTools.kt`, `PlayerToolsCards.kt` |
 | App | Tempo assistido com meta diária (aba Mais), proteção contra spoilers, atalho "Continuar", vibração nas abas | `yomira/player/WatchLog.kt`, `yomira/ui/WatchTimeCard.kt`, `yomira/ui/YomiraExperience.kt` |
+| Player | (1.8.0) Layout premium: título/episódio/servidor embaixo, barra fina, botões e tempo abaixo, controles do meio espaçados pela largura; opções em Layout → Player premium | `yomira/player/CinemaControls.kt`, `CinemaSettings.kt`, `PlayerControls.kt` |
+| Player | (1.8.0) Tela "Você está assistindo" ao pausar e botão de pular em vidro escuro (esconde em PiP/tela pequena) | `yomira/player/PauseOverlay.kt` |
+| Metadados | (1.8.0) TMDB: nomes, descrições, miniaturas e logo em pt-BR (cache em `files/yomira/meta`), temporada pela data de estreia do AniList, correção manual no menu do anime | `yomira/metadata/` |
+| Player | (1.8.0) Pular abertura sem rastrear (AniList pelo título), AniSkip corrigido e Anime Skip como segunda fonte | `yomira/player/SkipTimes.kt`, `yomira/metadata/AniListIds.kt` |
 
 ## Falta fazer (ordem sugerida)
 1. Medir no aparelho: `adb shell dumpsys gfxinfo com.lyraez.yomira` nas telas com vidro, nas transições e no player.
@@ -56,7 +60,9 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
    gravação de fundo para a barra superior e a barra de abas e pular a refração enquanto a lista rola.
 3. Player: conferir com o "Contador de quadros" se VO/DEC/LATE ficam parados com os controles visíveis; se subirem,
    testar "Atualização do vidro: 15 fps/Desligado".
-4. Novas ideias quando o dono pedir: tela "Mais" com título grande, busca global em cartões, ícones próprios.
+4. Conferir no aparelho o layout premium (paisagem e retrato), a tela de pausa e o botão de pular; os tempos do
+   Anime Skip podem vir deslocados em fontes com abertura em outro ponto do vídeo.
+5. Novas ideias quando o dono pedir: tela "Mais" com título grande, busca global em cartões, ícones próprios.
 
 ## Como gerar o APK assinado
 `signing.properties` na raiz (ignorado pelo Git) apontando para o keystore; depois

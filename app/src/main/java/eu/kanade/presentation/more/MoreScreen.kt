@@ -123,8 +123,15 @@ fun MoreScreen(
         containerColor = MaterialTheme.colorScheme.background
     ) { contentPadding ->
         ScrollbarLazyColumn(
-            modifier = Modifier.fillMaxSize().padding(contentPadding),
-            contentPadding = PaddingValues(16.dp),
+            // YMR --> the list scrolls under the floating tab bar instead of stopping above it
+            modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding()),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp + contentPadding.calculateBottomPadding(),
+            ),
+            // YMR <--
             verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             item {

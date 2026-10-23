@@ -10,6 +10,20 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.9.1] - 2026-10-23
+
+Ajustes da página do anime e da tela inicial pedidos depois da 1.9.0.
+
+### Changed
+- Página do anime: os cartões na horizontal e as abas de temporada saíram. Os episódios voltam para a lista na vertical, agora no visual do cartão novo: imagem do episódio ocupando o cartão, "T1 E2" (ou "T2 E10"), nome, sinopse, nota, data, servidor e quanto já foi assistido. Seleção, deslizar para os lados e download continuam funcionando.
+- A imagem do topo da página do anime e os destaques da tela inicial não terminam mais numa borda arredondada: descem num degradê com o tom da própria imagem até o fundo da página.
+- Destaques da tela inicial: a troca entre animes, sozinha ou com o dedo, é um fade suave em que as cores de um anime se misturam com as do próximo; o texto sai antes do próximo entrar.
+- Ícones do player arredondados: play/pause, voltar e avançar episódio, pular segundos, os botões laterais e as setas de toque duplo.
+
+### Fixed
+- Números estranhos nos episódios de algumas extensões ("Episódio 1.0010000467300415"): elas guardam temporada e episódio num número só (1.001 é T1 E1). Agora isso vira "T1 E1" na lista, no player, nos *Novos episódios* e no pular abertura, e o nome e a imagem do episódio certo vêm do TMDB.
+- Nas telas Navegar, Mais e Atualizações a lista parava acima de uma faixa e não passava por trás da barra de navegação; agora corre até o fim da tela, como no Início e na Biblioteca.
+
 ## Yomira [1.9.0] - 2026-10-23
 
 Tela inicial em forma de catálogo, página do anime no estilo dos apps de streaming e temporadas separadas certinho.

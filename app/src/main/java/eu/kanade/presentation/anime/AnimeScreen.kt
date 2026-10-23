@@ -148,7 +148,7 @@ import tachiyomi.source.localanime.isLocal
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import yomira.details.streamingEpisodeItems
+import yomira.details.streamingFactsItem
 import yomira.details.streamingTopItems
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -508,26 +508,19 @@ private fun AnimeScreenSmallImpl(
     }
     val vibrantColor = deferredVibrantColor ?: state.anime.asAnimeCover().vibrantCoverColor
 
-    // YMR --> streaming-style details: big cover with play button, characters, season tabs
+    // YMR --> streaming-style details: big cover with play button, characters, episode cards
     val streaming = yomira.details.rememberStreamingLayout() && state.anime.fetchType != FetchType.Seasons
     val streamingModel = if (streaming) yomira.details.rememberStreamingDetails(state) else null
-    val (cardsView, toggleCardsView) = yomira.details.rememberEpisodeCardsView()
     val streamingActions = yomira.details.StreamingDetailsActions(
         onPlay = { episode -> if (episode != null) onEpisodeClicked(episode, false) else onContinueWatching(null) },
-        onEpisodeClicked = { onEpisodeClicked(it, false) },
         onToggleFavorite = onAddToLibraryClicked,
         onCoverClicked = onCoverClicked,
-        onFilterClicked = onFilterClicked,
         onTrackingClicked = onTrackingClicked,
         onWebViewClicked = onWebViewClicked,
         onEditCategoryClicked = onEditCategoryClicked,
         onEditNotesClicked = onEditNotesClicked,
         onEditIntervalClicked = onEditIntervalClicked,
         onShareClicked = onShareClicked,
-        onDownloadEpisode = onDownloadEpisode,
-        onMarkSeen = onMultiMarkAsSeenClicked,
-        onBookmark = onMultiBookmarkClicked,
-        onMarkPreviousSeen = onMarkPreviousAsSeenClicked,
     )
     // YMR <--
 
@@ -789,35 +782,6 @@ private fun AnimeScreenSmallImpl(
                                     }
                                 }
 
-                                // YMR --> streaming layout: season tabs, episode cards (or the list) and details
-                                if (streamingModel != null) {
-                                    streamingEpisodeItems(
-                                        model = streamingModel,
-                                        state = state,
-                                        actions = streamingActions,
-                                        cardsView = cardsView,
-                                        onToggleView = toggleCardsView,
-                                        listItems = { seasonItems: List<EpisodeList> ->
-                                            sharedEpisodeItems(
-                                                anime = state.anime,
-                                                source = state.source,
-                                                showFileSize = showFileSize,
-                                                showEpisodeSummary = state.showEpisodeSummary,
-                                                showEpisodeThumbnail = state.showEpisodeThumbnail,
-                                                episodes = seasonItems,
-                                                fillerEpisodes = state.fillerEpisodes,
-                                                isAnyEpisodeSelected = episodes.fastAny { it.selected },
-                                                episodeSwipeStartAction = episodeSwipeStartAction,
-                                                episodeSwipeEndAction = episodeSwipeEndAction,
-                                                onEpisodeClicked = onEpisodeClicked,
-                                                onDownloadEpisode = onDownloadEpisode,
-                                                onEpisodeSelected = onEpisodeSelected,
-                                                onEpisodeSwipe = onEpisodeSwipe,
-                                            )
-                                        },
-                                    )
-                                } else {
-                                // YMR <--
                                 if (state.anime.seasonGroupingMode == LibraryPreferences.SeasonGrouping.Tabs && state.availableSeasons.size > 1) {
                                     item(key = "season-selector-small") {
                                         SeasonSelector(
@@ -940,10 +904,13 @@ private fun AnimeScreenSmallImpl(
                                         onDownloadEpisode = onDownloadEpisode,
                                         onEpisodeSelected = onEpisodeSelected,
                                         onEpisodeSwipe = onEpisodeSwipe,
+                                        // YMR -->
+                                        streamingCards = streamingModel != null,
+                                        // YMR <--
                                     )
                                 }
-                                // YMR -->
-                                }
+                                // YMR --> details table after the episodes
+                                if (streamingModel != null) streamingFactsItem(streamingModel)
                                 // YMR <--
                             }
                         }
@@ -1476,6 +1443,9 @@ private fun EpisodeItemWrapper(
     onDownloadEpisode: ((List<EpisodeList.Item>, EpisodeDownloadAction) -> Unit)?,
     onEpisodeSelected: (EpisodeList.Item, Boolean, Boolean, Boolean) -> Unit,
     onEpisodeSwipe: (EpisodeList.Item, LibraryPreferences.EpisodeSwipeAction) -> Unit,
+    // YMR -->
+    streamingCards: Boolean = false,
+    // YMR <--
 ) {
     when (item) {
         is EpisodeList.Season -> {
@@ -1534,7 +1504,13 @@ private fun EpisodeItemWrapper(
                 extensionName = item.episode.name,
                 extensionSummary = item.episode.summary,
                 extensionPreview = item.episode.previewUrl,
+                previewSize = if (streamingCards) "w780" else "w300",
             )
+            val card = if (streamingCards) {
+                yomira.details.rememberEpisodeCardExtras(anime.id, item.episode, display, showEpisodeThumbnail)
+            } else {
+                null
+            }
             // YMR <--
             AnimeEpisodeListItem(
                 title = if (anime.displayMode == Anime.EPISODE_DISPLAY_NUMBER) {
@@ -1574,6 +1550,9 @@ private fun EpisodeItemWrapper(
                 onDownloadClick = onDownloadClickMemo,
                 onEpisodeSwipe = onEpisodeSwipeMemo,
                 fileSize = fileSizeAsync,
+                // YMR -->
+                card = card,
+                // YMR <--
             )
         }
     }
@@ -1758,6 +1737,9 @@ private fun LazyListScope.sharedEpisodeItems(
     onDownloadEpisode: ((List<EpisodeList.Item>, EpisodeDownloadAction) -> Unit)?,
     onEpisodeSelected: (EpisodeList.Item, Boolean, Boolean, Boolean) -> Unit,
     onEpisodeSwipe: (EpisodeList.Item, LibraryPreferences.EpisodeSwipeAction) -> Unit,
+    // YMR -->
+    streamingCards: Boolean = false,
+    // YMR <--
 ) {
     itemsIndexed(
         items = episodes,
@@ -1791,6 +1773,9 @@ private fun LazyListScope.sharedEpisodeItems(
             onDownloadEpisode = onDownloadEpisode,
             onEpisodeSelected = onEpisodeSelected,
             onEpisodeSwipe = onEpisodeSwipe,
+            // YMR -->
+            streamingCards = streamingCards,
+            // YMR <--
         )
     }
 }

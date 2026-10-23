@@ -118,6 +118,9 @@ object TitleMatch {
             """|\.(?:mkv|mp4|avi|webm|m4v)$""",
     )
     private val longNumber = Regex("""(?<![\d.,])\d{7,}(?![\d.,])""")
+
+    /** A float printed with its binary noise: "1.0010000467300415". */
+    private val noisyFloat = Regex("""(?<![\d.,])\d{1,4}\.\d{6,}(?![\d.,])""")
     private val dangling = Regex("""^[\s\-–|:.,]+|[\s\-–|:.,]+$""")
 
     /**
@@ -125,8 +128,16 @@ object TitleMatch {
      * quality tags, file extensions and long ids or timestamps ("1697405673").
      */
     fun cleanEpisodeName(name: String): String {
-        val cleaned = name.replace(fileNoise, " ").replace(longNumber, " ").collapse().replace(dangling, "")
+        val cleaned = name.replace(noisyFloat) { tidyNumber(it.value) }
+            .replace(fileNoise, " ").replace(longNumber, " ").collapse().replace(dangling, "")
         return cleaned.ifBlank { name.trim() }
+    }
+
+    /** "1.0010000467300415" becomes the episode packed in it ("1"), "12.5000001" becomes "12.5". */
+    private fun tidyNumber(text: String): String {
+        val value = text.toDoubleOrNull() ?: return text
+        EpisodeNumbers.packed(value)?.let { return it.second.toString() }
+        return EpisodeDisplays.number(Math.round(value * 1000) / 1000.0)
     }
 
     /** Words, numbers and markers that say nothing about the episode itself. */

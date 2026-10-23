@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -123,7 +123,7 @@ fun SlideToUnlock(
                     label = "lockIcon"
                 ) { isUnlocking ->
                     Icon(
-                        imageVector = if (isUnlocking) Icons.Default.LockOpen else Icons.Default.Lock,
+                        imageVector = if (isUnlocking) Icons.Rounded.LockOpen else Icons.Rounded.Lock,
                         contentDescription = "Unlock",
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(24.dp)

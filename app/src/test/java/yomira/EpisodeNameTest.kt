@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import yomira.metadata.EpisodeDisplays
+import yomira.metadata.EpisodeNumbers
 import yomira.metadata.TitleMatch
 
 class EpisodeNameTest {
@@ -34,5 +35,27 @@ class EpisodeNameTest {
         assertEquals("1050", EpisodeDisplays.displayNumber(1050.0, "One Piece 1050"))
         assertNull(EpisodeDisplays.displayNumber(1717171717.0, "Sem número"))
         assertNull(EpisodeDisplays.displayNumber(-1.0, "Sem número"))
+    }
+
+    @Test
+    fun `season and episode packed in one number`() {
+        // Floats as they arrive from the extension.
+        assertEquals(1 to 1, EpisodeNumbers.packed(1.001f.toDouble()))
+        assertEquals(1 to 2, EpisodeNumbers.packed(1.0019999742507935))
+        assertEquals(2 to 4, EpisodeNumbers.packed(2.003999948501587))
+        assertEquals(3 to 16, EpisodeNumbers.packed(3.0160000324249268))
+        assertEquals(1 to 10, EpisodeNumbers.packed(1.01))
+        // Ordinary numbers stay as they are.
+        assertNull(EpisodeNumbers.packed(5.0))
+        assertNull(EpisodeNumbers.packed(12.5))
+        assertNull(EpisodeNumbers.packed(1.25))
+        assertNull(EpisodeNumbers.packed(0.001))
+        assertNull(EpisodeNumbers.packed(1717171717.0))
+
+        assertEquals("1", EpisodeDisplays.displayNumber(1.0010000467300415, "O Mundo das Espadas"))
+        assertEquals("T2 E4", EpisodeDisplays.shortLabel(2.003999948501587, "", "Ep %s"))
+        assertEquals("Ep 5", EpisodeDisplays.shortLabel(5.0, "", "Ep %s"))
+        assertEquals("Episódio 1 - O Mundo", TitleMatch.cleanEpisodeName("Episódio 1.0010000467300415 - O Mundo"))
+        assertEquals("Episódio 12.5", TitleMatch.cleanEpisodeName("Episódio 12.500000001"))
     }
 }

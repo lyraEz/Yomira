@@ -32,9 +32,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AspectRatio
-import androidx.compose.material.icons.filled.FitScreen
-import androidx.compose.material.icons.filled.ZoomOutMap
+import androidx.compose.material.icons.rounded.AspectRatio
+import androidx.compose.material.icons.rounded.FitScreen
+import androidx.compose.material.icons.rounded.ZoomOutMap
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -235,8 +235,8 @@ fun RenderPlayerButton(
             ControlsButton(
                 icon = when (aspectRatio) {
                     VideoAspect.Fit -> button.getIcon()
-                    VideoAspect.Stretch -> Icons.Filled.ZoomOutMap
-                    VideoAspect.Crop -> Icons.Filled.FitScreen
+                    VideoAspect.Stretch -> Icons.Rounded.ZoomOutMap
+                    VideoAspect.Crop -> Icons.Rounded.FitScreen
                 },
                 onClick = {
                     viewModel.changeVideoAspect(

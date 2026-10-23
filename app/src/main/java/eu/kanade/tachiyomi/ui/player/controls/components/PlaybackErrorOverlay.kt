@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ExitToApp
-import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.outlined.Dns
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material.icons.outlined.SkipNext
+import androidx.compose.material.icons.automirrored.rounded.ExitToApp
+import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.rounded.Dns
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -81,7 +81,7 @@ fun PlaybackErrorOverlay(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(
-                imageVector = Icons.Outlined.ErrorOutline,
+                imageVector = Icons.Rounded.ErrorOutline,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
             )
@@ -124,20 +124,20 @@ fun PlaybackErrorOverlay(
                     modifier = Modifier
                         .focusRequester(retryFocus),
                 ) {
-                    ActionLabel(Icons.Outlined.Refresh, stringResource(YMR.strings.player_error_retry))
+                    ActionLabel(Icons.Rounded.Refresh, stringResource(YMR.strings.player_error_retry))
                 }
                 if (hasServers) {
-                    ErrorAction(Icons.Outlined.Dns, stringResource(YMR.strings.player_error_servers), onChooseServer)
+                    ErrorAction(Icons.Rounded.Dns, stringResource(YMR.strings.player_error_servers), onChooseServer)
                 }
                 ErrorAction(
-                    Icons.AutoMirrored.Outlined.List,
+                    Icons.AutoMirrored.Rounded.List,
                     stringResource(YMR.strings.player_error_episodes),
                     onChooseEpisode,
                 )
                 if (hasNextEpisode) {
-                    ErrorAction(Icons.Outlined.SkipNext, stringResource(YMR.strings.player_error_next), onNextEpisode)
+                    ErrorAction(Icons.Rounded.SkipNext, stringResource(YMR.strings.player_error_next), onNextEpisode)
                 }
-                ErrorAction(Icons.AutoMirrored.Outlined.ExitToApp, stringResource(YMR.strings.player_error_exit), onExit)
+                ErrorAction(Icons.AutoMirrored.Rounded.ExitToApp, stringResource(YMR.strings.player_error_exit), onExit)
             }
         }
     }

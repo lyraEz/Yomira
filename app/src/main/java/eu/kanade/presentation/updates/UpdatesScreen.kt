@@ -1,6 +1,7 @@
 package eu.kanade.presentation.updates
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -146,7 +147,9 @@ fun UpdateScreen(
                 )
             },
             label = "updatesContent",
-            modifier = Modifier.padding(contentPadding),
+            // YMR --> the list scrolls under the floating tab bar instead of stopping above it
+            modifier = Modifier.padding(top = contentPadding.calculateTopPadding()),
+            // YMR <--
         ) { currentScreenState ->
             when (currentScreenState) {
                 "Loading" -> LoadingScreen()
@@ -171,6 +174,7 @@ fun UpdateScreen(
                         FastScrollLazyColumn(
                             // YMR -->
                             modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                             // YMR <--
                         ) {
                             updatesLastUpdatedItem(lastUpdated)

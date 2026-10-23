@@ -144,6 +144,7 @@ object EpisodeMetadata {
      */
     fun locate(show: ShowMeta, episodeNumber: Double, episodeName: String): Pair<Int, Int>? {
         if (show.isMovie) return 1 to 1
+        EpisodeNumbers.packed(episodeNumber)?.let { return packedLocation(show, it) }
         val named = TitleMatch.seasonEpisodeIn(episodeName)
         val whole = episodeNumber.takeIf { it == floor(it) }?.toInt()
         show.seasonHint?.let { hint ->
@@ -159,6 +160,22 @@ object EpisodeMetadata {
         }
         named?.let { (season, episode) -> return if (episode >= 1) season to episode else null }
         return absolute(show, (whole ?: return null) + show.offset)
+    }
+
+    /**
+     * Season packed in the number (2.004). It counts from this entry's first season: an entry that
+     * is TMDB's season 4 calls it 1. When it already equals the known season it is kept.
+     */
+    private fun packedLocation(show: ShowMeta, packed: Pair<Int, Int>): Pair<Int, Int> {
+        val (season, episode) = packed
+        val hint = show.seasonHint ?: return packed
+        if (season == hint) return packed
+        val known = show.seasons.map { it.number }.toSet()
+        val shifted = hint + season - 1
+        return when {
+            known.isEmpty() || shifted in known -> shifted to episode
+            else -> packed
+        }
     }
 
     /** Running number counted across the regular seasons. */

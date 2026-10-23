@@ -52,8 +52,11 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
 | Metadados | (1.8.0) TMDB: nomes, descrições, miniaturas e logo em pt-BR (cache em `files/yomira/meta`), temporada pela data de estreia do AniList, correção manual no menu do anime | `yomira/metadata/` |
 | Player | (1.8.0) Pular abertura sem rastrear (AniList pelo título), AniSkip corrigido e Anime Skip como segunda fonte | `yomira/player/SkipTimes.kt`, `yomira/metadata/AniListIds.kt` |
 | Início | (1.9.0) Aba catálogo: destaques com logo, continuar assistindo, novos episódios, biblioteca e listas das fontes fixadas; primeira aba e tela de abertura (migração única em `HomeTabSetup`) | `yomira/home/` |
-| Detalhes | (1.9.0) Página estilo streaming: imagem grande, logo, botão de reproduzir, personagens com dublador (AniList, idioma escolhido), cartões de episódio por temporada e fatos do TMDB/AniList | `yomira/details/`, `yomira/metadata/AniListDetails.kt`, `AnimeScreen.kt` |
-| Detalhes | (1.9.0) Temporadas pelo nome (números e romanos), pela numeração que recomeça ou pelo TMDB; especiais à parte | `yomira/details/EpisodeSeasons.kt` |
+| Detalhes | (1.9.0) Página estilo streaming: imagem grande, logo, botão de reproduzir, personagens com dublador (AniList, idioma escolhido) e fatos do TMDB/AniList | `yomira/details/`, `yomira/metadata/AniListDetails.kt`, `AnimeScreen.kt` |
+| Detalhes | (1.9.1) Sem abas de temporada nem cartões na horizontal (a pedido do dono): a lista vertical clássica usa o cartão novo (`EpisodeCard`) quando o estilo streaming está ligado | `AnimeEpisodeListItem.kt` (`card`), `yomira/details/StreamingDetails.kt` |
+| Detalhes | (1.9.1) Imagem do topo desce num degradê com o tom da imagem (Palette, 64 px, cache em memória) em vez de borda arredondada | `yomira/ui/ImageTone.kt`, `DetailsHero`, `HomeCatalogTab.kt` |
+| Metadados | (1.9.1) Número "temporada.episódio" de algumas extensões (1.001 = T1 E1) decodificado em todo lugar | `yomira/metadata/EpisodeNumbers.kt` |
+| Player | (1.9.1) Ícones dos controles no conjunto Rounded e play/pause e setas de toque duplo com cantos redondos. Troca sem marcador nos arquivos herdados do player: ao sincronizar, manter `Icons.Rounded` | `ui/player/controls/`, `PlayerEnums.kt`, `res/drawable/anim_play_to_pause.xml` |
 | Barras | (1.9.0) Barra de abas flutuante encolhe ao rolar para baixo (só ícones) e volta ao rolar para cima | `GlassTabBar.kt` (`collapsed`), `HomeScreen.kt` |
 | Player | (1.9.0) Formas arredondadas no player inteiro e linhas das folhas com destaque em pílula | `yomira/player/PlayerShapes.kt` |
 
@@ -67,7 +70,7 @@ Arquivo de retomada: quando o dono disser **"continua"**, siga a lista "Falta fa
    testar "Atualização do vidro: 15 fps/Desligado".
 4. Conferir no aparelho o layout premium (paisagem e retrato), a tela de pausa e o botão de pular; os tempos do
    Anime Skip podem vir deslocados em fontes com abertura em outro ponto do vídeo.
-5. Conferir no aparelho a aba Início, a página nova do anime (temporadas de extensões diferentes) e a barra que encolhe.
+5. Conferir no aparelho a aba Início, a página nova do anime (cartões, números T1 E2 de extensões diferentes) e a barra que encolhe.
 6. Novas ideias quando o dono pedir: tela "Mais" com título grande, busca global em cartões, ícones próprios.
 
 ## Como gerar o APK assinado

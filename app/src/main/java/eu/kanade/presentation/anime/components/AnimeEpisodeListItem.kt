@@ -98,6 +98,9 @@ fun AnimeEpisodeListItem(
     fileSize: Long?,
     // <-- AM (FILE_SIZE)
     modifier: Modifier = Modifier,
+    // YMR --> streaming layout: the row becomes a card with the episode's still
+    card: yomira.details.EpisodeCardExtras? = null,
+    // YMR <--
 ) {
     // YMR --> spoiler protection: unwatched episodes show only their number, no summary, blurred thumbnail
     val spoilerHidden = yomira.ui.rememberHideSpoilers() && !seen
@@ -143,11 +146,43 @@ fun AnimeEpisodeListItem(
 
     val hasActions = start != null || end != null
     // YMR --> each episode is a rounded card
-    val cardShape = RoundedCornerShape(18.dp)
+    val cardShape = RoundedCornerShape(if (card != null) 22.dp else 18.dp)
     val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val cardModifier = modifier
-        .padding(horizontal = 12.dp, vertical = 3.dp)
+        .padding(horizontal = if (card != null) 16.dp else 12.dp, vertical = if (card != null) 6.dp else 3.dp)
         .clip(cardShape)
+    val streamingCard: (@Composable (Modifier) -> Unit)? = card?.let { extras ->
+        { cardModifierArg ->
+            yomira.details.EpisodeCard(
+                data = yomira.details.EpisodeCardData(
+                    label = extras.label,
+                    title = if (spoilerHidden) shownTitle else extras.name ?: title,
+                    summary = shownSummary,
+                    image = extras.image,
+                    rating = extras.rating,
+                    details = listOfNotNull(extras.airDate ?: date, scanlator, watchProgress),
+                    progress = extras.progress,
+                    seen = seen,
+                    bookmarked = bookmark,
+                    blurImage = spoilerHidden,
+                ),
+                selected = selected,
+                onClick = onClick,
+                onLongClick = onLongClick,
+                modifier = cardModifierArg,
+                trailing = {
+                    EpisodeDownloadIndicator(
+                        enabled = downloadIndicatorEnabled,
+                        modifier = Modifier.sizeIn(minWidth = 40.dp, minHeight = 40.dp),
+                        downloadStateProvider = downloadStateProvider,
+                        downloadProgressProvider = downloadProgressProvider,
+                        onClick = { onDownloadClick?.invoke(it) },
+                        fileSize = fileSize,
+                    )
+                },
+            )
+        }
+    }
     // YMR <--
 
     // YMR -->
@@ -161,6 +196,12 @@ fun AnimeEpisodeListItem(
             swipeThreshold = swipeActionThreshold,
             backgroundUntilSwipeThreshold = MaterialTheme.colorScheme.surfaceContainerLowest,
         ) {
+            // YMR -->
+            if (streamingCard != null) {
+                streamingCard(Modifier)
+                return@SwipeableActionsBox
+            }
+            // YMR <--
             EpisodeItemRow(
                 title = shownTitle,
                 date = date,
@@ -184,6 +225,10 @@ fun AnimeEpisodeListItem(
                 modifier = Modifier.background(cardColor),
             )
         }
+    // YMR -->
+    } else if (streamingCard != null) {
+        streamingCard(cardModifier)
+    // YMR <--
     } else {
         EpisodeItemRow(
             title = shownTitle,

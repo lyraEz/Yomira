@@ -25,6 +25,10 @@ data class EpisodeDisplay(
 
 object EpisodeDisplays {
 
+    /** Short tag for posters: "T2 E4" or "Ep 5" ([episodeTag] is the "Ep %s" text). */
+    fun shortLabel(value: Double, name: String, episodeTag: String): String? =
+        EpisodeNumbers.packedLabel(value) ?: displayNumber(value, name)?.let { episodeTag.format(it) }
+
     fun number(value: Double): String =
         if (value == floor(value)) value.toLong().toString() else value.toString().trimEnd('0').trimEnd('.')
 
@@ -37,6 +41,7 @@ object EpisodeDisplays {
      * then the number written in the name ("Episódio 5") is used, or none at all.
      */
     fun displayNumber(value: Double, name: String): String? {
+        EpisodeNumbers.packed(value)?.let { return it.second.toString() }
         val fromName = yomira.details.EpisodeSeasons.episodeIn(name)
         val sane = value >= 0 && value <= MAX_NUMBER && !value.isNaN()
         return when {
@@ -103,7 +108,8 @@ object EpisodeDisplays {
             ?: meta?.stillUrl(previewSize)?.takeIf { prefs.episodeThumbnails().get() }
         val label = (if (enabled) EpisodeMetadata.seasonEpisodeLabel(show, episodeNumber, extensionName) else null)
             ?.takeIf { numberText != null }
-            ?: TitleMatch.seasonEpisodeIn(extensionName)?.let { "T${it.first} E${it.second}" }
+            ?: yomira.details.EpisodeSeasons.seasonEpisodeIn(extensionName)?.let { "T${it.first} E${it.second}" }
+            ?: EpisodeNumbers.packedLabel(episodeNumber)
             ?: numberLabel
         return EpisodeDisplay(title, name, summary, preview, label, meta?.runtime)
     }

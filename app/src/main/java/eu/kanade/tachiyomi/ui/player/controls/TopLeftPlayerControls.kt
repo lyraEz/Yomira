@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +52,7 @@ fun TopLeftPlayerControls(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.mediumSmall),
     ) {
         ControlsButton(
-            icon = Icons.AutoMirrored.Default.ArrowBack,
+            icon = Icons.AutoMirrored.Rounded.ArrowBack,
             onClick = onBackClick,
         )
         Column(

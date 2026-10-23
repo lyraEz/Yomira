@@ -21,6 +21,7 @@ import uy.kohesive.injekt.api.get
 import yomira.i18n.YMR
 import yomira.metadata.AniListIds
 import yomira.metadata.EpisodeMetadata
+import yomira.metadata.EpisodeNumbers
 import yomira.metadata.MetadataKeys
 import yomira.metadata.MetadataPreferences
 import yomira.metadata.TitleMatch
@@ -61,8 +62,13 @@ object SkipTimes {
             tracks = tracks,
             allowSearch = prefs.skipWithoutTracking().get(),
         ) ?: return@withContext null
+        // A later season packed in the number (2.004) belongs to another AniList entry; its
+        // times would be the first season's, so none are better.
+        val packed = EpisodeNumbers.packed(episodeNumber)
+        if (packed != null && packed.first > 1) return@withContext null
         // "T2E5" in the name wins over the running number for anime split into seasons.
         val number = TitleMatch.seasonEpisodeIn(episodeName)?.second
+            ?: packed?.second
             ?: episodeNumber.takeIf { it == floor(it) && it >= 1 }?.toInt()
             ?: return@withContext null
         val numbers = listOfNotNull(number, inSeason(animeId, number, episodeNumber, episodeName, media.episodes))

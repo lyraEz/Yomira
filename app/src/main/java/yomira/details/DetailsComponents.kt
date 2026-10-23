@@ -1,8 +1,11 @@
 package yomira.details
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,58 +16,48 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Bookmark
-import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.DoneAll
-import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material.icons.outlined.FilterList
-import androidx.compose.material.icons.outlined.RemoveDone
-import androidx.compose.material.icons.outlined.ViewCarousel
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -82,6 +75,8 @@ import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.i18n.YMR
+import yomira.ui.DefaultImageTone
+import yomira.ui.rememberImageTone
 import java.util.Locale
 
 private val Amber = Color(0xFFF5C518)
@@ -89,7 +84,8 @@ private val HeroShadow = Shadow(Color.Black.copy(alpha = 0.5f), blurRadius = 12f
 
 /**
  * Top of the details screen: the key art across the screen, the title logo (or the name), the
- * genres and the play, library and more buttons.
+ * genres and the play, library and more buttons. The art fades into a tone taken from it and
+ * then into the page, with no hard edge.
  */
 @Composable
 fun DetailsHero(
@@ -106,119 +102,140 @@ fun DetailsHero(
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp
     val height = (screenHeight * 0.64f).coerceIn(420f, 680f).dp
-    val shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .clip(shape)
-            .background(Color.Black),
-    ) {
-        AsyncImage(
-            model = image,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.TopCenter,
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onImageClick),
-        )
+    val tone by animateColorAsState(
+        rememberImageTone(image) ?: DefaultImageTone,
+        animationSpec = tween(TONE_FADE_MS),
+        label = "heroTone",
+    )
+    val page = MaterialTheme.colorScheme.background
+    Column(Modifier.fillMaxWidth()) {
         Box(
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Black.copy(alpha = 0.45f),
-                        0.16f to Color.Transparent,
-                        0.42f to Color.Transparent,
-                        0.74f to Color.Black.copy(alpha = 0.72f),
-                        1f to Color.Black.copy(alpha = 0.96f),
-                    ),
-                ),
-        )
-        Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .height(height)
+                .clipToBounds()
+                .drawBehind { drawRect(tone) },
         ) {
-            var logoFailed by remember(logoUrl) { mutableStateOf(false) }
-            if (logoUrl != null && !logoFailed) {
-                AsyncImage(
-                    model = logoUrl,
-                    contentDescription = title,
-                    contentScale = ContentScale.Fit,
-                    onError = { logoFailed = true },
-                    modifier = Modifier
-                        .fillMaxWidth(0.74f)
-                        .heightIn(max = 112.dp),
-                )
-            } else {
-                Text(
-                    text = title,
-                    style = TextStyle(
-                        fontSize = 30.sp,
-                        lineHeight = 34.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        shadow = HeroShadow,
-                    ),
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (genres.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = genres.joinToString("  •  "),
-                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, shadow = HeroShadow),
-                    color = Color.White.copy(alpha = 0.78f),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Spacer(Modifier.height(18.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(54.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                        .clickable(onClick = onPlay),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(Icons.Filled.PlayArrow, null, tint = Color.Black, modifier = Modifier.size(28.dp))
-                    Spacer(Modifier.width(6.dp))
+            AsyncImage(
+                model = image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onImageClick),
+            )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .drawBehind {
+                        drawRect(
+                            Brush.verticalGradient(
+                                0f to Color.Black.copy(alpha = 0.45f),
+                                0.16f to Color.Transparent,
+                                0.4f to Color.Transparent,
+                                0.66f to tone.copy(alpha = 0.72f),
+                                0.84f to tone.copy(alpha = 0.95f),
+                                1f to tone,
+                            ),
+                        )
+                    },
+            )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                var logoFailed by remember(logoUrl) { mutableStateOf(false) }
+                if (logoUrl != null && !logoFailed) {
+                    AsyncImage(
+                        model = logoUrl,
+                        contentDescription = title,
+                        contentScale = ContentScale.Fit,
+                        onError = { logoFailed = true },
+                        modifier = Modifier
+                            .fillMaxWidth(0.74f)
+                            .heightIn(max = 112.dp),
+                    )
+                } else {
                     Text(
-                        playLabel,
-                        color = Color.Black,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
+                        text = title,
+                        style = TextStyle(
+                            fontSize = 30.sp,
+                            lineHeight = 34.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            shadow = HeroShadow,
+                        ),
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                if (genres.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = genres.joinToString("  •  "),
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, shadow = HeroShadow),
+                        color = Color.White.copy(alpha = 0.78f),
+                        textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Spacer(Modifier.width(12.dp))
-                HeroCircle(
-                    icon = if (favorite) Icons.Filled.Check else Icons.Filled.Add,
-                    description = stringResource(if (favorite) YMR.strings.details_in_library else YMR.strings.details_add_library),
-                    onClick = onToggleFavorite,
-                )
-                Spacer(Modifier.width(10.dp))
-                HeroCircle(
-                    icon = Icons.Filled.MoreHoriz,
-                    description = stringResource(YMR.strings.details_more),
-                    onClick = onMore,
-                )
+                Spacer(Modifier.height(18.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(54.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .clickable(onClick = onPlay),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.PlayArrow, null, tint = Color.Black, modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            playLabel,
+                            color = Color.Black,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    HeroCircle(
+                        icon = if (favorite) Icons.Filled.Check else Icons.Filled.Add,
+                        description = stringResource(if (favorite) YMR.strings.details_in_library else YMR.strings.details_add_library),
+                        onClick = onToggleFavorite,
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    HeroCircle(
+                        icon = Icons.Filled.MoreHoriz,
+                        description = stringResource(YMR.strings.details_more),
+                        onClick = onMore,
+                    )
+                }
             }
         }
+        // The tone melts into the page below the buttons.
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(HeroTail)
+                .drawBehind { drawRect(Brush.verticalGradient(listOf(tone, page))) },
+        )
     }
 }
+
+/** Height of the fade from the artwork's tone into the page. */
+val HeroTail = 56.dp
+private const val TONE_FADE_MS = 600
 
 @Composable
 private fun HeroCircle(icon: ImageVector, description: String, onClick: () -> Unit) {
@@ -244,7 +261,7 @@ fun DetailsOverview(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(start = 20.dp, top = 0.dp, end = 20.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         val meta = listOfNotNull(facts.years, facts.runtime)
@@ -484,179 +501,157 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     )
 }
 
-/** "Temporadas" with the view switch and the filter button, then the season pills. */
-@Composable
-fun SeasonsHeader(
-    title: String,
-    seasonLabels: List<String>,
-    selected: Int,
-    onSelect: (Int) -> Unit,
-    cards: Boolean,
-    onToggleView: () -> Unit,
-    filterActive: Boolean,
-    onFilter: () -> Unit,
-) {
-    Column(Modifier.padding(top = 12.dp)) {
-        Row(
-            modifier = Modifier.padding(start = 20.dp, end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            SectionTitle(title, Modifier.weight(1f))
-            IconButton(onClick = onToggleView) {
-                Icon(
-                    if (cards) Icons.AutoMirrored.Outlined.ViewList else Icons.Outlined.ViewCarousel,
-                    contentDescription = stringResource(if (cards) YMR.strings.details_view_list else YMR.strings.details_view_cards),
-                )
-            }
-            IconButton(onClick = onFilter) {
-                Icon(
-                    Icons.Outlined.FilterList,
-                    contentDescription = stringResource(YMR.strings.details_filter),
-                    tint = if (filterActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                )
-            }
-        }
-        if (seasonLabels.size > 1) {
-            val listState = rememberLazyListState()
-            LaunchedEffect(selected) { listState.animateScrollToItem(selected.coerceAtLeast(0)) }
-            LazyRow(
-                state = listState,
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                items(seasonLabels.size) { index ->
-                    val isSelected = index == selected
-                    Text(
-                        seasonLabels[index],
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(if (isSelected) MaterialTheme.colorScheme.surfaceContainerHighest else Color.Transparent)
-                            .clickable { onSelect(index) }
-                            .padding(horizontal = 18.dp, vertical = 10.dp),
-                    )
-                }
-            }
-        }
-    }
-}
-
 /** What an episode card shows. */
 @Immutable
 data class EpisodeCardData(
-    val id: Long,
+    /** "T1 E2", or "Episódio 2" when the season is unknown. */
     val label: String,
     val title: String,
     val summary: String?,
+    /** Episode still; null draws a compact card without a picture. */
     val image: Any?,
     val rating: String?,
-    val date: String?,
+    /** Date, scanlator, time watched: shown after the rating, separated by dots. */
+    val details: List<String>,
     /** 0..1, 0 when not started. */
     val progress: Float,
     val seen: Boolean,
-    val downloaded: Boolean,
     val bookmarked: Boolean,
+    /** Spoiler protection: blur the still. */
+    val blurImage: Boolean = false,
 )
 
+/**
+ * An episode of the details list: the still across the card with the season and episode, name,
+ * synopsis, rating and date over it. [trailing] holds the download button.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EpisodeCard(
     data: EpisodeCardData,
+    selected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit = {},
 ) {
+    val hasImage = data.image != null
+    val shape = RoundedCornerShape(22.dp)
+    val primary = MaterialTheme.colorScheme.primary
+    val textColor = if (hasImage) Color.White else MaterialTheme.colorScheme.onSurface
+    val softColor = if (hasImage) Color.White.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
     Box(
         modifier = modifier
-            .width(300.dp)
-            .height(176.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color(0xFF1C1C22))
+            .fillMaxWidth()
+            .then(if (hasImage) Modifier.aspectRatio(16f / 9f) else Modifier)
+            .clip(shape)
+            .background(
+                if (hasImage) {
+                    Brush.verticalGradient(listOf(Color(0xFF1C1C22), Color(0xFF1C1C22)))
+                } else {
+                    Brush.verticalGradient(
+                        listOf(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.surfaceContainer),
+                    )
+                },
+            )
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
-        AsyncImage(
-            model = data.image,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Black.copy(alpha = if (data.seen) 0.45f else 0.1f),
-                        0.38f to Color.Black.copy(alpha = if (data.seen) 0.55f else 0.2f),
-                        1f to Color.Black.copy(alpha = 0.92f),
+        if (hasImage) {
+            AsyncImage(
+                model = data.image,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (data.blurImage) Modifier.blur(18.dp) else Modifier),
+            )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = if (data.seen) 0.5f else 0.28f),
+                            0.32f to Color.Black.copy(alpha = if (data.seen) 0.5f else 0.12f),
+                            0.55f to Color.Black.copy(alpha = if (data.seen) 0.6f else 0.35f),
+                            1f to Color.Black.copy(alpha = 0.94f),
+                        ),
                     ),
-                ),
-        )
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            if (data.bookmarked) CardIcon(Icons.Outlined.Bookmark)
-            if (data.downloaded) CardIcon(Icons.Filled.DownloadDone)
-            if (data.seen) CardIcon(Icons.Filled.CheckCircle)
+            )
         }
         Column(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .fillMaxWidth()
-                .padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
+                .then(if (hasImage) Modifier.fillMaxSize() else Modifier.fillMaxWidth())
+                .padding(start = 14.dp, top = 10.dp, end = 8.dp, bottom = 14.dp),
         ) {
-            Text(
-                data.label,
-                color = Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.Black.copy(alpha = 0.55f))
-                    .padding(horizontal = 7.dp, vertical = 3.dp),
-            )
-            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    data.label,
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (hasImage) Color.Black.copy(alpha = 0.55f) else primary.copy(alpha = 0.85f))
+                        .padding(horizontal = 8.dp, vertical = 3.dp),
+                )
+                Spacer(Modifier.width(6.dp))
+                if (data.seen) CardIcon(Icons.Filled.CheckCircle, hasImage)
+                if (data.bookmarked) CardIcon(Icons.Filled.Bookmark, hasImage)
+                Spacer(Modifier.weight(1f))
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(
+                            if (hasImage) MaterialTheme.colorScheme.surface.copy(alpha = 0.72f) else Color.Transparent,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    trailing()
+                }
+            }
+            if (hasImage) Spacer(Modifier.weight(1f)) else Spacer(Modifier.height(8.dp))
             Text(
                 data.title,
-                color = Color.White,
-                fontSize = 16.sp,
+                color = textColor.copy(alpha = if (data.seen) 0.75f else 1f),
+                fontSize = 17.sp,
+                lineHeight = 21.sp,
                 fontWeight = FontWeight.Bold,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(end = 6.dp),
             )
             if (!data.summary.isNullOrBlank()) {
+                Spacer(Modifier.height(2.dp))
                 Text(
                     data.summary,
-                    color = Color.White.copy(alpha = 0.82f),
+                    color = softColor,
                     fontSize = 12.sp,
                     lineHeight = 16.sp,
                     fontStyle = FontStyle.Italic,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(end = 6.dp),
                 )
             }
-            if (data.rating != null || data.date != null) {
+            if (data.rating != null || data.details.isNotEmpty()) {
                 Spacer(Modifier.height(6.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 6.dp)) {
                     if (data.rating != null) {
                         Icon(Icons.Filled.Star, null, tint = Amber, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(3.dp))
                         Text(data.rating, color = Amber, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        if (data.details.isNotEmpty()) Spacer(Modifier.width(8.dp))
                     }
-                    Spacer(Modifier.weight(1f))
-                    if (data.date != null) {
-                        Text(
-                            data.date,
-                            color = Color.White.copy(alpha = 0.72f),
-                            fontSize = 11.sp,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
+                    Text(
+                        data.details.joinToString("  •  "),
+                        color = softColor,
+                        fontSize = 11.sp,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
         }
@@ -665,111 +660,44 @@ fun EpisodeCard(
                 Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .height(3.dp)
-                    .background(Color.White.copy(alpha = 0.25f)),
+                    .height(4.dp)
+                    .background(textColor.copy(alpha = 0.22f)),
             ) {
                 Box(
                     Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(data.progress.coerceIn(0.02f, 1f))
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(primary),
                 )
             }
         }
+        if (selected) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .background(primary.copy(alpha = 0.22f))
+                    .border(3.dp, primary, shape),
+            )
+        }
     }
 }
 
 @Composable
-private fun CardIcon(icon: ImageVector) {
+private fun CardIcon(icon: ImageVector, onImage: Boolean) {
     Box(
         modifier = Modifier
-            .size(26.dp)
+            .padding(end = 4.dp)
+            .size(24.dp)
             .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.5f)),
+            .background(if (onImage) Color.Black.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = Color.White, modifier = Modifier.size(16.dp))
-    }
-}
-
-/** Cards of one season in a row, scrolled to [startIndex]. */
-@Composable
-fun EpisodeCardsRow(
-    cards: List<EpisodeCardData>,
-    startIndex: Int,
-    onClick: (Long) -> Unit,
-    onLongClick: (Long) -> Unit,
-) {
-    val state = rememberLazyListState(initialFirstVisibleItemIndex = startIndex.coerceIn(0, (cards.size - 1).coerceAtLeast(0)))
-    LazyRow(
-        state = state,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(cards, key = { it.id }) { card ->
-            EpisodeCard(card, onClick = { onClick(card.id) }, onLongClick = { onLongClick(card.id) })
-        }
-    }
-}
-
-/** Actions of one episode, opened by a long press on its card. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EpisodeActionsSheet(
-    title: String,
-    seen: Boolean,
-    bookmarked: Boolean,
-    downloaded: Boolean,
-    canDownload: Boolean,
-    onDismiss: () -> Unit,
-    onDownload: () -> Unit,
-    onDeleteDownload: () -> Unit,
-    onToggleSeen: () -> Unit,
-    onToggleBookmark: () -> Unit,
-    onMarkPreviousSeen: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.navigationBarsPadding().padding(bottom = 8.dp)) {
-            Text(
-                title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            if (canDownload) {
-                if (downloaded) {
-                    SheetAction(Icons.Outlined.Delete, stringResource(YMR.strings.details_ep_delete)) {
-                        onDeleteDownload()
-                        onDismiss()
-                    }
-                } else {
-                    SheetAction(Icons.Outlined.Download, stringResource(YMR.strings.details_ep_download)) {
-                        onDownload()
-                        onDismiss()
-                    }
-                }
-            }
-            SheetAction(
-                if (seen) Icons.Outlined.RemoveDone else Icons.Outlined.DoneAll,
-                stringResource(if (seen) YMR.strings.details_ep_unseen else YMR.strings.details_ep_seen),
-            ) {
-                onToggleSeen()
-                onDismiss()
-            }
-            SheetAction(
-                if (bookmarked) Icons.Outlined.BookmarkBorder else Icons.Outlined.Bookmark,
-                stringResource(if (bookmarked) YMR.strings.details_ep_unbookmark else YMR.strings.details_ep_bookmark),
-            ) {
-                onToggleBookmark()
-                onDismiss()
-            }
-            SheetAction(Icons.Outlined.DoneAll, stringResource(YMR.strings.details_ep_previous)) {
-                onMarkPreviousSeen()
-                onDismiss()
-            }
-        }
+        Icon(
+            icon,
+            null,
+            tint = if (onImage) Color.White else MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(15.dp),
+        )
     }
 }
 

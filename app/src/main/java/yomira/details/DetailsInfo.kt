@@ -14,14 +14,11 @@ import kotlin.math.roundToInt
 
 /** Settings → Appearance → Experience: the anime details screen. */
 class DetailsPreferences(private val store: PreferenceStore = Injekt.get()) {
-    /** Streaming-app layout (big cover, play button, characters, season tabs, episode cards). */
+    /** Streaming-app layout (big cover, play button, characters, episode cards). */
     fun streamingLayout() = store.getBoolean("yomira_details_streaming", true)
 
     /** Voice actors shown for the characters: "ja", "pt", "en"... (see AniListDetails.voiceLanguages). */
     fun voiceLanguage() = store.getString("yomira_details_voice_language", "ja")
-
-    /** Episodes as large cards in a row ("cards") or as the full list ("list"). */
-    fun episodeView() = store.getString("yomira_details_episode_view", "cards")
 }
 
 /** Everything the details screen shows, merged from TMDB, AniList and the extension. */

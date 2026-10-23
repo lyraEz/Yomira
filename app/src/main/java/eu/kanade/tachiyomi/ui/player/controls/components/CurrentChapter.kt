@@ -33,7 +33,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -84,7 +84,7 @@ fun CurrentChapter(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
             ) {
                 Icon(
-                    imageVector = Icons.Default.Bookmarks,
+                    imageVector = Icons.Rounded.Bookmarks,
                     contentDescription = null,
                     modifier = Modifier
                         .padding(end = MaterialTheme.padding.extraSmall)

@@ -92,7 +92,13 @@ fun TabbedScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding),
+                // YMR --> the bottom inset goes to the pages, so lists scroll under the floating bar
+                .padding(
+                    start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    top = contentPadding.calculateTopPadding(),
+                    end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
+                ),
+                // YMR <--
         ) {
             // YMR --> capsule tabs instead of the Material tab row
             yomira.glass.CapsuleTabs(

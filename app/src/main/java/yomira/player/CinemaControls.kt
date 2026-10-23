@@ -30,17 +30,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.FastForward
-import androidx.compose.material.icons.filled.Forward10
-import androidx.compose.material.icons.filled.Forward30
-import androidx.compose.material.icons.filled.Forward5
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.Replay10
-import androidx.compose.material.icons.filled.Replay30
-import androidx.compose.material.icons.filled.Replay5
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.FastForward
+import androidx.compose.material.icons.rounded.Forward10
+import androidx.compose.material.icons.rounded.Forward30
+import androidx.compose.material.icons.rounded.Forward5
+import androidx.compose.material.icons.rounded.Replay
+import androidx.compose.material.icons.rounded.Replay10
+import androidx.compose.material.icons.rounded.Replay30
+import androidx.compose.material.icons.rounded.Replay5
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -213,7 +213,7 @@ fun CinemaTopRow(
                 onCastClick = onCastClick,
             )
         }
-        ControlsButton(Icons.AutoMirrored.Filled.ArrowBack, onClick = onBackPress, iconSize = 24.dp)
+        ControlsButton(Icons.AutoMirrored.Rounded.ArrowBack, onClick = onBackPress, iconSize = 24.dp)
     }
 }
 
@@ -298,7 +298,7 @@ fun CinemaCenterControls(
                         viewModel.seekBy(-seekSeconds)
                     }
                 } else {
-                    SeekGlassButton(Icons.Filled.SkipPrevious, side, enabled = hasPrevious) {
+                    SeekGlassButton(Icons.Rounded.SkipPrevious, side, enabled = hasPrevious) {
                         clickEvent()
                         viewModel.changeEpisode(true)
                     }
@@ -311,7 +311,7 @@ fun CinemaCenterControls(
                         viewModel.seekBy(seekSeconds)
                     }
                 } else {
-                    SeekGlassButton(Icons.Filled.SkipNext, side, enabled = hasNext) {
+                    SeekGlassButton(Icons.Rounded.SkipNext, side, enabled = hasNext) {
                         clickEvent()
                         viewModel.changeEpisode(false)
                     }
@@ -322,10 +322,10 @@ fun CinemaCenterControls(
 }
 
 private fun seekIcon(seconds: Int, back: Boolean): ImageVector = when (seconds) {
-    5 -> if (back) Icons.Filled.Replay5 else Icons.Filled.Forward5
-    10 -> if (back) Icons.Filled.Replay10 else Icons.Filled.Forward10
-    30 -> if (back) Icons.Filled.Replay30 else Icons.Filled.Forward30
-    else -> if (back) Icons.Filled.Replay else Icons.Filled.FastForward
+    5 -> if (back) Icons.Rounded.Replay5 else Icons.Rounded.Forward5
+    10 -> if (back) Icons.Rounded.Replay10 else Icons.Rounded.Forward10
+    30 -> if (back) Icons.Rounded.Replay30 else Icons.Rounded.Forward30
+    else -> if (back) Icons.Rounded.Replay else Icons.Rounded.FastForward
 }
 
 /** Glass glyph that gives a short spin when tapped, so a seek feels acknowledged. */

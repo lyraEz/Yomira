@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material.icons.outlined.ScreenRotation
-import androidx.compose.material.icons.outlined.Subtitles
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.ScreenRotation
+import androidx.compose.material.icons.rounded.SkipNext
+import androidx.compose.material.icons.rounded.SkipPrevious
+import androidx.compose.material.icons.rounded.Subtitles
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -89,11 +89,11 @@ fun PlayerButtonSizeCard(modifier: Modifier = Modifier) {
         ) {
             ProvidePlayerButtonLook {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    ControlsButton(Icons.Outlined.Subtitles, onClick = {})
-                    ControlsButton(Icons.Filled.SkipPrevious, onClick = {}, iconSize = 32.dp)
-                    ControlsButton(Icons.Filled.Pause, onClick = {}, iconSize = 40.dp)
-                    ControlsButton(Icons.Filled.SkipNext, onClick = {}, iconSize = 32.dp)
-                    ControlsButton(Icons.Outlined.ScreenRotation, onClick = {})
+                    ControlsButton(Icons.Rounded.Subtitles, onClick = {})
+                    ControlsButton(Icons.Rounded.SkipPrevious, onClick = {}, iconSize = 32.dp)
+                    ControlsButton(Icons.Rounded.Pause, onClick = {}, iconSize = 40.dp)
+                    ControlsButton(Icons.Rounded.SkipNext, onClick = {}, iconSize = 32.dp)
+                    ControlsButton(Icons.Rounded.ScreenRotation, onClick = {})
                 }
             }
         }

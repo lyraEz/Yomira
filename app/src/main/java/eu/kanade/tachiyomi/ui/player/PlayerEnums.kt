@@ -18,23 +18,23 @@
 package eu.kanade.tachiyomi.ui.player
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.AspectRatio
-import androidx.compose.material.icons.outlined.Audiotrack
-import androidx.compose.material.icons.outlined.Bookmarks
-import androidx.compose.material.icons.outlined.Cast
-import androidx.compose.material.icons.outlined.FastForward
-import androidx.compose.material.icons.outlined.HighQuality
-import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.PictureInPictureAlt
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.ScreenRotation
-import androidx.compose.material.icons.outlined.Speed
-import androidx.compose.material.icons.outlined.Subtitles
-import androidx.compose.material.icons.outlined.Title
-import androidx.compose.material.icons.outlined.TouchApp
-import androidx.compose.material.icons.outlined.ZoomIn
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AspectRatio
+import androidx.compose.material.icons.rounded.Audiotrack
+import androidx.compose.material.icons.rounded.Bookmarks
+import androidx.compose.material.icons.rounded.Cast
+import androidx.compose.material.icons.rounded.FastForward
+import androidx.compose.material.icons.rounded.HighQuality
+import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.PictureInPictureAlt
+import androidx.compose.material.icons.rounded.PlayCircle
+import androidx.compose.material.icons.rounded.ScreenRotation
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.Subtitles
+import androidx.compose.material.icons.rounded.Title
+import androidx.compose.material.icons.rounded.TouchApp
+import androidx.compose.material.icons.rounded.ZoomIn
 import androidx.compose.ui.graphics.vector.ImageVector
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.tachiyomi.ui.player.settings.DecoderPreferences
@@ -375,23 +375,23 @@ enum class PlayerButton(
 }
 
 fun PlayerButton.getIcon(): ImageVector = when (this) {
-    PlayerButton.BackArrow -> Icons.AutoMirrored.Outlined.ArrowBack
-    PlayerButton.VideoTitle -> Icons.Outlined.Title
-    PlayerButton.AutoPlay -> Icons.Outlined.PlayCircle
-    PlayerButton.Cast -> Icons.Outlined.Cast
-    PlayerButton.SubtitleTracks -> Icons.Outlined.Subtitles
-    PlayerButton.AudioTracks -> Icons.Outlined.Audiotrack
-    PlayerButton.QualityTracks -> Icons.Outlined.HighQuality
-    PlayerButton.MoreOptions -> Icons.Outlined.MoreVert
-    PlayerButton.PlaybackSpeed -> Icons.Outlined.Speed
-    PlayerButton.CurrentChapter -> Icons.Outlined.Bookmarks
-    PlayerButton.LockControls -> Icons.Outlined.LockOpen
-    PlayerButton.ScreenRotation -> Icons.Outlined.ScreenRotation
-    PlayerButton.PictureInPicture -> Icons.Outlined.PictureInPictureAlt
-    PlayerButton.AspectRatio -> Icons.Outlined.AspectRatio
-    PlayerButton.VideoZoom -> Icons.Outlined.ZoomIn
-    PlayerButton.SkipIntro -> Icons.Outlined.FastForward
-    PlayerButton.CustomButton -> Icons.Outlined.TouchApp
+    PlayerButton.BackArrow -> Icons.AutoMirrored.Rounded.ArrowBack
+    PlayerButton.VideoTitle -> Icons.Rounded.Title
+    PlayerButton.AutoPlay -> Icons.Rounded.PlayCircle
+    PlayerButton.Cast -> Icons.Rounded.Cast
+    PlayerButton.SubtitleTracks -> Icons.Rounded.Subtitles
+    PlayerButton.AudioTracks -> Icons.Rounded.Audiotrack
+    PlayerButton.QualityTracks -> Icons.Rounded.HighQuality
+    PlayerButton.MoreOptions -> Icons.Rounded.MoreVert
+    PlayerButton.PlaybackSpeed -> Icons.Rounded.Speed
+    PlayerButton.CurrentChapter -> Icons.Rounded.Bookmarks
+    PlayerButton.LockControls -> Icons.Rounded.LockOpen
+    PlayerButton.ScreenRotation -> Icons.Rounded.ScreenRotation
+    PlayerButton.PictureInPicture -> Icons.Rounded.PictureInPictureAlt
+    PlayerButton.AspectRatio -> Icons.Rounded.AspectRatio
+    PlayerButton.VideoZoom -> Icons.Rounded.ZoomIn
+    PlayerButton.SkipIntro -> Icons.Rounded.FastForward
+    PlayerButton.CustomButton -> Icons.Rounded.TouchApp
 }
 
 val allPlayerButtons = PlayerButton.entries.filter { 

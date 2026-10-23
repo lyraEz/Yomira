@@ -1,7 +1,9 @@
 package yomira.home
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,9 +52,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -77,6 +84,7 @@ import tachiyomi.domain.anime.model.Anime
 import tachiyomi.domain.anime.model.asAnimeCover
 import tachiyomi.domain.source.interactor.GetRemoteAnime
 import tachiyomi.presentation.core.i18n.stringResource
+import yomira.details.HeroTail
 import yomira.glass.LocalFloatingBarInset
 import yomira.i18n.YMR
 import yomira.metadata.EpisodeDisplays
@@ -84,7 +92,10 @@ import yomira.metadata.ShowMeta
 import yomira.metadata.rememberEpisodeDisplay
 import yomira.metadata.rememberShowMeta
 import yomira.ui.ContinueItem
+import yomira.ui.DefaultImageTone
 import yomira.ui.openContinueEpisode
+import yomira.ui.rememberImageTone
+import kotlin.math.abs
 
 private val Shade = Shadow(Color.Black.copy(alpha = 0.55f), blurRadius = 12f)
 
@@ -148,8 +159,7 @@ data object HomeCatalogTab : Tab {
                             items = state.newEpisodes.map { it.anime },
                             badge = { anime ->
                                 state.newEpisodes.firstOrNull { it.anime.id == anime.id }?.let {
-                                    EpisodeDisplays.displayNumber(it.episodeNumber, it.episodeName)
-                                        ?.let { number -> episodeBadge.format(number) }
+                                    EpisodeDisplays.shortLabel(it.episodeNumber, it.episodeName, episodeBadge)
                                 }
                             },
                             onClick = { navigator.push(AnimeScreen(it.id)) },
@@ -188,87 +198,150 @@ data object HomeCatalogTab : Tab {
     }
 }
 
-/** Big swipeable highlights with the title logo, genres and a details button. */
+/**
+ * Big highlights with the title logo, genres and a details button. They turn by themselves and
+ * by swiping with a crossfade, while the tone under them blends from one artwork to the next.
+ */
 @Composable
 private fun HeroCarousel(items: List<Anime>, onOpen: (Anime) -> Unit) {
-    val pager = rememberPagerState { items.size }
+    val count = items.size
+    val loop = count > 1
+    // A long run of pages lets it keep going forward instead of jumping back to the first.
+    val pager = rememberPagerState(initialPage = if (loop) count * (LOOP_PAGES / 2) else 0) {
+        if (loop) count * LOOP_PAGES else count
+    }
     // Turns by itself, but not while the user is dragging it.
     val dragged by pager.interactionSource.collectIsDraggedAsState()
-    LaunchedEffect(items.size, dragged) {
-        if (dragged || items.size < 2) return@LaunchedEffect
+    LaunchedEffect(count, dragged) {
+        if (dragged || !loop) return@LaunchedEffect
         while (true) {
             delay(HERO_INTERVAL_MS)
-            pager.animateScrollToPage((pager.currentPage + 1) % items.size)
+            pager.animateScrollToPage(
+                pager.currentPage + 1,
+                animationSpec = tween(HERO_FADE_MS, easing = FastOutSlowInEasing),
+            )
         }
     }
-    val height = (LocalConfiguration.current.screenHeightDp * 0.66f).coerceIn(440f, 700f).dp
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height)
-            .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
-            .background(Color.Black),
-    ) {
-        HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
-            HeroPage(items[page], onOpen)
+    val images = items.map { anime ->
+        key(anime.id) {
+            val show = rememberShowMeta(anime.id)
+            heroImage(anime, show)
         }
-        Row(
+    }
+    val tones = images.map { image -> rememberImageTone(image) ?: DefaultImageTone }
+    val page = MaterialTheme.colorScheme.background
+    // Tone between the page shown and the one coming in, read while drawing.
+    val blended = {
+        val fraction = pager.currentPageOffsetFraction
+        val from = tones[pager.currentPage.mod(count)]
+        val to = tones[(pager.currentPage + if (fraction >= 0f) 1 else -1).mod(count)]
+        lerp(from, to, abs(fraction).coerceIn(0f, 1f))
+    }
+    val height = (LocalConfiguration.current.screenHeightDp * 0.66f).coerceIn(440f, 700f).dp
+    Column(Modifier.fillMaxWidth()) {
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .fillMaxWidth()
+                .height(height)
+                .drawBehind { drawRect(blended()) },
         ) {
-            repeat(items.size) { index ->
-                val selected = index == pager.currentPage
-                val width by animateDpAsState(if (selected) 26.dp else 8.dp, label = "dot")
-                val color by animateColorAsState(
-                    if (selected) Color.White else Color.White.copy(alpha = 0.45f),
-                    label = "dotColor",
-                )
+            HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { index ->
+                val item = index.mod(count)
+                val offset = { (pager.currentPage - index) + pager.currentPageOffsetFraction }
                 Box(
                     Modifier
-                        .height(8.dp)
-                        .width(width)
-                        .clip(CircleShape)
-                        .background(color),
-                )
+                        .fillMaxSize()
+                        // Pages stay in place and crossfade instead of sliding.
+                        .graphicsLayer { translationX = offset() * size.width },
+                ) {
+                    HeroPage(items[item], images[item], tones[item], { abs(offset()).coerceIn(0f, 1f) }, onOpen)
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val current = pager.currentPage.mod(count.coerceAtLeast(1))
+                repeat(count) { index ->
+                    val selected = index == current
+                    val width by animateDpAsState(if (selected) 26.dp else 8.dp, label = "dot")
+                    val color by animateColorAsState(
+                        if (selected) Color.White else Color.White.copy(alpha = 0.45f),
+                        label = "dotColor",
+                    )
+                    Box(
+                        Modifier
+                            .height(8.dp)
+                            .width(width)
+                            .clip(CircleShape)
+                            .background(color),
+                    )
+                }
             }
         }
+        // The tone melts into the page under the highlights.
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(HeroTail)
+                .drawBehind { drawRect(Brush.verticalGradient(listOf(blended(), page))) },
+        )
     }
 }
 
+private fun heroImage(anime: Anime, show: ShowMeta?): Any =
+    show?.keyArtUrl ?: show?.backdropUrl ?: anime.backgroundUrl ?: anime.asAnimeCover()
+
+/** One highlight; [away] is how far it is from being shown (0 shown, 1 gone). */
 @Composable
-private fun HeroPage(anime: Anime, onOpen: (Anime) -> Unit) {
+private fun HeroPage(anime: Anime, image: Any, tone: Color, away: () -> Float, onOpen: (Anime) -> Unit) {
     val show = rememberShowMeta(anime.id)
-    Box(Modifier.fillMaxSize()) {
-        AsyncImage(
-            model = show?.keyArtUrl ?: show?.backdropUrl ?: anime.backgroundUrl ?: anime.asAnimeCover(),
-            contentDescription = anime.title,
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.TopCenter,
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { onOpen(anime) },
-        )
+    Box(Modifier.fillMaxSize().clipToBounds()) {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        0f to Color.Black.copy(alpha = 0.4f),
-                        0.14f to Color.Transparent,
-                        0.5f to Color.Transparent,
-                        0.8f to Color.Black.copy(alpha = 0.72f),
-                        1f to Color.Black.copy(alpha = 0.95f),
+                .graphicsLayer {
+                    val distance = away()
+                    alpha = 1f - distance
+                    val zoom = 1f + distance * 0.06f
+                    scaleX = zoom
+                    scaleY = zoom
+                },
+        ) {
+            AsyncImage(
+                model = image,
+                contentDescription = anime.title,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { onOpen(anime) },
+            )
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = 0.4f),
+                            0.14f to Color.Transparent,
+                            0.45f to Color.Transparent,
+                            0.7f to tone.copy(alpha = 0.75f),
+                            0.88f to tone.copy(alpha = 0.96f),
+                            1f to tone,
+                        ),
                     ),
-                ),
-        )
+            )
+        }
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(start = 24.dp, end = 24.dp, bottom = 48.dp),
+                // The text leaves before the next one arrives, so the two never overlap.
+                .graphicsLayer { alpha = (1f - away() * 2f).coerceIn(0f, 1f) }
+                .padding(start = 24.dp, end = 24.dp, bottom = 34.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             HeroTitle(anime, show)
@@ -564,3 +637,5 @@ private fun EmptyHome() {
 }
 
 private const val HERO_INTERVAL_MS = 7_000L
+private const val HERO_FADE_MS = 1_100
+private const val LOOP_PAGES = 1_000

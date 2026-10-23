@@ -47,6 +47,9 @@ jobs:
       - name: Formatting (files changed since the upstream base)
         run: ./gradlew --no-daemon spotlessCheck
 
+      - name: Regex patterns compile on Android (ICU)
+        run: python3 -I scripts/yomira/check-regex-icu.py
+
       - name: Static analysis (detekt)
         run: ./gradlew --no-daemon detekt
 

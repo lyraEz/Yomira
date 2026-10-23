@@ -7,7 +7,7 @@ import kotlin.math.min
 /** Cleans anime titles from extensions and compares them with catalogue titles. */
 object TitleMatch {
 
-    private val bracketed = Regex("""\[[^]]*]|\{[^}]*}""")
+    private val bracketed = Regex("""\[[^\]]*\]|\{[^}]*\}""")
     private val audioMarkers = Regex(
         """(?i)\(\s*(?:dub(?:lado)?|leg(?:endado)?|sub(?:s|bed|titled)?|pt-?br|uncensored|sem censura|tv)\s*\)""" +
             """|\b(?:dublado|legendado|dub|pt-?br)\b""",

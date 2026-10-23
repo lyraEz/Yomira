@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.core.common.util.system.logcat
 import yomira.i18n.YMR
 import kotlin.math.floor
 
@@ -35,6 +37,31 @@ object EpisodeDisplays {
         extensionPreview: String?,
         previewSize: String = "w300",
         prefs: MetadataPreferences = MetadataPreferences(),
+    ): EpisodeDisplay = try {
+        compose(context, show, episodeNumber, extensionName, extensionSummary, extensionPreview, previewSize, prefs)
+    } catch (e: Throwable) {
+        // Lists, the player and the start screen must never fail because of TMDB data:
+        // fall back to what the extension gave.
+        logcat(LogPriority.ERROR, e) { "Episode display failed" }
+        EpisodeDisplay(
+            title = extensionName.ifBlank { number(episodeNumber) },
+            name = extensionName.takeIf { it.isNotBlank() },
+            summary = extensionSummary?.takeIf { it.isNotBlank() },
+            previewUrl = extensionPreview?.takeIf { it.isNotBlank() },
+            label = number(episodeNumber),
+            runtimeMinutes = null,
+        )
+    }
+
+    private fun compose(
+        context: Context,
+        show: ShowMeta?,
+        episodeNumber: Double,
+        extensionName: String,
+        extensionSummary: String?,
+        extensionPreview: String?,
+        previewSize: String,
+        prefs: MetadataPreferences,
     ): EpisodeDisplay {
         val enabled = prefs.tmdbEnabled().get()
         val meta = if (enabled) EpisodeMetadata.episode(show, episodeNumber, extensionName) else null

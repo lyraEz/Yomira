@@ -10,6 +10,17 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.8.1] - 2026-10-23
+
+Correção urgente da 1.8.0.
+
+### Fixed
+- O app fechava logo ao abrir na 1.8.0. Um padrão de texto usado para limpar os títulos dos animes funcionava nos testes do computador, mas o Android não o aceita, e a tela inicial caía ao montar o cartão *Continuar assistindo*.
+- Se os dados do TMDB de um episódio derem qualquer erro, a lista, o player e a tela inicial mostram o nome da extensão em vez de fechar o app.
+
+### Other
+- Antes de cada build, todos os padrões de texto do app são testados com o mesmo motor de regex do Android (`scripts/yomira/check-regex-icu.py`).
+
 ## Yomira [1.8.0] - 2026-10-23
 
 Player novo no estilo dos apps de streaming, episódios com nome e descrição em português e o pular abertura funcionando sem rastrear o anime.

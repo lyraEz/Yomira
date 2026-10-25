@@ -598,6 +598,9 @@ class PlayerActivity : BaseActivity() {
         // AM (DISCORD) -->
         updateDiscordRPC(exitingPlayer = true)
         // <-- AM (DISCORD)
+        // YMR -->
+        yomira.discord.PlayerPresence.onDestroy(this)
+        // YMR <--
 
         // ANZ -->
         pipReceiver?.let {
@@ -980,6 +983,9 @@ class PlayerActivity : BaseActivity() {
                 // ANZ -->
                 viewModel.restoreAspectRatio()
                 // ANZ <--
+                // YMR --> the Discord progress bar follows seeks and the resume position
+                yomira.discord.PlayerPresence.onSeek(this)
+                // YMR <--
             }
             MPV.mpvEvent.MPV_EVENT_END_FILE -> {
                 val errorNode = node.asMap()?.get("file_error") ?: return
@@ -1696,13 +1702,17 @@ class PlayerActivity : BaseActivity() {
 
         // aniSkip stuff
         viewModel.viewModelScope.launchIO {
+            // YMR --> only skip times already in the file or from the extension turn AniSkip off,
+            // and the length is read from this file (the flow may still hold the previous one)
             if (viewModel.introSkipEnabled && playerPreferences.aniSkipEnabled().get() &&
-                !(playerPreferences.disableAniSkipOnChapters().get() && viewModel.getChapterCount() > 0)
+                !(playerPreferences.disableAniSkipOnChapters().get() && viewModel.hasSkipChapters())
             ) {
-                viewModel.aniSkipResponse(viewModel.duration.value)?.let {
+                val length = mpv.getPropertyInt("duration")?.takeIf { it > 0 } ?: viewModel.duration.value
+                viewModel.aniSkipResponse(length)?.let {
                     viewModel.addTimestamps(it)
                 }
             }
+            // YMR <--
         }
     }
 
@@ -1789,6 +1799,9 @@ class PlayerActivity : BaseActivity() {
 
     // AM (DISCORD) -->
     private fun updateDiscordRPC(exitingPlayer: Boolean) {
+        // YMR --> Rich Presence through the Discord app on the phone; see yomira.discord
+        yomira.discord.PlayerPresence.onPlayerEvent(this, exitingPlayer)
+        // YMR <--
         if (!connectionsPreferences.enableDiscordRPC().get()) return
 
         lifecycleScope.launchIO {

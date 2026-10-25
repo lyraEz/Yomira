@@ -51,6 +51,8 @@ data class ShowMeta(
     /** Show-level details for the details screen; null on data saved by older versions. */
     val details: ShowDetails? = null,
     val detailsVersion: Int = 0,
+    /** Seasons the extension names ("T2E13", 2.013) with its first and last episode numbers. */
+    val extensionSeasons: Map<Int, ExtensionSeason> = emptyMap(),
 ) {
     val logoUrl: String? get() = TmdbClient.image(logoPath, "w500")
     val backdropUrl: String? get() = TmdbClient.image(backdropPath, "w1280")
@@ -87,6 +89,10 @@ data class CastMember(val name: String, val character: String? = null, val profi
 @Serializable
 data class SeasonInfo(val number: Int, val episodeCount: Int, val airDate: String? = null)
 
+/** A season as the extension numbers it: "T2E13" to "T2E29" is first 13, last 29. */
+@Serializable
+data class ExtensionSeason(val first: Int, val last: Int)
+
 @Serializable
 data class EpisodeMeta(
     val season: Int,
@@ -115,6 +121,7 @@ object EpisodeMetadata {
     private const val NO_MATCH_RETRY = 6 * HOUR
     private const val MAX_SEASONS_PER_PASS = 30
     private const val MAX_CAST = 24
+    private const val MIN_LIST_FOR_SEASONS = 3
 
     /** Raise when ShowMeta gains fields: older saved data is fetched again. */
     private const val DETAILS_VERSION = 1
@@ -144,7 +151,10 @@ object EpisodeMetadata {
      */
     fun locate(show: ShowMeta, episodeNumber: Double, episodeName: String): Pair<Int, Int>? {
         if (show.isMovie) return 1 to 1
-        EpisodeNumbers.packed(episodeNumber)?.let { return packedLocation(show, it) }
+        EpisodeNumbers.packed(episodeNumber)?.let { packed ->
+            val (season, episode) = packedLocation(show, packed)
+            return reconcile(show, season, episode, extensionSeason = packed.first)
+        }
         val named = TitleMatch.seasonEpisodeIn(episodeName)
         val whole = episodeNumber.takeIf { it == floor(it) }?.toInt()
         show.seasonHint?.let { hint ->
@@ -158,8 +168,60 @@ object EpisodeMetadata {
             val continued = absolute(show, number)
             return if (continued != null && continued.first >= hint) continued else hint to shifted
         }
-        named?.let { (season, episode) -> return if (episode >= 1) season to episode else null }
+        named?.let { (season, episode) ->
+            return if (episode >= 1) reconcile(show, season, episode, extensionSeason = season) else null
+        }
         return absolute(show, (whole ?: return null) + show.offset)
+    }
+
+    /**
+     * Fits a season and episode the extension wrote into TMDB's seasons. Some extensions call a
+     * continuation a new season: "T2E25" for TMDB's S2E1 (numbering that goes on from season 1),
+     * or "T2E13" for TMDB's S1E13 when TMDB keeps both parts in one season. Without this those
+     * episodes had no name or image.
+     */
+    private fun reconcile(show: ShowMeta, season: Int, episode: Int, extensionSeason: Int): Pair<Int, Int> {
+        val regular = show.seasons.filter { it.number >= 1 }.sortedBy { it.number }
+        if (regular.isEmpty() || season < 1) return season to episode
+        val info = regular.firstOrNull { it.number == season }
+        if (info != null && episode in 1..info.episodeCount) return season to episode
+        val own = show.extensionSeasons[extensionSeason]
+        val continues = own != null && own.first > 1
+        // The number goes on from the earlier seasons: S2 "E25" is S2E1 after a 24-episode S1.
+        if (info != null && (own == null || continues)) {
+            val before = regular.filter { it.number < season }.sumOf { it.episodeCount }
+            val inSeason = episode - before
+            if (inSeason in 1..info.episodeCount) return season to inSeason
+        }
+        if (continues) absolute(show, episode)?.let { return it }
+        // A season TMDB does not have, numbered from 1: count the extension's earlier seasons.
+        if (info == null && own != null) {
+            val earlier = (1 until extensionSeason).map { show.extensionSeasons[it] ?: return season to episode }
+            val before = earlier.sumOf { it.last - it.first + 1 }
+            absolute(show, before + episode)?.let { return it }
+        }
+        return season to episode
+    }
+
+    /** The seasons the extension names in these episodes, with their first and last numbers. */
+    internal fun extensionSeasons(episodes: List<Pair<Double, String>>): Map<Int, ExtensionSeason> =
+        episodes
+            .mapNotNull { (number, name) -> EpisodeNumbers.packed(number) ?: TitleMatch.seasonEpisodeIn(name) }
+            .filter { (season, episode) -> season >= 1 && episode >= 1 }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, numbers) -> ExtensionSeason(numbers.min(), numbers.max()) }
+
+    private fun mergeSeasons(
+        old: Map<Int, ExtensionSeason>,
+        new: Map<Int, ExtensionSeason>,
+    ): Map<Int, ExtensionSeason> = (old.keys + new.keys).associateWith { season ->
+        val a = old[season]
+        val b = new[season]
+        when {
+            a == null -> b!!
+            b == null -> a
+            else -> ExtensionSeason(minOf(a.first, b.first), maxOf(a.last, b.last))
+        }
     }
 
     /**
@@ -282,7 +344,11 @@ object EpisodeMetadata {
                     cached.language == language &&
                     cached.detailsVersion == DETAILS_VERSION
                 ) {
-                    fresh.copy(episodes = cached.episodes, fetchedSeasons = cached.fetchedSeasons)
+                    fresh.copy(
+                        episodes = cached.episodes,
+                        fetchedSeasons = cached.fetchedSeasons,
+                        extensionSeasons = cached.extensionSeasons,
+                    )
                 } else {
                     fresh
                 }
@@ -290,8 +356,20 @@ object EpisodeMetadata {
                 writeDisk(show)
             }
         }
-        val current = show ?: return
+        var current = show ?: return
         if (current.isMovie) return
+
+        // Only whole lists say where a season starts (one episode from the player could mislead).
+        val named = if (episodes.size >= MIN_LIST_FOR_SEASONS) {
+            mergeSeasons(current.extensionSeasons, extensionSeasons(episodes))
+        } else {
+            current.extensionSeasons
+        }
+        if (named != current.extensionSeasons) {
+            current = current.copy(extensionSeasons = named)
+            publish(current)
+            writeDisk(current)
+        }
 
         val wanted = episodes.mapNotNull { (number, name) -> locate(current, number, name) }
         val seasons = wanted.map { it.first }.distinct().filter { season ->

@@ -943,6 +943,14 @@ class PlayerViewModel @JvmOverloads constructor(
         return mpv.getPropertyInt("chapter-list/count") ?: 0
     }
 
+    // YMR --> whether the file or the extension already marks an opening, ending or recap; plain
+    // "Chapter 1" markers do not count, so AniSkip still runs for those files
+    fun hasSkipChapters(): Boolean {
+        val chapters = mpv.getPropertyNode("chapter-list")?.toObject<List<ChapterNode>>(json) ?: return false
+        return chapters.any { it.chapterType != ChapterType.Other || yomira.player.SkipTimes.isSkipName(it.chapterTitle) }
+    }
+    // YMR <--
+
     fun addTimestamps(timestamps: List<TimeStamp>) {
         if (timestamps.isEmpty()) return
         val current = (
@@ -2809,7 +2817,9 @@ class PlayerViewModel @JvmOverloads constructor(
                     context.applicationContext.stringResource(MR.strings.player_aniskip_dontskip)
                 }
                 netflixTimeout.update { _ -> defaultWaitingTime }
-            } else if (autoSkip) {
+            // YMR --> openings and endings with story scenes over them get the button instead
+            } else if (autoSkip && !yomira.player.SkipTimes.isMixed(chapterType, chapter.chapterTitle)) {
+                // YMR <--
                 skipIntro(chapter.chapterTitle)
             } else {
                 updateSkipIntroButton(chapterType)

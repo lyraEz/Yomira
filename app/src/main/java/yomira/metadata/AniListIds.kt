@@ -165,7 +165,117 @@ object AniListIds {
         )
     }
 
-    private fun post(query: String, value: Long? = null, search: String? = null): JsonObject? {
+    /** An AniList entry and its neighbours in the chain of TV seasons. */
+    data class Entry(
+        val id: Long,
+        val idMal: Long?,
+        /** Episodes in the entry; while it airs, the ones aired so far. Null when unknown. */
+        val episodes: Int?,
+        val sequel: Long?,
+        val prequel: Long?,
+    )
+
+    private const val ENTRY_TTL = 24 * 60 * 60 * 1000L
+    private const val MAX_HOPS = 12
+    private val seasonFormats = setOf("TV", "TV_SHORT", "ONA")
+    private val entries = ConcurrentHashMap<Long, Entry>()
+
+    private fun savedEntry(id: Long) = store().getString("yomira_anilist_entry_$id", "")
+
+    /** The entry with this AniList id, from memory, the device or AniList (blocking). */
+    fun entry(id: Long): Entry? {
+        if (id <= 0) return null
+        entries[id]?.let { return it }
+        val raw = savedEntry(id).get().split(SEP)
+        val savedAt = raw.getOrNull(5)?.toLongOrNull() ?: 0L
+        val finished = raw.getOrNull(6) == "1"
+        val saved = if (raw.size >= 7) {
+            Entry(
+                id = id,
+                idMal = raw[0].toLongOrNull()?.takeIf { it > 0 },
+                episodes = raw[1].toIntOrNull()?.takeIf { it > 0 },
+                sequel = raw[2].toLongOrNull()?.takeIf { it > 0 },
+                prequel = raw[3].toLongOrNull()?.takeIf { it > 0 },
+            )
+        } else {
+            null
+        }
+        if (saved != null && (finished || System.currentTimeMillis() - savedAt < ENTRY_TTL)) {
+            entries[id] = saved
+            return saved
+        }
+        val query = "query(\$v:Int){Media(id:\$v,type:ANIME){id idMal episodes status nextAiringEpisode{episode} " +
+            "relations{edges{relationType node{id type format}}}}}"
+        val media = post(query, value = id)?.obj("data")?.obj("Media") ?: return saved
+        fun related(type: String): Long? = media.obj("relations")?.array("edges").orEmpty()
+            .firstOrNull { edge ->
+                val node = edge.obj("node")
+                edge.string("relationType") == type &&
+                    node?.string("type") == "ANIME" &&
+                    node.string("format") in seasonFormats
+            }
+            ?.obj("node")?.long("id")
+        val aired = media.obj("nextAiringEpisode")?.int("episode")?.minus(1)?.takeIf { it > 0 }
+        val entry = Entry(
+            id = id,
+            idMal = media.long("idMal")?.takeIf { it > 0 },
+            episodes = media.int("episodes")?.takeIf { it > 0 } ?: aired,
+            sequel = related("SEQUEL"),
+            prequel = related("PREQUEL"),
+        )
+        val done = media.string("status") == "FINISHED"
+        entries[id] = entry
+        savedEntry(id).set(
+            listOf(
+                entry.idMal ?: 0,
+                entry.episodes ?: 0,
+                entry.sequel ?: 0,
+                entry.prequel ?: 0,
+                "",
+                System.currentTimeMillis(),
+                if (done) "1" else "0",
+            ).joinToString(SEP),
+        )
+        return entry
+    }
+
+    /** The first season of the chain this entry belongs to. */
+    fun root(start: Entry): Entry {
+        var current = start
+        repeat(MAX_HOPS) {
+            current = current.prequel?.let(::entry) ?: return current
+        }
+        return current
+    }
+
+    /** The entry [hops] seasons after [start], or null when the chain is shorter. */
+    fun hop(start: Entry, hops: Int): Entry? {
+        var current = start
+        repeat(hops.coerceIn(0, MAX_HOPS)) {
+            current = current.sequel?.let(::entry) ?: return null
+        }
+        return current
+    }
+
+    /**
+     * The entry and episode of the [number]th episode counted from the start of [start], going on
+     * into its sequels ("episode 25" of a 24-episode first season is the second season's first).
+     */
+    fun walk(start: Entry, number: Int): Pair<Entry, Int>? {
+        if (number < 1) return null
+        var current = start
+        var remaining = number
+        repeat(MAX_HOPS) {
+            val count = current.episodes ?: return current to remaining
+            if (remaining <= count) return current to remaining
+            val next = current.sequel?.let(::entry) ?: return null
+            remaining -= count
+            current = next
+        }
+        return null
+    }
+
+    internal fun post(query: String, value: Long? = null, search: String? = null): JsonObject? {
         val body = buildJsonObject {
             put("query", query)
             put(

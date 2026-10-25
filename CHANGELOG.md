@@ -10,6 +10,33 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.10.0] - 2026-10-25
+
+Rich Presence no Discord pelo app do Discord do celular, capas certas nas temporadas "divididas" e pular abertura mais confiável.
+
+### Added
+- Discord: enquanto você assiste, o seu perfil mostra um card no estilo do Crunchyroll (capa em pé, selo S1E4 e barra de progresso). Sem login e sem token: o Yomira conversa com o app do Discord instalado e logado no celular. Pausar congela o tempo, avançar move a barra, trocar de episódio atualiza sozinho e sair do player tira o card.
+- O card é preenchido pelo TMDB: o nome do anime sem "Dublado/Legendado" da extensão e o nome do episódio em vez de "Episódio 3".
+- Configurações → Conexões → Discord, com tudo configurável:
+  - ligar e desligar, ver o estado da conexão e *Testar no Discord* (card de exemplo por 30 segundos);
+  - estilo do card (Crunchyroll ou um app seu do Discord Developer Portal), atividade e o que aparece na lista de membros;
+  - título (TMDB, inglês, romaji ou da extensão), primeira e segunda linha (anime, episódio, sinopse, número, extensão ou nada), nomes do TMDB e selo de temporada;
+  - imagem grande e pequena (capa, imagem do episódio ou nenhuma), barra de progresso ou tempo decorrido, o que fazer ao pausar e título/capa clicáveis;
+  - até dois botões: Assistir no Crunchyroll, AniList, MyAnimeList, TMDB, site da extensão ou um link seu;
+  - em quais extensões e categorias aparece, animes fora da biblioteca, esconder extensões +18 e animes escondidos.
+- No player: atalho em *Mais* para ligar e desligar, e o card *Discord* em Filtros com as opções principais, "Mostrar este anime" e "Mostrar esta extensão". As mudanças valem na hora.
+- O modo anônimo nunca mostra nada no Discord.
+
+### Fixed
+- Capas e nomes faltando nos episódios quando a extensão chama uma continuação de temporada nova: "T2E25" vira T2 E1 (Kusuriya no Hitorigoto) e "T2E13" vira T1 E13 quando o TMDB junta tudo numa temporada (Tensei Kizoku).
+- Pular abertura:
+  - nas temporadas 2 em diante de animes com todas as temporadas numa entrada só, ele usava os tempos da primeira temporada; agora segue as continuações do AniList até a temporada certa;
+  - aberturas e encerramentos "com cenas" (com história por cima) não são mais pulados sozinhos: aparece o botão;
+  - o encerramento acompanha o fim do vídeo quando ele é mais longo ou mais curto que o usado para marcar os tempos;
+  - quando não há tempos para um vídeo com a mesma duração, usa os tempos gerais do episódio em vez de não fazer nada;
+  - arquivos com capítulos comuns ("Capítulo 1") não desligam mais o pular abertura;
+  - a duração usada é a do episódio aberto, não a do anterior.
+
 ## Yomira [1.9.1] - 2026-10-23
 
 Ajustes da página do anime e da tela inicial pedidos depois da 1.9.0.

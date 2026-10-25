@@ -75,8 +75,8 @@ android {
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
         // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
-        versionCode = 10901
-        versionName = "1.9.1"
+        versionCode = 11000
+        versionName = "1.10.0"
 
         manifestPlaceholders["author"] = "@lyraEz"
         // YMR <--
@@ -107,6 +107,15 @@ android {
         // YMR <--
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // YMR --> Discord Rich Presence bridge (src/main/cpp), built for the packaged ABIs
+        externalNativeBuild {
+            cmake {
+                cppFlags += listOf("-std=c++20")
+                abiFilters(*yomiraAbis.toTypedArray())
+            }
+        }
+        // YMR <--
     }
 
     buildTypes {
@@ -173,6 +182,15 @@ android {
             matchingFallbacks.addAll(commonMatchingFallbacks)
         }
     }
+
+    // YMR -->
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
+    // YMR <--
 
     sourceSets {
         getByName("preview").res.srcDirs("src/beta/res")
@@ -249,6 +267,10 @@ android {
         aidl = true
         renderScript = false
         shaders = false
+
+        // YMR --> exposes the Discord SDK headers and library to CMake
+        prefab = true
+        // YMR <--
     }
 
     lint {
@@ -463,6 +485,9 @@ dependencies {
     implementation(aniyomilibs.bundles.cast)
     // nanohttpd server
     implementation(aniyomilibs.nanohttpd)
+    // YMR --> Discord Social SDK (Rich Presence through the installed Discord app)
+    implementation(files("libs/discord_partner_sdk.aar"))
+    // YMR <--
 }
 
 androidComponents {

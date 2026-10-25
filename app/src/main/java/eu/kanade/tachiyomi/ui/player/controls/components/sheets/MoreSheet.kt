@@ -172,6 +172,10 @@ fun MoreSheet(
                 }
             }
 
+            // YMR --> Discord Rich Presence on or off; the options live in the filters panel
+            yomira.discord.DiscordQuickRow(onOpenOptions = onEnterFiltersPanel)
+            // YMR <--
+
             Text(stringResource(MR.strings.player_hwdec_mode))
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),

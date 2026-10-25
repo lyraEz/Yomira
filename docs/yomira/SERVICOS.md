@@ -4,7 +4,7 @@ Alguns recursos herdados do AniZen usam contas, aplicativos ou chaves registrada
 
 | Recurso | Situação no Yomira | Como habilitar |
 | --- | --- | --- |
-| Discord Rich Presence | Desligado. Usava o aplicativo Discord registrado pelo autor do AniZen. A tela de conexões mostra o aviso. | Registre um aplicativo em <https://discord.com/developers/applications> e compile com `-Pyomira.discordAppId=ID_DO_APP`. |
+| Discord Rich Presence (1.10.0) | Pelo Discord Social SDK (`app/libs/discord_partner_sdk.aar`, binário proprietário do Discord, ~28 MB, a variante sem voz) e a ponte `app/src/main/cpp`. Fala com o app do Discord instalado no celular: sem login, sem token. Desligado por padrão; liga em Configurações → Conexões → Discord. Usa o Application ID público da integração do Crunchyroll (card com capa em pé) ou um ID digitado pelo usuário. A versão antiga herdada do AniZen (login com token da conta) continua desligada. | Para a marca própria: crie um app em <https://discord.com/developers/applications>, suba o ícone e digite o ID em *Estilo do card → Meu próprio app*. |
 | Sincronização com Google Drive | Desligada. O `client_secrets.json` era do projeto Google do autor do AniZen e foi removido. A opção some da lista de serviços de sincronização. | Crie um cliente OAuth do tipo *Desktop* no Google Cloud, coloque o JSON em `app/src/main/assets/client_secrets.json` (ignorado pelo Git) e compile. |
 | SyncYomi | Disponível; usa um servidor indicado por você. | — |
 | Assistente de IA | Disponível e desligado por padrão; usa a chave de API que você informar. A verificação remota de bloqueio, que consultava um repositório do autor do AniZen, foi removida. | Configurações do assistente, com sua própria chave. |

@@ -82,13 +82,9 @@ object SettingsConnectionsScreen : SearchableSettings {
             }
         }
 
-        // YMR -->
+        // YMR --> Rich Presence through the Discord app on the phone (no account login); see yomira.discord
         if (!BuildConfig.DISCORD_RPC_ENABLED) {
-            return listOf(
-                Preference.PreferenceItem.InfoPreference(
-                    tachiyomi.presentation.core.i18n.stringResource(YMR.strings.discord_rpc_unavailable),
-                ),
-            )
+            return yomira.discord.discordPresenceGroups()
         }
         // YMR <--
         return listOf(

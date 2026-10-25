@@ -15,6 +15,8 @@ O app só se conecta a:
 
   Nada disso inclui dados da sua conta ou do aparelho. O que vem do TMDB fica guardado no próprio celular e pode ser apagado em *Limpar dados do TMDB*.
 
+- **Discord** (Configurações → Conexões → Discord, desligado por padrão): enquanto o player está aberto, o Yomira passa para o app do Discord instalado no celular o nome do anime e do episódio, a capa, o tempo e os botões escolhidos. O Discord mostra isso no seu perfil para quem pode vê-lo. O Yomira não pede nem guarda login, senha ou token da conta. Modo anônimo, animes escondidos, extensões +18 (por padrão) e as extensões e categorias fora da lista nunca aparecem.
+
 O recurso *Enviar do celular / Receber do celular* abre um servidor temporário na sua rede local enquanto o diálogo estiver na tela. Ele só aceita pedidos com o código aleatório exibido no QR code e é encerrado quando o diálogo fecha.
 
 Biblioteca, histórico, configurações e backups ficam no próprio aparelho, ou onde você decidir guardar o backup.

@@ -153,6 +153,7 @@ fun VideoFiltersPanel(
                 yomira.player.ResetPlayerButton()
                 yomira.player.OptimizerCard()
                 yomira.player.ToolsCard()
+                yomira.discord.DiscordPresenceCard()
                 yomira.player.DisplayCard()
                 // YMR <--
                 FilterPresetsCard()

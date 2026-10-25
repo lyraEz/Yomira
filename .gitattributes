@@ -22,3 +22,7 @@
 *.woff binary
 *.pyc binary
 *.swp binary
+
+# Native libraries
+*.aar binary
+*.so binary

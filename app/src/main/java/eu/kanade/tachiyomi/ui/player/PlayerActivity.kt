@@ -311,6 +311,9 @@ class PlayerActivity : BaseActivity() {
         enableEdgeToEdge()
         registerSecureActivity(this)
         super.onCreate(savedInstanceState)
+        // YMR --> Anime4K processing waits (or slows down) while the player is open
+        yomira.anime4k.Anime4KQueue.setPlayerOpen(applicationContext, true)
+        // YMR <--
         // YMR --> one-time return to the light player defaults (fixes the overheating presets)
         yomira.player.PlayerDefaults.migrate()
         // YMR <--
@@ -600,6 +603,7 @@ class PlayerActivity : BaseActivity() {
         // <-- AM (DISCORD)
         // YMR -->
         yomira.discord.PlayerPresence.onDestroy(this)
+        yomira.anime4k.Anime4KQueue.setPlayerOpen(applicationContext, false)
         // YMR <--
 
         // ANZ -->
@@ -1698,6 +1702,8 @@ class PlayerActivity : BaseActivity() {
         // ANZ <--
         // YMR --> audio extras, A-B loop reset and per-anime speed for every file
         yomira.player.PlayerTools.onFileLoaded(viewModel.mpv, viewModel.currentAnime.value?.id)
+        // Smart Anime4K: use or prepare the Anime4K version of this episode
+        yomira.anime4k.PlayerAnime4K.onEpisodeStarted(this)
         // YMR <--
 
         // aniSkip stuff

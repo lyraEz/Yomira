@@ -485,6 +485,11 @@ dependencies {
     implementation(aniyomilibs.bundles.cast)
     // nanohttpd server
     implementation(aniyomilibs.nanohttpd)
+    // YMR --> Anime4K offline processing: Media3 decodes, runs the GPU effect and encodes
+    implementation(androidx.media3.transformer)
+    implementation(androidx.media3.effect)
+    implementation(androidx.media3.common)
+    // YMR <--
     // YMR --> Discord Social SDK (Rich Presence through the installed Discord app)
     implementation(files("libs/discord_partner_sdk.aar"))
     // YMR <--

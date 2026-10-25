@@ -204,7 +204,9 @@ class DownloadManager(
         if (files.isEmpty()) {            throw Exception(context.stringResource(MR.strings.video_list_empty_error))
         }
 
-        val file = files[0]
+        // YMR --> the Anime4K version (Enhanced Downloads) is played when it is there
+        val file = yomira.anime4k.EnhancedDownloads.preferEnhanced(files) { it.name }[0]
+        // YMR <--
 
         val subtitleTracks = episodeDir?.listFiles().orEmpty()
             .filter {

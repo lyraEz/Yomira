@@ -3,6 +3,7 @@ agp_version = "8.11.1"
 lifecycle_version = "2.9.3"
 paging_version = "3.3.6"
 interpolator_version = "1.0.0"
+media3_version = "1.8.0"
 
 [libraries]
 gradle = { module = "com.android.tools.build:gradle", version.ref = "agp_version" }
@@ -23,6 +24,11 @@ lifecycle-runtimektx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", ve
 lifecycle-runtimecompose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle_version" }
 
 workmanager = "androidx.work:work-runtime:2.10.4"
+
+# YMR: Anime4K offline processing (decode, GPU effect, encode)
+media3-transformer = { module = "androidx.media3:media3-transformer", version.ref = "media3_version" }
+media3-effect = { module = "androidx.media3:media3-effect", version.ref = "media3_version" }
+media3-common = { module = "androidx.media3:media3-common", version.ref = "media3_version" }
 
 paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "paging_version" }
 paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging_version" }

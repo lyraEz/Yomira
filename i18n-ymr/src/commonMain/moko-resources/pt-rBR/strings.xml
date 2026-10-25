@@ -513,4 +513,6 @@
     <string name="rpc_test_summary">Mostra um card de exemplo por 30 segundos</string>
     <string name="rpc_test_sent">Card de exemplo enviado. Veja no seu perfil do Discord.</string>
     <string name="rpc_test_episode">Teste do Rich Presence</string>
+    <string name="rpc_app_name">Nome no card</string>
+    <string name="rpc_app_name_summary">Aparece como \"Assistindo %1$s\". Deixe vazio para usar o nome do estilo do card.</string>
 </resources>

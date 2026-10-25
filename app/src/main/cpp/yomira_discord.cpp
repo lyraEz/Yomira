@@ -40,6 +40,7 @@ enum Field {
     kButton1Url,
     kButton2Label,
     kButton2Url,
+    kName,
     kFieldCount,
 };
 
@@ -183,6 +184,8 @@ Java_yomira_discord_DiscordNative_nativeUpdate(JNIEnv *env, jobject, jobjectArra
             return;
         }
         discordpp::Activity activity;
+        // Without a name the Discord app shows "Game" in the header.
+        if (!values[kName].empty()) activity.SetName(values[kName]);
         activity.SetType(activityType(type));
         activity.SetSupportedPlatforms(discordpp::ActivityGamePlatforms::Android);
         switch (display) {

@@ -26,7 +26,8 @@ internal object DiscordNative {
     const val BUTTON1_URL = 11
     const val BUTTON2_LABEL = 12
     const val BUTTON2_URL = 13
-    const val FIELD_COUNT = 14
+    const val NAME = 14
+    const val FIELD_COUNT = 15
 
     @Volatile private var loaded: Boolean? = null
 

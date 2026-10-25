@@ -10,6 +10,11 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.10.1] - 2026-10-26
+
+### Fixed
+- Discord: o cabeçalho do card mostrava "Assistindo Game". Agora mostra "Assistindo Crunchyroll" (ou o nome do seu app), e dá para trocar o nome em Configurações → Conexões → Discord → *Nome no card*.
+
 ## Yomira [1.10.0] - 2026-10-25
 
 Rich Presence no Discord pelo app do Discord do celular, capas certas nas temporadas "divididas" e pular abertura mais confiável.

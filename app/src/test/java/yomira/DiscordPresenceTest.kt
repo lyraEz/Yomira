@@ -37,6 +37,7 @@ class DiscordPresenceTest {
     @Test
     fun `playing card uses TMDB names, the badge and a progress bar`() {
         val card = PresenceBuilder.build(input(), PresenceOptions())!!
+        assertEquals("Crunchyroll", card.fields[DiscordNative.NAME])
         assertEquals("Attack on Titan", card.fields[DiscordNative.DETAILS])
         assertEquals("To You, in 2000 Years", card.fields[DiscordNative.STATE])
         assertEquals("Season 1, Episode 1", card.fields[DiscordNative.LARGE_TEXT])

@@ -514,4 +514,6 @@
     <string name="rpc_test_summary">Shows a sample card for 30 seconds</string>
     <string name="rpc_test_sent">Sample card sent. Look at your Discord profile.</string>
     <string name="rpc_test_episode">Rich Presence test</string>
+    <string name="rpc_app_name">Name in the card</string>
+    <string name="rpc_app_name_summary">Shown as \"Watching %1$s\". Leave empty for the card style\'s name.</string>
 </resources>

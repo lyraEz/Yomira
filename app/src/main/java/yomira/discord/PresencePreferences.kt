@@ -16,6 +16,14 @@ class PresencePreferences(private val store: PreferenceStore = Injekt.get()) {
     /** Application ID typed by the user (Discord Developer Portal) for [APP_CUSTOM]. */
     fun customAppId() = store.getString("yomira_rpc_app_id", "")
 
+    /** Name in the card header; empty = "Crunchyroll" or "Yomira", after the card style. */
+    fun appName() = store.getString("yomira_rpc_app_name", "")
+
+    /** The header name actually used. */
+    fun effectiveAppName(): String = appName().get().trim().ifEmpty {
+        if (app().get() == APP_CUSTOM) "Yomira" else "Crunchyroll"
+    }
+
     /** "watching", "playing" or "listening". */
     fun activityType() = store.getString("yomira_rpc_type", "watching")
 
@@ -79,6 +87,7 @@ class PresencePreferences(private val store: PreferenceStore = Injekt.get()) {
     }
 
     fun options(): PresenceOptions = PresenceOptions(
+        appName = effectiveAppName(),
         activityType = activityType().get(),
         statusDisplay = statusDisplay().get(),
         titleSource = titleSource().get(),

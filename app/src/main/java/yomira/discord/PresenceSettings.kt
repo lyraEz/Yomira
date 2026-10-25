@@ -31,6 +31,8 @@ fun discordPresenceGroups(): List<Preference> {
     val enabled by prefs.enabled().collectPref()
     val app by prefs.app().collectPref()
     val customId by prefs.customAppId().collectPref()
+    val typedName by prefs.appName().collectPref()
+    val appName = remember(typedName, app) { prefs.effectiveAppName() }
     val sourceMode by prefs.sourceMode().collectPref()
     val hidden by prefs.hiddenAnime().collectPref()
     val buttons = (1..2).map { prefs.button(it).collectPref().value }
@@ -133,6 +135,11 @@ fun discordPresenceGroups(): List<Preference> {
                         else -> stringResource(YMR.strings.rpc_app_id_summary)
                     },
                     enabled = app == PresencePreferences.APP_CUSTOM,
+                ),
+                Preference.PreferenceItem.EditTextPreference(
+                    pref = prefs.appName(),
+                    title = stringResource(YMR.strings.rpc_app_name),
+                    subtitle = stringResource(YMR.strings.rpc_app_name_summary, appName),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     pref = prefs.activityType(),

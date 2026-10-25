@@ -7,6 +7,8 @@ data class PresenceButtonOption(val kind: String, val label: String = "", val ur
 
 /** A snapshot of [PresencePreferences]. */
 data class PresenceOptions(
+    /** Shown after "Watching" in the card header ("Watching Crunchyroll"). */
+    val appName: String = "Crunchyroll",
     val activityType: String = "watching",
     val statusDisplay: String = "name",
     val titleSource: String = "tmdb",
@@ -97,6 +99,7 @@ object PresenceBuilder {
     fun build(input: PresenceInput, options: PresenceOptions, labels: PresenceLabels = PresenceLabels()): PresencePayload? {
         if (input.paused && options.pausedMode == "hide") return null
         val fields = MutableList(DiscordNative.FIELD_COUNT) { "" }
+        fields[DiscordNative.NAME] = text(options.appName)
 
         val title = title(input, options)
         val episodeName = episodeName(input, options)

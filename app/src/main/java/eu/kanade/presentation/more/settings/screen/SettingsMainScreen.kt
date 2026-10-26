@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CallToAction
 import androidx.compose.material.icons.outlined.Code
@@ -127,12 +126,6 @@ object SettingsMainScreen : Screen() {
                         screen = yomira.anime4k.SettingsAnime4KScreen,
                     ),
                     // YMR <--
-                    Item(
-                        titleRes = MR.strings.pref_category_ai,
-                        subtitleRes = MR.strings.pref_ai_summary,
-                        icon = Icons.Default.AutoAwesome,
-                        screen = SettingsAiScreen,
-                    ),
                 ),
                 "Connections" to listOf(
                     Item(

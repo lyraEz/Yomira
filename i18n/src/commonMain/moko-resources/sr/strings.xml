@@ -993,7 +993,7 @@
     <string name="label_all">Сви</string>
     <string name="delete_confirmation">Да ли сте сигурни да желите да обришете \"%s\"?</string>
     <string name="label_storage">Складиште</string>
-    <string name="unofficial_extension_message_anizen">Ово проширење није са званичне листе.</string>
+    <string name="unofficial_extension_message_app">Ово проширење није са званичне листе.</string>
     <string name="choose_video_quality">Изабери квалитет видеа:</string>
     <string name="action_sort_last_checked">Последњи пут проверено</string>
     <string name="action_mark_as_seen">Означи као гледано</string>

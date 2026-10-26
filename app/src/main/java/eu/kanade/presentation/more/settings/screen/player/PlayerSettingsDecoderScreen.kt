@@ -87,8 +87,8 @@ object PlayerSettingsDecoderScreen : SearchableSettings {
             ),
             Preference.PreferenceItem.SwitchPreference(
                 pref = adaptiveScaling,
-                title = stringResource(MR.strings.pref_ai_performance_intelligence),
-                subtitle = stringResource(MR.strings.pref_ai_performance_intelligence_summary),
+                title = stringResource(yomira.i18n.YMR.strings.adaptive_performance),
+                subtitle = stringResource(yomira.i18n.YMR.strings.adaptive_performance_summary),
             ),
             Preference.PreferenceItem.SwitchPreference(
                 pref = yuv420p,

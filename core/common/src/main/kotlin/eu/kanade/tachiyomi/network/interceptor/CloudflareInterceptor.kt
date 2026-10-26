@@ -81,7 +81,7 @@ class CloudflareInterceptor(
     private fun cleanUserAgent(userAgent: String): String {
         return userAgent
             .replace(ANIYOMI_USER_AGENT_REGEX, "")
-            .replace(ANIZEN_USER_AGENT_REGEX, "")
+            .replace(APP_USER_AGENT_REGEX, "")
             .replace(TACHIYOMI_USER_AGENT_REGEX, "")
             .trim()
     }
@@ -393,7 +393,7 @@ private val COOKIE_NAMES = listOf("cf_clearance")
 
 // Hoisted out of the interceptor body: these previously recompiled on every request.
 private val ANIYOMI_USER_AGENT_REGEX = Regex("\\s+Aniyomi/\\S+", RegexOption.IGNORE_CASE)
-private val ANIZEN_USER_AGENT_REGEX = Regex("\\s+AniZen/\\S+", RegexOption.IGNORE_CASE)
+private val APP_USER_AGENT_REGEX = Regex("\\s+Yomira/\\S+", RegexOption.IGNORE_CASE)
 private val TACHIYOMI_USER_AGENT_REGEX = Regex("\\s+Tachiyomi/\\S+", RegexOption.IGNORE_CASE)
 private val CHROME_VERSION_REGEX = Regex("Chrome/(\\d+)")
 

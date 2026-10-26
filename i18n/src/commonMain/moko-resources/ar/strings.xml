@@ -783,7 +783,7 @@
     <string name="action_edit_manga_categories">تعديل فئات المانغا</string>
     <string name="action_previous_episode">الحلقة السابقة</string>
     <string name="action_start_download_internally">إستخدام أداة التحميل الداخلية</string>
-    <string name="unofficial_extension_message_anizen">هذا الامتداد ليس من قائمة ملحقات \"Yomira\" الرسمية.</string>
+    <string name="unofficial_extension_message_app">هذا الامتداد ليس من قائمة ملحقات \"Yomira\" الرسمية.</string>
     <string name="pref_progress_mark_as_seen">في أي نسبة تحدد الحلقة كـ\"تم مشاهدتها\"</string>
     <string name="pref_category_player_orientation">التوجيه</string>
     <string name="pref_skip_disable">تعطيل</string>

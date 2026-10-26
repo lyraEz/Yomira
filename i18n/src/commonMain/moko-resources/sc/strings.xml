@@ -834,7 +834,7 @@
     <string name="label_watched_episodes">Pompiadu</string>
     <string name="entries">Elementos de sa biblioteca</string>
     <string name="label_all">Totu</string>
-    <string name="unofficial_extension_message_anizen">Custa estensione non benit dae sa lista ufitziale.</string>
+    <string name="unofficial_extension_message_app">Custa estensione non benit dae sa lista ufitziale.</string>
     <string name="pref_player_audio_channels_auto">Automàticu</string>
     <string name="pref_player_audio_channels_mono">Mono</string>
     <string name="pref_player_audio_channels_stereo">Istèreu</string>

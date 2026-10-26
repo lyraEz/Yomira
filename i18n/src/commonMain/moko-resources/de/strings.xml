@@ -824,7 +824,7 @@
     <string name="default_anime_category">Standard-Animekategorie</string>
     <string name="pref_manga_library_update_categories_details">Einträge in ausgeschlossenen Kategorien werden nicht aktualisiert, auch wenn sie in eingeschlossenen Kategorien vorhanden sind.</string>
     <string name="pref_anime_library_update_categories_details">Anime in ausgeschlossenen Kategorien werden nicht aktualisiert, auch wenn sie in eingeschlossenen Kategorien vorhanden sind.</string>
-    <string name="unofficial_extension_message_anizen">Diese Erweiterung stammt nicht von der offiziellen Yomira-Erweiterungsliste.</string>
+    <string name="unofficial_extension_message_app">Diese Erweiterung stammt nicht von der offiziellen Yomira-Erweiterungsliste.</string>
     <string name="rotation_reverse_landscape">Umgekehrtes Querformat</string>
     <string name="rotation_sensor_portrait">Sensor-Hochformat</string>
     <string name="rotation_sensor_landscape">Sensor-Querformat</string>

@@ -4,7 +4,6 @@ import logcat.LogPriority
 import mihon.domain.extensionrepo.exception.SaveExtensionRepoException
 import mihon.domain.extensionrepo.model.KEIYOUSHI_SIGNATURE
 import mihon.domain.extensionrepo.model.ExtensionRepo
-import mihon.domain.extensionrepo.model.SALMANBAPPI_SIGNATURE
 import mihon.domain.extensionrepo.model.YUZONO_SIGNATURE
 import mihon.domain.extensionrepo.repository.ExtensionRepoRepository
 import mihon.domain.extensionrepo.service.ExtensionRepoService
@@ -104,11 +103,7 @@ class CreateExtensionRepo(
     }
 
     companion object {
-        const val OFFICIAL_REPO_WEBSITE = "https://github.com/salmanbappi/AniZen"
-        const val OFFICIAL_REPO_BASE_URL = "https://raw.githubusercontent.com/anizen-app/extensions/repo"
-
         const val OFFICIAL_REPO_SIGNATURE = YUZONO_SIGNATURE
         const val KEIYOUSHI_REPO_SIGNATURE = KEIYOUSHI_SIGNATURE
-        const val SALMANBAPPI_REPO_SIGNATURE = SALMANBAPPI_SIGNATURE
     }
 }

@@ -823,7 +823,7 @@
     <string name="default_anime_category">Varsayılan anime kategorisi</string>
     <string name="pref_manga_library_update_categories_details">Hariç tutulan kategorilerdeki girdiler, dahil edilen kategorilerde olsa bile güncellenmeyecektir.</string>
     <string name="pref_anime_library_update_categories_details">Hariç tutulan kategorilerdeki animeler, dahil edilen kategorilerde de olsalar dahi güncellenmeyecektir.</string>
-    <string name="unofficial_extension_message_anizen">Bu uzantı, resmi Yomira uzantıları listesinden değildir.</string>
+    <string name="unofficial_extension_message_app">Bu uzantı, resmi Yomira uzantıları listesinden değildir.</string>
     <string name="pref_preserve_watching_position">İzlenen bölümlerde izleme konumunu koru</string>
     <string name="pref_category_player_orientation">Yön</string>
     <string name="pref_default_intro_length">Giriş kısmı için varsayılan atlama süresi</string>

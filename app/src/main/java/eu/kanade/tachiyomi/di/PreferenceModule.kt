@@ -97,13 +97,7 @@ class PreferenceModule(val app: Application) : InjektModule {
             UiPreferences(get())
         }
         addSingletonFactory {
-            eu.kanade.domain.ai.AiPreferences(get())
-        }
-        addSingletonFactory {
             BasePreferences(app, get())
-        }
-        addSingletonFactory {
-            eu.kanade.tachiyomi.data.ai.AiManager(app, get(), get(), get())
         }
         // AM (CONNECTIONS) -->
         addSingletonFactory { ConnectionsPreferences(get()) }

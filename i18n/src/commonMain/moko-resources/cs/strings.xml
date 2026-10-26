@@ -781,7 +781,7 @@
     <string name="pref_bottom_nav_style">Styl spodní navigace</string>
     <string name="pref_anime_library_update_categories_details">Anime odebrané z kategorií nebudou aktualizována, ani když jsou zároveň v zahrnutých kategoriích.</string>
     <string name="action_start_download_internally">Použít stahovač uvnitř aplikace</string>
-    <string name="unofficial_extension_message_anizen">Toto rozšíření není z oficiálního seznamu Yomira rozšíření.</string>
+    <string name="unofficial_extension_message_app">Toto rozšíření není z oficiálního seznamu Yomira rozšíření.</string>
     <string name="pref_progress_mark_as_seen">Od jakého okamžiku označovat epizodu jako viděnou</string>
     <string name="pref_category_player_orientation">Orientace</string>
     <string name="pref_intro_length">Délka přeskočení intra</string>

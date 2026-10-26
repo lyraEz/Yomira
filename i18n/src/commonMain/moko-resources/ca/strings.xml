@@ -952,7 +952,7 @@
     <string name="label_migration_manga">Migrar el manga</string>
     <string name="label_migration_anime">Migrar l\'anime</string>
     <string name="settings">Ajustaments</string>
-    <string name="unofficial_extension_message_anizen">Aquesta extensió no és de la llista oficial d\'extensions d\'Yomira.</string>
+    <string name="unofficial_extension_message_app">Aquesta extensió no és de la llista oficial d\'extensions d\'Yomira.</string>
     <string name="unofficial_anime_extension_message">Aquesta extensió no és del llistat d\'extensions oficials d\'Yomira.</string>
     <string name="pref_default_intro_length">Salta la introducció per defecte</string>
     <string name="pref_enable_pip">Activa l\'ús del mode d\'imatge a imatge</string>

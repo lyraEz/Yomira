@@ -109,7 +109,6 @@
 
                 <!-- YMR -->
                 <data android:scheme="yomira" />
-                <data android:scheme="anizen" />
                 <data android:scheme="aniyomi" />
                 <data android:scheme="mihon" />
                 <data android:scheme="tachiyomi" />
@@ -262,7 +261,17 @@
                 <data android:host="tmdb-auth"/>
             </intent-filter>
 
-            <!-- Secondary filter for anizen scheme -->
+            <!-- Yomira's own redirects (TMDB accepts any redirect address) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="yomira" />
+                <data android:host="tmdb-auth"/>
+            </intent-filter>
+
+            <!-- Redirect address registered with the Trakt, Simkl, Shikimori and Bangumi apps in use -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

@@ -197,11 +197,11 @@ enum class DiscordScreen(
 
 // Constants for standard Rich Presence image urls
 // YMR -->
-private const val ANIZEN_LOGO_IMAGE_URL = "https://raw.githubusercontent.com/lyraEz/Yomira/main/.github/assets/icon.png"
+private const val YOMIRA_LOGO_IMAGE_URL = "https://raw.githubusercontent.com/lyraEz/Yomira/main/.github/assets/icon.png"
 
 // YMR <--
-private const val ANIMETAIL_IMAGE_URL = ANIZEN_LOGO_IMAGE_URL
-private const val ANIMETAIL_PREVIEW_IMAGE_URL = ANIZEN_LOGO_IMAGE_URL
+private const val ANIMETAIL_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
+private const val ANIMETAIL_PREVIEW_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
 private val ANIMETAIL_IMAGE = if (isPreviewBuildType) ANIMETAIL_PREVIEW_IMAGE_URL else ANIMETAIL_IMAGE_URL
 private const val BROWSE_IMAGE_URL = "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/explore/materialicons/48dp/1x/baseline_explore_white_48dp.png"
 private const val LIBRARY_IMAGE_URL = "https://raw.githubusercontent.com/google/material-design-icons/master/png/av/video_library/materialicons/48dp/1x/baseline_video_library_white_48dp.png"
@@ -209,7 +209,7 @@ private const val UPDATES_IMAGE_URL = "https://raw.githubusercontent.com/google/
 private const val HISTORY_IMAGE_URL = "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/history/materialicons/48dp/1x/baseline_history_white_48dp.png"
 private const val MORE_IMAGE_URL = "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/settings/materialicons/48dp/1x/baseline_settings_white_48dp.png"
 private const val WEBVIEW_IMAGE_URL = "https://raw.githubusercontent.com/google/material-design-icons/master/png/action/language/materialicons/48dp/1x/baseline_language_white_48dp.png"
-private const val VIDEO_IMAGE_URL = ANIZEN_LOGO_IMAGE_URL
-private const val MANGA_IMAGE_URL = ANIZEN_LOGO_IMAGE_URL
+private const val VIDEO_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
+private const val MANGA_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
 
 // <-- AM (DISCORD)

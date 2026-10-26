@@ -1,0 +1,4 @@
+-- The chat feature was removed; drop its tables.
+DROP INDEX IF EXISTS ai_messages_session_id_index;
+DROP TABLE IF EXISTS ai_messages;
+DROP TABLE IF EXISTS ai_sessions;

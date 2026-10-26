@@ -71,8 +71,8 @@ private fun ComingUpdatesScreenPreview() {
                 Foobar
 
                 ### More info
-                [salmanbappi/AniZen@23d862d17...48fb4a2e6](https://github.com/salmanbappi/AniZen/compare/23d862d17...48fb4a2e6)
-                - Hello ([@salmanbappi](@https://github.com/salmanbappi))
+                [lyraEz/Yomira@23d862d17...48fb4a2e6](https://github.com/lyraEz/Yomira/compare/23d862d17...48fb4a2e6)
+                - Hello ([@lyraEz](https://github.com/lyraEz))
                 - World
             """.trimIndent(),
             onOpenInBrowser = {},

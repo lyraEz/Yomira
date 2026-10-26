@@ -37,7 +37,6 @@ import eu.kanade.tachiyomi.util.system.copyToClipboard
 import kotlinx.collections.immutable.ImmutableSet
 import mihon.domain.extensionrepo.model.ExtensionRepo
 import mihon.domain.extensionrepo.model.KEIYOUSHI_SIGNATURE
-import mihon.domain.extensionrepo.model.SALMANBAPPI_SIGNATURE
 import mihon.domain.extensionrepo.model.YUZONO_SIGNATURE
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
@@ -214,6 +213,5 @@ private fun ExtensionRepoListItem(
 fun repoResId(fingerprint: String) = when (fingerprint) {
     YUZONO_SIGNATURE -> R.mipmap.repo_yuzono
     KEIYOUSHI_SIGNATURE -> R.mipmap.repo_keiyoushi
-    SALMANBAPPI_SIGNATURE -> R.mipmap.repo_salmanbappi
     else -> R.mipmap.repo_default
 }

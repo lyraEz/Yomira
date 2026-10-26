@@ -918,7 +918,7 @@
     <string name="download_ahead_info_anime">僅適用於媒體櫃中的條目，且在本集與下一集皆下載時生效</string>
     <string name="download_unseen">未看</string>
     <string name="pref_category_pip">畫中畫 (PiP)</string>
-    <string name="unofficial_extension_message_anizen">此擴充功能不是來自官方列表。</string>
+    <string name="unofficial_extension_message_app">此擴充功能不是來自官方列表。</string>
     <string name="rotation_reverse_landscape">橫向反轉</string>
     <string name="downloaded_episodes">已下載的集數</string>
     <string name="local_manga_source">本地漫畫源</string>

@@ -1,100 +1,56 @@
 #!/usr/bin/env python3
-"""Generates the Yomira launcher icon, README banner and splash assets.
+"""Generates the Yomira launcher icon, splash and README assets from the mark.
 
-The artwork is built from simple geometry (a crescent moon holding a play
-button) so it can be reproduced exactly from this script. Requires Pillow.
+The mark (the character 夜, "night", with an orbit and a moon) lives in
+scripts/yomira/branding/yomira-mark.svg as two paths: "mark" (even-odd fill)
+and "moon". Vector drawables keep the path data as is inside a scaled group;
+raster files are drawn by flattening the curves. Requires Pillow.
 
 Usage: python3 scripts/yomira/generate_branding.py [repo_root]
 """
 
-import math
 import os
+import re
 import sys
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", ".."))
 RES = os.path.join(ROOT, "app", "src", "main", "res")
+MARK_SVG = os.path.join(ROOT, "scripts", "yomira", "branding", "yomira-mark.svg")
 
 NIGHT_TOP = (0x1A, 0x12, 0x3D)
 NIGHT_BOTTOM = (0x3B, 0x22, 0x7E)
+MARK = (0xF6, 0xF1, 0xFF)
 MOON = (0xFF, 0xC8, 0x57)
-PLAY = (0xFF, 0xFF, 0xFF)
 
-# Geometry in the 108x108 adaptive icon viewport (safe zone: r=33 around 54,54).
-OUTER = (54.0, 54.0, 30.0)
-INNER = (63.0, 47.0, 24.5)
-PLAY_TRIANGLE = [(55.0, 40.0), (55.0, 66.0), (76.0, 53.0)]
-PLAY_CORNER = 3.2
-
+# The mark spans MARK_WIDTH dp centred in the 108 dp adaptive icon, which keeps the moon and the
+# ends of the orbit inside the 66 dp safe circle.
+MARK_WIDTH = 58.0
+# The orbit is a hairline in the artwork; an outline this wide (in mark units, the artwork is about
+# 1000 wide) keeps it visible at launcher size and only slightly bolds the strokes.
+OUTLINE = 6.0
 SCALE = 8  # supersampling factor for raster output
 
 
-def circle_intersections(c1, c2):
-    (x0, y0, r0), (x1, y1, r1) = c1, c2
-    d = math.hypot(x1 - x0, y1 - y0)
-    a = (r0 * r0 - r1 * r1 + d * d) / (2 * d)
-    h = math.sqrt(r0 * r0 - a * a)
-    xm = x0 + a * (x1 - x0) / d
-    ym = y0 + a * (y1 - y0) / d
-    p1 = (xm + h * (y1 - y0) / d, ym - h * (x1 - x0) / d)
-    p2 = (xm - h * (y1 - y0) / d, ym + h * (x1 - x0) / d)
-    return p1, p2
+def read_mark():
+    svg = open(MARK_SVG, encoding="utf-8").read()
+    w, h = (float(v) for v in re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg).groups())
+    paths = dict(re.findall(r'<path id="(\w+)"[^>]* d="([^"]+)"', svg))
+    return w, h, paths["mark"], paths["moon"]
 
 
-def rounded_triangle_points(points, radius, steps=12):
-    """Approximates a triangle with rounded corners as a polygon."""
-    out = []
-    n = len(points)
-    for i in range(n):
-        prev_pt = points[i - 1]
-        cur = points[i]
-        nxt = points[(i + 1) % n]
-        v1 = (prev_pt[0] - cur[0], prev_pt[1] - cur[1])
-        v2 = (nxt[0] - cur[0], nxt[1] - cur[1])
-        l1 = math.hypot(*v1)
-        l2 = math.hypot(*v2)
-        u1 = (v1[0] / l1, v1[1] / l1)
-        u2 = (v2[0] / l2, v2[1] / l2)
-        angle = math.acos(max(-1.0, min(1.0, u1[0] * u2[0] + u1[1] * u2[1])))
-        dist = radius / math.tan(angle / 2)
-        start = (cur[0] + u1[0] * dist, cur[1] + u1[1] * dist)
-        end = (cur[0] + u2[0] * dist, cur[1] + u2[1] * dist)
-        bis = (u1[0] + u2[0], u1[1] + u2[1])
-        bl = math.hypot(*bis)
-        center_dist = radius / math.sin(angle / 2)
-        center = (cur[0] + bis[0] / bl * center_dist, cur[1] + bis[1] / bl * center_dist)
-        a0 = math.atan2(start[1] - center[1], start[0] - center[0])
-        a1 = math.atan2(end[1] - center[1], end[0] - center[0])
-        delta = a1 - a0
-        while delta > math.pi:
-            delta -= 2 * math.pi
-        while delta < -math.pi:
-            delta += 2 * math.pi
-        for s in range(steps + 1):
-            t = a0 + delta * s / steps
-            out.append((center[0] + radius * math.cos(t), center[1] + radius * math.sin(t)))
-    return out
+W, H, MARK_D, MOON_D = read_mark()
+
+
+def placement(box, width):
+    """Scale and offset that centre a mark `width` units wide in a square `box`."""
+    s = width / W
+    return s, (box - W * s) / 2, (box - H * s) / 2
 
 
 def fmt(v):
-    return ("%.3f" % v).rstrip("0").rstrip(".")
-
-
-def crescent_path():
-    (ox, oy, r_out), (ix, iy, r_in) = OUTER, INNER
-    p1, p2 = circle_intersections(OUTER, INNER)
-    # Outer arc goes the long way round (away from the inner circle), inner arc comes back.
-    return (
-        f"M{fmt(p1[0])},{fmt(p1[1])} "
-        f"A{fmt(r_out)},{fmt(r_out)} 0 1,0 {fmt(p2[0])},{fmt(p2[1])} "
-        f"A{fmt(r_in)},{fmt(r_in)} 0 1,1 {fmt(p1[0])},{fmt(p1[1])} Z"
-    )
-
-
-def play_path():
-    pts = rounded_triangle_points(PLAY_TRIANGLE, PLAY_CORNER, steps=6)
-    return "M" + " L".join(f"{fmt(x)},{fmt(y)}" for x, y in pts) + " Z"
+    return f"{v:.4f}".rstrip("0").rstrip(".")
 
 
 def write(path, content):
@@ -103,28 +59,7 @@ def write(path, content):
         fh.write(content)
 
 
-def write_vectors():
-    foreground = f"""<?xml version="1.0" encoding="utf-8"?>
-<!-- Generated by scripts/yomira/generate_branding.py -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="#FFC857"
-        android:pathData="{crescent_path()}" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="{play_path()}" />
-</vector>
-"""
-    write(os.path.join(RES, "drawable", "ic_launcher_foreground.xml"), foreground)
-
-    monochrome = foreground.replace("#FFC857", "#FFFFFF")
-    write(os.path.join(RES, "drawable", "ic_launcher_monochrome.xml"), monochrome)
-
-    background = """<?xml version="1.0" encoding="utf-8"?>
+VECTOR_HEAD = """<?xml version="1.0" encoding="utf-8"?>
 <!-- Generated by scripts/yomira/generate_branding.py -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
@@ -132,7 +67,39 @@ def write_vectors():
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M0,0h108v108h-108z">
+"""
+
+
+def argb(rgb, alpha=0xFF):
+    return "#%02X%02X%02X%02X" % ((alpha,) + tuple(rgb))
+
+
+def mark_group(mark_color, moon_color):
+    s, x, y = placement(108, MARK_WIDTH)
+    moon = "" if moon_color is None else (
+        f'        <path android:fillColor="{moon_color}" android:pathData="{MOON_D}" />\n'
+    )
+    return (
+        f'    <group android:scaleX="{fmt(s)}" android:scaleY="{fmt(s)}" '
+        f'android:translateX="{fmt(x)}" android:translateY="{fmt(y)}">\n'
+        f'        <path android:fillColor="{mark_color}" android:fillType="evenOdd" '
+        f'android:strokeColor="{mark_color}" android:strokeWidth="{fmt(OUTLINE)}" android:strokeLineJoin="round" '
+        f'android:pathData="{MARK_D}" />\n'
+        f"{moon}"
+        "    </group>\n"
+    )
+
+
+def write_vectors():
+    write(
+        os.path.join(RES, "drawable", "ic_launcher_foreground.xml"),
+        VECTOR_HEAD + mark_group(argb(MARK), argb(MOON)) + "</vector>\n",
+    )
+    write(
+        os.path.join(RES, "drawable", "ic_launcher_monochrome.xml"),
+        VECTOR_HEAD + mark_group("#FFFFFFFF", None) + "</vector>\n",
+    )
+    background = VECTOR_HEAD + f"""    <path android:pathData="M0,0h108v108h-108z">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:endX="108"
@@ -140,8 +107,20 @@ def write_vectors():
                 android:startX="0"
                 android:startY="0"
                 android:type="linear">
-                <item android:color="#FF1A123D" android:offset="0" />
-                <item android:color="#FF3B227E" android:offset="1" />
+                <item android:color="{argb(NIGHT_TOP)}" android:offset="0" />
+                <item android:color="{argb(NIGHT_BOTTOM)}" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="70"
+                android:centerY="70"
+                android:gradientRadius="56"
+                android:type="radial">
+                <item android:color="#33FFC857" android:offset="0" />
+                <item android:color="#00FFC857" android:offset="1" />
             </gradient>
         </aapt:attr>
     </path>
@@ -150,123 +129,140 @@ def write_vectors():
     write(os.path.join(RES, "drawable", "ic_launcher_background.xml"), background)
 
 
+# Raster -----------------------------------------------------------------------------------------
+
+
+def flatten(d, steps=16):
+    """Turns absolute M/L/C/Z path data into closed polygons."""
+    polygons, current, pos = [], [], (0.0, 0.0)
+    tokens = re.findall(r"[MLCZ]|-?\d+(?:\.\d+)?", d)
+    i = 0
+    while i < len(tokens):
+        cmd = tokens[i]
+        i += 1
+        if cmd == "M":
+            if current:
+                polygons.append(current)
+            pos = (float(tokens[i]), float(tokens[i + 1]))
+            current = [pos]
+            i += 2
+        elif cmd == "L":
+            pos = (float(tokens[i]), float(tokens[i + 1]))
+            current.append(pos)
+            i += 2
+        elif cmd == "C":
+            c1 = (float(tokens[i]), float(tokens[i + 1]))
+            c2 = (float(tokens[i + 2]), float(tokens[i + 3]))
+            end = (float(tokens[i + 4]), float(tokens[i + 5]))
+            for k in range(1, steps + 1):
+                t = k / steps
+                u = 1 - t
+                current.append((
+                    u * u * u * pos[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t * t * t * end[0],
+                    u * u * u * pos[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t * t * t * end[1],
+                ))
+            pos = end
+            i += 6
+        elif cmd == "Z":
+            if current:
+                polygons.append(current)
+            current = []
+    if current:
+        polygons.append(current)
+    return polygons
+
+
+def draw_mark(size_px, width_px, mark_rgb, moon_rgb, offset=(0, 0)):
+    """The mark on a transparent square, centred, `width_px` wide (before supersampling)."""
+    big = size_px * SCALE
+    s, x0, y0 = placement(big, width_px * SCALE)
+    x0 += offset[0] * SCALE
+    y0 += offset[1] * SCALE
+    mask = Image.new("L", (big, big), 0)
+    # Even-odd: toggle every polygon (outlines and holes) against the mask.
+    for poly in flatten(MARK_D):
+        layer = Image.new("L", (big, big), 0)
+        ImageDraw.Draw(layer).polygon([(x0 + px * s, y0 + py * s) for px, py in poly], fill=255)
+        mask = _xor(mask, layer)
+    outline = ImageDraw.Draw(mask)
+    for poly in flatten(MARK_D):
+        pts = [(x0 + px * s, y0 + py * s) for px, py in poly]
+        outline.line(pts + [pts[0]], fill=255, width=max(1, round(OUTLINE * s)), joint="curve")
+    out = Image.new("RGBA", (big, big), mark_rgb + (0,))
+    out.putalpha(mask)
+    if moon_rgb is not None:
+        moon = Image.new("L", (big, big), 0)
+        for poly in flatten(MOON_D):
+            ImageDraw.Draw(moon).polygon([(x0 + px * s, y0 + py * s) for px, py in poly], fill=255)
+        out.paste(Image.new("RGBA", (big, big), moon_rgb + (255,)), (0, 0), moon)
+    return out.resize((size_px, size_px), Image.LANCZOS)
+
+
+def _xor(a, b):
+    return ImageChops.logical_xor(a.convert("1"), b.convert("1")).convert("L")
+
+
 def gradient(size, top, bottom):
-    w, h = size
-    img = Image.new("RGB", size, top)
+    img = Image.new("RGB", (size, size))
     px = img.load()
-    for y in range(h):
-        for x in range(w):
-            t = (x + y) / float(w + h - 2)
+    for y in range(size):
+        for x in range(size):
+            t = (x + y) / (2 * (size - 1))
             px[x, y] = tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
     return img
 
 
-def logo_layer(size_px, unit_px, offset=(0.0, 0.0)):
-    """Renders the crescent + play glyph on a transparent layer.
-
-    unit_px is the pixel size of one viewport unit; offset is in viewport units.
-    """
-    s = size_px * SCALE
-    u = unit_px * SCALE
-    ox, oy = offset[0] * u, offset[1] * u
-
-    def tx(p):
-        return (p[0] * u + ox, p[1] * u + oy)
-
-    outer_mask = Image.new("L", (s, s), 0)
-    inner_mask = Image.new("L", (s, s), 0)
-    d_out = ImageDraw.Draw(outer_mask)
-    d_in = ImageDraw.Draw(inner_mask)
-    cx, cy, r = OUTER
-    d_out.ellipse([tx((cx - r, cy - r)), tx((cx + r, cy + r))], fill=255)
-    cx, cy, r = INNER
-    d_in.ellipse([tx((cx - r, cy - r)), tx((cx + r, cy + r))], fill=255)
-    crescent = Image.composite(outer_mask, Image.new("L", (s, s), 0), Image.eval(inner_mask, lambda v: 255 - v))
-
-    play_mask = Image.new("L", (s, s), 0)
-    ImageDraw.Draw(play_mask).polygon([tx(p) for p in rounded_triangle_points(PLAY_TRIANGLE, PLAY_CORNER)], fill=255)
-
-    layer = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    layer.paste(Image.new("RGBA", (s, s), MOON + (255,)), (0, 0), crescent)
-    layer.paste(Image.new("RGBA", (s, s), PLAY + (255,)), (0, 0), play_mask)
-    return layer.resize((size_px, size_px), Image.LANCZOS)
-
-
 def legacy_icon(px):
-    """Full square icon with rounded corners for pre-adaptive consumers."""
-    s = px * SCALE
-    bg = gradient((s, s), NIGHT_TOP, NIGHT_BOTTOM).convert("RGBA")
-    mask = Image.new("L", (s, s), 0)
-    ImageDraw.Draw(mask).rounded_rectangle([0, 0, s - 1, s - 1], radius=int(s * 0.22), fill=255)
-    icon = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    icon.paste(bg, (0, 0), mask)
-    icon = icon.resize((px, px), Image.LANCZOS)
-    # Legacy icons show the full 108-unit canvas cropped to the central 72 units.
-    glyph = logo_layer(px, px / 72.0, offset=(-18.0, -18.0))
-    icon.alpha_composite(glyph)
-    return icon
+    """Rounded-square icon for places that need a bitmap (pre-adaptive launchers, README)."""
+    base = gradient(px, NIGHT_TOP, NIGHT_BOTTOM).convert("RGBA")
+    base.alpha_composite(draw_mark(px, px * MARK_WIDTH / 72, MARK, MOON))
+    mask = Image.new("L", (px * SCALE, px * SCALE), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, px * SCALE - 1, px * SCALE - 1), radius=int(px * SCALE * 0.23), fill=255)
+    base.putalpha(mask.resize((px, px), Image.LANCZOS))
+    return base
 
 
 def banner(width, height):
-    s_w, s_h = width * SCALE, height * SCALE
-    bg = gradient((s_w // 4, s_h // 4), NIGHT_TOP, NIGHT_BOTTOM).resize((s_w, s_h), Image.BICUBIC).convert("RGBA")
-    bg = bg.resize((width, height), Image.LANCZOS)
-
-    glyph_size = int(height * 0.62)
-    glyph = logo_layer(glyph_size, glyph_size / 64.0, offset=(-22.0, -22.0))
-
-    font_path = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
-    if not os.path.exists(font_path):
-        font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    draw = ImageDraw.Draw(bg)
-    text = "Yomira"
-    gap = int(width * 0.03)
-    font_size = int(height * 0.30)
-    while True:
-        font = ImageFont.truetype(font_path, font_size)
-        bbox = draw.textbbox((0, 0), text, font=font)
-        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        if glyph_size + gap + tw <= width * 0.86 or font_size < 8:
-            break
-        font_size -= 1
-
-    total = glyph_size + gap + tw
-    gx = (width - total) // 2
-    bg.alpha_composite(glyph, (gx, (height - glyph_size) // 2))
-    tx = gx + glyph_size + gap - bbox[0]
-    ty = (height - th) // 2 - bbox[1]
-    draw.text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
-    return bg
-
-
-def splash(px, dark):
-    glyph = logo_layer(px, px / 64.0, offset=(-22.0, -22.0))
-    if dark:
-        return glyph
-    # On light backgrounds the white play button needs the night colour to stay visible.
-    out = Image.new("RGBA", glyph.size, (0, 0, 0, 0))
-    r, g, b, a = glyph.split()
-    white = Image.eval(Image.merge("RGB", (r, g, b)).convert("L"), lambda v: 255 if v > 240 else 0)
-    night = Image.new("RGBA", glyph.size, NIGHT_BOTTOM + (255,))
-    out.alpha_composite(glyph)
-    out.paste(night, (0, 0), Image.composite(a, Image.new("L", glyph.size, 0), white))
-    return out
+    img = Image.new("RGB", (width, height))
+    px = img.load()
+    for y in range(height):
+        for x in range(width):
+            t = (x / width + y / height) / 2
+            px[x, y] = tuple(int(NIGHT_TOP[i] + (NIGHT_BOTTOM[i] - NIGHT_TOP[i]) * t) for i in range(3))
+    img = img.convert("RGBA")
+    mark = draw_mark(int(height * 0.62), int(height * 0.62), MARK, MOON)
+    img.alpha_composite(mark, ((width - mark.width) // 2, int(height * 0.08)))
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf"
+    if os.path.exists(font_path):
+        font = ImageFont.truetype(font_path, int(height * 0.075))
+        text = "  ".join("YOMIRA")
+        draw = ImageDraw.Draw(img)
+        box = draw.textbbox((0, 0), text, font=font)
+        tx = (width - (box[2] - box[0])) // 2
+        ty = int(height * 0.78)
+        draw.text((tx, ty), text, font=font, fill=MARK + (255,))
+        line_y = ty + (box[3] - box[1]) // 2 + int(height * 0.01)
+        draw.line((tx - int(width * 0.09), line_y, tx - int(width * 0.025), line_y), fill=MARK + (200,), width=2)
+        draw.line((tx + box[2] - box[0] + int(width * 0.025), line_y, tx + box[2] - box[0] + int(width * 0.09), line_y), fill=MARK + (200,), width=2)
+    return img
 
 
 def main():
     write_vectors()
-
-    densities = {"mdpi": 1.0, "hdpi": 1.5, "xhdpi": 2.0, "xxhdpi": 3.0, "xxxhdpi": 4.0}
+    densities = {"mdpi": 1, "hdpi": 1.5, "xhdpi": 2, "xxhdpi": 3, "xxxhdpi": 4}
     for name, factor in densities.items():
         folder = os.path.join(RES, f"mipmap-{name}")
-        os.makedirs(folder, exist_ok=True)
-        legacy_icon(int(48 * factor)).save(os.path.join(folder, "ic_launcher.png"), optimize=True)
-
-    # Wide banner used at the top of the README.
-
-    splash(288, dark=False).save(os.path.join(RES, "drawable", "ic_splash_logo_raw.png"), optimize=True)
-    splash(288, dark=True).save(os.path.join(RES, "drawable", "ic_splash_logo_raw_dark.png"), optimize=True)
-
+        if os.path.isdir(folder):
+            legacy_icon(int(48 * factor)).save(os.path.join(folder, "ic_launcher.png"), optimize=True)
+            if os.path.exists(os.path.join(folder, "ic_launcher_round.png")):
+                round_icon = legacy_icon(int(48 * factor))
+                m = Image.new("L", round_icon.size, 0)
+                ImageDraw.Draw(m).ellipse((0, 0, round_icon.width - 1, round_icon.height - 1), fill=255)
+                round_icon.putalpha(m)
+                round_icon.save(os.path.join(folder, "ic_launcher_round.png"), optimize=True)
+    # Splash: the mark alone; night-coloured on the light theme, light on the dark one.
+    draw_mark(288, 250, NIGHT_TOP, MOON).save(os.path.join(RES, "drawable", "ic_splash_logo_raw.png"), optimize=True)
+    draw_mark(288, 250, MARK, MOON).save(os.path.join(RES, "drawable", "ic_splash_logo_raw_dark.png"), optimize=True)
     assets = os.path.join(ROOT, ".github", "assets")
     os.makedirs(assets, exist_ok=True)
     legacy_icon(512).save(os.path.join(assets, "icon.png"), optimize=True)

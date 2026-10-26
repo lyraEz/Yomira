@@ -80,7 +80,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import eu.kanade.tachiyomi.R
-import eu.kanade.domain.ai.AiPreferences
 import eu.kanade.presentation.anime.components.MarkdownRender
 import eu.kanade.presentation.more.stats.data.ExtensionInfo
 import eu.kanade.presentation.more.stats.data.StatsData
@@ -102,14 +101,9 @@ import kotlin.time.toDuration
 fun StatsScreenContent(
     state: StatsScreenState.SuccessAnime,
     paddingValues: PaddingValues,
-    onGenerateAiAnalysis: () -> Unit,
-    onRegenerateAiAnalysis: () -> Unit,
     onClickExtensionReport: () -> Unit,
 ) {
     val statListState = rememberLazyListState()
-    val aiPreferences = remember { Injekt.get<AiPreferences>() }
-    val enableAi by aiPreferences.enableAi().collectAsState()
-    val enableAiStatistics by aiPreferences.enableAiStatistics().collectAsState()
 
     LazyColumn(
         state = statListState,
@@ -122,17 +116,6 @@ fun StatsScreenContent(
     ) {
         item {
             ProfileHeaderSection(state)
-        }
-
-        if (enableAi && enableAiStatistics) {
-            item {
-                AiIntelligenceSection(
-                    analysis = state.aiAnalysis ?: state.streamingAnalysis,
-                    isLoading = state.isAiLoading,
-                    onGenerate = onGenerateAiAnalysis,
-                    onRegenerate = onRegenerateAiAnalysis
-                )
-            }
         }
 
         item {
@@ -175,9 +158,9 @@ fun StatsScreenContent(
 
 @Composable
 private fun ProfileHeaderSection(state: StatsScreenState.SuccessAnime) {
-    val aiPreferences = remember { Injekt.get<AiPreferences>() }
-    val displayName by aiPreferences.displayName().collectAsState()
-    val profilePhotoUri by aiPreferences.profilePhotoUri().collectAsState()
+    val profilePreferences = remember { yomira.profile.ProfilePreferences() }
+    val displayName by profilePreferences.displayName().collectAsState()
+    val profilePhotoUri by profilePreferences.profilePhotoUri().collectAsState()
     val context = LocalContext.current
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
@@ -193,7 +176,7 @@ private fun ProfileHeaderSection(state: StatsScreenState.SuccessAnime) {
             } catch (e: Exception) {
                 // Ignore if not supported
             }
-            aiPreferences.profilePhotoUri().set(uri.toString())
+            profilePreferences.profilePhotoUri().set(uri.toString())
         }
     }
 
@@ -240,7 +223,7 @@ private fun ProfileHeaderSection(state: StatsScreenState.SuccessAnime) {
                 value = editText,
                 onValueChange = {
                     editText = it
-                    aiPreferences.displayName().set(it)
+                    profilePreferences.displayName().set(it)
                 },
                 textStyle = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold,
@@ -296,113 +279,6 @@ private fun ProfileHeaderSection(state: StatsScreenState.SuccessAnime) {
                 modifier = Modifier.secondaryItemAlpha(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-    }
-}
-
-@Composable
-private fun AiIntelligenceSection(
-    analysis: String?,
-    isLoading: Boolean,
-    onGenerate: () -> Unit,
-    onRegenerate: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    
-    StatsSectionCard(
-        title = "Behavioral Analytics",
-        modifier = Modifier.clickable(enabled = analysis != null) { expanded = !expanded }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .animateContentSize()
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(MaterialTheme.padding.medium)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.AutoAwesome,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = when {
-                            isLoading && analysis.isNullOrBlank() -> "Processing system data..."
-                            analysis != null -> "Analytical Summary"
-                            else -> "Generate behavioral insight"
-                        },
-                        style = MaterialTheme.typography.labelLarge,
-                        color = if (analysis != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                    )
-                    if (analysis == null && !isLoading) {
-                        Text(
-                            text = "AI will analyze your watch patterns",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.secondaryItemAlpha()
-                        )
-                    }
-                }
-                
-                if (analysis == null && isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else if (analysis == null) {
-                    TextButton(
-                        onClick = onGenerate,
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        Text("Generate")
-                    }
-                } else {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        IconButton(
-                            onClick = {
-                                context.copyToClipboard("Yomira AI Analysis", analysis)
-                            },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.ContentCopy,
-                                contentDescription = "Copy",
-                                modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        IconButton(
-                            onClick = onRegenerate,
-                            enabled = !isLoading,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Refresh,
-                                contentDescription = "Regenerate",
-                                modifier = Modifier.size(18.dp),
-                                tint = if (isLoading) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f) else MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
-            }
-            if (expanded && analysis != null) {
-                HorizontalDivider(modifier = Modifier.alpha(0.2f))
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    SelectionContainer {
-                        MarkdownRender(
-                            content = analysis,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
         }
     }
 }

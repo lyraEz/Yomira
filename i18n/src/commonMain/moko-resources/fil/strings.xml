@@ -823,7 +823,7 @@
     <string name="action_start_download_internally">Gumamit ng internal na downloader</string>
     <string name="action_order_by_episode_number">Ayon sa bilang ng episode</string>
     <string name="default_anime_category">Default na kategorya ng anime</string>
-    <string name="unofficial_extension_message_anizen">Ang extension na ito ay hindi mula sa opisyal na listahan ng mga extension ng Yomira.</string>
+    <string name="unofficial_extension_message_app">Ang extension na ito ay hindi mula sa opisyal na listahan ng mga extension ng Yomira.</string>
     <string name="rotation_sensor_portrait">Sensor na portrait</string>
     <string name="rotation_sensor_landscape">Sensor na landscape</string>
     <string name="unofficial_anime_extension_message">Ang extension na ito ay hindi mula sa opisyal na listahan ng mga extension ng Yomira.</string>

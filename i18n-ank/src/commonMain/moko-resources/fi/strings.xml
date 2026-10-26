@@ -25,7 +25,7 @@
   <string name="channel_new_episodes">Jaksojen päivitykset</string>
   <string name="pref_category_connections">Yhteydet</string>
   <string name="pref_connections_summary">Discord, lisää tullaan..</string>
-  <string name="connections_info">Erikoispalvelut, jotka ovat ainutlaatuisia AniZenlle ja parantavat tapaa käyttää sovellusta</string>
+  <string name="connections_info">Erikoispalvelut, jotka ovat ainutlaatuisia Yomiralle ja parantavat tapaa käyttää sovellusta</string>
   <string name="connections_discord">Discord</string>
   <string name="connections_discord_info">Tämä Discord-palvelu toimii tunnuksen lokilla. Käytä omalla vastuullasi. Tunnuksesi tallennetaan paikallisesti ja Yomira ei jaa sitä mistään muualta.</string>
   <string name="show_chapters_titles_title">Näytä Jaksot Otsikot</string>

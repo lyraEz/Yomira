@@ -778,7 +778,7 @@
     <string name="action_view_episodes">نمایش قسمت‌ها</string>
     <string name="action_previous_episode">قسمت قبلی</string>
     <string name="action_play">پخش</string>
-    <string name="unofficial_extension_message_anizen">این افزونه از لیست افزونه‌های رسمی آنی‌یومی نیست.</string>
+    <string name="unofficial_extension_message_app">این افزونه از لیست افزونه‌های رسمی آنی‌یومی نیست.</string>
     <string name="rotation_reverse_landscape">دورنما برعکس</string>
     <string name="rotation_sensor_portrait">حسگر پرتره</string>
     <string name="pref_progress_mark_as_seen">در چه نقطه ای اپیزود بعنوان مشاهده شده علامت‌گذاری شود</string>

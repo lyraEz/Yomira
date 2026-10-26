@@ -608,7 +608,7 @@ class MainActivity : BaseActivity() {
 
     private fun Intent.isAddExtensionRepoIntent(): Boolean {
         // YMR -->
-        val validSchemes = setOf("yomira", "anizen", "aniyomi", "mihon", "tachiyomi")
+        val validSchemes = setOf("yomira", "aniyomi", "mihon", "tachiyomi")
         // YMR <--
         val validHosts = setOf("add-repo", "extension-store")
         return scheme in validSchemes && data?.host in validHosts

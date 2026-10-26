@@ -163,7 +163,7 @@ object SettingsAdvancedScreen : SearchableSettings {
             preferenceItems = persistentListOf(
                 Preference.PreferenceItem.TextPreference(
                     title = "Start Performance Benchmark (30s)",
-                    subtitle = if (isBenchmarking) "Benchmarking in progress... interact with the app now!" else "Collects frame data and memory usage for 30 seconds to help optimize Anizen.",
+                    subtitle = if (isBenchmarking) "Benchmarking in progress... interact with the app now!" else "Collects frame data and memory usage for 30 seconds to see what slows the app down. The report stays on the phone.",
                     enabled = !isBenchmarking,
                     onClick = {
                         val activity = context.findActivity() ?: return@TextPreference

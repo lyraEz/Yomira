@@ -750,7 +750,7 @@
     <string name="download_notifier_download_paused_chapters">Завантаження призупинено</string>
     <string name="channel_new_chapters_episodes">Оновлення розділів/епізодів</string>
     <string name="pref_default_home_tab_library">Встановіть стартовий екран на вкладку Манґа</string>
-    <string name="unofficial_extension_message_anizen">Це розширення не входить до переліку офіційних розширень Yomira.</string>
+    <string name="unofficial_extension_message_app">Це розширення не входить до переліку офіційних розширень Yomira.</string>
     <string name="pref_intro_length">Пропустити тривалість вступу</string>
     <string name="pref_skip_length">Двічі торкніться, щоб пропустити інтро</string>
     <string name="default_anime_category">Категорія аніме за замовчуванням</string>

@@ -2,9 +2,6 @@
 <resources>
     <!-- Sobre -->
     <string name="about_project">Projeto</string>
-    <string name="about_credits">Créditos</string>
-    <string name="about_unofficial">Fork independente do AniZen</string>
-    <string name="about_unofficial_summary">O Yomira não é uma versão oficial do AniZen. Ele parte do trabalho dos projetos abaixo, sob a licença Apache 2.0.</string>
 
     <!-- Serviços -->
 
@@ -48,7 +45,7 @@
     <string name="ext_nsfw_settings_hint">Fontes adultas podem ser ligadas em Configurações → Navegar.</string>
 
     <!-- Repositórios -->
-    <string name="repo_add_message">Cole o endereço de um repositório no formato legado do AniZen/Aniyomi (termina em index.min.json). Qualquer repositório compatível funciona.</string>
+    <string name="repo_add_message">Cole o endereço de um repositório no formato legado de repositório (termina em index.min.json). Qualquer repositório compatível funciona.</string>
     <string name="repo_paste">Colar</string>
     <string name="repo_suggestions">Sugestões</string>
     <string name="repo_suggestions_note">Os repositórios sugeridos são mantidos por terceiros, não pelo Yomira.</string>
@@ -653,4 +650,6 @@
     <string name="color_saturation">Intensidade das cores</string>
     <string name="color_fade">Desbotar (filme)</string>
     <string name="color_info">Roda na GPU como um shader leve, depois do Anime4K. As legendas não são afetadas.</string>
+    <string name="adaptive_performance">Desempenho adaptativo</string>
+    <string name="adaptive_performance_summary">Reduz a qualidade dos shaders e a interpolação quando o celular esquenta ou perde quadros</string>
 </resources>

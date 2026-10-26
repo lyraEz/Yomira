@@ -1,4 +1,4 @@
--- Create AI Chat tables if they don't exist
+-- Create the chat tables if they don't exist (dropped again in 146)
 CREATE TABLE IF NOT EXISTS ai_sessions (
     _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,

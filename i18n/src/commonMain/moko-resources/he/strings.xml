@@ -796,7 +796,7 @@
     <string name="label_anime_sources">מקורות אנימה</string>
     <string name="label_manga_library">מאנגה</string>
     <string name="label_manga_sources">מקורות מאנגה</string>
-    <string name="unofficial_extension_message_anizen">הרחבה זו אינה מרשימת ההרחבות הרשמית של אניומי (Yomira).</string>
+    <string name="unofficial_extension_message_app">הרחבה זו אינה מרשימת ההרחבות הרשמית של אניומי (Yomira).</string>
     <string name="rotation_reverse_landscape">תצוגה הפוכה לרוחב</string>
     <string name="rotation_sensor_landscape">חיישן תצוגת רוחב</string>
     <string name="rotation_sensor_portrait">חיישן תצוגת דיוקן</string>

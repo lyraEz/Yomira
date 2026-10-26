@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Public
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -196,28 +195,11 @@ object AboutScreen : Screen() {
 
                         MoreItem(
                             title = stringResource(MR.strings.privacy_policy),
-                            onClick = { uriHandler.openUri("$YOMIRA_REPO_URL/blob/main/docs/yomira/PRIVACIDADE.md") },
+                            onClick = { uriHandler.openUri("$YOMIRA_REPO_URL/blob/main/docs/PRIVACY.md") },
                         )
                     }
                 }
 
-                item {
-                    MoreSection(title = stringResource(YMR.strings.about_credits)) {
-                        MoreItem(
-                            title = stringResource(YMR.strings.about_unofficial),
-                            subtitle = stringResource(YMR.strings.about_unofficial_summary),
-                            onClick = { uriHandler.openUri("$YOMIRA_REPO_URL#cr%C3%A9ditos") },
-                        )
-                        UPSTREAM_PROJECTS.forEach { (name, url) ->
-                            MoreItem(
-                                title = name,
-                                subtitle = url,
-                                icon = Icons.Outlined.Public,
-                                onClick = { uriHandler.openUri(url) },
-                            )
-                        }
-                    }
-                }
             }
         }
 
@@ -344,11 +326,5 @@ object AboutScreen : Screen() {
     // YMR -->
     private const val YOMIRA_REPO_URL = "https://github.com/lyraEz/Yomira"
 
-    private val UPSTREAM_PROJECTS = listOf(
-        "Yomira" to "https://github.com/salmanbappi/Yomira",
-        "Anikku" to "https://github.com/komikku-app/anikku",
-        "Aniyomi" to "https://github.com/aniyomiorg/aniyomi",
-        "Mihon" to "https://github.com/mihonapp/mihon",
-    )
     // YMR <--
 }

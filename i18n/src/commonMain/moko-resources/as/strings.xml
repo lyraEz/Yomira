@@ -871,7 +871,7 @@
     <string name="default_anime_category">ডিফল্ট এনিমে শ্ৰেণী</string>
     <string name="pref_manga_library_update_categories_details">বহিষ্কৃত শ্ৰেণীত থকা মাঙ্গাসমূহ অন্তৰ্ভুক্ত শ্ৰেণীত থকা হ’লেও আপডেট কৰা হ’ব নে।</string>
     <string name="pref_anime_library_update_categories_details">বহিষ্কৃত শ্ৰেণীত থকা এনিমেছমূহ অন্তৰ্ভুক্ত শ্ৰেণীত থকা হ’লেও আপডেট কৰা হ’ব নে।</string>
-    <string name="unofficial_extension_message_anizen">এই এক্সটেনচনটি আনুষ্ঠানিক তালিকাৰ পৰা নহয়।</string>
+    <string name="unofficial_extension_message_app">এই এক্সটেনচনটি আনুষ্ঠানিক তালিকাৰ পৰা নহয়।</string>
     <string name="rotation_reverse_landscape">বিপৰীত পৰিৱৰণ</string>
     <string name="rotation_sensor_portrait">চেন্সৰ পোৰট্ৰেইট</string>
     <string name="rotation_sensor_landscape">চেন্সৰ পৰিৱৰণ</string>

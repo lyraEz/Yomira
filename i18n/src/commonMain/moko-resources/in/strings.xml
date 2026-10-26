@@ -826,7 +826,7 @@
     <string name="default_anime_category">Kategori anime standar default</string>
     <string name="pref_manga_library_update_categories_details">Manga dalam kategori yang dikecualikan tidak akan diperbarui meskipun masuk dalam kategori yang disertakan.</string>
     <string name="pref_anime_library_update_categories_details">Anime dalam kategori yang dikecualikan tidak akan diperbarui meskipun masuk dalam kategori yang disertakan.</string>
-    <string name="unofficial_extension_message_anizen">Ektension ini bukan dari daftar ekstension official Yomira.</string>
+    <string name="unofficial_extension_message_app">Ektension ini bukan dari daftar ekstension official Yomira.</string>
     <string name="rotation_reverse_landscape">Lanskap terbalik</string>
     <string name="rotation_sensor_portrait">Sensor potret</string>
     <string name="rotation_sensor_landscape">Sensor pemandangan</string>

@@ -59,7 +59,7 @@ data class Anime(
      * The user's edit overlay, resolved on demand when the caller did not supply one.
      *
      * Upstream attaches this inside the model (`if (favorite) getCustomMangaInfo.get(id)`), so every
-     * instance resolves its derived properties against the user's edits. AniZen turned it into an
+     * instance resolves its derived properties against the user's edits. Yomira turned it into an
      * optional constructor parameter, which meant any [Anime] built from a repository row carried no
      * overlay: `title` (and author/artist/thumbnail/description/genre/status) then silently fell
      * back to the source's original values. That is what made the player header, the saved cover and

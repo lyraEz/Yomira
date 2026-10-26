@@ -879,7 +879,7 @@
     <string name="action_remove_bookmark_episode">Rimuovi segnalibro</string>
     <string name="action_show_anime">Mostra anime</string>
     <string name="action_display_local_badge_anime">Anime locali</string>
-    <string name="unofficial_extension_message_anizen">Questa estensione non proviene dalla lista di estensioni ufficiali Yomira.</string>
+    <string name="unofficial_extension_message_app">Questa estensione non proviene dalla lista di estensioni ufficiali Yomira.</string>
     <string name="rotation_reverse_landscape">Orizzontale inverso</string>
     <string name="action_mark_as_unseen">Segna come non visto</string>
     <string name="action_mark_previous_as_seen">Segna i precedenti come visti</string>

@@ -29,7 +29,6 @@ import animiru.feature.mpvfiles.MpvConfig
 import eu.kanade.tachiyomi.ui.player.domain.AudioManager
 import eu.kanade.tachiyomi.ui.player.domain.BrightnessManager
 import eu.kanade.tachiyomi.util.system.isDebugBuildType
-import eu.kanade.tachiyomi.data.ai.AiManager
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -173,9 +172,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ConnectionsManager() }
         // <-- AM (CONNECTIONS)
 
-        addSingletonFactory<tachiyomi.domain.ai.repository.ChatRepository> { 
-            tachiyomi.data.ai.ChatRepositoryImpl(get()) 
-        }
 
         addSingletonFactory { GoogleDriveService(app) }
 

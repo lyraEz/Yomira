@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 /**
  * Regression tests for moving to the next episode inside the player.
  *
- * Reported in AniZen/Aniyomi: opening the next episode directly worked, but pressing the
+ * Reported in Yomira/Aniyomi: opening the next episode directly worked, but pressing the
  * next-episode arrow sometimes closed the player. The causes were (1) the previous episode's
  * server list being reused when the next one failed to load, (2) an empty or failed server list
  * finishing the activity and (3) an uncaught "no available videos" exception reaching a global

@@ -135,7 +135,7 @@ private fun ColumnScope.FilterPage(
 ) {
     val filterDownloaded by screenModel.libraryPreferences.filterDownloaded().collectAsState()
     val downloadedOnly by screenModel.preferences.downloadedOnly().collectAsState()
-    // ANZ: AniZen exposes this as a Preference value, not a function.
+    // ANZ: Yomira exposes this as a Preference value, not a function.
     val autoUpdateAnimeRestrictions by screenModel.libraryPreferences.autoUpdateAnimeRestrictions.collectAsState()
 
     TriStateItem(
@@ -323,7 +323,7 @@ private val displayModes = listOf(
     MR.strings.action_display_comfortable_grid to LibraryDisplayMode.ComfortableGrid,
     MR.strings.action_display_list to LibraryDisplayMode.List,
     MR.strings.action_display_cover_only_grid to LibraryDisplayMode.CoverOnlyGrid,
-    // ANZ: upstream adds a `ComfortableGridPanorama` display mode here; AniZen keeps panorama
+    // ANZ: upstream adds a `ComfortableGridPanorama` display mode here; Yomira keeps panorama
     // as its own PanoramaMode preference (rendered below) and has no such enum entry.
 )
 
@@ -344,7 +344,7 @@ private fun ColumnScope.DisplayPage(
     }
 
     // ANZ -->
-    // AniZen-specific: panorama mode and the chip-based grid design. Upstream instead offers a
+    // Yomira-specific: panorama mode and the chip-based grid design. Upstream instead offers a
     // panorama display mode plus a SliderItem whose overload this branch of presentation-core
     // does not have, so these blocks are kept as-is.
     val uiPreferences = remember { Injekt.get<eu.kanade.domain.ui.UiPreferences>() }
@@ -449,7 +449,7 @@ private fun ColumnScope.DisplayPage(
 // SY -->
 data class GroupMode(
     val int: Int,
-    // ANZ: AniZen's LibraryGroup.groupTypeStringRes returns an android R.string id, not a
+    // ANZ: Yomira's LibraryGroup.groupTypeStringRes returns an android R.string id, not a
     // moko StringResource as in upstream.
     val nameRes: Int,
     val drawableRes: Int,

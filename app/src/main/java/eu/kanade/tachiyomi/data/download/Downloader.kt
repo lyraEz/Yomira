@@ -1289,7 +1289,7 @@ class Downloader(
                 context.startActivity(chooser)
             }
             
-            // A successful intent handoff is not a completed Anizen download. The external app has
+            // A successful intent handoff is not a completed Yomira download. The external app has
             // only accepted the request, so do not show a downloaded checkmark or cache an empty dir.
             download.status = Download.State.NOT_DOWNLOADED
             _queueState.update { it - download }

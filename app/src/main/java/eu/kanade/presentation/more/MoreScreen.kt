@@ -22,15 +22,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Label
-import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.outlined.CallToAction
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.GetApp
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LocalLibrary
-import androidx.compose.material.icons.outlined.MonitorHeart
 import androidx.compose.material.icons.outlined.QueryStats
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
@@ -59,15 +56,12 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
-import eu.kanade.domain.ai.AiPreferences
 import eu.kanade.domain.ui.model.NavItem
-import eu.kanade.presentation.more.settings.screen.ai.AiAssistantScreen
 import eu.kanade.presentation.more.settings.screen.NavigationSettingsScreen
 import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.more.DownloadQueueState
-import eu.kanade.tachiyomi.ui.stats.InfrastructureScreen
 import kotlinx.coroutines.launch
 import tachiyomi.core.common.Constants
 import tachiyomi.i18n.MR
@@ -107,7 +101,6 @@ fun MoreScreen(
     val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.currentOrThrow
     val scope = rememberCoroutineScope()
-    val aiPreferences = remember { Injekt.get<AiPreferences>() }
 
     Scaffold(
         topBar = {
@@ -217,28 +210,6 @@ fun MoreScreen(
             }
 
             item {
-                MoreSection(title = "System") {
-                    MoreItem(
-                        title = "Extension Health",
-                        subtitle = "Real-time telemetry and source status",
-                        icon = Icons.Outlined.MonitorHeart,
-                        onClick = { navigator.push(InfrastructureScreen) }
-                    )
-
-                    val enableAi by aiPreferences.enableAi().collectAsState()
-                    val enableAiAssistant by aiPreferences.enableAiAssistant().collectAsState()
-                    if (enableAi && enableAiAssistant) {
-                        MoreItem(
-                            title = "App Diagnostics",
-                            subtitle = "Automated troubleshooting and AI insights",
-                            icon = Icons.Default.Terminal,
-                            onClick = { navigator.push(AiAssistantScreen()) }
-                        )
-                    }
-                }
-            }
-
-            item {
                 MoreSection(title = "General") {
                     hiddenTabs.forEach { navItem ->
                         MoreItem(
@@ -298,11 +269,6 @@ fun MoreScreen(
                         title = stringResource(MR.strings.label_help),
                         icon = Icons.AutoMirrored.Outlined.HelpOutline,
                         onClick = { uriHandler.openUri(Constants.URL_HELP) }
-                    )
-                    MoreItem(
-                        title = stringResource(MR.strings.label_sponsor_me),
-                        icon = Icons.Outlined.Favorite,
-                        onClick = { uriHandler.openUri("https://www.patreon.com/10625779/join") }
                     )
                 }
             }

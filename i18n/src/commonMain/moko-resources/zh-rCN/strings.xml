@@ -831,7 +831,7 @@
     <string name="default_anime_category">默认动画分类</string>
     <string name="pref_manga_library_update_categories_details">排除优先于包含，同时属于包含和排除分类的漫画不会自动更新。</string>
     <string name="pref_anime_library_update_categories_details">排除优先于包含，同时属于包含和排除分类的动画不会自动更新。</string>
-    <string name="unofficial_extension_message_anizen">此插件不是 Yomira 官方插件。</string>
+    <string name="unofficial_extension_message_app">此插件不是 Yomira 官方插件。</string>
     <string name="rotation_reverse_landscape">翻转横屏</string>
     <string name="rotation_sensor_portrait">感应竖屏</string>
     <string name="rotation_sensor_landscape">感应横屏</string>
@@ -944,7 +944,7 @@
     <string name="label_anime">动画</string>
     <string name="action_global_manga_search">全局漫画搜索</string>
     <string name="action_global_anime_search">全局动画搜索</string>
-    <string name="unofficial_anime_extension_message">此插件不是AniZen官方插件。</string>
+    <string name="unofficial_anime_extension_message">此插件不是Yomira官方插件。</string>
     <string name="pref_hide_in_manga_library_items">隐藏已添加到仓库中的漫画作品</string>
     <string name="action_hide">隐藏</string>
     <string name="label_all">所有分类</string>

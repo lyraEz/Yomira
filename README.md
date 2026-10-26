@@ -11,7 +11,7 @@ player you can tune for smoothness and picture quality.
 [![Latest release](https://img.shields.io/github/v/release/lyraEz/Yomira?label=release)](https://github.com/lyraEz/Yomira/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
-[Website](https://lyraez.github.io/Yomira/) · [Download](https://github.com/lyraEz/Yomira/releases/latest) · [Betas](https://github.com/lyraEz/Yomira-releases/releases) · [Changelog](CHANGELOG.md)
+[Website](https://yomira.lyraez.lol) · [Download](https://github.com/lyraEz/Yomira/releases/latest) · [Betas](https://github.com/lyraEz/Yomira-releases/releases) · [Changelog](CHANGELOG.md)
 
 </div>
 

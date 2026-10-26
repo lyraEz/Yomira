@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Yomira — anime player for Android</title>
+  <meta name="description" content="Yomira is a free, open-source anime, series and movie player for Android with a liquid glass interface, Anime4K, color grading and Discord Rich Presence without logging in.">
+  <meta name="theme-color" content="#07060f">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon-64.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Yomira — anime player for Android">
+  <meta property="og:description" content="Liquid glass interface, Anime4K, color grading and Discord Rich Presence without logging in.">
+  <meta property="og:image" content="assets/img/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="assets/fonts/montserrat-latin-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+
+  <header class="site-head glass" id="top">
+    <a class="brand" href="#top" aria-label="Yomira">
+      <img src="assets/img/icon-192.png" alt="" width="38" height="38">
+      <span>Yomira</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#interface" data-i18n="nav.interface">Interface</a>
+      <a href="#player" data-i18n="nav.player">Player</a>
+      <a href="#discord" data-i18n="nav.discord">Discord</a>
+      <a href="#guide" data-i18n="nav.guide">Guide</a>
+      <a href="#faq" data-i18n="nav.faq">FAQ</a>
+    </nav>
+    <div class="head-actions">
+      <div class="lang">
+        <button class="lang-btn" id="lang-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Language">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+          <span id="lang-code">EN</span>
+        </button>
+        <div class="lang-menu glass" id="lang-menu" role="menu">
+          <button role="menuitemradio" data-lang="en" aria-checked="true">English <small>EN</small></button>
+          <button role="menuitemradio" data-lang="pt" aria-checked="false">Português <small>PT</small></button>
+          <button role="menuitemradio" data-lang="es" aria-checked="false">Español <small>ES</small></button>
+          <button role="menuitemradio" data-lang="ru" aria-checked="false">Русский <small>RU</small></button>
+        </div>
+      </div>
+      <a class="btn btn-primary btn-download" href="#download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+        <span data-i18n="cta.download_short">Download</span>
+      </a>
+      <button class="menu-btn" id="menu-btn" aria-label="Menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="mobile-nav glass" id="mobile-nav" aria-label="Sections">
+    <a href="#features" data-i18n="nav.features">Features</a>
+    <a href="#interface" data-i18n="nav.interface">Interface</a>
+    <a href="#player" data-i18n="nav.player">Player</a>
+    <a href="#discord" data-i18n="nav.discord">Discord</a>
+    <a href="#guide" data-i18n="nav.guide">Guide</a>
+    <a href="#faq" data-i18n="nav.faq">FAQ</a>
+  </nav>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy reveal">
+          <img class="hero-mark" src="assets/img/mark.svg" alt="" width="120" height="88">
+          <span class="eyebrow" data-i18n="hero.eyebrow">Free · Open source · Android 8+</span>
+          <h1><span data-i18n="hero.title_a">Anime nights,</span><br><span class="grad" data-i18n="hero.title_b">beautifully played.</span></h1>
+          <p class="lead" data-i18n="hero.lead">Yomira is an anime, series and movie player for Android with a liquid glass interface, a player tuned for smoothness and Discord Rich Presence that needs no login.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+              <span data-i18n="cta.download">Download for Android</span>
+            </a>
+            <a class="btn btn-ghost" href="#video">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>
+              <span data-i18n="cta.watch">Watch the video</span>
+            </a>
+          </div>
+          <div class="hero-meta">
+            <span><b class="latest-version">v1.12.0</b> · <span data-i18n="hero.meta_arch">arm64 · armeabi-v7a</span></span>
+            <span data-i18n="hero.meta_free">No ads, no accounts, no telemetry</span>
+          </div>
+        </div>
+        <div class="stage" aria-hidden="true">
+          <div class="glow"></div>
+          <div class="phone p2" data-parallax="0.10"><img src="assets/img/details.webp" alt="" loading="eager" width="720" height="1507"></div>
+          <div class="phone p3" data-parallax="0.16"><img src="assets/img/episodes.webp" alt="" loading="eager" width="720" height="1507"></div>
+          <div class="phone p1" data-parallax="-0.06"><img src="assets/img/home-hero.webp" alt="Yomira home screen" loading="eager" width="720" height="1507"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="features.eyebrow">Why Yomira</span>
+          <h2 data-i18n="features.title">Everything you watch, in one calm place</h2>
+          <p class="lead" data-i18n="features.lead">Catalogs come from extensions you choose. Yomira makes the rest feel effortless.</p>
+        </div>
+        <div class="features">
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="5"/><path d="M7 16h10"/></svg></div>
+            <h3 data-i18n="f1.t">Liquid glass interface</h3>
+            <p data-i18n="f1.d">A floating tab bar, glass top bars and capsule tabs that react to touch. The glass adapts to your phone.</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="3.5"/><path d="M10 9.5v5l4.5-2.5z" fill="#fff"/></svg></div>
+            <h3 data-i18n="f2.t">A player you can tune</h3>
+            <p data-i18n="f2.d">Match the display to the video, smooth motion, image quality, a per-video optimizer and a heat guard.</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 5.2L20 9l-4.2 3.8L17 18.5 12 15.6 7 18.5l1.2-5.7L4 9l5.7-.8z"/></svg></div>
+            <h3 data-i18n="f3.t">Anime4K, live and offline</h3>
+            <p data-i18n="f3.d">Sharpen in real time, or let Enhanced Downloads process episodes into a cleaner copy.</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 000 17z" fill="#fff"/></svg></div>
+            <h3 data-i18n="f4.t">Color correction &amp; grading</h3>
+            <p data-i18n="f4.d">Temperature, exposure, shadows, highlights and cinematic looks, applied after Anime4K and never on subtitles.</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="#fff"><path d="M19.3 5.3A16.6 16.6 0 0015.2 4l-.5 1a15 15 0 00-5.4 0l-.5-1a16.6 16.6 0 00-4.1 1.3C2.1 9.3 1.4 13.2 1.8 17a16.8 16.8 0 005 2.5l1.1-1.7a10.8 10.8 0 01-1.7-.8l.4-.3a11.9 11.9 0 0010.8 0l.4.3a10.8 10.8 0 01-1.7.8l1.1 1.7a16.8 16.8 0 005-2.5c.5-4.4-.7-8.3-2.9-11.7zM8.7 14.7c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1zm6.6 0c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1z"/></svg></div>
+            <h3 data-i18n="f5.t">Discord, without logging in</h3>
+            <p data-i18n="f5.d">A card on your profile while you watch, through the Discord app. No token, no password.</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+            <h3 data-i18n="f6.t">Real episode names</h3>
+            <p data-i18n="f6.d">Titles, synopses and stills from TMDB in your language, instead of "Episode 3".</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l8 7-8 7zM14 5l6 7-6 7"/></svg></div>
+            <h3 data-i18n="f7.t">Skip intro, smartly</h3>
+            <p data-i18n="f7.d">Openings and endings from AniSkip and Anime Skip, matched to the right season, without tracking.</p>
+          </article>
+          <article class="feature surface reveal">
+            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></div>
+            <h3 data-i18n="f8.t">Private by design</h3>
+            <p data-i18n="f8.d">No telemetry, no ads and no accounts. Your library and history stay on your phone.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interface gallery -->
+    <section id="interface">
+      <div class="wrap section-head reveal">
+        <span class="eyebrow" data-i18n="interface.eyebrow">Interface</span>
+        <h2 data-i18n="interface.title">An interface that feels alive</h2>
+        <p class="lead" data-i18n="interface.lead">A catalog-style Home, streaming-style details with artwork and characters, and episodes as cards with real names and stills.</p>
+      </div>
+      <div class="gallery" id="gallery">
+        <figure class="shot reveal"><div class="phone"><img src="assets/img/home-hero.webp" alt="" loading="lazy" width="720" height="1507"></div><figcaption><span data-i18n="g1.t">Home</span><small data-i18n="g1.d">Highlights with logos</small></figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="assets/img/home-rows.webp" alt="" loading="lazy" width="720" height="1507"></div><figcaption><span data-i18n="g2.t">Continue watching</span><small data-i18n="g2.d">Pick up where you left off</small></figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="assets/img/details.webp" alt="" loading="lazy" width="720" height="1507"></div><figcaption><span data-i18n="g3.t">Details</span><small data-i18n="g3.d">Artwork, facts and cast</small></figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="assets/img/episodes.webp" alt="" loading="lazy" width="720" height="1507"></div><figcaption><span data-i18n="g4.t">Episodes</span><small data-i18n="g4.d">Names, synopses and ratings</small></figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="assets/img/details-alt.webp" alt="" loading="lazy" width="720" height="1507"></div><figcaption><span data-i18n="g5.t">Characters</span><small data-i18n="g5.d">With voice actors</small></figcaption></figure>
+        <figure class="shot reveal"><div class="phone"><img src="assets/img/tmdb-match.webp" alt="" loading="lazy" width="720" height="1507"></div><figcaption><span data-i18n="g6.t">TMDB match</span><small data-i18n="g6.d">Fix seasons in a tap</small></figcaption></figure>
+      </div>
+      <p class="gallery-hint" data-i18n="interface.hint">Swipe to see more →</p>
+    </section>
+
+    <!-- Tab bar demo -->
+    <section id="tabbar">
+      <div class="wrap navdemo">
+        <div class="navphone reveal" aria-label="Interactive demo of the floating tab bar">
+          <div class="navscreen">
+            <div class="navscroll" id="navscroll">
+              <img src="assets/img/demo-feed.webp" alt="" loading="lazy" width="720" height="2470">
+            </div>
+            <div class="tabbar-wrap">
+              <div class="tabbar" id="tabbar-demo">
+                <div class="lens"></div>
+                <div class="tabs" role="tablist">
+                  <button class="tab on" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></svg><span data-i18n="tab.home">Home</span></button>
+                  <button class="tab" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="7" y="3.5" width="13" height="13" rx="2"/><path d="M4 7.5V19a1.5 1.5 0 001.5 1.5H17M11 3.5v6l2-1.3 2 1.3v-6"/></svg><span data-i18n="tab.library">Library</span></button>
+                  <button class="tab" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 102.3-5.6L4 8.6M4 4v4.6h4.6M12 8v4.5l3 2"/></svg><span data-i18n="tab.history">History</span></button>
+                  <button class="tab" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg><span data-i18n="tab.browse">Browse</span></button>
+                  <button class="tab" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg><span data-i18n="tab.more">More</span></button>
+                </div>
+              </div>
+              <div class="orb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <div class="copy reveal">
+          <span class="eyebrow" data-i18n="tabbar.eyebrow">The tab bar</span>
+          <h2 data-i18n="tabbar.title">A lens that glides between tabs</h2>
+          <p class="lead" data-i18n="tabbar.lead">The floating capsule carries a glass lens that slides on a spring and stretches as it moves. Scroll down and the bar shrinks to its icons; scroll back up and it returns.</p>
+          <ul class="checks">
+            <li><span data-i18n-html="tabbar.c1"><b>Tap or drag</b> along the bar to change tabs.</span></li>
+            <li><span data-i18n-html="tabbar.c2"><b>Scroll the phone</b> to watch it shrink and grow.</span></li>
+            <li><span data-i18n-html="tabbar.c3"><b>Same springs</b> as the app: stiffness 420, damping 0.66 for the lens and 0.82 for the bar.</span></li>
+          </ul>
+          <div class="controls">
+            <button class="btn btn-ghost" id="demo-auto" data-i18n="tabbar.auto">Play the animation</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Video -->
+    <section id="video">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="video.eyebrow">In motion</span>
+          <h2 data-i18n="video.title">Yomira in thirty seconds</h2>
+        </div>
+        <div class="video-card glass reveal">
+          <video id="promo" controls playsinline preload="none" poster="assets/video/yomira-promo-poster.jpg">
+            <source src="assets/video/yomira-promo.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <!-- Player -->
+    <section id="player">
+      <div class="wrap split">
+        <div class="media-stack reveal">
+          <div class="media-card glass" data-parallax="0.04"><img src="assets/img/player.webp" alt="Yomira player" loading="lazy" width="1600" height="738"></div>
+          <div class="back" data-parallax="0.12"><img src="assets/img/pause.webp" alt="" loading="lazy" width="1600" height="738"></div>
+        </div>
+        <div class="copy reveal">
+          <span class="eyebrow" data-i18n="player.eyebrow">Player</span>
+          <h2 data-i18n="player.title">Made for watching</h2>
+          <p class="lead" data-i18n="player.lead">Built on mpv and tuned for phones, from budget models to flagships.</p>
+          <ul class="checks">
+            <li><span data-i18n-html="player.c1"><b>Premium layout</b> with the title at the bottom and a thin progress bar.</span></li>
+            <li><span data-i18n-html="player.c2"><b>"You are watching"</b> screen when you pause, with the episode's name and synopsis.</span></li>
+            <li><span data-i18n-html="player.c3"><b>Smoothness:</b> match the display to the video, motion interpolation and image quality.</span></li>
+            <li><span data-i18n-html="player.c4"><b>Heat guard</b> that switches to lighter settings when the phone warms up.</span></li>
+            <li><span data-i18n-html="player.c5"><b>Tools:</b> A-B loop, frame step, rotation, speed per anime, sleep at the end.</span></li>
+            <li><span data-i18n-html="player.c6"><b>Sound:</b> night mode, clear dialogue, spatial audio, balance.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Anime4K and color -->
+    <section id="anime4k">
+      <div class="wrap split flip">
+        <div class="media-card glass reveal" data-parallax="0.06"><img src="assets/img/filters.webp" alt="Player filters" loading="lazy" width="1600" height="738"></div>
+        <div class="copy reveal">
+          <span class="eyebrow" data-i18n="a4k.eyebrow">Picture</span>
+          <h2 data-i18n="a4k.title">Sharper lines, your colors</h2>
+          <p class="lead" data-i18n="a4k.lead">Real-time Anime4K with a recommendation for your phone, plus offline processing for the best result.</p>
+          <ul class="checks">
+            <li><span data-i18n-html="a4k.c1"><b>Enhanced Downloads:</b> choose Original or Anime4K when downloading; the sharper copy plays first and the original is kept.</span></li>
+            <li><span data-i18n-html="a4k.c2"><b>Smart Anime4K:</b> prepares the episode you opened, and optionally the next, in the background.</span></li>
+            <li><span data-i18n-html="a4k.c3"><b>Color correction and grading:</b> temperature, tint, exposure, shadows, highlights, vibrance and looks like Cinema, Vintage or Black and white.</span></li>
+          </ul>
+          <div class="chips"><span class="chip">A</span><span class="chip">B</span><span class="chip">C</span><span class="chip">A+A</span><span class="chip">B+B</span><span class="chip">C+A</span><span class="chip">Fast · High</span></div>
+          <p class="note" data-i18n="a4k.note">Offline processing is heavy: on mid-range phones an episode can take hours. The built-in speed test shows the real time on your phone.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Discord -->
+    <section id="discord">
+      <div class="wrap split">
+        <div class="reveal" data-parallax="0.05">
+          <div class="discord" aria-label="Example Discord profile card">
+            <div class="who">
+              <div class="avatar"></div>
+              <div><div class="name">you</div><div class="tag" data-i18n="discord.status">Watching anime</div></div>
+            </div>
+            <div class="act">
+              <div class="act-title"><span data-i18n="discord.watching">Watching Yomira</span><img src="assets/img/icon-192.png" alt=""></div>
+              <div class="row">
+                <div class="cover"><img src="assets/img/details.webp" alt="" loading="lazy"></div>
+                <div class="meta">
+                  <b>Tokyo Ghoul</b>
+                  <span>Tragedy</span>
+                  <em><span data-i18n="discord.season">Season 1, Episode 1</span></em>
+                </div>
+              </div>
+              <div class="bar"><i></i></div>
+              <div class="times"><span>08:45</span><span>24:10</span></div>
+              <div class="cta"><a href="#download" data-i18n="discord.button">Watch on Yomira</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="copy reveal">
+          <span class="eyebrow" data-i18n="discord.eyebrow">Discord Rich Presence</span>
+          <h2 data-i18n="discord.title">Show what you watch. No login.</h2>
+          <p class="lead" data-i18n="discord.lead">Yomira talks to the Discord app installed on your phone, so your profile shows a polished card while you watch.</p>
+          <ul class="checks">
+            <li><span data-i18n-html="discord.c1"><b>Never asks</b> for your Discord token, password or email.</span></li>
+            <li><span data-i18n-html="discord.c2"><b>Filled from TMDB:</b> clean anime names, episode titles and covers.</span></li>
+            <li><span data-i18n-html="discord.c3"><b>Configurable:</b> lines, images, progress or elapsed time, up to two buttons, and which extensions and categories appear.</span></li>
+            <li><span data-i18n-html="discord.c4"><b>Private when you want:</b> incognito mode and hidden anime never show.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Guide -->
+    <section id="guide">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow" data-i18n="guide.eyebrow">Guide</span>
+          <h2 data-i18n="guide.title">From install to first episode</h2>
+          <p class="lead" data-i18n="guide.lead">A few minutes, once. After that, Yomira keeps itself up to date.</p>
+        </div>
+        <div class="guide reveal">
+          <div class="guide-tabs surface" role="tablist" id="guide-tabs">
+            <button role="tab" aria-selected="true" aria-controls="g-install"><span class="n">1</span><span data-i18n="guide.t1">Install</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-repo"><span class="n">2</span><span data-i18n="guide.t2">Add a repository</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-watch"><span class="n">3</span><span data-i18n="guide.t3">Install and watch</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-discord"><span class="n">4</span><span data-i18n="guide.t4">Discord</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-a4k"><span class="n">5</span><span data-i18n="guide.t5">Anime4K offline</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-color"><span class="n">6</span><span data-i18n="guide.t6">Color</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-update"><span class="n">7</span><span data-i18n="guide.t7">Updates and betas</span></button>
+            <button role="tab" aria-selected="false" aria-controls="g-backup"><span class="n">8</span><span data-i18n="guide.t8">Backups</span></button>
+          </div>
+          <div>
+            <div class="guide-panel surface on" id="g-install" role="tabpanel">
+              <h3 data-i18n="guide.t1">Install</h3>
+              <ol>
+                <li data-i18n-html="guide.install1">Download the APK below. Most phones need <b>arm64-v8a</b>; if unsure, take <b>universal</b>.</li>
+                <li data-i18n-html="guide.install2">Open the file. If Android asks, allow your browser or file manager to <b>install unknown apps</b>.</li>
+                <li data-i18n-html="guide.install3">Open Yomira and follow the setup screens.</li>
+              </ol>
+              <p class="note" data-i18n="guide.install_note">Updates install over the current version and keep your library. Never uninstall to update.</p>
+            </div>
+            <div class="guide-panel surface" id="g-repo" role="tabpanel">
+              <h3 data-i18n="guide.t2">Add a repository</h3>
+              <ol>
+                <li data-i18n-html="guide.repo1">Go to <span class="path">Browse › Extensions › ⋮ › Extension repos</span>.</li>
+                <li data-i18n-html="guide.repo2">Paste the address of a repository. It ends with <code>index.min.json</code>.</li>
+                <li data-i18n-html="guide.repo3">Yomira checks it before saving and explains what is wrong if it cannot be read.</li>
+              </ol>
+              <p class="note" data-i18n="guide.repo_note">Yomira does not host or recommend content. Use repositories you trust.</p>
+            </div>
+            <div class="guide-panel surface" id="g-watch" role="tabpanel">
+              <h3 data-i18n="guide.t3">Install and watch</h3>
+              <ol>
+                <li data-i18n-html="guide.watch1">In <span class="path">Browse › Extensions</span>, install an extension and confirm if Android asks.</li>
+                <li data-i18n-html="guide.watch2">Its sources appear in <span class="path">Browse › Sources</span>. Search, open an anime and press <b>Play</b>.</li>
+                <li data-i18n-html="guide.watch3">In the player, swipe for brightness and volume and double-tap to seek. <b>Filters</b> holds quality, smoothness and color.</li>
+              </ol>
+            </div>
+            <div class="guide-panel surface" id="g-discord" role="tabpanel">
+              <h3 data-i18n="guide.t4">Discord</h3>
+              <ol>
+                <li data-i18n-html="guide.discord1">Install the Discord app on the phone and sign in.</li>
+                <li data-i18n-html="guide.discord2">In Yomira: <span class="path">Settings › Connections › Discord</span>, turn it on.</li>
+                <li data-i18n-html="guide.discord3">Tap <b>Test on Discord</b> to see a sample card for 30 seconds, then shape the card to your taste.</li>
+              </ol>
+            </div>
+            <div class="guide-panel surface" id="g-a4k" role="tabpanel">
+              <h3 data-i18n="guide.t5">Anime4K offline</h3>
+              <ol>
+                <li data-i18n-html="guide.a4k1">Open <span class="path">Settings › Anime4K</span> and run the <b>speed test</b> to see how long your phone needs.</li>
+                <li data-i18n-html="guide.a4k2">Turn on <b>Enhanced Downloads</b>. Downloads will ask: Original or Anime4K, with mode and quality.</li>
+                <li data-i18n-html="guide.a4k3">Follow progress in the processing queue. By default it only runs while charging.</li>
+              </ol>
+            </div>
+            <div class="guide-panel surface" id="g-color" role="tabpanel">
+              <h3 data-i18n="guide.t6">Color</h3>
+              <ol>
+                <li data-i18n-html="guide.color1">While watching, open <b>Filters</b>.</li>
+                <li data-i18n-html="guide.color2"><b>Color correction</b> fixes the picture: temperature, tint, exposure, shadows, highlights, vibrance.</li>
+                <li data-i18n-html="guide.color3"><b>Color grading</b> gives it a look: pick Cinema, Warm, Vintage and more, then fine-tune.</li>
+              </ol>
+            </div>
+            <div class="guide-panel surface" id="g-update" role="tabpanel">
+              <h3 data-i18n="guide.t7">Updates and betas</h3>
+              <ol>
+                <li data-i18n-html="guide.update1"><span class="path">More › About › Check for updates</span> shows new versions with the right APK for your phone.</li>
+                <li data-i18n-html="guide.update2">Turn on <b>Beta versions</b> in the same screen to try new features first.</li>
+              </ol>
+            </div>
+            <div class="guide-panel surface" id="g-backup" role="tabpanel">
+              <h3 data-i18n="guide.t8">Backups</h3>
+              <ol>
+                <li data-i18n-html="guide.backup1"><span class="path">More › Settings › Data and storage › Create backup</span> saves library, history, categories, settings and repositories.</li>
+                <li data-i18n-html="guide.backup2">Restore it from the same screen on a new phone, then reinstall extensions from the restored repositories.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">FAQ</span>
+          <h2 data-i18n="faq.title">Questions, answered</h2>
+        </div>
+        <div class="faq">
+          <details class="surface reveal"><summary data-i18n="faq.q1">Is Yomira free?</summary><p data-i18n="faq.a1">Yes. It is free and open source under the Apache License 2.0, with no ads and no in-app purchases.</p></details>
+          <details class="surface reveal"><summary data-i18n="faq.q2">Does Yomira come with anime?</summary><p data-i18n="faq.a2">No. Yomira hosts no content. Catalogs come from extensions you install from repositories you choose.</p></details>
+          <details class="surface reveal"><summary data-i18n="faq.q3">Does the Discord feature need my token?</summary><p data-i18n="faq.a3">No. It talks to the Discord app on your phone through Discord's own SDK. Yomira never asks for or stores your login, password or token.</p></details>
+          <details class="surface reveal"><summary data-i18n="faq.q4">Which phones are supported?</summary><p data-i18n="faq.a4">Android 8.0 or newer on 64-bit (arm64-v8a) or 32-bit (armeabi-v7a) ARM phones. The glass effects adapt to each phone.</p></details>
+          <details class="surface reveal"><summary data-i18n="faq.q5">Will updating erase my library?</summary><p data-i18n="faq.a5">No. Every version uses the same package and signature, so it installs over the previous one and keeps everything.</p></details>
+          <details class="surface reveal"><summary data-i18n="faq.q6">What are beta versions?</summary><p data-i18n="faq.a6">Test builds published before a stable release. Turn on Beta versions in More › About to be offered them, or get them from the Yomira-releases repository.</p></details>
+          <details class="surface reveal"><summary data-i18n="faq.q7">Why does offline Anime4K take so long?</summary><p data-i18n="faq.a7">It runs Anime4K's neural network shaders on every frame of the episode on your phone's GPU. The speed test tells you exactly how long your phone needs.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section id="download">
+      <div class="wrap">
+        <div class="download glass reveal">
+          <img class="icon" src="assets/img/icon-512.png" alt="Yomira icon" width="150" height="150" loading="lazy">
+          <div class="copy">
+            <span class="eyebrow"><span data-i18n="download.eyebrow">Latest version</span> · <span class="latest-version">v1.12.0</span></span>
+            <h2 data-i18n="download.title">Get Yomira</h2>
+            <p class="lead" data-i18n="download.lead">Free, open source and ready in a minute.</p>
+            <div class="apks">
+              <a class="apk surface rec" data-abi="arm64-v8a" href="https://github.com/lyraEz/Yomira/releases/latest"><b>arm64-v8a</b><small data-i18n="download.arm64">Most phones · recommended</small></a>
+              <a class="apk surface" data-abi="armeabi-v7a" href="https://github.com/lyraEz/Yomira/releases/latest"><b>armeabi-v7a</b><small data-i18n="download.arm32">32-bit phones</small></a>
+              <a class="apk surface" data-abi="universal" href="https://github.com/lyraEz/Yomira/releases/latest"><b>universal</b><small data-i18n="download.universal">Any phone · larger</small></a>
+            </div>
+            <p class="small-print"><span data-i18n="download.verify">Check the file with SHA256SUMS.txt on the release page. Signing certificate SHA-256:</span> <code>e4d0adb9369971bfbe862554d8e7d418b43c17321e2694719d0efeb0f1d677ce</code></p>
+            <p class="small-print"><a href="https://github.com/lyraEz/Yomira/releases" data-i18n="download.all">All releases</a> · <a href="https://github.com/lyraEz/Yomira-releases/releases" data-i18n="download.betas">Beta versions</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot">
+        <a class="brand" href="#top"><img src="assets/img/icon-192.png" alt="" width="32" height="32" loading="lazy"><span>Yomira · 夜</span></a>
+        <nav aria-label="Links">
+          <a href="https://github.com/lyraEz/Yomira">GitHub</a>
+          <a href="https://github.com/lyraEz/Yomira/releases" data-i18n="footer.releases">Releases</a>
+          <a href="https://github.com/lyraEz/Yomira-releases/releases" data-i18n="footer.betas">Betas</a>
+          <a href="https://github.com/lyraEz/Yomira/blob/main/docs/PRIVACY.md" data-i18n="footer.privacy">Privacy</a>
+          <a href="https://github.com/lyraEz/Yomira/blob/main/LICENSE" data-i18n="footer.license">License</a>
+        </nav>
+      </div>
+      <p class="disclaimer" data-i18n="footer.disclaimer">Yomira does not host, provide or link to any content. Artwork in screenshots belongs to its respective owners. Discord is a trademark of Discord Inc.; Yomira is not affiliated with Discord.</p>
+      <p class="disclaimer">© 2026 lyraEz</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/i18n.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

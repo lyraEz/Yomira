@@ -20,6 +20,9 @@
 *.ttf binary
 *.eot binary
 *.woff binary
+*.woff2 binary
+*.mp4 binary
+*.webm binary
 *.pyc binary
 *.swp binary
 

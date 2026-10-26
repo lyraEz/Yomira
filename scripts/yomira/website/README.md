@@ -12,6 +12,10 @@ repository, which runs it against Cloudflare:
 python3 scripts/yomira/website/cf-pages-request.py ../cloud-cf/requests/$(date +%Y%m%d)-yomira-site-deploy.json
 ```
 
+The script adds a content hash to every asset URL (`style.css?v=…`). The lyraez.lol zone tells
+browsers to keep assets for four hours, so without it returning visitors would see a new page
+with old images, styles and scripts.
+
 The promo video is rendered from `promo.html`, a page that draws any moment of the video when
 `window.renderFrame(seconds)` is called. It uses the real screenshots in `website/assets/img` and
 the same tab bar component as the website, with the app's spring values.

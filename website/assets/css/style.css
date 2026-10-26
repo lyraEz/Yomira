@@ -298,6 +298,13 @@ h3 { font-size: 1.18rem; font-weight: 700; }
 .shot figcaption { font-weight: 700; font-family: var(--head-font); }
 .shot figcaption small { display: block; font-family: var(--body-font); font-weight: 400; color: var(--ink-3); text-align: center; }
 .gallery-hint { text-align: center; color: var(--ink-3); font-size: .9rem; margin-top: -10px; }
+/* Wide screens fit all five phones, so nothing hides off to the side. */
+@media (min-width: 1240px) {
+  .gallery { justify-content: center; gap: 28px; }
+  .shot { margin: 16px 0; }
+  .shot .phone { width: 208px; }
+  .gallery-hint { display: none; }
+}
 
 /* Split rows -------------------------------------------------------------------------------- */
 

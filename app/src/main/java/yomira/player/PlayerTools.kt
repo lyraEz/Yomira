@@ -63,6 +63,7 @@ object PlayerTools {
         applySound(mpv)
         clearLoop(mpv)
         restoreSpeed(mpv, animeId)
+        ColorGrading.apply(mpv)
     }
 
     // A-B loop -------------------------------------------------------------------------------

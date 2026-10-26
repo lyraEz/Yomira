@@ -158,6 +158,10 @@ fun VideoFiltersPanel(
                 // YMR <--
                 FilterPresetsCard()
                 FiltersCard()
+                // YMR --> color correction and grading, next to brightness and contrast
+                yomira.player.ColorCorrectionCard()
+                yomira.player.ColorGradingCard()
+                // YMR <--
                 DebandCard()
                 Anime4KCard()
                 // YMR -->

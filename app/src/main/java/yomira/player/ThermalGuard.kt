@@ -69,7 +69,8 @@ object ThermalGuard {
     private fun lighten(mpv: MPV?) {
         mpv ?: return
         listOf(
-            "glsl-shaders" to "",
+            // The color shader is a few operations per pixel; only the heavy ones go.
+            "glsl-shaders" to ColorGrading.withColor(""),
             "interpolation" to "no",
             "video-sync" to "audio",
             "scale" to "bilinear",

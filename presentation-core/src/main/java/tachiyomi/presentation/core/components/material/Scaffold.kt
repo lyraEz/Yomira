@@ -122,9 +122,8 @@ import dev.chrisbanes.haze.hazeChild
 @Composable
 fun Scaffold(
     modifier: Modifier = Modifier,
-    // YMR --> null picks pinned, or collapse-on-scroll when [largeTopBar] is set
+    // null picks pinned, or collapse-on-scroll when [largeTopBar] is set
     topBarScrollBehavior: TopAppBarScrollBehavior? = null,
-    // YMR <--
     topBar: @Composable (TopAppBarScrollBehavior) -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     startBar: @Composable () -> Unit = {},
@@ -135,27 +134,23 @@ fun Scaffold(
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     hazeEnabled: Boolean = false,
-    // YMR -->
     glassTopBar: Boolean = true,
     // false: the content is still recorded, but the top bar paints its own glass through
     // LocalGlassBackdrop (e.g. buttons floating over a cover)
     glassTopBarSurface: Boolean = true,
     // iOS-style large title that shrinks into the bar while the content scrolls up
     largeTopBar: Boolean = false,
-    // YMR <--
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    // YMR -->
     val scrollBehavior = topBarScrollBehavior ?: if (largeTopBar) {
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     } else {
         TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     }
-    // YMR <--
     // Tachiyomi: Handle consumed window insets
     val remainingWindowInsets = remember { MutableWindowInsets() }
     val hazeState = remember { HazeState() }
-    // YMR --> Top bar as liquid glass over the scrolling content (Android 12+)
+    // Top bar as liquid glass over the scrolling content (Android 12+)
     val glassStyle = LocalGlassStyle.current
     val glassBackdrop = if (glassTopBar && !hazeEnabled && glassStyle.liveBlur) {
         rememberGlassBackdrop(containerColor)
@@ -164,7 +159,6 @@ fun Scaffold(
     }
     val glassBarTint = (glassStyle.tintAlpha + 0.32f).coerceAtMost(0.88f)
     val floatingBarInset = LocalFloatingBarInset.current
-    // YMR <--
 
     androidx.compose.material3.Surface(
         modifier = Modifier
@@ -191,12 +185,11 @@ fun Scaffold(
                                 tint = HazeTint(Color.Transparent),
                             ),
                         )
-                    // YMR -->
                     } else {
                         Modifier
                     }
                 ) {
-                    // YMR --> glass that fades out below the bar instead of ending in a line
+                    // glass that fades out below the bar instead of ending in a line
                     if (glassBackdrop != null && glassTopBarSurface) {
                         // A large title starts clear over the page and turns into glass as it collapses
                         val fade = if (largeTopBar) {
@@ -222,7 +215,6 @@ fun Scaffold(
                     ) {
                         topBar(scrollBehavior)
                     }
-                    // YMR <--
                 }
             },
             startBar = startBar,
@@ -249,24 +241,19 @@ fun Scaffold(
                     modifier = if (hazeEnabled) {
                         Modifier.haze(hazeState)
                     } else {
-                        // YMR -->
                         Modifier.glassSource(glassBackdrop)
-                        // YMR <--
                     },
                 ) {
-                    // YMR --> content must never sample a backdrop that records it
+                    // content must never sample a backdrop that records it
                     CompositionLocalProvider(LocalGlassBackdrop provides null) {
                         content(it)
                     }
-                    // YMR <--
                 }
             },
             snackbar = snackbarHost,
             contentWindowInsets = remainingWindowInsets,
             fab = floatingActionButton,
-            // YMR -->
             extraBottom = floatingBarInset,
-            // YMR <--
         )
     }
 }
@@ -293,9 +280,7 @@ private fun ScaffoldLayout(
     fab: @Composable () -> Unit,
     contentWindowInsets: WindowInsets,
     bottomBar: @Composable () -> Unit,
-    // YMR -->
     extraBottom: Dp = 0.dp,
-    // YMR <--
 ) {
     SubcomposeLayout { constraints ->
         val layoutWidth = constraints.maxWidth
@@ -311,9 +296,8 @@ private fun ScaffoldLayout(
         layout(layoutWidth, layoutHeight) {
             val leftInset = contentWindowInsets.getLeft(this@SubcomposeLayout, layoutDirection)
             val rightInset = contentWindowInsets.getRight(this@SubcomposeLayout, layoutDirection)
-            // YMR --> a floating bar drawn over the content counts as part of the bottom inset
+            // a floating bar drawn over the content counts as part of the bottom inset
             val bottomInset = contentWindowInsets.getBottom(this@SubcomposeLayout) + extraBottom.roundToPx()
-            // YMR <--
 
             // Tachiyomi: Add startBar slot for Navigation Rail
             val startBarPlaceables = subcompose(ScaffoldLayoutContent.StartBar, startBar).fastMap {
@@ -347,10 +331,8 @@ private fun ScaffoldLayout(
             val fabPlaceables =
                 subcompose(ScaffoldLayoutContent.Fab, fab).fastMapNotNull { measurable ->
                     measurable
-                        // KMK -->
                         .measure(looseConstraints.offset(-leftInset - rightInset, -bottomInset))
                         .takeIf { it.height != 0 && it.width != 0 }
-                    // KMK <--
                 }
 
             val fabWidth = fabPlaceables.fastMaxBy { it.width }?.width ?: 0
@@ -360,7 +342,6 @@ private fun ScaffoldLayout(
                 // FAB distance from the left of the layout, taking into account LTR / RTL
                 // Tachiyomi: Calculate insets for fab placement offset
                 val fabLeftOffset = when (fabPosition) {
-                    // KMK -->
                     FabPosition.Start -> {
                         if (layoutDirection == LayoutDirection.Ltr) {
                             FabSpacing.roundToPx() + leftInset
@@ -369,7 +350,6 @@ private fun ScaffoldLayout(
                         }
                     }
                     FabPosition.EndOverlay,
-                    // KMK <--
                     FabPosition.End,
                     -> {
                         if (layoutDirection == LayoutDirection.Ltr) {
@@ -414,9 +394,7 @@ private fun ScaffoldLayout(
                 val insets = contentWindowInsets.asPaddingValues(this@SubcomposeLayout)
                 val fabOffsetDp = fabOffsetFromBottom?.let { it.toDp() } ?: 0.dp
                 val bottomBarHeightPx = bottomBarHeight ?: 0
-                // YMR -->
                 val extraBottomDp = extraBottom
-                // YMR <--
                 val innerPadding = PaddingValues(
                     top = if (topBarPlaceables.isEmpty()) {
                         insets.calculateTopPadding()

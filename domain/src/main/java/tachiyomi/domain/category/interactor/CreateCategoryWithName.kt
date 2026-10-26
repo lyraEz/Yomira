@@ -39,9 +39,7 @@ class CreateCategoryWithName(
     }
 
     sealed interface Result {
-        // SY -->
         data class Success(val category: Category) : Result
-        // SY <--
 
         data class InternalError(val error: Throwable) : Result
     }

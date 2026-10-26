@@ -136,9 +136,7 @@ class DomainModule : InjektModule {
         addFactory { UpdateCategory(get()) }
         addFactory { DeleteCategory(get()) }
 
-        // KMK -->
         addFactory { HideCategory(get()) }
-        // KMK <--
 
         addSingletonFactory<AnimeRepository> { AnimeRepositoryImpl(get()) }
         addSingletonFactory<AnimeMergeRepository> { AnimeMergeRepositoryImpl(get()) }

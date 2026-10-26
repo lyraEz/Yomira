@@ -1,4 +1,3 @@
-// AY -->
 package eu.kanade.tachiyomi.ui.anime
 
 import tachiyomi.domain.anime.model.SeasonAnime
@@ -11,4 +10,3 @@ data class AnimeSeasonItem(
     val sourceLanguage: String = "",
     val showContinueOverlay: Boolean = false,
 )
-// <-- AY

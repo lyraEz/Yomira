@@ -172,7 +172,7 @@
     <string name="discord_status_scrolling">Прокручивает</string>
     <string name="discord_status_messing">Разбирается с</string>
     <string name="discord_download_button">Читать в %s</string>
-    <string name="discord_app_description">Komikku — приложение для чтения манги</string>
+    <string name="discord_app_description">Yomira - anime player</string>
     <string name="pref_category_discord_customization">Настройка Discord</string>
     <string name="pref_discord_custom_message">Своё сообщение</string>
     <string name="pref_discord_custom_message_summary">Пользовательское сообщение, которое будет отображаться в Discord</string>

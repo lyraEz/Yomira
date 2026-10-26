@@ -44,9 +44,8 @@ fun BrowseSourceComfortableGrid(
     val selectionIds = remember(selection) { selection.map { it.id }.toSet() }
     LazyVerticalGrid(
         columns = columns,
-        // YMR --> back from an entry, the remote focus returns to it
+        // back from an entry, the remote focus returns to it
         modifier = Modifier.focusRestorer(),
-        // YMR <--
         contentPadding = contentPadding + PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(CommonAnimeItemDefaults.GridVerticalSpacer),
         horizontalArrangement = Arrangement.spacedBy(CommonAnimeItemDefaults.GridHorizontalSpacer),

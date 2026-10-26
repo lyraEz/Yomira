@@ -149,27 +149,23 @@ fun VideoFiltersPanel(
                     }
                 }
 
-                // YMR --> reset to the light defaults, then the optimizer
+                // reset to the light defaults, then the optimizer
                 yomira.player.ResetPlayerButton()
                 yomira.player.OptimizerCard()
                 yomira.player.ToolsCard()
                 yomira.discord.DiscordPresenceCard()
                 yomira.player.DisplayCard()
-                // YMR <--
                 FilterPresetsCard()
                 FiltersCard()
-                // YMR --> color correction and grading, next to brightness and contrast
+                // color correction and grading, next to brightness and contrast
                 yomira.player.ColorCorrectionCard()
                 yomira.player.ColorGradingCard()
-                // YMR <--
                 DebandCard()
                 Anime4KCard()
-                // YMR -->
                 yomira.player.SmoothnessCard()
                 yomira.player.QualityCard()
                 yomira.player.ExtrasCard()
                 yomira.player.SoundCard()
-                // YMR <--
             }
         }
     }
@@ -180,10 +176,8 @@ fun VideoFiltersPanel(
 fun FilterPresetsCard() {
     val decoderPreferences = remember { Injekt.get<DecoderPreferences>() }
     var isExpanded by remember { mutableStateOf(false) }
-    // ANZ -->
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
-    // ANZ <--
 
     // Collect current values for matching
     val brightness by decoderPreferences.brightnessFilter().collectAsState()
@@ -228,9 +222,7 @@ fun FilterPresetsCard() {
                             selected = currentPreset == theme,
                             onClick = {
                                 decoderPreferences.videoFilterTheme().set(theme.ordinal)
-                                // ANZ -->
                                 applyTheme(mpv, theme, decoderPreferences)
-                                // ANZ <--
                             },
                             label = { Text(stringResource(theme.titleRes)) },
                         )
@@ -256,10 +248,8 @@ fun FilterPresetsCard() {
 fun FiltersCard() {
     val decoderPreferences = remember { Injekt.get<DecoderPreferences>() }
     var isExpanded by remember { mutableStateOf(true) }
-    // ANZ -->
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
-    // ANZ <--
 
     ExpandableCard(
         isExpanded = isExpanded,
@@ -278,7 +268,6 @@ fun FiltersCard() {
                     VideoFilters.entries.forEach {
                         it.preference(decoderPreferences).delete()
                     }
-                    // ANZ -->
                     mpv?.setPropertyString("vf", "")
                     mpv?.setPropertyInt("brightness", 0)
                     mpv?.setPropertyInt("contrast", 0)
@@ -286,7 +275,6 @@ fun FiltersCard() {
                     mpv?.setPropertyInt("gamma", 0)
                     mpv?.setPropertyInt("hue", 0)
                     mpv?.setPropertyInt("sharpen", 0)
-                    // ANZ <--
                 },
             ) {
                 Text(text = stringResource(MR.strings.action_reset))
@@ -305,9 +293,7 @@ fun FiltersCard() {
                         valueText = value.toString(),
                         onChange = {
                             filter.preference(decoderPreferences).set(it.toInt())
-                            // ANZ -->
                             applyFilter(mpv, filter, it.toInt(), decoderPreferences)
-                            // ANZ <--
                         },
                         max = filter.max.toFloat(),
                         min = filter.min.toFloat(),
@@ -324,10 +310,8 @@ fun DebandCard() {
     val decoderPreferences = remember { Injekt.get<DecoderPreferences>() }
     val debandMode by decoderPreferences.videoDebanding().collectAsState()
     var isExpanded by remember { mutableStateOf(true) }
-    // ANZ -->
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
-    // ANZ <--
 
     ExpandableCard(
         isExpanded = isExpanded,
@@ -353,9 +337,7 @@ fun DebandCard() {
                         checked = debandMode == mode,
                         onCheckedChange = {
                             decoderPreferences.videoDebanding().set(mode)
-                            // ANZ -->
                             applyDebandMode(mpv, mode, decoderPreferences)
-                            // ANZ <--
                         }
                     ) {
                         when (mode) {
@@ -372,14 +354,12 @@ fun DebandCard() {
                 
                 TextButton(onClick = {
                     decoderPreferences.videoDebanding().set(Debanding.None)
-                    // ANZ -->
                     applyDebandMode(mpv, Debanding.None, decoderPreferences)
                     DebandSettings.entries.forEach { setting ->
                         val pref = setting.preference(decoderPreferences)
                         pref.delete()
                         mpv?.setPropertyInt(setting.mpvProperty, pref.get())
                     }
-                    // ANZ <--
                 }) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
@@ -402,9 +382,7 @@ fun DebandCard() {
                                 valueText = value.toString(),
                                 onChange = {
                                     setting.preference(decoderPreferences).set(it)
-                                    // ANZ -->
                                     applyDebandSetting(mpv, setting, it)
-                                    // ANZ <--
                                 },
                                 max = setting.end,
                                 min = setting.start,
@@ -423,11 +401,8 @@ fun Anime4KCard() {
     val anime4kManager = remember { Injekt.get<Anime4KManager>() }
     val enableAnime4K by decoderPreferences.enableAnime4K().collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
-    // ANZ -->
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
-    // ANZ <--
-    // YMR -->
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val recommendation = remember { yomira.player.Anime4KAdvisor.recommend(ctx) }
@@ -439,7 +414,6 @@ fun Anime4KCard() {
         decoderPreferences.anime4kQuality().set(quality.name)
         applyAnime4K(mpv, decoderPreferences, anime4kManager)
     }
-    // YMR <--
 
     ExpandableCard(
         isExpanded = isExpanded,
@@ -471,14 +445,12 @@ fun Anime4KCard() {
                     checked = enableAnime4K,
                     onCheckedChange = {
                         decoderPreferences.enableAnime4K().set(it)
-                        // ANZ -->
                         applyAnime4K(mpv, decoderPreferences, anime4kManager)
-                        // ANZ <--
                     }
                 )
             }
 
-            // YMR --> recommendation for this phone, in plain words
+            // recommendation for this phone, in plain words
             val qualityLabel = @Composable { q: Anime4KManager.Quality ->
                 when (q) {
                     Anime4KManager.Quality.FAST -> stringResource(MR.strings.anime4k_quality_fast)
@@ -509,7 +481,6 @@ fun Anime4KCard() {
                     Text(stringResource(YMR.strings.a4k_apply))
                 }
             }
-            // YMR <--
 
             if (enableAnime4K) {
                 val anime4kMode by decoderPreferences.anime4kMode().collectAsState()
@@ -531,15 +502,12 @@ fun Anime4KCard() {
                             selected = anime4kMode == mode.name,
                             onClick = {
                                 decoderPreferences.anime4kMode().set(mode.name)
-                                // ANZ -->
                                 applyAnime4K(mpv, decoderPreferences, anime4kManager)
-                                // ANZ <--
                             },
                             label = { Text(mode.name.replace("_", "+")) },
                         )
                     }
                 }
-                // YMR -->
                 val modeDescription = when (anime4kMode) {
                     Anime4KManager.Mode.A.name -> YMR.strings.a4k_mode_a
                     Anime4KManager.Mode.B.name -> YMR.strings.a4k_mode_b
@@ -556,7 +524,6 @@ fun Anime4KCard() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                // YMR <--
 
                 Text(
                     text = stringResource(MR.strings.pref_anime4k_quality),
@@ -578,15 +545,13 @@ fun Anime4KCard() {
                             selected = anime4kQuality == quality.name,
                             onClick = {
                                 decoderPreferences.anime4kQuality().set(quality.name)
-                                // ANZ -->
                                 applyAnime4K(mpv, decoderPreferences, anime4kManager)
-                                // ANZ <--
                             },
                             label = { Text(label) },
                         )
                     }
                 }
-                // YMR --> confirm on the real video that no frames are dropped
+                // confirm on the real video that no frames are dropped
                 Text(
                     text = stringResource(YMR.strings.a4k_quality_info),
                     style = MaterialTheme.typography.bodySmall,
@@ -629,7 +594,6 @@ fun Anime4KCard() {
                 checkMessage?.let {
                     Text(text = it, style = MaterialTheme.typography.bodySmall)
                 }
-                // YMR <--
             }
         }
     }

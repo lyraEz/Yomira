@@ -25,18 +25,7 @@ signing.properties
 *.jks
 app/standard/preview/*
 
-# AI and Automation
-.gemini/
-conductor/
-anikku-dev/
-testsprite_tests/
-ai_terminal.py
-PLAN.md
-CODE_MAP.md
+# Local files
 *.log
 !CHANGELOG.md
-
-# Local conductor tracking
-conductor/
-GEMINI.md
 __pycache__/

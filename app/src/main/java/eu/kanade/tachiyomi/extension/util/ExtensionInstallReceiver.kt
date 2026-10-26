@@ -55,9 +55,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
                     when (val result = getExtensionFromIntent(context, intent)) {
                         is LoadResult.Success -> listener.onExtensionInstalled(result.extension)
                         is LoadResult.Untrusted -> listener.onExtensionUntrusted(result.extension)
-                        // YMR -->
                         is LoadResult.Error -> result.failure?.let(listener::onExtensionFailed)
-                        // YMR <--
                     }
                 }
             }
@@ -66,9 +64,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
                     when (val result = getExtensionFromIntent(context, intent)) {
                         is LoadResult.Success -> listener.onExtensionUpdated(result.extension)
                         is LoadResult.Untrusted -> listener.onExtensionUntrusted(result.extension)
-                        // YMR -->
                         is LoadResult.Error -> result.failure?.let(listener::onExtensionFailed)
-                        // YMR <--
                     }
                 }
             }
@@ -122,9 +118,7 @@ internal class ExtensionInstallReceiver(private val listener: Listener) : Broadc
         fun onExtensionUpdated(extension: Extension.Installed)
         fun onExtensionUntrusted(extension: Extension.Untrusted)
 
-        // YMR -->
         fun onExtensionFailed(failure: ExtensionLoadFailure)
-        // YMR <--
         fun onPackageUninstalled(pkgName: String)
     }
 

@@ -145,9 +145,8 @@ object HomeScreen : Screen() {
 
     private val uiPreferences: UiPreferences by injectLazy()
     private val defaultTab = uiPreferences.also {
-        // YMR --> the catalog tab, first and as the start screen, once per install
+        // the catalog tab, first and as the start screen, once per install
         yomira.home.HomeTabSetup.ensure(it)
-        // YMR <--
     }.startScreen().get().tab.let { 
         if (it.isEnabled()) it else LibraryTab
     }
@@ -175,9 +174,8 @@ object HomeScreen : Screen() {
         val preferences = Injekt.get<PreferenceStore>()
 
         var bottomNavVisible by rememberSaveable { mutableStateOf(true) }
-        // YMR --> the floating bar shrinks to its icons while scrolling down
+        // the floating bar shrinks to its icons while scrolling down
         var barCollapsed by rememberSaveable { mutableStateOf(false) }
-        // YMR <--
 
         val nestedScrollConnection = remember(hideOnScroll) {
             object : NestedScrollConnection {
@@ -187,13 +185,11 @@ object HomeScreen : Screen() {
                     } else if (hideOnScroll && available.y > 10f && !bottomNavVisible) {
                         bottomNavVisible = true
                     }
-                    // YMR -->
                     if (available.y < -10f && !barCollapsed) {
                         barCollapsed = true
                     } else if (available.y > 10f && barCollapsed) {
                         barCollapsed = false
                     }
-                    // YMR <--
                     return Offset.Zero
                 }
             }
@@ -202,11 +198,10 @@ object HomeScreen : Screen() {
         val behaviorMap by uiPreferences.bottomNavBehaviors().collectAsStatePref()
         val executor = remember(context, scope, navigator) { NavActionExecutor(context, scope, navigator) }
 
-        // YMR --> phones get the floating liquid glass tab bar; tablets and TVs keep rail/bar
+        // phones get the floating liquid glass tab bar; tablets and TVs keep rail/bar
         val floatingBar = !isTabletUi() &&
             !remember { yomira.diagnostics.CrashGuard.isSafeMode(context) }
         val glassStyle = LocalGlassStyle.current
-        // YMR <--
 
         TabNavigator(
             tab = defaultTab,
@@ -218,18 +213,14 @@ object HomeScreen : Screen() {
             val isCurrentTabVisible = remember(visibleNavItems, tabNavigator.current) {
                 visibleNavItems.any { it.tab::class == tabNavigator.current::class }
             }
-            // YMR -->
             LaunchedEffect(tabNavigator.current) { barCollapsed = false }
-            // YMR <--
 
             // Provide usable navigator to content screen
             CompositionLocalProvider(LocalNavigator provides navigator) {
                 Scaffold(
                     modifier = Modifier.nestedScroll(nestedScrollConnection),
                     hazeEnabled = hazeEnabled,
-                    // YMR -->
                     glassTopBar = false,
-                    // YMR <--
                     startBar = {
                         if (isTabletUi()) {
                             NavigationRail(
@@ -244,9 +235,7 @@ object HomeScreen : Screen() {
                         }
                     },
                     bottomBar = {
-                        // YMR -->
                         if (!isTabletUi() && !floatingBar) {
-                        // YMR <--
                             LaunchedEffect(Unit) {
                                 showBottomNavEvent.receiveAsFlow().collectLatest { bottomNavVisible = it }
                             }
@@ -270,7 +259,6 @@ object HomeScreen : Screen() {
                     },
                     contentWindowInsets = WindowInsets(0),
                 ) { contentPadding ->
-                    // YMR -->
                     // "Continue watching" card above the tab bar on the start tab
                     val continuePrefs = remember { yomira.ui.ContinueWatchingPreferences() }
                     val showContinueCard by continuePrefs.showOnHome().collectAsStatePref()
@@ -289,14 +277,12 @@ object HomeScreen : Screen() {
                             showBottomNavEvent.receiveAsFlow().collectLatest { bottomNavVisible = it }
                         }
                     }
-                    // YMR <--
                     Box(
                         modifier = Modifier
                             .padding(contentPadding)
                             .consumeWindowInsets(contentPadding)
                             .fillMaxSize(),
                     ) {
-                      // YMR -->
                       Box(Modifier.fillMaxSize().glassSource(homeBackdrop)) {
                       CompositionLocalProvider(
                           LocalFloatingBarInset provides (
@@ -304,7 +290,6 @@ object HomeScreen : Screen() {
                                   (if (continueVisible) yomira.ui.continueCardInset() else 0.dp)
                               ),
                       ) {
-                      // YMR <--
                         AnimatedContent(
                             targetState = tabNavigator.current,
                             transitionSpec = {
@@ -324,11 +309,8 @@ object HomeScreen : Screen() {
                                 }
                             }
                         }
-                      // YMR -->
                       }
-                      // YMR <--
 
-                      // YMR -->
                       }
                       // The smart suggestion card is gone; its place shows the episode to continue.
                       AnimatedVisibility(
@@ -374,7 +356,6 @@ object HomeScreen : Screen() {
                               )
                           }
                       }
-                      // YMR <--
                     }
                 }
             }
@@ -396,9 +377,7 @@ object HomeScreen : Screen() {
                 launch {
                     openTabEvent.receiveAsFlow().collectLatest {
                         tabNavigator.current = when (it) {
-                            // YMR -->
                             is HomeTab.Home -> yomira.home.HomeCatalogTab
-                            // YMR <--
                             is HomeTab.AnimeLib -> LibraryTab
                             is HomeTab.Feed -> FeedTab
                             is HomeTab.Updates -> UpdatesTab
@@ -425,7 +404,6 @@ object HomeScreen : Screen() {
         }
     }
 
-    // YMR -->
     @Composable
     private fun FloatingHomeBar(
         tabNavigator: TabNavigator,
@@ -509,7 +487,6 @@ object HomeScreen : Screen() {
             else -> painterResource(R.drawable.ic_browse_filled_24dp)
         }
     }
-    // YMR <--
 
     @Composable
     private fun RowScope.HomeNavigationBarItem(
@@ -805,9 +782,7 @@ object HomeScreen : Screen() {
     }
 
     sealed interface HomeTab {
-        // YMR -->
         data object Home : HomeTab
-        // YMR <--
         data class AnimeLib(val animeIdToOpen: Long? = null) : HomeTab
         data object Feed : HomeTab
         data object Updates : HomeTab

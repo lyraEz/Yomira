@@ -19,10 +19,8 @@ class SubtitlePreferences(
     fun subtitleWhitelist() = preferenceStore.getString("pref_subtitle_whitelist", "")
     fun subtitleBlacklist() = preferenceStore.getString("pref_subtitle_blacklist", "")
     fun disableAutoSubtitles() = preferenceStore.getBoolean("pref_disable_auto_subtitles", false)
-    // ANZ -->
     fun subtitleSystemFonts() = preferenceStore.getBoolean("pref_subtitle_system_fonts", false)
     fun subtitleBlackBars() = preferenceStore.getBoolean("pref_subtitle_black_bars", false)
-    // ANZ <--
 
     // Non-preferences
 
@@ -51,9 +49,7 @@ class SubtitlePreferences(
     fun subtitleJustification() = preferenceStore.getEnum("pref_sub_justify", SubtitleJustification.Auto)
     fun subtitlePos() = preferenceStore.getInt("pref_sub_pos", 100)
 
-    // ANZ -->
     fun overrideSubsASS() = preferenceStore.getEnum("pref_override_subtitles_ass_enum", SubtitleAssOverride.No)
-    // ANZ <--
 
     fun subtitlesDelay() = preferenceStore.getInt("pref_subtitles_delay", 0)
     fun subtitlesSpeed() = preferenceStore.getFloat("pref_subtitles_speed", 1f)
@@ -82,7 +78,6 @@ enum class SubtitleJustification(
     }
 }
 
-// ANZ -->
 enum class SubtitleAssOverride(
     val value: String,
     val titleRes: dev.icerock.moko.resources.StringResource,
@@ -99,4 +94,3 @@ enum class SubtitleAssOverride(
             entries.firstOrNull { it.value == value } ?: No
     }
 }
-// ANZ <--

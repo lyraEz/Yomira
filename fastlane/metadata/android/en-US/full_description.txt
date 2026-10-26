@@ -1,13 +1,13 @@
-Discover and watch anime, cartoons, series, and more – easier than ever on your Android device.
+Yomira is an anime, series and movie player for Android phones, with a liquid glass interface and a player you can tune for smoothness and picture quality. Catalogs come from extensions you install from repositories you choose.
 <h3>Features</h3>
 <ul>
-<li>Local reading and watching of content.</li>
-<li>A configurable reader with multiple viewers, reading directions and other settings.</li>
-<li>A configurable player built on mpv-android with multiple options and settings.</li>
-<li>Tracker support: MyAnimeList, AniList, Kitsu, MangaUpdates, Shikimori, Simkl, and Bangumi support.</li>
-<li>Categories to organize your library.</li>
-<li>Light and dark themes.</li>
-<li>Schedule updating your library for new chapters/episodes.</li>
-<li>Create backups locally to read/watch offline or to your desired cloud service.</li>
-<li>Plus much more...</li>
+<li>Liquid glass interface: floating tab bar, glass top bars, a Home tab with highlights and a streaming-style details page.</li>
+<li>A player built on mpv with smoothness options, a per-video optimizer, a heat guard and a premium layout.</li>
+<li>Real-time Anime4K, color correction and color grading.</li>
+<li>Offline Anime4K: Enhanced Downloads and Smart Anime4K.</li>
+<li>Discord Rich Presence through the Discord app, without logging in.</li>
+<li>Episode names and artwork from TMDB, and skip intro without tracking.</li>
+<li>Trackers: AniList, MyAnimeList, Kitsu, Shikimori, Simkl, Trakt and Bangumi.</li>
+<li>Categories, downloads, backups and library updates.</li>
+<li>No telemetry, no ads, no accounts.</li>
 </ul>

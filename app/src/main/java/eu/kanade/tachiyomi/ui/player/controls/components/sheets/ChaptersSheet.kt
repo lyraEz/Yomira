@@ -35,10 +35,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 
-// ANZ -->
 import kotlinx.collections.immutable.ImmutableList
 import yomira.player.playerRow
-// ANZ <--
 
 @Composable
 fun ChaptersSheet(
@@ -82,9 +80,7 @@ fun ChapterTrack(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // YMR -->
             .playerRow()
-            // YMR <--
             .clickable(onClick = onClick)
             .padding(vertical = MaterialTheme.padding.small, horizontal = MaterialTheme.padding.medium),
         horizontalArrangement = Arrangement.SpaceBetween,

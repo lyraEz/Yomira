@@ -157,11 +157,9 @@ internal fun LazyListScope.updatesUiItems(
                                 .padding(top = topPadding, bottom = bottomPadding)
                                 .fillMaxWidth(),
                             shape = shape,
-                            // YMR -->
                             color = yomira.ui.GlassCard.color(),
                             border = yomira.ui.GlassCard.border(),
                             tonalElevation = 0.dp,
-                            // YMR <--
                         ) {
                             UpdatesUiItem(
                                 modifier = Modifier.clip(shape),
@@ -277,7 +275,7 @@ private fun UpdatesUiItem(
 ) {
     val haptic = LocalHapticFeedback.current
     val textAlpha = if (update.seen) DISABLED_ALPHA else 1f
-    // YMR --> TMDB episode name when this anime's data is already on the device
+    // TMDB episode name when this anime's data is already on the device
     androidx.compose.runtime.LaunchedEffect(update.animeId) {
         yomira.metadata.EpisodeMetadata.peek(update.animeId)
     }
@@ -288,7 +286,6 @@ private fun UpdatesUiItem(
         extensionSummary = null,
         extensionPreview = null,
     )
-    // YMR <--
 
     val itemHeight = if (isLeader) 96.dp else 48.dp
     val verticalPadding = if (isLeader) MaterialTheme.padding.small else 0.dp
@@ -314,10 +311,8 @@ private fun UpdatesUiItem(
                 data = update.coverData,
                 onClick = onClickCover,
                 ratio = ratio,
-                // ANZ -->
                 // Forced-on panorama has to measure the ratio itself; the default is the global pref.
                 measureRatio = usePanorama,
-                // ANZ <--
             )
         } else {
             val (_, ratio) = AnimeCover.getEntry(update.animeId, usePanoramaOverride = usePanorama)
@@ -367,9 +362,7 @@ private fun UpdatesUiItem(
                     DotSeparatorText()
                 }
                 Text(
-                    // YMR -->
                     text = episodeDisplay.title,
-                    // YMR <--
                     maxLines = 1,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = textAlpha),

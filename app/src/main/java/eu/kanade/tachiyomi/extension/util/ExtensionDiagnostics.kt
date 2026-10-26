@@ -17,7 +17,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 
-// YMR -->
 /**
  * Builds a plain-text report about one extension: what the device, PackageManager, the loader and
  * the repositories say about it. Meant to be copied and pasted into a bug report.
@@ -107,4 +106,3 @@ object ExtensionDiagnostics {
             }
         }
 }
-// YMR <--

@@ -24,9 +24,7 @@ class EpisodeRepositoryImpl(
                         episode.scanlator,
                         episode.seen,
                         episode.bookmark,
-                        // AM (FILLERMARK) -->
                         episode.fillermark,
-                        // <-- AM (FILLERMARK)
                         episode.lastSecondSeen,
                         episode.totalSeconds,
                         episode.episodeNumber,
@@ -65,9 +63,7 @@ class EpisodeRepositoryImpl(
                     scanlator = episodeUpdate.scanlator,
                     seen = episodeUpdate.seen,
                     bookmark = episodeUpdate.bookmark,
-                    // AM (FILLERMARK) -->
                     fillermark = episodeUpdate.fillermark,
-                    // <-- AM (FILLERMARK)
                     lastSecondSeen = episodeUpdate.lastSecondSeen,
                     totalSeconds = episodeUpdate.totalSeconds,
                     episodeNumber = episodeUpdate.episodeNumber,
@@ -143,11 +139,9 @@ class EpisodeRepositoryImpl(
         }
     }
 
-    // AM (FILLERMARK) -->
     override suspend fun getFillermarkedEpisodesByAnimeId(animeId: Long): List<Episode> {
         return handler.awaitList { episodesQueries.getFillermarkedEpisodesByAnimeId(animeId, EpisodeMapper::mapEpisode) }
     }
-    // <-- AM (FILLERMARK)
 
     override suspend fun getEpisodeById(id: Long): Episode? {
         return handler.awaitOneOrNull { episodesQueries.getEpisodeById(id, EpisodeMapper::mapEpisode) }
@@ -169,7 +163,6 @@ class EpisodeRepositoryImpl(
         }
     }
 
-    // SY -->
     override suspend fun getEpisodeByUrl(url: String): List<Episode> {
         return handler.awaitList { episodesQueries.getEpisodeByUrl(url, EpisodeMapper::mapEpisode) }
     }
@@ -208,5 +201,4 @@ class EpisodeRepositoryImpl(
             episodesQueries.getScanlatorsByMergeId(animeId) { it.orEmpty() }
         }
     }
-    // SY <--
 }

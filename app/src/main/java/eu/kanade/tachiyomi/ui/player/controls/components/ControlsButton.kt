@@ -67,9 +67,7 @@ fun ControlsButton(
     val interactionSource = remember { MutableInteractionSource() }
     val clickEvent = LocalPlayerButtonsClickEvent.current
     val iconColor = if (enabled) color else color.copy(alpha = DISABLED_ALPHA)
-    // YMR -->
     val scale = yomira.player.LocalPlayerButtonLook.current.scale
-    // YMR <--
 
     Box(
         modifier = modifier
@@ -83,7 +81,7 @@ fun ControlsButton(
                 interactionSource = interactionSource,
                 indication = null,
             )
-            // YMR --> no bubble: the glyph itself is liquid glass
+            // no bubble: the glyph itself is liquid glass
             .playerButtonSpacing()
             .padding(
                 vertical = MaterialTheme.padding.medium * scale,
@@ -98,7 +96,6 @@ fun ControlsButton(
             interactionSource = interactionSource,
             color = color,
         )
-        // YMR <--
     }
 }
 
@@ -113,9 +110,7 @@ fun ControlsButton(
     val interactionSource = remember { MutableInteractionSource() }
 
     val clickEvent = LocalPlayerButtonsClickEvent.current
-    // YMR -->
     val scale = yomira.player.LocalPlayerButtonLook.current.scale
-    // YMR <--
     Box(
         modifier = modifier
             .combinedClickable(
@@ -128,9 +123,8 @@ fun ControlsButton(
                 indication = null,
 
             )
-            // YMR --> plain text with a soft shadow, no bubble
+            // plain text with a soft shadow, no bubble
             .playerButtonSpacing()
-            // YMR <--
             .padding(MaterialTheme.padding.medium * scale),
     ) {
         Text(
@@ -188,11 +182,9 @@ private fun PreviewControlsButton() {
     )
 }
 
-// YMR -->
 /** Gap kept around each player button, from the button look settings. */
 @Composable
 fun Modifier.playerButtonSpacing(): Modifier {
     val gap = yomira.player.LocalPlayerButtonLook.current.spacing
     return this.padding(horizontal = gap, vertical = gap * 2 / 3)
 }
-// YMR <--

@@ -1,4 +1,3 @@
-// AM (DISCORD) -->
 package eu.kanade.presentation.more.settings.screen
 
 import androidx.compose.foundation.layout.Column
@@ -289,4 +288,3 @@ object SettingsDiscordScreen : SearchableSettings {
         )
     }
 }
-// <-- AM (DISCORD)

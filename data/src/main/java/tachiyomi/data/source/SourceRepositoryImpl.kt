@@ -46,9 +46,7 @@ class SourceRepositoryImpl(
             sourceManager.catalogueSources,
         ) { sourceIdWithFavoriteCount, _ -> sourceIdWithFavoriteCount }
             .map {
-                // SY -->
                 it.filterNot { it.source == MERGED_SOURCE_ID }
-                    // SY <--
                     .map { (sourceId, count) ->
                         val source = sourceManager.getOrStub(sourceId)
                         val domainSource = mapSourceToDomainSource(source).copy(

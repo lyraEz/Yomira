@@ -30,9 +30,7 @@ interface EpisodeRepository {
 
     suspend fun getBookmarkedEpisodesByAnimeId(animeId: Long): List<Episode>
 
-    // AM (FILLERMARK) -->
     suspend fun getFillermarkedEpisodesByAnimeId(animeId: Long): List<Episode>
-    // <-- AM (FILLERMARK)
 
     suspend fun getEpisodeById(id: Long): Episode?
 
@@ -40,7 +38,6 @@ interface EpisodeRepository {
 
     suspend fun getEpisodeByUrlAndAnimeId(url: String, animeId: Long): Episode?
 
-    // SY -->
     suspend fun getEpisodeByUrl(url: String): List<Episode>
 
     suspend fun getMergedEpisodeByAnimeId(animeId: Long, applyScanlatorFilter: Boolean = false): List<Episode>
@@ -53,5 +50,4 @@ interface EpisodeRepository {
     suspend fun getScanlatorsByMergeId(animeId: Long): List<String>
 
     fun getScanlatorsByMergeIdAsFlow(animeId: Long): Flow<List<String>>
-    // SY <--
 }

@@ -123,7 +123,6 @@ class AndroidSourceManager(
         return stubSourcesMap.values.filterNot { it.id in onlineSourceIds }
     }
 
-    // SY -->
     override fun getVisibleOnlineSources(): List<HttpSource> {
         return sourcesMapFlow.value.values
             .filterIsInstance<HttpSource>()
@@ -147,7 +146,6 @@ class AndroidSourceManager(
                 enhancedHttpSource.enhancedSource as? DelegatedHttpSource
             }
     }
-    // SY <--
 
     private fun registerStubSource(source: StubSource) {
         scope.launch {

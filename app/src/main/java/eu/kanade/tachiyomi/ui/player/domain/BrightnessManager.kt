@@ -4,7 +4,6 @@ import android.content.Context
 import android.provider.Settings
 import eu.kanade.tachiyomi.ui.player.normalize
 
-// ANZ -->
 class BrightnessManager(
     private val context: Context,
 ) {
@@ -15,4 +14,3 @@ class BrightnessManager(
         }.getOrElse { 0f }
     }
 }
-// ANZ <--

@@ -1,119 +1,131 @@
 <div align="center">
 
-<img src="./.github/assets/icon.png" alt="Ícone do Yomira" width="96"/>
+<img src="./.github/assets/icon.png" alt="Yomira icon" width="104"/>
 
 # Yomira
 
-Cliente de animes, séries e filmes para **celulares Android**, com interface própria em liquid glass e um player ajustável para fluidez e qualidade.
+An anime, series and movie player for **Android phones**, with a liquid glass interface and a
+player you can tune for smoothness and picture quality.
 
 [![CI](https://github.com/lyraEz/Yomira/actions/workflows/ci.yml/badge.svg)](https://github.com/lyraEz/Yomira/actions/workflows/ci.yml)
-[![Licença](https://img.shields.io/badge/licen%C3%A7a-Apache--2.0-blue)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/lyraEz/Yomira?label=release)](https://github.com/lyraEz/Yomira/releases/latest)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
+[Website](https://lyraez.github.io/Yomira/) · [Download](https://github.com/lyraEz/Yomira/releases/latest) · [Betas](https://github.com/lyraEz/Yomira-releases/releases) · [Changelog](CHANGELOG.md)
 
 </div>
 
-O Yomira é um **fork independente** do [AniZen](https://github.com/salmanbappi/AniZen), que por sua vez descende do Anikku, do Aniyomi e do Mihon/Tachiyomi. **Não é uma versão oficial do AniZen** e não tem ligação com seus autores. O app não traz conteúdo próprio: os catálogos vêm de extensões instaladas a partir de repositórios escolhidos por quem usa.
+Yomira ships no content of its own: catalogs come from extensions you install from repositories
+you choose.
 
-- Pacote: `com.lyraez.yomira` (instala ao lado do AniZen, sem conflito)
-- Base do código: AniZen v0.5.215 (`becbe2d`, 30/09/2026)
-- Histórico de versões: [CHANGELOG.md](CHANGELOG.md)
+## Highlights
 
-## O que muda em relação ao AniZen
+- **Liquid glass interface**: floating tab bar that shrinks while you scroll, glass top bars that
+  fade out, capsule tabs, a Home tab with highlights and continue watching, and a streaming-style
+  details page with artwork, logos, characters and episode cards. The glass adapts to the phone and
+  can be tuned in **Appearance > Liquid glass**.
+- **Player**: glass controls and seek bar, premium layout, a "You are watching" pause screen,
+  smoothness options (match the display to the video, motion interpolation, image quality), a
+  per-video optimizer and a heat guard that switches to lighter settings when the phone warms up.
+- **Picture**: real-time Anime4K with a recommendation for your phone, plus **color correction**
+  (temperature, tint, exposure, shadows, highlights, vibrance) and **color grading** (looks, tinted
+  shadows and highlights, contrast curve, fade).
+- **Offline Anime4K**: *Enhanced Downloads* processes downloaded episodes into an Anime4K version
+  that plays first; *Smart Anime4K* prepares the episode you opened in the background.
+- **Discord Rich Presence without logging in**: a Crunchyroll-style card on your Discord profile
+  while you watch, through the Discord app on the phone. No token, no password. Fully configurable.
+- **Episode names and artwork from TMDB**, skip intro without tracking (AniList, AniSkip, Anime
+  Skip), packed season numbers and split seasons handled.
+- **Private**: no telemetry, no ads, no accounts. See [docs/PRIVACY.md](docs/PRIVACY.md).
 
-- **Interface nova em liquid glass**: barra de abas flutuante, barras superiores de vidro com fade, abas em cápsula, tela "Mais" e configurações em grupos, detalhes do anime com botões de vidro sobre a capa e episódios em cartões. A intensidade do vidro se ajusta ao aparelho e pode ser configurada em **Aparência → Liquid glass**.
-- **Player**: ícones de vidro, barra de progresso de vidro, tamanho e espaçamento dos botões ajustáveis, cards de Fluidez, Qualidade, Áudio e extras, estatísticas do vídeo, otimizador opcional por vídeo e proteção contra aquecimento, que passa para os ajustes mais leves quando o celular esquenta.
-- **Próximo episódio sem fechar o player**: quando um episódio falha (servidor fora do ar, link expirado), o player mostra o erro com opções para tentar de novo, escolher outro servidor ou episódio, em vez de fechar.
-- **Extensões explicadas**: a lista mostra quando o sistema aguarda confirmação, quantas fontes cada extensão carregou e, para extensões instaladas que não carregaram, o motivo (biblioteca incompatível, assinatura, filtro adulto, erro de carregamento) com um diagnóstico que pode ser copiado.
-- **Repositórios mais fáceis**: colar o endereço ou escolher uma sugestão, com mensagens de erro específicas.
-- **Relatório de falhas e modo seguro**: se o app fechar sozinho, uma tela simples mostra o erro, e depois de falhas seguidas ele oferece abrir em modo seguro.
-
-## Requisitos
+## Requirements
 
 | | |
 | --- | --- |
-| Android | 8.0 ou mais novo (API 26+) |
-| Arquitetura | ARM 64 bits (`arm64-v8a`, a maioria dos celulares) ou 32 bits (`armeabi-v7a`) |
+| Android | 8.0 or newer (API 26+) |
+| Architecture | 64-bit ARM (`arm64-v8a`, most phones) or 32-bit (`armeabi-v7a`) |
 
-## Instalação
+## Install
 
-Os APKs assinados ficam em [lyraEz/Yomira-releases](https://github.com/lyraEz/Yomira-releases/releases/latest), todos com o mesmo pacote e a mesma assinatura:
+Stable releases are published [here](https://github.com/lyraEz/Yomira/releases/latest). Betas are
+pre-releases in [lyraEz/Yomira-releases](https://github.com/lyraEz/Yomira-releases/releases); turn
+on **More > About > Beta versions** to be offered them in the app.
 
-| Arquivo | Quando usar |
+| File | When to use it |
 | --- | --- |
-| `Yomira-vX.Y.Z-arm64-v8a.apk` | A maioria dos celulares |
-| `Yomira-vX.Y.Z-armeabi-v7a.apk` | Celulares de 32 bits |
-| `Yomira-vX.Y.Z-universal.apk` | Se tiver dúvida; funciona nos dois, mas é maior |
+| `Yomira-vX.Y.Z-arm64-v8a.apk` | Most phones |
+| `Yomira-vX.Y.Z-armeabi-v7a.apk` | 32-bit phones |
+| `Yomira-vX.Y.Z-universal.apk` | If unsure; works on both, but is larger |
 
-Confira o arquivo antes de instalar com o `SHA256SUMS.txt` da release (`sha256sum -c SHA256SUMS.txt`). O certificado de assinatura do Yomira tem SHA-256 `e4d0adb9369971bfbe862554d8e7d418b43c17321e2694719d0efeb0f1d677ce`.
+Check the download with the release's `SHA256SUMS.txt` (`sha256sum -c SHA256SUMS.txt`). Yomira's
+signing certificate has SHA-256
+`e4d0adb9369971bfbe862554d8e7d418b43c17321e2694719d0efeb0f1d677ce`.
 
-## Primeiros passos
+## Getting started
 
-1. Na primeira abertura, siga o assistente.
-2. Em **Navegar → Extensões → menu → Repositórios de extensões**, adicione um repositório. Estes dois têm o formato compatível conferido:
-   - Rede: `https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json`
-   - Project Nox Anime: `https://raw.githubusercontent.com/Awerkori/anime-extensoes/repo/index.min.json`
+1. Follow the setup screens on first launch.
+2. In **Browse > Extensions > menu > Extension repos**, add a repository, for example
+   `https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json`. Any repository in the legacy
+   format (with `repo.json` and `index.min.json`) works; the newer store-v2 index is a different
+   format, and when you paste one the app looks for an `index.min.json` in the same folder and
+   explains when there is none.
+3. Install an extension. Confirm the install if the system asks. When an extension is signed by a
+   key no added repository declares, the app asks whether you trust it.
+4. Its sources show up in **Browse > Sources**.
 
-   Qualquer repositório no formato legado do Aniyomi/AniZen (com `repo.json` e `index.min.json`) funciona. O índice **store-v2** usado pelas versões novas do Aniyomi é outro formato e o Yomira não o lê; se você colar um endereço store-v2, o app tenta o `index.min.json` da mesma pasta e explica quando ele não existe.
-3. Instale uma extensão. Se o sistema pedir, confirme a instalação. Quando a extensão estiver assinada por uma chave que nenhum repositório adicionado declara, o app pede para você confiar nela.
-4. A fonte aparece em **Navegar → Fontes**.
+If an extension does not show up, use **Browse > Extensions > menu > Reload extensions** and look
+at *Installed with problems*. An extension signed with another key cannot be updated in place:
+Android requires uninstalling the current one first.
 
-Se uma extensão não aparecer, use **Navegar → Extensões → menu → Recarregar extensões** e veja a seção *Instaladas com problemas*. Uma extensão assinada com outra chave não pode ser atualizada por cima: o Android exige desinstalar a versão atual antes.
+## Updating
 
-## Atualizar o Yomira
+Use **More > About > Check for updates**, or install the new APK **over** the current one. Your
+library, history and settings stay, because the package and signature do not change and the
+version code always goes up. **Do not uninstall** before updating.
 
-Use **Mais → Sobre → Verificar atualizações**, ou instale o APK novo **por cima** do atual. Biblioteca, histórico e configurações são mantidos porque o pacote e a assinatura não mudam e o `versionCode` sempre aumenta. **Não desinstale** antes de atualizar.
+After installing an APK by hand, Android takes a few days to optimize the app, which can cause some
+stutter at first. With the phone connected to a computer,
+`adb shell cmd package compile -m speed-profile -f com.lyraez.yomira` does it right away.
 
-Em APK instalado manualmente, o Android leva alguns dias para otimizar o app e isso pode causar engasgos no começo. Com o celular ligado ao computador, `adb shell cmd package compile -m speed-profile -f com.lyraez.yomira` faz isso na hora.
+## Backups
 
-## Backup e migração do AniZen
+**More > Settings > Data and storage** creates and restores backups (`.tachibk`), including
+library, history, categories, settings, sources and repositories. Extensions are installed again
+from the restored repositories.
 
-O Yomira tem pacote próprio, então não enxerga os dados do AniZen. Para levar biblioteca, histórico, categorias, configurações, fontes e repositórios:
+## Services and privacy
 
-1. No AniZen: **Mais → Configurações → Dados e armazenamento → Criar backup**.
-2. No Yomira: **Mais → Configurações → Dados e armazenamento → Restaurar backup** e escolha o arquivo `.tachibk`.
+Yomira has no telemetry. Some features need accounts or keys from third-party services (trackers,
+TMDB, Discord, Google Drive); [docs/SERVICES.md](docs/SERVICES.md) lists each one and how to use
+your own. [docs/PRIVACY.md](docs/PRIVACY.md) lists everything the app connects to.
 
-O AniZen continua instalado e intacto. As extensões precisam ser instaladas de novo pelo Yomira, a partir dos repositórios restaurados.
+## Building
 
-## Serviços desativados
-
-Alguns recursos herdados dependiam de credenciais do autor do AniZen e estão desligados: Discord Rich Presence, sincronização com o Google Drive e a verificação remota do assistente de IA. Os logins de rastreadores (AniList, MyAnimeList e outros) usam registros OAuth dos projetos de origem. Detalhes e como configurar credenciais próprias em [docs/yomira/SERVICOS.md](docs/yomira/SERVICOS.md). O app não tem telemetria; veja [docs/yomira/PRIVACIDADE.md](docs/yomira/PRIVACIDADE.md).
-
-## Compilar
-
-Requer JDK 17 e o Android SDK (plataforma 36).
+Needs JDK 17 and the Android SDK (platform 36).
 
 ```sh
 git clone https://github.com/lyraEz/Yomira.git
 cd Yomira
-./gradlew :app:assembleDebug            # versão de desenvolvimento (com.lyraez.yomira.dev)
-./gradlew :app:assembleRelease          # APKs de release (sem assinatura se não houver chave)
+./gradlew :app:assembleDebug            # development build (com.lyraez.yomira.dev)
+./gradlew :app:assembleRelease          # release APKs (unsigned without a key)
 ```
 
-Para assinar, crie `signing.properties` na raiz (o arquivo é ignorado pelo Git):
+To sign, create `signing.properties` in the project root (ignored by Git):
 
 ```properties
-storeFile=/caminho/para/yomira-release.jks
+storeFile=/path/to/yomira-release.jks
 storePassword=...
 keyAlias=yomira
 keyPassword=...
 ```
 
-O processo de release, a guarda da chave e a política de versões estão em [docs/yomira/RELEASES.md](docs/yomira/RELEASES.md). Para trazer mudanças do AniZen, veja [docs/yomira/SINCRONIZACAO.md](docs/yomira/SINCRONIZACAO.md).
+Releases, the signing key and the version policy are described in
+[docs/RELEASES.md](docs/RELEASES.md); [docs/CODE_MAP.md](docs/CODE_MAP.md) shows where each feature
+lives. See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-## Créditos
+## License
 
-O Yomira só existe por causa destes projetos, todos de código aberto:
-
-- [AniZen](https://github.com/salmanbappi/AniZen), de salmanbappi: a base deste fork
-- [Anikku](https://github.com/komikku-app/anikku) e [Komikku](https://github.com/komikku-app/komikku)
-- [Aniyomi](https://github.com/aniyomiorg/aniyomi)
-- [Mihon](https://github.com/mihonapp/mihon) e o projeto Tachiyomi
-- [TachiyomiSY](https://github.com/jobobby04/TachiyomiSY)
-- [mpv](https://mpv.io) e [mpv-android](https://github.com/mpv-android/mpv-android)
-- [mpvKt](https://github.com/abdallahmehiz/mpvKt) e [mpvEx](https://github.com/marlboro-advance/mpvEx)
-- [Anime4K](https://github.com/bloc97/Anime4K) (shaders, licença MIT)
-
-As licenças das bibliotecas usadas aparecem no app em **Mais → Sobre → Licenças de código aberto**.
-
-## Licença
-
-Distribuído sob a [Licença Apache 2.0](LICENSE), a mesma do AniZen. Veja também [NOTICE](NOTICE).
+Yomira is licensed under the [Apache License 2.0](LICENSE). It includes code from other open-source
+projects; those files keep their original copyright and license headers (see [NOTICE](NOTICE)).
+The licenses of third-party libraries are listed in the app under **More > About > Open source
+licenses**.

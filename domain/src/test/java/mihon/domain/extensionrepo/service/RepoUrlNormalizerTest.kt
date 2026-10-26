@@ -3,7 +3,6 @@ package mihon.domain.extensionrepo.service
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
-// YMR -->
 class RepoUrlNormalizerTest {
 
     @Test
@@ -49,4 +48,3 @@ class RepoUrlNormalizerTest {
         RepoUrlNormalizer.candidates("not a url") shouldBe null
     }
 }
-// YMR <--

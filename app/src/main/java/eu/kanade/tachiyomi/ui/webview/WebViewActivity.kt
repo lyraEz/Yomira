@@ -82,21 +82,17 @@ class WebViewActivity : BaseActivity() {
                 onClearCookies = this::clearCookies,
             )
         }
-        // AM (DISCORD) -->
         lifecycleScope.launchIO {
             DiscordRPCService.setAnimeScreen(this@WebViewActivity, DiscordScreen.WEBVIEW)
         }
-        // <-- AM (DISCORD)
     }
 
-    // AM (DISCORD) -->
     override fun onDestroy() {
         lifecycleScope.launchIO {
             DiscordRPCService.setAnimeScreen(this@WebViewActivity, DiscordRPCService.lastUsedScreen)
         }
         super.onDestroy()
     }
-    // <-- AM (DISCORD)
 
     override fun onPause() {
         super.onPause()

@@ -1,1 +1,1 @@
-Full-featured player and reader, based on Mihon.
+Anime, series and movie player with a liquid glass interface.

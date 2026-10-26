@@ -1,4 +1,3 @@
-// AM (DISCORD) -->
 
 // Taken from Animiru. Thank you Quickdev for permission!
 // Original library from https://github.com/dead8309/KizzyRPC (Thank you)
@@ -17,7 +16,6 @@ import kotlinx.serialization.json.JsonElement
 // Constant for logging tag
 const val RICH_PRESENCE_TAG = "discord_rpc"
 
-// YMR -->
 // The Discord application belongs to whoever builds the app. Yomira ships without one, so Rich
 // Presence stays off unless the build sets `-Pyomira.discordAppId=<id>` (see docs/yomira/SERVICOS.md).
 val RICH_PRESENCE_APPLICATION_ID: String = BuildConfig.DISCORD_RPC_APP_ID
@@ -26,7 +24,6 @@ const val DOWNLOAD_BUTTON_LABEL = "Download"
 const val DOWNLOAD_BUTTON_URL = "https://github.com/lyraEz/Yomira-releases/releases/latest"
 const val DISCORD_BUTTON_LABEL = "GitHub"
 const val DISCORD_BUTTON_URL = "https://github.com/lyraEz/Yomira"
-// YMR <--
 
 @Serializable
 data class Activity(
@@ -196,10 +193,8 @@ enum class DiscordScreen(
 }
 
 // Constants for standard Rich Presence image urls
-// YMR -->
 private const val YOMIRA_LOGO_IMAGE_URL = "https://raw.githubusercontent.com/lyraEz/Yomira/main/.github/assets/icon.png"
 
-// YMR <--
 private const val ANIMETAIL_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
 private const val ANIMETAIL_PREVIEW_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
 private val ANIMETAIL_IMAGE = if (isPreviewBuildType) ANIMETAIL_PREVIEW_IMAGE_URL else ANIMETAIL_IMAGE_URL
@@ -212,4 +207,3 @@ private const val WEBVIEW_IMAGE_URL = "https://raw.githubusercontent.com/google/
 private const val VIDEO_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
 private const val MANGA_IMAGE_URL = YOMIRA_LOGO_IMAGE_URL
 
-// <-- AM (DISCORD)

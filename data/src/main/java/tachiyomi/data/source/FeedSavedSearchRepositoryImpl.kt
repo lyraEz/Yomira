@@ -51,7 +51,6 @@ class FeedSavedSearchRepositoryImpl(
     }
 
     override suspend fun insert(feedSavedSearch: FeedSavedSearch): Long {
-        // KMK -->
         return handler.awaitOneExecutable(true) {
             feed_saved_searchQueries.insert(
                 sourceId = feedSavedSearch.source,
@@ -80,7 +79,6 @@ class FeedSavedSearchRepositoryImpl(
         }
     }
 
-    // KMK -->
     override suspend fun updatePartial(update: FeedSavedSearchUpdate) {
         handler.await {
             updatePartialBlocking(update)

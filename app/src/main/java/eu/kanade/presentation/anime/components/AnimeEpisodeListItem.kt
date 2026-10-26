@@ -94,15 +94,12 @@ fun AnimeEpisodeListItem(
     onClick: () -> Unit,
     onDownloadClick: ((EpisodeDownloadAction) -> Unit)?,
     onEpisodeSwipe: (LibraryPreferences.EpisodeSwipeAction) -> Unit,
-    // AM (FILE_SIZE) -->
     fileSize: Long?,
-    // <-- AM (FILE_SIZE)
     modifier: Modifier = Modifier,
-    // YMR --> streaming layout: the row becomes a card with the episode's still
+    // streaming layout: the row becomes a card with the episode's still
     card: yomira.details.EpisodeCardExtras? = null,
-    // YMR <--
 ) {
-    // YMR --> spoiler protection: unwatched episodes show only their number, no summary, blurred thumbnail
+    // spoiler protection: unwatched episodes show only their number, no summary, blurred thumbnail
     val spoilerHidden = yomira.ui.rememberHideSpoilers() && !seen
     val shownTitle = if (spoilerHidden) {
         yomira.ui.SpoilerShield.maskTitle(title, stringResource(MR.strings.episodes))
@@ -110,7 +107,6 @@ fun AnimeEpisodeListItem(
         title
     }
     val shownSummary = summary.takeUnless { spoilerHidden }
-    // YMR <--
     val downloadState = downloadStateProvider()
     val fillermarkIcon = ImageVector.vectorResource(id = R.drawable.ic_fillermark_24dp)
     val fillermarkBorderIcon = ImageVector.vectorResource(id = R.drawable.ic_fillermark_border_24dp)
@@ -145,7 +141,7 @@ fun AnimeEpisodeListItem(
     }
 
     val hasActions = start != null || end != null
-    // YMR --> each episode is a rounded card
+    // each episode is a rounded card
     val cardShape = RoundedCornerShape(if (card != null) 22.dp else 18.dp)
     val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val cardModifier = modifier
@@ -183,11 +179,8 @@ fun AnimeEpisodeListItem(
             )
         }
     }
-    // YMR <--
 
-    // YMR -->
     androidx.compose.runtime.CompositionLocalProvider(yomira.ui.LocalSpoilerBlur provides spoilerHidden) {
-    // YMR <--
     if (hasActions) {
         SwipeableActionsBox(
             modifier = cardModifier,
@@ -196,12 +189,10 @@ fun AnimeEpisodeListItem(
             swipeThreshold = swipeActionThreshold,
             backgroundUntilSwipeThreshold = MaterialTheme.colorScheme.surfaceContainerLowest,
         ) {
-            // YMR -->
             if (streamingCard != null) {
                 streamingCard(Modifier)
                 return@SwipeableActionsBox
             }
-            // YMR <--
             EpisodeItemRow(
                 title = shownTitle,
                 date = date,
@@ -225,10 +216,8 @@ fun AnimeEpisodeListItem(
                 modifier = Modifier.background(cardColor),
             )
         }
-    // YMR -->
     } else if (streamingCard != null) {
         streamingCard(cardModifier)
-    // YMR <--
     } else {
         EpisodeItemRow(
             title = shownTitle,
@@ -253,9 +242,7 @@ fun AnimeEpisodeListItem(
             modifier = cardModifier.background(cardColor),
         )
     }
-    // YMR -->
     }
-    // YMR <--
 }
 
 @Composable
@@ -449,7 +436,7 @@ private fun EpisodeThumbnail(
             modifier = Modifier
                 .width(targetWidth.dp)
                 .padding(end = 8.dp)
-                // YMR --> unwatched episode with spoiler protection: blurred thumbnail
+                // unwatched episode with spoiler protection: blurred thumbnail
                 .then(
                     if (yomira.ui.LocalSpoilerBlur.current) {
                         Modifier.blur(16.dp, androidx.compose.ui.draw.BlurredEdgeTreatment.Rectangle)
@@ -457,7 +444,6 @@ private fun EpisodeThumbnail(
                         Modifier
                     },
                 ),
-                // YMR <--
             ratio = 16f / 9f,
             shape = MaterialTheme.shapes.small,
         )
@@ -603,15 +589,11 @@ private fun BookmarkDownloadIcons(
     }
 }
 
-// AM (FILLERMARK) -->
-// <-- AM (FILLERMARK)
 private fun getSwipeAction(
     action: LibraryPreferences.EpisodeSwipeAction,
     seen: Boolean,
     bookmark: Boolean,
-    // AM (FILLERMARK) -->
     fillermark: Boolean,
-    // <-- AM (FILLERMARK)
     downloadState: Download.State,
     background: Color,
     onSwipe: () -> Unit,
@@ -631,7 +613,6 @@ private fun getSwipeAction(
             isUndo = bookmark,
             onSwipe = onSwipe,
         )
-        // AM (FILLERMARK) -->
         LibraryPreferences.EpisodeSwipeAction.ToggleFillermark -> {
             val icon = if (!fillermark) fillermarkIcon else fillermarkBorderIcon
             swipeAction(
@@ -641,7 +622,6 @@ private fun getSwipeAction(
                 onSwipe = onSwipe,
             )
         }
-        // <-- AM (FILLERMARK)
         LibraryPreferences.EpisodeSwipeAction.Download -> swipeAction(
             icon = when (downloadState) {
                 Download.State.NOT_DOWNLOADED, Download.State.ERROR, Download.State.PAUSED -> Icons.Outlined.Download

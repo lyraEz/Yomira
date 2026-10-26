@@ -204,7 +204,6 @@ fun QualitySheet(
     }
 }
 
-// ANZ -->
 private fun buildDefaultVideoByHosterIndex(
     hosterState: List<HosterState>,
     defaultStreamSelector: String,
@@ -216,7 +215,6 @@ private fun buildDefaultVideoByHosterIndex(
         if (videoIdx >= 0) hosterIdx to videoIdx else null
     }.toMap()
 }
-// ANZ <--
 
 private fun findDefaultVideoIndex(
     videos: List<Video>,
@@ -510,9 +508,7 @@ fun HosterTrack(
     Row(
         modifier = modifier
             .height(32.dp)
-            // YMR -->
             .clip(RoundedCornerShape(percent = 50))
-            // YMR <--
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -600,9 +596,7 @@ fun VideoTrack(
             .fillMaxWidth()
             .padding(vertical = MaterialTheme.padding.extraSmall)
             .then(highlightModifier)
-            // YMR -->
             .clip(DefaultHighlightShape)
-            // YMR <--
             .clickable(onClick = onClick)
             .padding(
                 horizontal = MaterialTheme.padding.small,

@@ -2,7 +2,6 @@ package mihon.domain.extensionrepo.service
 
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-// YMR -->
 /**
  * Turns whatever URL the user pasted into the repository base URLs worth probing.
  *
@@ -61,4 +60,3 @@ object RepoUrlNormalizer {
         return "https://raw.githubusercontent.com/$owner/$repo/$branch$path".removeSuffix("/")
     }
 }
-// YMR <--

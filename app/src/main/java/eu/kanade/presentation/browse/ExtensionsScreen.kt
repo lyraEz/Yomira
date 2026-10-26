@@ -120,10 +120,8 @@ fun ExtensionScreen(
     onOpenExtension: (Extension.Installed) -> Unit,
     onClickUpdateAll: () -> Unit,
     onRefresh: () -> Unit,
-    // YMR -->
     onBuildDiagnostics: suspend (Extension?, String, String?) -> String = { _, _, _ -> "" },
     onUninstallPackage: (String) -> Unit = {},
-    // YMR <--
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val uiPreferences = remember { Injekt.get<UiPreferences>() }
@@ -169,10 +167,8 @@ fun ExtensionScreen(
                     onOpenExtension = onOpenExtension,
                     onClickUpdateAll = onClickUpdateAll,
                     useContainer = useContainer,
-                    // YMR -->
                     onBuildDiagnostics = onBuildDiagnostics,
                     onUninstallPackage = onUninstallPackage,
-                    // YMR <--
                 )
             }
         }
@@ -193,21 +189,17 @@ private fun ExtensionContent(
     onOpenExtension: (Extension.Installed) -> Unit,
     onClickUpdateAll: () -> Unit,
     useContainer: Boolean,
-    // YMR -->
     onBuildDiagnostics: suspend (Extension?, String, String?) -> String,
     onUninstallPackage: (String) -> Unit,
-    // YMR <--
 ) {
     val context = LocalContext.current
     var trustState by remember { mutableStateOf<Extension.Untrusted?>(null) }
-    // YMR -->
     var diagnosticsRequest by remember { mutableStateOf<DiagnosticsRequest?>(null) }
-    // YMR <--
     val installGranted = rememberRequestPackageInstallsPermissionState(initialValue = true)
 
     val handleItemClick: (Extension) -> Unit = remember(onInstallExtension, onOpenExtension, state.items) {
         click@{ ext ->
-            // YMR --> a failed install opens its explanation instead of retrying blindly
+            // a failed install opens its explanation instead of retrying blindly
             val failedItem = state.items.values.flatten()
                 .find { it.extension.pkgName == ext.pkgName && it.installStep == InstallStep.Error }
             if (failedItem != null) {
@@ -220,7 +212,6 @@ private fun ExtensionContent(
                 )
                 return@click
             }
-            // YMR <--
             when (ext) {
                 is Extension.Available -> onInstallExtension(ext)
                 is Extension.Installed -> onOpenExtension(ext)
@@ -331,11 +322,9 @@ private fun ExtensionContent(
                         bottomStart = if (isLast) 16.dp else 0.dp,
                         bottomEnd = if (isLast) 16.dp else 0.dp,
                     ),
-                    // YMR -->
                     color = yomira.ui.GlassCard.color(),
                     border = yomira.ui.GlassCard.border(),
                     tonalElevation = 0.dp,
-                    // YMR <--
                 ) {
                     ExtensionItem(
                         modifier = Modifier,
@@ -360,7 +349,7 @@ private fun ExtensionContent(
             }
         }
     }
-        // YMR --> APKs that are installed but did not load, with the reason
+        // APKs that are installed but did not load, with the reason
         if (state.failures.isNotEmpty()) {
             item(contentType = "header", key = "extensionHeader-failures") {
                 ExtensionHeader(text = stringResource(YMR.strings.ext_problems))
@@ -386,9 +375,7 @@ private fun ExtensionContent(
                 )
             }
         }
-        // YMR <--
     }
-    // YMR -->
     diagnosticsRequest?.let { request ->
         ExtensionDiagnosticsDialog(
             request = request,
@@ -404,7 +391,6 @@ private fun ExtensionContent(
             onDismissRequest = { diagnosticsRequest = null },
         )
     }
-    // YMR <--
     if (trustState != null) {
         ExtensionTrustDialog(
             onClickConfirm = {
@@ -590,15 +576,12 @@ private fun ExtensionItemContent(
                         text = when (installStep) {
                             InstallStep.Pending -> stringResource(MR.strings.ext_pending)
                             InstallStep.Downloading -> stringResource(MR.strings.ext_downloading)
-                            // YMR -->
                             InstallStep.AwaitingConfirmation -> stringResource(YMR.strings.ext_awaiting_confirmation)
-                            // YMR <--
                             InstallStep.Installing -> stringResource(MR.strings.ext_installing)
                             else -> error("Must not show non-install process text")
                         },
                     )
                 }
-                // YMR -->
                 if (installStep == InstallStep.Error) {
                     DotSeparatorNoSpaceText()
                     Text(
@@ -615,7 +598,6 @@ private fun ExtensionItemContent(
                         },
                     )
                 }
-                // YMR <--
             }
         }
     }
@@ -768,7 +750,6 @@ private fun ExtensionTrustDialog(
 
 private const val TORRENT_ICON = "torrentIcon"
 
-// YMR -->
 private data class DiagnosticsRequest(
     val extension: Extension?,
     val pkgName: String,
@@ -855,4 +836,3 @@ private fun ExtensionDiagnosticsDialog(
         onDismissRequest = onDismissRequest,
     )
 }
-// YMR <--

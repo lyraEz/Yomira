@@ -140,11 +140,8 @@ fun AppBar(
     onCancelActionMode: () -> Unit = {},
 
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    // YMR -->
     large: Boolean = yomira.glass.LocalLargeTopBar.current,
-    // YMR <--
 ) {
-    // YMR -->
     val colors = if (yomira.glass.LocalGlassTopBar.current && backgroundColor == null) {
         val glassColor = if (isActionMode) {
             MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
@@ -195,7 +192,6 @@ fun AppBar(
             scrollBehavior.state.heightOffset = 0f
         }
     }
-    // YMR <--
     Column(
         modifier = modifier,
     ) {
@@ -203,10 +199,8 @@ fun AppBar(
             navigationIcon = navigation,
             title = titleContent,
             actions = actions,
-            // YMR -->
             colors = colors,
             scrollBehavior = scrollBehavior.takeUnless { inLargeScreen },
-            // YMR <--
         )
     }
 }
@@ -455,9 +449,7 @@ fun SearchToolbar(
         },
         isActionMode = false,
         scrollBehavior = scrollBehavior,
-        // YMR -->
         large = yomira.glass.LocalLargeTopBar.current && searchQuery == null,
-        // YMR <--
     )
 }
 

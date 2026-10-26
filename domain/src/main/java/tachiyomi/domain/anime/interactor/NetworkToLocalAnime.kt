@@ -25,13 +25,11 @@ class NetworkToLocalAnime(
         }
     }
 
-    // KMK -->
     suspend fun getLocal(manga: Anime): Anime = if (manga.id <= 0) {
         await(manga)
     } else {
         manga
     }
-    // KMK <--
 
     private suspend fun getManga(url: String, sourceId: Long): Anime? {
         return animeRepository.getAnimeByUrlAndSourceId(url, sourceId)

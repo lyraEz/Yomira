@@ -41,7 +41,6 @@ class ExtensionRepoService(
         }
     }
 
-    // YMR -->
     sealed interface ProbeResult {
         data class Found(val repo: ExtensionRepo, val extensionCount: Int) : ProbeResult
         data class HttpError(val url: String, val code: Int) : ProbeResult
@@ -114,7 +113,6 @@ class ExtensionRepoService(
         logcat(LogPriority.WARN, e) { "Failed to fetch $url" }
         Fetched.Failure(e.message ?: e.javaClass.simpleName)
     }
-    // YMR <--
 
     private fun BufferedSource.decompressIfGzipped(): BufferedSource {
         val isGzip = peek().use { peeked ->

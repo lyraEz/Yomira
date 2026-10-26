@@ -53,12 +53,10 @@ class EpisodeLoader {
                 isDownloaded -> getHostersOnDownloaded(episode, anime, source)
                 source is AnimeHttpSource -> getHostersOnHttp(episode, source)
                 source is LocalAnimeSource -> getHostersOnLocal(episode)
-                // ANZ -->
                 else -> throw PlayerViewModel.ExceptionWithStringResource(
                     "Source not supported: ${source.name}",
                     MR.strings.source_unsupported,
                 )
-                // ANZ <--
             }
         }
 
@@ -106,7 +104,6 @@ class EpisodeLoader {
          * @param episode the episode being parsed.
          * @param source the online source of the episode.
          */
-        // ANZ -->
         private suspend fun getHostersOnHttp(episode: Episode, source: AnimeHttpSource): List<Hoster> {
             return withIOContext {
                 if (checkHasHosters(source)) {
@@ -119,7 +116,6 @@ class EpisodeLoader {
                 }
             }
         }
-        // ANZ <--
 
         /**
          * Returns the hoster when the [episode] is downloaded.
@@ -181,12 +177,10 @@ class EpisodeLoader {
                 hoster.videoList != null && source is AnimeHttpSource -> hoster.videoList!!.parseVideoUrls(source)
                 hoster.videoList != null -> hoster.videoList!!
                 source is AnimeHttpSource -> getVideosOnHttp(source, hoster)
-                // ANZ -->
                 else -> throw PlayerViewModel.ExceptionWithStringResource(
                     "Source not supported: ${source.name}",
                     MR.strings.source_unsupported,
                 )
-                // ANZ <--
             }
 
             val sortedVideos = if (source is AnimeHttpSource) {
@@ -215,14 +209,12 @@ class EpisodeLoader {
          * @param source the online source of the episode.
          * @param hoster the hoster.
          */
-        // ANZ -->
         private suspend fun getVideosOnHttp(source: AnimeHttpSource, hoster: Hoster): List<Video> {
             return withIOContext {
                 source.getVideoList(hoster)
                     .parseVideoUrls(source)
             }
         }
-        // ANZ <--
 
         // TODO(1.6): Remove after ext lib bump
         private suspend fun List<Video>.parseVideoUrls(source: AnimeHttpSource): List<Video> {

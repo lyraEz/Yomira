@@ -1,4 +1,3 @@
-// AM (CONNECTIONS) -->
 package eu.kanade.tachiyomi.data.connections
 
 import eu.kanade.tachiyomi.data.connections.discord.Discord
@@ -15,4 +14,3 @@ class ConnectionsManager {
 
     fun getService(id: Long) = services.find { it.id == id }
 }
-// <-- AM (CONNECTIONS)

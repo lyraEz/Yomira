@@ -30,7 +30,6 @@ interface AnimeSource {
     val lang: String
         get() = ""
 
-    // ANZ -->
     /**
      * Whether the source has support for latest updates.
      *
@@ -74,7 +73,6 @@ interface AnimeSource {
      */
     suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage =
         (this as? AnimeCatalogueSource)?.getSearchAnime(page, query, filters) ?: throw UnsupportedOperationException()
-    // ANZ <--
 
     /**
      * Fetches updated information for an anime.
@@ -243,7 +241,6 @@ interface AnimeSource {
     suspend fun getRelatedAnimeList(anime: SAnime): List<AnimeRelation> = emptyList()
     // Lib 17 <--
 
-    // KMK -->
     /**
      * Get all the available related animes for a anime.
      *
@@ -261,5 +258,4 @@ interface AnimeSource {
         exceptionHandler: (Throwable) -> Unit,
         pushResults: suspend (relatedAnime: Pair<String, List<SAnime>>, completed: Boolean) -> Unit,
     ): Unit = throw UnsupportedOperationException()
-    // KMK <--
 }

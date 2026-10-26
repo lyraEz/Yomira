@@ -47,9 +47,7 @@ fun ExtensionRepoCreateDialog(
 
     val focusRequester = remember { FocusRequester() }
     val nameAlreadyExists = remember(name) { repoUrls.contains(name) }
-    // YMR -->
     val context = LocalContext.current
-    // YMR <--
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -73,13 +71,12 @@ fun ExtensionRepoCreateDialog(
             Text(text = stringResource(MR.strings.action_add_repo))
         },
         text = {
-            // YMR --> scrollable, so the shortcuts below stay reachable
+            // scrollable, so the shortcuts below stay reachable
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(text = stringResource(YMR.strings.repo_add_message))
-                // YMR <--
 
                 OutlinedTextField(
                     modifier = Modifier
@@ -102,7 +99,6 @@ fun ExtensionRepoCreateDialog(
                     singleLine = true,
                 )
 
-                // YMR -->
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
                         onClick = {
@@ -139,7 +135,6 @@ fun ExtensionRepoCreateDialog(
                     text = stringResource(YMR.strings.repo_suggestions_note),
                     style = MaterialTheme.typography.bodySmall,
                 )
-                // YMR <--
             }
         },
     )
@@ -247,14 +242,11 @@ fun ExtensionRepoConfirmDialog(
     )
 }
 
-// YMR -->
 private fun Context.clipboardText(): String? {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return null
     return clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(this)?.toString()
 }
-// YMR <--
 
-// YMR -->
 @Composable
 fun ExtensionRepoErrorDialog(
     message: dev.icerock.moko.resources.StringResource,
@@ -279,4 +271,3 @@ fun ExtensionRepoErrorDialog(
         },
     )
 }
-// YMR <--

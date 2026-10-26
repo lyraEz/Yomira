@@ -231,7 +231,6 @@ sealed class Preference {
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true }
         }
 
-        // AM (CONNECTIONS) -->
         /**
          * A [PreferenceItem] for individual connections service.
          */
@@ -246,7 +245,6 @@ sealed class Preference {
             override val icon: ImageVector? = null
             override val onValueChanged: suspend (newValue: String) -> Boolean = { true }
         }
-        // <-- AM (CONNECTIONS)
 
         data class InfoPreference(
             override val title: String,

@@ -67,7 +67,6 @@ internal fun Uri.getFileName(context: Context): String? {
     }
 }
 
-// ANZ -->
 inline fun <reified T> MPVNode.toObject(json: Json): T = json.decodeFromString<T>(toJson())
 
 fun <T> Flow<T>.collectAsState(scope: CoroutineScope, initialValue: T? = null) =
@@ -91,7 +90,6 @@ internal fun videoDisplaySize(screenSize: IntSize, mpv: MPV? = null): Pair<Float
     val sa = sw / sh
     return if (va >= sa) Pair(sw, sw / va) else Pair(sh * va, sh)
 }
-// ANZ <--
 
 fun parseButtons(
     csv: String,

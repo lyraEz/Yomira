@@ -1,4 +1,3 @@
-// AY -->
 package tachiyomi.domain.anime.interactor
 
 import tachiyomi.domain.anime.model.SeasonDisplayMode
@@ -188,4 +187,3 @@ class SetAnimeSeasonFlags(
         return this and mask.inv() or (flag and mask)
     }
 }
-// <-- AY

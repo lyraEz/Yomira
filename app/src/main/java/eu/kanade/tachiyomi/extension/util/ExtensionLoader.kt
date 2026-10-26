@@ -271,7 +271,6 @@ object ExtensionLoader {
         val versionName = pkgInfo.versionName
         val versionCode = PackageInfoCompat.getLongVersionCode(pkgInfo)
 
-        // YMR -->
         fun failure(reason: ExtensionLoadFailure.Reason, detail: String?, libVersion: Double? = null) =
             LoadResult.Error(
                 ExtensionLoadFailure(
@@ -286,17 +285,13 @@ object ExtensionLoader {
                     isShared = extensionInfo.isShared,
                 ),
             )
-        // YMR <--
 
         if (versionName.isNullOrEmpty()) {
             logcat(LogPriority.WARN) { "Missing versionName for extension $extName" }
-            // YMR -->
             return failure(ExtensionLoadFailure.Reason.MISSING_VERSION, "versionName is empty")
-            // YMR <--
         }
 
         // Validate lib version
-        // ANZ -->
         val libVersion = (
             appInfo.metaData?.getInt(METADATA_EXTENSION_LIB)?.takeUnless { it == 0 }?.toDouble()
                 ?: appInfo.metaData?.getInt("tachiyomix.extensionLib")?.takeUnless { it == 0 }?.toDouble()
@@ -315,22 +310,17 @@ object ExtensionLoader {
                 "Lib version is $libVersion, while only versions " +
                     "$LIB_VERSION_MIN to $LIB_VERSION_MAX are allowed"
             }
-            // YMR -->
             return failure(
                 ExtensionLoadFailure.Reason.LIB_VERSION_UNSUPPORTED,
                 "extensionLib=$libVersion, supported=$LIB_VERSION_MIN..$LIB_VERSION_MAX, versionName=$versionName",
                 libVersion,
             )
-            // YMR <--
         }
-        // ANZ <--
 
         val signatures = getSignatures(pkgInfo)
         if (signatures.isNullOrEmpty()) {
             logcat(LogPriority.WARN) { "Package $pkgName isn't signed" }
-            // YMR -->
             return failure(ExtensionLoadFailure.Reason.UNSIGNED, null, libVersion)
-            // YMR <--
         } else if (!trustExtension.isTrusted(pkgInfo, signatures)) {
             val extension = Extension.Untrusted(
                 extName,
@@ -351,12 +341,11 @@ object ExtensionLoader {
                 is String -> v.toBoolean() || v == "1"
                 else -> false
             }
-        // YMR --> read the setting on every load so toggling it does not need an app restart
+        // read the setting on every load so toggling it does not need an app restart
         if (!preferences.showNsfwSource().get() && isNsfw) {
             logcat(LogPriority.WARN) { "NSFW extension $pkgName not allowed" }
             return failure(ExtensionLoadFailure.Reason.NSFW_FILTERED, null, libVersion)
         }
-        // YMR <--
 
         val isTorrent = appInfo.metaData?.getBoolean(METADATA_IS_TORRENT) == true ||
             when (val v = appInfo.metaData?.get(METADATA_TORRENT)) {
@@ -370,19 +359,15 @@ object ExtensionLoader {
             ChildFirstPathClassLoader(appInfo.sourceDir, null, context.classLoader)
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($pkgName)" }
-            // YMR -->
             return failure(ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED, e.describe(), libVersion)
-            // YMR <--
         }
 
-        // YMR -->
         val sourceClassMeta = appInfo.metaData?.getString(METADATA_SOURCE_CLASS)
             ?: return failure(
                 ExtensionLoadFailure.Reason.MANIFEST_INVALID,
                 "missing <meta-data android:name=\"$METADATA_SOURCE_CLASS\">",
                 libVersion,
             )
-        // YMR <--
         val sources = sourceClassMeta
             .split(";")
             .map {
@@ -452,15 +437,11 @@ object ExtensionLoader {
                         }
                     } catch (e: Throwable) {
                         logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($it)" }
-                        // YMR -->
                         return failure(ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED, "$it: ${e.describe()}", libVersion)
-                        // YMR <--
                     }
                 } catch (e: Throwable) {
                     logcat(LogPriority.ERROR, e) { "Extension load error: $extName ($it)" }
-                    // YMR -->
                     return failure(ExtensionLoadFailure.Reason.CLASS_LOAD_FAILED, "$it: ${e.describe()}", libVersion)
-                    // YMR <--
                 }
             }
 
@@ -568,7 +549,6 @@ object ExtensionLoader {
         }
     }
 
-    // YMR -->
     private fun Throwable.describe(): String {
         val root = generateSequence(this) { it.cause }.last()
         return buildString {
@@ -581,7 +561,6 @@ object ExtensionLoader {
             }
         }
     }
-    // YMR <--
 
     private data class ExtensionInfo(
         val packageInfo: PackageInfo,

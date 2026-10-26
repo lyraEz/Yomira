@@ -66,9 +66,7 @@ fun HistoryScreen(
     val effectivePanorama = remember(globalPanorama, historyMode) { historyMode.resolve(globalPanorama) }
 
     Scaffold(
-        // YMR -->
         largeTopBar = true,
-        // YMR <--
         topBar = { scrollBehavior ->
             SearchToolbar(
                 titleContent = { AppBarTitle(stringResource(MR.strings.history)) },
@@ -148,9 +146,7 @@ private fun HistoryScreenContent(
 
     FastScrollLazyColumn(
         contentPadding = contentPadding,
-        // YMR -->
         modifier = Modifier,
-        // YMR <--
     ) {
         if (useContainer) {
             items(
@@ -176,11 +172,9 @@ private fun HistoryScreenContent(
                                 .padding(horizontal = 12.dp, vertical = 4.dp)
                                 .fillMaxWidth(),
                             shape = MaterialTheme.shapes.large,
-                            // YMR -->
                             color = yomira.ui.GlassCard.color(),
                             border = yomira.ui.GlassCard.border(),
                             tonalElevation = 0.dp,
-                            // YMR <--
                         ) {
                             androidx.compose.foundation.layout.Column {
                                 HistoryItem(

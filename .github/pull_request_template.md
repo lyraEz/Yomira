@@ -1,8 +1,8 @@
-## O que muda
+## What changes
 
-## Como foi testado
+## How it was tested
 
-- [ ] `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest spotlessCheck`
-- [ ] No celular (modelo, Android/API, ABI):
+- [ ] `./gradlew :app:compileDebugKotlin :app:testDebugUnitTest spotlessCheck detekt`
+- [ ] On a phone (model, Android/API, ABI):
 
-## Observações
+## Notes

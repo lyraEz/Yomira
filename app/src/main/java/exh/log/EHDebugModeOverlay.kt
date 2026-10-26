@@ -29,7 +29,6 @@ import java.util.Locale
 
 @Composable
 fun InterpolationStatsOverlay() {
-    // ANZ -->
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
     LaunchedEffect(Unit) {
@@ -60,7 +59,6 @@ fun InterpolationStatsOverlay() {
             delay(1000)
         }
     }
-    // ANZ <--
     val vfFps by PlayerStats.estimatedVfFps.collectAsState(0.0)
     val sourceFps by PlayerStats.videoParamsFps.collectAsState(0.0)
     val containerFps by PlayerStats.containerFps.collectAsState(0.0)

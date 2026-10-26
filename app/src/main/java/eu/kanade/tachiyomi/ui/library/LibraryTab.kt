@@ -143,14 +143,12 @@ data object LibraryTab : Tab {
         val defaultCategoryTitle = stringResource(MR.strings.label_default)
 
         val onClickRefresh: (Category?) -> Boolean = { category ->
-            // SY -->
             val started = LibraryUpdateJob.startNow(
                 context = context,
                 category = category,
                 group = state.groupType,
                 groupExtra = null,
             )
-            // SY <--
             scope.launch {
                 val msgRes = if (started) {
                     if (category == null) MR.strings.updating_library else MR.strings.updating_category
@@ -186,9 +184,7 @@ data object LibraryTab : Tab {
 
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
-                // YMR -->
                 largeTopBar = true,
-                // YMR <--
                 topBar = { scrollBehavior ->
                     val title = state.getToolbarTitle(
                         defaultTitle = defaultTitle,
@@ -234,9 +230,8 @@ data object LibraryTab : Tab {
                         },
                         searchQuery = state.searchQuery,
                         onSearchQueryChange = screenModel::search,
-                        // YMR --> the large title always follows the scroll
+                        // the large title always follows the scroll
                         scrollBehavior = scrollBehavior,
-                        // YMR <--
                     )
                 },
                 bottomBar = {
@@ -457,12 +452,8 @@ data object LibraryTab : Tab {
                     onDismissRequest = onDismissRequest,
                     screenModel = settingsScreenModel,
                     category = category,
-                    // SY -->
                     hasCategories = state.categories.fastAny { !it.isSystemCategory },
-                    // SY <--
-                    // KMK -->
                     categories = state.categories,
-                    // KMK <--
                 )
             }
             is LibraryScreenModel.Dialog.ChangeCategory -> {
@@ -507,9 +498,7 @@ data object LibraryTab : Tab {
         LaunchedEffect(state.isLoading) {
             if (!state.isLoading) {
                 (context as? MainActivity)?.ready = true
-                // AM (DISCORD) -->
                 DiscordRPCService.setAnimeScreen(context, DiscordScreen.APP)
-                // <-- AM (DISCORD)
             }
         }
 

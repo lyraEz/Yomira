@@ -101,7 +101,6 @@ fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
     }
 }
 
-// AM (DISCORD) -->
 fun Context.openDiscordLoginActivity() {
     try {
         val intent = Intent(this, DiscordLoginActivity::class.java)
@@ -110,7 +109,6 @@ fun Context.openDiscordLoginActivity() {
         toast(e.message)
     }
 }
-// <-- AM (DISCORD)
 
 fun Context.createFileInCacheDir(name: String): File {
     val file = File(externalCacheDir, name)

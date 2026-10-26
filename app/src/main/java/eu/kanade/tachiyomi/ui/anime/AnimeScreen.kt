@@ -276,9 +276,7 @@ class AnimeScreen(
             onOpenAnimeFolderClicked = onOpenAnimeFolderClicked,
             onMergeClicked = screenModel::showEditMergedSettings.takeIf { successState.source.id == MERGED_SOURCE_ID },
             onMultiBookmarkClicked = screenModel::bookmarkEpisodes,
-            // AM (FILLERMARK) -->
             onMultiFillermarkClicked = screenModel::fillermarkEpisodes,
-            // <-- AM (FILLERMARK)
             onMultiMarkAsSeenClicked = screenModel::markEpisodesSeen,
             onMarkPreviousAsSeenClicked = screenModel::markPreviousEpisodeSeen,
             onMultiDeleteClicked = screenModel::showDeleteEpisodeDialog,
@@ -290,9 +288,7 @@ class AnimeScreen(
             onToggleDiscoveryExpansion = screenModel::toggleDiscoveryExpansion,
             onSettingsClicked = onSettingsClicked,
             onSeasonSelected = screenModel::onSeasonSelected,
-            // AY -->
             onSeasonClicked = onSeasonClicked,
-            // <-- AY
             )
             var showScanlatorsDialog by remember { mutableStateOf(false) }
 
@@ -374,7 +370,6 @@ class AnimeScreen(
                     )
                 }
 
-                // YMR -->
                 is AnimeScreenModel.Dialog.Anime4KDownload -> {
                     yomira.anime4k.Anime4KDownloadDialog(
                         episodeCount = dialog.episodes.size,
@@ -382,7 +377,6 @@ class AnimeScreen(
                         onConfirm = { preset -> screenModel.startAnime4KDownload(dialog.episodes, preset) },
                     )
                 }
-                // YMR <--
 
                 is AnimeScreenModel.Dialog.ShowQualities -> {
                     EpisodeOptionsDialogScreen.onDismissDialog = onDismissRequest
@@ -541,7 +535,6 @@ class AnimeScreen(
                         onDismissRequest = onDismissRequest,
                     )
                 }
-                // SY <--
                 is AnimeScreenModel.Dialog.ChangeAnimeSkipIntro -> {
                     fun updateSkipIntroLength(newLength: Long) {
                         scope.launchIO {

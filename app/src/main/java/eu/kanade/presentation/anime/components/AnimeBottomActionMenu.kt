@@ -81,10 +81,8 @@ fun AnimeBottomActionMenu(
     modifier: Modifier = Modifier,
     onBookmarkClicked: (() -> Unit)? = null,
     onRemoveBookmarkClicked: (() -> Unit)? = null,
-    // AM (FILLERMARK) -->
     onFillermarkClicked: (() -> Unit)? = null,
     onRemoveFillermarkClicked: (() -> Unit)? = null,
-    // <-- AM (FILLERMARK)
     onMarkAsSeenClicked: (() -> Unit)? = null,
     onMarkAsUnseenClicked: (() -> Unit)? = null,
     onMarkPreviousAsSeenClicked: (() -> Unit)? = null,
@@ -109,10 +107,8 @@ fun AnimeBottomActionMenu(
             color = MaterialTheme.colorScheme.surfaceContainerHigh,
         ) {
             val haptic = LocalHapticFeedback.current
-            // AM (FILLERMARK) -->
             val confirm = remember { mutableStateListOf(false, false, false, false, false, false, false, false, false, false, false) }
             val confirmRange = 0..<11
-            // <-- AM (FILLERMARK)
             var resetJob: Job? = remember { null }
             val onLongClickItem: (Int) -> Unit = { toConfirmIndex ->
                 (confirmRange).forEach { i -> confirm[i] = i == toConfirmIndex }
@@ -149,7 +145,6 @@ fun AnimeBottomActionMenu(
                         onClick = onRemoveBookmarkClicked,
                     )
                 }
-                // AM (FILLERMARK) -->
                 if (onFillermarkClicked != null) {
                     BottomMenuButton(
                         title = stringResource(AMR.strings.action_fillermark_episode),
@@ -168,7 +163,6 @@ fun AnimeBottomActionMenu(
                         onClick = onRemoveFillermarkClicked,
                     )
                 }
-                // <-- AM (FILLERMARK)
                 if (onMarkAsSeenClicked != null) {
                     BottomMenuButton(
                         title = stringResource(MR.strings.action_mark_as_seen),
@@ -246,15 +240,11 @@ fun LibraryBottomActionMenu(
     onFavoriteClicked: (() -> Unit)?,
     onDownloadClicked: ((DownloadAction) -> Unit)?,
     onDeleteClicked: () -> Unit,
-    // KMK -->
     onMigrateClicked: () -> Unit,
     onMergeClicked: () -> Unit,
     onSelectionUpdateClicked: () -> Unit,
-    // KMK <--
-    // SY -->
     onClickCollectRecommendations: (() -> Unit)?,
     onClickResetInfo: (() -> Unit)?,
-    // SY <--
     onFolderClicked: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {

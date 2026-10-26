@@ -88,9 +88,7 @@ fun UpdatesWidget(
                                     UpdatesAnimeCover(
                                         cover = cover,
                                         modifier = GlanceModifier.clickable(actionStartActivity(intent)),
-                                        // KMK -->
                                         color = AnimeCover.dominantCoverColorMap[animeId]?.first?.let { Color(it) },
-                                        // KMK <--
                                     )
                                 }
                             }

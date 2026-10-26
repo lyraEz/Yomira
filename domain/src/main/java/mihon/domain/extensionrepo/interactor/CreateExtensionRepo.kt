@@ -15,7 +15,6 @@ class CreateExtensionRepo(
     private val service: ExtensionRepoService,
 ) {
     suspend fun await(indexUrl: String): Result {
-        // YMR -->
         // Try every base the pasted URL could mean (the file's directory, a GitHub page's raw
         // address) and report the most useful failure instead of a generic "invalid URL".
         val candidates = RepoUrlNormalizer.candidates(indexUrl) ?: return Result.InvalidUrl
@@ -39,7 +38,6 @@ class CreateExtensionRepo(
             return Result.UnsupportedStoreV2
         }
         return failure
-        // YMR <--
     }
 
     private suspend fun insert(repo: ExtensionRepo): Result {
@@ -92,14 +90,12 @@ class CreateExtensionRepo(
         data object Success : Result
         data object Error : Result
 
-        // YMR -->
         data class Added(val repo: ExtensionRepo, val extensionCount: Int) : Result
         data class Unreachable(val url: String, val reason: String) : Result
         data class NotARepository(val url: String, val reason: String) : Result
 
         /** The URL is a store-v2 index with no legacy repo.json / index.min.json next to it. */
         data object UnsupportedStoreV2 : Result
-        // YMR <--
     }
 
     companion object {

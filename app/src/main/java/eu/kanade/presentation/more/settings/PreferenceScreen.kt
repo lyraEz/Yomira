@@ -74,7 +74,7 @@ fun PreferenceScreen(
                         PreferenceGroupHeader(title = preference.title)
                     }
                     item(key = "group-content-${preference.title}") {
-                        // YMR --> grouped card with hairline dividers (iOS settings style)
+                        // grouped card with hairline dividers (iOS settings style)
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -100,7 +100,6 @@ fun PreferenceScreen(
                                 }
                             }
                         }
-                        // YMR <--
                     }
                     item(key = "group-spacer-${preference.title}") {
                         if (i < items.lastIndex) {

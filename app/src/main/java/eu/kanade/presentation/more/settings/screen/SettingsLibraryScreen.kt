@@ -209,7 +209,6 @@ object SettingsLibraryScreen : SearchableSettings {
                     ),
                     onClick = { showAnimeCategoriesDialog = true },
                 ),
-                // SY -->
                 Preference.PreferenceItem.ListPreference(
                     pref = libraryPreferences.groupLibraryUpdateType(),
                     title = stringResource(SYMR.strings.library_group_updates),
@@ -225,7 +224,6 @@ object SettingsLibraryScreen : SearchableSettings {
                         ),
                     ),
                 ),
-                // SY <--
                 Preference.PreferenceItem.SwitchPreference(
                     pref = libraryPreferences.autoUpdateMetadata,
                     title = stringResource(MR.strings.pref_library_update_refresh_metadata),
@@ -245,12 +243,10 @@ object SettingsLibraryScreen : SearchableSettings {
                     pref = libraryPreferences.newShowUpdatesCount(),
                     title = stringResource(MR.strings.pref_library_update_show_tab_badge),
                 ),
-                // KMK -->
                 Preference.PreferenceItem.SwitchPreference(
                     pref = libraryPreferences.showUpdatingProgressBanner(),
                     title = stringResource(MR.strings.pref_show_updating_progress_banner),
                 ),
-                // KMK <--
             ),
         )
     }
@@ -279,12 +275,10 @@ object SettingsLibraryScreen : SearchableSettings {
                     pref = libraryPreferences.showEpisodeThumbnail(),
                     title = stringResource(MR.strings.pref_show_episode_thumbnail),
                 ),
-                // SY -->
                 Preference.PreferenceItem.SwitchPreference(
                     pref = libraryPreferences.skipDupeEpisodes(),
                     title = stringResource(AMR.strings.pref_skip_dupe_episodes),
                 ),
-                // SY <--
                 Preference.PreferenceItem.SwitchPreference(
                     pref = libraryPreferences.hideMissingEpisodes(),
                     title = stringResource(MR.strings.pref_hide_missing_episodes),
@@ -317,11 +311,9 @@ object SettingsLibraryScreen : SearchableSettings {
                             stringResource(MR.strings.disabled),
                         LibraryPreferences.EpisodeSwipeAction.ToggleBookmark to
                             stringResource(MR.strings.action_bookmark_episode),
-                        // AM (FILLERMARK) -->
                         LibraryPreferences.EpisodeSwipeAction.ToggleFillermark to stringResource(
                             AMR.strings.action_fillermark_episode,
                         ),
-                        // <-- AM (FILLERMARK)
                         LibraryPreferences.EpisodeSwipeAction.ToggleSeen to
                             stringResource(MR.strings.action_mark_as_seen),
                         LibraryPreferences.EpisodeSwipeAction.Download to
@@ -336,11 +328,9 @@ object SettingsLibraryScreen : SearchableSettings {
                             stringResource(MR.strings.disabled),
                         LibraryPreferences.EpisodeSwipeAction.ToggleBookmark to
                             stringResource(MR.strings.action_bookmark_episode),
-                        // AM (FILLERMARK) -->
                         LibraryPreferences.EpisodeSwipeAction.ToggleFillermark to stringResource(
                             AMR.strings.action_fillermark_episode,
                         ),
-                        // <-- AM (FILLERMARK)
                         LibraryPreferences.EpisodeSwipeAction.ToggleSeen to
                             stringResource(MR.strings.action_mark_as_seen),
                         LibraryPreferences.EpisodeSwipeAction.Download to

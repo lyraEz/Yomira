@@ -112,9 +112,7 @@ val playerRippleConfiguration
     )
 
 private val colorSchemes: Map<AppTheme, BaseColorScheme> = mapOf(
-    // YMR -->
     AppTheme.YOMIRA to YomiraColorScheme,
-    // YMR <--
     AppTheme.DEFAULT to TachiyomiColorScheme,
     AppTheme.CLOUDFLARE to CloudflareColorScheme,
     AppTheme.COTTONCANDY to CottoncandyColorScheme,

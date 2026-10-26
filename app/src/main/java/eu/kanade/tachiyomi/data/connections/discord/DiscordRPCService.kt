@@ -1,4 +1,3 @@
-// AM (DISCORD) -->
 
 // Taken from Animiru. Thank you Quickdev for permission!
 
@@ -107,9 +106,7 @@ class DiscordRPCService : Service() {
         private val playerPreferences: PlayerPreferences by injectLazy()
 
         fun start(context: Context) {
-            // YMR -->
             if (!BuildConfig.DISCORD_RPC_ENABLED) return
-            // YMR <--
             handler.removeCallbacksAndMessages(null)
             if (rpc == null && connectionsPreferences.enableDiscordRPC().get()) {
                 since = System.currentTimeMillis()
@@ -566,4 +563,3 @@ class DiscordRPCService : Service() {
         }
     }
 }
-// <-- AM (DISCORD)

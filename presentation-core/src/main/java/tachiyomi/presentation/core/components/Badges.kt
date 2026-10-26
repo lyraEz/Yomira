@@ -28,9 +28,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BadgeGroup(
     modifier: Modifier = Modifier,
-    // YMR --> capsule pills over covers
+    // capsule pills over covers
     shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(percent = 50),
-    // YMR <--
     content: @Composable RowScope.() -> Unit,
 ) {
     Row(
@@ -39,11 +38,10 @@ fun BadgeGroup(
                 this.shape = shape
                 clip = true
             }
-            // YMR --> frosted dark pill with a light rim, readable on any cover
+            // frosted dark pill with a light rim, readable on any cover
             .drawBehind { drawRect(Color.Black.copy(alpha = 0.28f)) }
             .border(0.5.dp, Color.White.copy(alpha = 0.22f), shape)
             .height(20.dp),
-            // YMR <--
     ) {
         content()
     }
@@ -53,11 +51,10 @@ fun BadgeGroup(
 fun Badge(
     text: String,
     modifier: Modifier = Modifier,
-    // YMR --> translucent dark glass by default; callers that pass a colour keep it
+    // translucent dark glass by default; callers that pass a colour keep it
     color: Color = Color.Black.copy(alpha = 0.42f),
     textColor: Color = Color.White,
     shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(percent = 50),
-    // YMR <--
 ) {
     Text(
         text = text,
@@ -106,7 +103,6 @@ fun Badge(
     }
 }
 
-// KMK -->
 @Composable
 fun Badge(
     painter: Painter,
@@ -162,4 +158,3 @@ fun Badge(
         )
     }
 }
-// KMK <--

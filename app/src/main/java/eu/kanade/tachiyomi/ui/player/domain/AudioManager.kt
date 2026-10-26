@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.player.domain
 import android.content.Context
 import android.media.AudioManager as AndroidAudioManager
 
-// ANZ -->
 class AudioManager(
     private val context: Context,
 ) {
@@ -25,4 +24,3 @@ class AudioManager(
         )
     }
 }
-// ANZ <--

@@ -168,17 +168,13 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { Anime4KManager(app) }
 
-        // AM (CONNECTIONS) -->
         addSingletonFactory { ConnectionsManager() }
-        // <-- AM (CONNECTIONS)
 
 
         addSingletonFactory { GoogleDriveService(app) }
 
-        // ANZ -->
         addSingletonFactory { MpvConfig(app, get(), get(), get()) }
         addSingletonFactory { AudioManager(app) }
         addSingletonFactory { BrightnessManager(app) }
-        // ANZ <--
     }
 }

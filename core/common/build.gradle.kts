@@ -20,9 +20,7 @@ kotlin {
 
 dependencies {
     implementation(projects.i18n)
-    // SY -->
     implementation(projects.i18nSy)
-    // SY <--
 
     api(libs.logcat)
 
@@ -60,10 +58,8 @@ dependencies {
     testImplementation(libs.bundles.test)
     testRuntimeOnly(libs.junit.platform.launcher)
 
-    // SY -->
     implementation(sylibs.xlog)
     implementation(sylibs.exifinterface)
-    // SY <--
 
     implementation(libs.injekt)
     implementation(aniyomilibs.torrentserver)

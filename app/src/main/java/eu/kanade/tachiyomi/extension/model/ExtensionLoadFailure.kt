@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.extension.model
 
 import androidx.compose.runtime.Immutable
 
-// YMR -->
 /**
  * An extension APK that is installed on the device but could not be turned into sources.
  *
@@ -49,4 +48,3 @@ data class ExtensionLoadFailure(
             reason == Reason.MISSING_VERSION ||
             reason == Reason.UNSIGNED
 }
-// YMR <--

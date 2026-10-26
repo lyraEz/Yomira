@@ -143,7 +143,6 @@ fun GestureHandler(
     fun rampSpeed(targetSpeed: Float, onComplete: () -> Unit = {}) {
         speedRampJob?.cancel()
         speedRampJob = scope.launch {
-            // ANZ -->
             var currentSpeed = viewModel.mpv.getPropertyDouble("speed")?.toFloat() ?: 1f
             val step = if (targetSpeed > currentSpeed) 0.1f else -0.1f
 
@@ -157,7 +156,6 @@ fun GestureHandler(
                 delay(16)
             }
             viewModel.mpv.setPropertyDouble("speed", targetSpeed.toDouble())
-            // ANZ <--
             viewModel.playerUpdate.update { PlayerUpdates.DoubleSpeed(targetSpeed, false) }
             onComplete()
         }
@@ -216,9 +214,7 @@ fun GestureHandler(
                                     viewModel.playerUpdate.update { PlayerUpdates.VideoZoom(zoom) }
 
                                     val scale = 2f.pow(zoom)
-                                    // ANZ -->
                                     val (bw, bh) = videoDisplaySize(size, viewModel.mpv)
-                                    // ANZ <--
                                     val panDX = midX - prevMidX
                                     val panDY = midY - prevMidY
                                     val targetPanX = panX + panDX / (bw * scale)
@@ -246,9 +242,7 @@ fun GestureHandler(
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = true)
                     val startPosition = down.position
-                    // ANZ -->
                     originalSpeed = viewModel.playbackSpeed.value ?: playerPreferences.playerSpeed().get()
-                    // ANZ <--
                     wasPaused = false
                     isSpeedLongPress = false
                     
@@ -284,9 +278,7 @@ fun GestureHandler(
                                             viewModel.isLongPressing.update { true }
                                             isSpeedLongPress = true
                                             viewModel.unpause()
-                                            // ANZ -->
                                             originalSpeed = viewModel.mpv.getPropertyDouble("speed")?.toFloat() ?: 1f
-                                            // ANZ <--
                                             rampSpeed(playerPreferences.playerSpeedLongPress().get())
                                         }
                                         else -> {}
@@ -295,9 +287,7 @@ fun GestureHandler(
                                     if (longPressAction == LongPressAction.Speed) {
                                         viewModel.isLongPressing.update { true }
                                         isSpeedLongPress = true
-                                        // ANZ -->
                                         originalSpeed = viewModel.mpv.getPropertyDouble("speed")?.toFloat() ?: 1f
-                                        // ANZ <--
                                         rampSpeed(playerPreferences.playerSpeedLongPress().get())
                                     } else if (longPressAction == LongPressAction.Screenshot) {
                                         viewModel.sheetShown.update { Sheets.Screenshot }
@@ -339,12 +329,10 @@ fun GestureHandler(
                                     val dragDistance = abs(pointer.position.x - startPosition.x)
                                     if (hasInitializedDragSpeed || dragDistance > viewConfiguration.touchSlop) {
                                         if (!hasInitializedDragSpeed) {
-                                            // ANZ -->
                                             unsnappedCurrentSpeed = maxOf(
                                                 playerPreferences.playerSpeedLongPress().get(),
                                                 viewModel.mpv.getPropertyDouble("speed")?.toFloat() ?: 1f,
                                             ).toDouble()
-                                            // ANZ <--
                                             hasInitializedDragSpeed = true
                                             lastX = pointer.position.x
                                         }
@@ -353,9 +341,7 @@ fun GestureHandler(
                                             unsnappedCurrentSpeed = (unsnappedCurrentSpeed + diffX * 0.0035).coerceIn(0.25, 4.0)
                                             val snappedSpeed = (Math.round(unsnappedCurrentSpeed * 2.0) / 2.0).toFloat().coerceIn(0.5f, 4.0f)
                                             speedRampJob?.cancel()
-                                            // ANZ -->
                                             viewModel.mpv.setPropertyDouble("speed", snappedSpeed.toDouble())
-                                            // ANZ <--
                                             viewModel.playerUpdate.update { PlayerUpdates.DoubleSpeed(snappedSpeed, isDragging = true) }
                                             lastX = pointer.position.x
                                         }

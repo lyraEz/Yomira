@@ -53,7 +53,7 @@
     <string name="repo_error_title">Não foi possível adicionar o repositório</string>
     <string name="repo_error_unreachable">O repositório não respondeu. Confira o endereço e a conexão de rede.</string>
     <string name="repo_error_not_repository">O endereço respondeu, mas não é um repositório que o Yomira consiga ler: ele precisa de repo.json e index.min.json na mesma pasta.</string>
-    <string name="repo_error_store_v2">Este endereço é um índice store-v2, o formato das versões novas do Aniyomi, que o Yomira não lê. Use o endereço index.min.json do mesmo repositório (para a Rede: https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json).</string>
+    <string name="repo_error_store_v2">Este endereço é um índice store-v2, um formato mais novo, que o Yomira não lê. Use o endereço index.min.json do mesmo repositório (para a Rede: https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json).</string>
 
     <string name="settings_screen_unavailable">Este aparelho não tem essa tela de configurações.</string>
     <string name="no_app_for_link">Nenhum app deste aparelho consegue abrir %1$s</string>
@@ -652,4 +652,7 @@
     <string name="color_info">Roda na GPU como um shader leve, depois do Anime4K. As legendas não são afetadas.</string>
     <string name="adaptive_performance">Desempenho adaptativo</string>
     <string name="adaptive_performance_summary">Reduz a qualidade dos shaders e a interpolação quando o celular esquenta ou perde quadros</string>
+    <string name="update_beta">Versões beta</string>
+    <string name="update_beta_on">Ligado: também oferece versões de teste antes de virarem estáveis</string>
+    <string name="update_beta_off">Desligado: só versões estáveis</string>
 </resources>

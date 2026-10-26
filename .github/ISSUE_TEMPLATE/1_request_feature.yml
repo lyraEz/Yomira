@@ -1,16 +1,16 @@
-name: Sugestão
-description: Sugira uma melhoria para o Yomira
-labels: [sugestão]
+name: Feature request
+description: Suggest an improvement for Yomira
+labels: [enhancement]
 body:
   - type: textarea
     id: feature-description
     attributes:
-      label: O que você gostaria
-      description: Descreva a melhoria e em que situação ela ajudaria.
+      label: What would you like?
+      description: Describe the improvement and when it would help.
     validations:
       required: true
 
   - type: textarea
     id: other-details
     attributes:
-      label: Outros detalhes
+      label: Other details

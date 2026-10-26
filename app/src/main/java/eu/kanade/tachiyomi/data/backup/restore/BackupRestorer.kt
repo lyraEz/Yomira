@@ -73,10 +73,8 @@ class BackupRestorer(
     private suspend fun restoreFromFile(uri: Uri, options: RestoreOptions) {
         val backup = BackupDecoder(context).decode(uri)
 
-        // SY -->
         val backupAnime = backup.backupAnime
         val backupAnimeCategories = backup.backupCategories
-        // SY <--
 
         // Store source mapping for error messages
         val backupAnimeMaps = backup.backupSources

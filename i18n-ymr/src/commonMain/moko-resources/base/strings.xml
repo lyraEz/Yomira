@@ -54,7 +54,7 @@
     <string name="repo_error_title">Could not add the repository</string>
     <string name="repo_error_unreachable">The repository could not be reached. Check the address and the network connection.</string>
     <string name="repo_error_not_repository">The address answered, but it is not a repository Yomira can read: it needs repo.json and index.min.json in the same folder.</string>
-    <string name="repo_error_store_v2">This address is a store-v2 index, the format used by newer Aniyomi builds, which Yomira does not read. Use the index.min.json address of the same repository (for Rede: https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json).</string>
+    <string name="repo_error_store_v2">This address is a store-v2 index, a newer format, which Yomira does not read. Use the index.min.json address of the same repository (for Rede: https://raw.githubusercontent.com/lyraEz/Rede/repo/index.min.json).</string>
 
     <string name="settings_screen_unavailable">This device does not have that settings screen.</string>
     <string name="no_app_for_link">No app on this device can open %1$s</string>
@@ -653,4 +653,7 @@
     <string name="color_info">Runs on the GPU as a light shader after Anime4K. Subtitles are not affected.</string>
     <string name="adaptive_performance">Adaptive performance</string>
     <string name="adaptive_performance_summary">Lowers shader quality and interpolation when the phone heats up or drops frames</string>
+    <string name="update_beta">Beta versions</string>
+    <string name="update_beta_on">On: also offers test versions before they become stable</string>
+    <string name="update_beta_off">Off: only stable versions</string>
 </resources>

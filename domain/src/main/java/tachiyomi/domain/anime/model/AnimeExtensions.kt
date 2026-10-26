@@ -19,7 +19,6 @@ fun Anime.toSAnime(): SAnime = SAnime.create().also {
 fun SAnimeSource.toDomainAnime(sourceId: Long): Anime {
     return Anime.create().copy(
         url = url,
-        // SY -->
         ogTitle = title,
         ogArtist = artist,
         ogAuthor = author,
@@ -27,7 +26,6 @@ fun SAnimeSource.toDomainAnime(sourceId: Long): Anime {
         ogDescription = description,
         ogGenre = genre?.split(", ")?.map { it.trim() },
         ogStatus = status.toLong(),
-        // SY <--
         backgroundUrl = background_url,
         updateStrategy = update_strategy,
         initialized = initialized,

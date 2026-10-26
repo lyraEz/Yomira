@@ -5,9 +5,8 @@ enum class InstallStep {
     Pending,
     Downloading,
 
-    // YMR --> the system installer is showing its confirmation screen
+    // the system installer is showing its confirmation screen
     AwaitingConfirmation,
-    // YMR <--
     Installing,
     Installed,
     Error,

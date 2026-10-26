@@ -118,14 +118,13 @@ object SettingsMainScreen : Screen() {
                         icon = Icons.Outlined.Sync,
                         screen = SettingsTrackingScreen,
                     ),
-                    // YMR --> Anime4K offline processing (Enhanced Downloads, Smart Anime4K)
+                    // Anime4K offline processing (Enhanced Downloads, Smart Anime4K)
                     Item(
                         titleRes = yomira.i18n.YMR.strings.a4k_title,
                         subtitleRes = yomira.i18n.YMR.strings.a4k_settings_summary,
                         icon = Icons.Outlined.AutoAwesome,
                         screen = yomira.anime4k.SettingsAnime4KScreen,
                     ),
-                    // YMR <--
                 ),
                 "Connections" to listOf(
                     Item(
@@ -180,10 +179,8 @@ object SettingsMainScreen : Screen() {
         val hazeEnabled by uiPreferences.hazeEnabled().collectAsStatePref()
 
         Scaffold(
-            // YMR -->
             topBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(topBarState),
             largeTopBar = true,
-            // YMR <--
             topBar = { scrollBehavior ->
                 AppBar(
                     title = stringResource(MR.strings.label_settings),
@@ -207,7 +204,7 @@ object SettingsMainScreen : Screen() {
             content = { contentPadding ->
                 val state = rememberLazyListState()
 
-                // YMR --> the list scrolls under the glass bar
+                // the list scrolls under the glass bar
                 LazyColumn(
                     state = state,
                     contentPadding = PaddingValues(
@@ -216,7 +213,6 @@ object SettingsMainScreen : Screen() {
                         top = 16.dp + contentPadding.calculateTopPadding(),
                         bottom = 16.dp + contentPadding.calculateBottomPadding(),
                     ),
-                    // YMR <--
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     groupedItems.forEach { (category, items) ->

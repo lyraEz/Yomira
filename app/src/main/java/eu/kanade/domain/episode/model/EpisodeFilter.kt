@@ -18,9 +18,7 @@ fun List<Episode>.applyFilters(anime: Anime, downloadManager: DownloadManager, s
     val unseenFilter = anime.unseenFilter
     val downloadedFilter = anime.downloadedFilter
     val bookmarkedFilter = anime.bookmarkedFilter
-    // AM (FILLERMARK) -->
     val fillermarkedFilter = anime.fillermarkedFilter
-    // <-- AM (FILLERMARK)
 
     val episodes = if (skipDupeEpisodes) {
         groupBy { if (it.isRecognizedNumber) it.episodeNumber to it.scanlator else it.id }
@@ -38,17 +36,13 @@ fun List<Episode>.applyFilters(anime: Anime, downloadManager: DownloadManager, s
 
     return episodes.filter { episode -> applyFilter(unseenFilter) { !episode.seen } }
         .filter { episode -> applyFilter(bookmarkedFilter) { episode.bookmark } }
-        // AM (FILLERMARK) -->
         .filter { episode -> applyFilter(fillermarkedFilter) { episode.fillermark } }
-        // <-- AM (FILLERMARK)
         .filter { episode ->
             applyFilter(downloadedFilter) {
                 val downloaded = downloadManager.isEpisodeDownloaded(
                     episode.name,
                     episode.scanlator,
-                    // SY -->
                     anime.ogTitle,
-                    // SY <--
                     anime.source,
                     episodeNumber = episode.episodeNumber,
                 )
@@ -67,9 +61,7 @@ fun List<EpisodeList.Item>.applyFilters(anime: Anime, skipDupeEpisodes: Boolean)
     val unseenFilter = anime.unseenFilter
     val downloadedFilter = anime.downloadedFilter
     val bookmarkedFilter = anime.bookmarkedFilter
-    // AM (FILLERMARK) -->
     val fillermarkedFilter = anime.fillermarkedFilter
-    // <-- AM (FILLERMARK)
 
     val episodes = if (skipDupeEpisodes) {
         groupBy { if (it.episode.isRecognizedNumber) it.episode.episodeNumber to it.episode.scanlator else it.episode.id }
@@ -88,9 +80,7 @@ fun List<EpisodeList.Item>.applyFilters(anime: Anime, skipDupeEpisodes: Boolean)
     return episodes.asSequence()
         .filter { (episode) -> applyFilter(unseenFilter) { !episode.seen } }
         .filter { (episode) -> applyFilter(bookmarkedFilter) { episode.bookmark } }
-        // AM (FILLERMARK) -->
         .filter { (episode) -> applyFilter(fillermarkedFilter) { episode.fillermark } }
-        // <-- AM (FILLERMARK)
         .filter { applyFilter(downloadedFilter) { it.isDownloaded || isLocalAnime } }
         .sortedWith { (episode1), (episode2) -> getEpisodeSort(anime).invoke(episode1, episode2) }
 }

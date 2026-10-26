@@ -122,9 +122,7 @@ internal class AppUpdateNotifier(private val context: Context) {
     fun promptInstall(uri: Uri, title: String? = null) {
         val installIntent = NotificationHandler.installApkPendingActivity(context, uri)
         with(notificationBuilder) {
-            // KMK -->
             title?.let { setContentTitle(title) }
-            // KMK <--
             setContentText(context.stringResource(MR.strings.update_check_notification_download_complete))
             setSmallIcon(android.R.drawable.stat_sys_download_done)
             setOnlyAlertOnce(false)
@@ -153,16 +151,12 @@ internal class AppUpdateNotifier(private val context: Context) {
      */
     fun onDownloadError(
         url: String,
-        // KMK -->
         error: String? = null,
-        // KMK <--
     ) {
         with(notificationBuilder) {
             setContentText(
                 context.stringResource(MR.strings.update_check_notification_download_error) +
-                    // KMK -->
                     (": $error".takeIf { error != null } ?: ""),
-                // KMK <--
             )
             setSmallIcon(R.drawable.ic_warning_white_24dp)
             setOnlyAlertOnce(false)
@@ -179,7 +173,6 @@ internal class AppUpdateNotifier(private val context: Context) {
                 context.stringResource(MR.strings.action_cancel),
                 NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_APP_UPDATE_ERROR),
             )
-            // KMK -->
             addAction(
                 R.drawable.ic_get_app_24dp,
                 context.stringResource(KMR.strings.manual_download),
@@ -188,12 +181,10 @@ internal class AppUpdateNotifier(private val context: Context) {
                     url,
                 ),
             )
-            // KMK <--
         }
         notificationBuilder.show(Notifications.ID_APP_UPDATE_ERROR)
     }
 
-    // KMK -->
     fun onInstalling(uri: Uri, title: String? = null) {
         val installIntent = NotificationHandler.installApkPendingActivity(context, uri)
         with(notificationBuilder) {
@@ -298,5 +289,4 @@ internal class AppUpdateNotifier(private val context: Context) {
     companion object {
         var releasePageUrl: String? = null
     }
-    // KMK <--
 }

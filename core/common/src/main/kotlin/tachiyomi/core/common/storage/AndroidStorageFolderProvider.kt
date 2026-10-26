@@ -17,7 +17,6 @@ class AndroidStorageFolderProvider(
     override fun directory(): File {
         val appName = context.stringResource(MR.strings.app_name)
         val normalizedAppName = appName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
-        // YMR -->
         val shared = File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
                 normalizedAppName,
@@ -27,10 +26,8 @@ class AndroidStorageFolderProvider(
         // written. The app's own external folder always can, and is still reachable over adb.
         if (canWriteSharedStorage()) return shared
         return context.getExternalFilesDir(null) ?: shared
-        // YMR <--
     }
 
-    // YMR -->
     private fun canWriteSharedStorage(): Boolean = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> Environment.isExternalStorageManager()
         Build.VERSION.SDK_INT == Build.VERSION_CODES.Q ->
@@ -40,7 +37,6 @@ class AndroidStorageFolderProvider(
 
     private fun hasWritePermission(): Boolean =
         context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-    // YMR <--
 
     override fun path(): String {
         return directory().toUri().toString()

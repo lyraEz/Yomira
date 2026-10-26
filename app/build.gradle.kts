@@ -23,15 +23,13 @@ if (Config.includeTelemetry && file("google-services.json").exists()) {
 
 shortcutHelper.setFilePath("./shortcuts.xml")
 
-// YMR --> ABIs built as split APKs (and kept in the release universal APK). Override with -PabiList=...
+// ABIs built as split APKs (and kept in the release universal APK). Override with -PabiList=...
 val yomiraAbis: List<String> =
     (project.findProperty("abiList") as? String)?.split(",") ?: listOf("armeabi-v7a", "arm64-v8a")
-// YMR <--
 
 android {
     namespace = "eu.kanade.tachiyomi"
 
-    // YMR -->
     // Yomira release signing. The keystore and its passwords never live in the repository:
     // they come from `signing.properties` (git-ignored) or from environment variables in CI.
     // Without them the release APK is produced unsigned instead of failing the build.
@@ -65,21 +63,18 @@ android {
             enableV3Signing = true
         }
     }
-    // YMR <--
 
     compileSdk = 36
 
     defaultConfig {
-        // YMR -->
         applicationId = "com.lyraez.yomira"
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
-        // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
-        versionCode = 11100
-        versionName = "1.11.0"
+        // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/RELEASES.md.
+        versionCode = 11200
+        versionName = "1.12.0"
 
         manifestPlaceholders["author"] = "@lyraEz"
-        // YMR <--
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
@@ -91,31 +86,28 @@ android {
 
         buildConfigField("boolean", "UPDATER_ENABLED", "${Config.enableUpdater}")
 
-        // YMR --> Services tied to someone else's credentials stay off unless configured.
+        // Services tied to someone else's credentials stay off unless configured.
         val discordAppId = (project.findProperty("yomira.discordAppId") as? String).orEmpty()
         buildConfigField("String", "DISCORD_RPC_APP_ID", "\"$discordAppId\"")
         buildConfigField("boolean", "DISCORD_RPC_ENABLED", "${discordAppId.isNotBlank()}")
         val hasGoogleDriveClient = file("src/main/assets/client_secrets.json").exists()
         buildConfigField("boolean", "GOOGLE_DRIVE_SYNC_ENABLED", "$hasGoogleDriveClient")
-        // YMR <--
-        // YMR --> optional built-in API keys from the build environment (GitHub secrets);
+        // optional built-in API keys from the build environment (GitHub secrets);
         // empty means the user types their own in Settings
         val apiKeyPattern = Regex("[A-Za-z0-9._-]*")
         fun envKey(name: String) = System.getenv(name).orEmpty().trim().takeIf { apiKeyPattern.matches(it) }.orEmpty()
         buildConfigField("String", "YOMIRA_TMDB_KEY", "\"${envKey("YOMIRA_TMDB_API_KEY")}\"")
         buildConfigField("String", "YOMIRA_ANIME_SKIP_CLIENT_ID", "\"${envKey("YOMIRA_ANIME_SKIP_CLIENT_ID")}\"")
-        // YMR <--
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // YMR --> Discord Rich Presence bridge (src/main/cpp), built for the packaged ABIs
+        // Discord Rich Presence bridge (src/main/cpp), built for the packaged ABIs
         externalNativeBuild {
             cmake {
                 cppFlags += listOf("-std=c++20")
                 abiFilters(*yomiraAbis.toTypedArray())
             }
         }
-        // YMR <--
     }
 
     buildTypes {
@@ -134,9 +126,7 @@ android {
                 "proguard-rules.pro",
             )
 
-            // YMR -->
             signingConfig = if (hasYomiraSigning) signingConfigs.getByName("release") else null
-            // YMR <--
 
             buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLastCommitTime = true)}\"")
         }
@@ -183,14 +173,12 @@ android {
         }
     }
 
-    // YMR -->
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
     }
-    // YMR <--
 
     sourceSets {
         getByName("preview").res.srcDirs("src/beta/res")
@@ -202,9 +190,8 @@ android {
             isEnable = true
             isUniversalApk = true
             reset()
-            // YMR --> ARM phones (32 and 64 bits); x86 only on request (emulators).
+            // ARM phones (32 and 64 bits); x86 only on request (emulators).
             include(*yomiraAbis.toTypedArray())
-            // YMR <--
         }
     }
 
@@ -268,9 +255,8 @@ android {
         renderScript = false
         shaders = false
 
-        // YMR --> exposes the Discord SDK headers and library to CMake
+        // exposes the Discord SDK headers and library to CMake
         prefab = true
-        // YMR <--
     }
 
     lint {
@@ -309,16 +295,10 @@ kotlin {
 
 dependencies {
     implementation(projects.i18n)
-    // KMK -->
     implementation(projects.i18nKmk)
     implementation(projects.i18nAnk)
-    // KMK <-
-    // SY -->
     implementation(projects.i18nSy)
-    // SY <-
-    // YMR -->
     implementation(projects.i18nYmr)
-    // YMR <--
     implementation(projects.core.archive)
     implementation(projects.core.common)
     implementation(projects.coreMetadata)
@@ -348,9 +328,7 @@ dependencies {
     implementation(androidx.paging.compose)
 
     implementation(libs.bundles.sqlite)
-    // SY -->
     implementation(sylibs.sqlcipher)
-    // SY <-
 
     implementation(kotlinx.reflect)
     implementation(kotlinx.immutables)
@@ -426,7 +404,6 @@ dependencies {
     implementation(libs.reorderable)
     implementation(libs.bundles.markdown)
 
-    // KMK -->
     implementation(libs.palette.ktx)
     implementation(libs.materialKolor)
     implementation(libs.haze)
@@ -434,7 +411,6 @@ dependencies {
     implementation(libs.backdrop.shapes)
     implementation(compose.colorpicker)
     implementation(projects.flagkit)
-    // KMK <-
 
     // Logging
     implementation(libs.timber)
@@ -453,7 +429,6 @@ dependencies {
 
     testImplementation(kotlinx.coroutines.test)
 
-    // SY -->
     // Text distance (EH)
     implementation(sylibs.similarity)
 
@@ -485,14 +460,12 @@ dependencies {
     implementation(aniyomilibs.bundles.cast)
     // nanohttpd server
     implementation(aniyomilibs.nanohttpd)
-    // YMR --> Anime4K offline processing: Media3 decodes, runs the GPU effect and encodes
+    // Anime4K offline processing: Media3 decodes, runs the GPU effect and encodes
     implementation(androidx.media3.transformer)
     implementation(androidx.media3.effect)
     implementation(androidx.media3.common)
-    // YMR <--
-    // YMR --> Discord Social SDK (Rich Presence through the installed Discord app)
+    // Discord Social SDK (Rich Presence through the installed Discord app)
     implementation(files("libs/discord_partner_sdk.aar"))
-    // YMR <--
 }
 
 androidComponents {
@@ -501,14 +474,13 @@ androidComponents {
         // Layout Inspector's Compose tree
         it.packaging.resources.excludes.add("META-INF/*.version")
     }
-    // YMR --> Keep x86 libraries out of the release universal APK unless they were asked for:
+    // Keep x86 libraries out of the release universal APK unless they were asked for:
     // phones are ARM, and the x86 mpv libraries add about 100 MB.
     onVariants(selector().withBuildType("release")) { variant ->
         listOf("x86", "x86_64").filterNot { it in yomiraAbis }.forEach { abi ->
             variant.packaging.jniLibs.excludes.add("lib/$abi/**")
         }
     }
-    // YMR <--
 }
 
 

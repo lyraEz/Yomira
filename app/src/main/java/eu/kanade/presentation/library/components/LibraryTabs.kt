@@ -18,12 +18,11 @@ internal fun LibraryTabs(
     Column(
         modifier = Modifier.zIndex(1f),
     ) {
-        // YMR --> capsule tabs instead of the Material tab row
+        // capsule tabs instead of the Material tab row
         yomira.glass.CapsuleTabs(
             tabs = categories.map { yomira.glass.CapsuleTab(it.visualName, getNumberOfItemsForCategory(it)) },
             selectedIndex = pagerState.currentPage.coerceAtMost(categories.lastIndex.coerceAtLeast(0)),
             onSelect = onTabItemClick,
         )
-        // YMR <--
     }
 }

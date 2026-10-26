@@ -39,7 +39,6 @@ class LibraryPreferences(
     fun lastUpdatedTimestamp() = preferenceStore.getLong(Preference.appStateKey("library_update_last_timestamp"), 0L)
     fun autoUpdateInterval() = preferenceStore.getInt("pref_library_update_interval_key", 0)
 
-    // KMK -->
     fun showUpdatingProgressBanner() = preferenceStore.getBoolean(
         Preference.appStateKey("pref_show_updating_progress_banner_key"),
         true,
@@ -48,7 +47,6 @@ class LibraryPreferences(
     fun showEmptyCategoriesSearch() = preferenceStore.getBoolean("pref_show_empty_categories_search", true)
 
     fun syncOnAdd() = preferenceStore.getBoolean("pref_sync_manga_on_add", false)
-    // KMK <--
 
     fun coverRatios() = preferenceStore.getStringSet(
         Preference.appStateKey("pref_library_cover_ratios_key"),
@@ -59,7 +57,6 @@ class LibraryPreferences(
         Preference.appStateKey("pref_library_cover_colors_key"),
         emptySet(),
     )
-    // KMK <--
 
     val autoUpdateDeviceRestrictions: Preference<Set<String>> = preferenceStore.getStringSet(
         "library_update_restriction",
@@ -103,10 +100,8 @@ class LibraryPreferences(
         TriState.DISABLED,
     )
 
-    // AM (FILLERMARK) -->
     fun filterFillermarkedAnime() =
         preferenceStore.getEnum("pref_filter_animelib_fillermarked_v2", TriState.DISABLED)
-    // <-- AM (FILLERMARK)
 
     fun filterCompleted() = preferenceStore.getEnum(
         "pref_filter_animelib_completed_v2",
@@ -118,7 +113,6 @@ class LibraryPreferences(
         TriState.DISABLED,
     )
 
-    // SY -->
     fun filterLewd() = preferenceStore.getEnum(
         "pref_filter_library_lewd_v2",
         TriState.DISABLED,
@@ -126,19 +120,14 @@ class LibraryPreferences(
 
     fun filterCategories() = preferenceStore.getBoolean("pref_filter_library_categories", false)
 
-    // ANZ -->
     // Category include/exclude filter, ported from Anikku upstream.
     fun filterCategoriesInclude() = preferenceStore.getStringSet(FILTER_LIBRARY_CATEGORIES_INCLUDE_PREF_KEY, emptySet())
 
     fun filterCategoriesExclude() = preferenceStore.getStringSet(FILTER_LIBRARY_CATEGORIES_EXCLUDE_PREF_KEY, emptySet())
-    // ANZ <--
 
     fun libraryReadDuplicateChapters() = preferenceStore.getBoolean("pref_library_mark_duplicate_chapters", false)
 
-    // SY -->
     fun skipDupeEpisodes() = preferenceStore.getBoolean("pref_skip_dupe_episodes", false)
-    // SY <--
-    // SY <--
 
     fun hideMissingEpisodes() = preferenceStore.getBoolean("pref_hide_missing_episodes", false)
 
@@ -153,11 +142,9 @@ class LibraryPreferences(
 
     fun downloadBadge() = preferenceStore.getBoolean("display_download_badge", false)
 
-    // ANZ -->
     // Unseen badge on library covers, ported from Anikku upstream.
     // Preference exists so the sheet matches upstream; the renderer does not honor it yet.
     fun unreadBadge() = preferenceStore.getBoolean("display_unread_badge", true)
-    // ANZ <--
 
     fun localBadge() = preferenceStore.getBoolean("display_local_badge", true)
 
@@ -190,9 +177,7 @@ class LibraryPreferences(
 
     fun categorizedDisplaySettings() = preferenceStore.getBoolean("categorized_display", false)
 
-    // KMK -->
     fun showHiddenCategories() = preferenceStore.getBoolean("show_hidden_categories", false)
-    // KMK <--
 
     fun updateCategories() = preferenceStore.getStringSet("animelib_update_categories", emptySet())
 
@@ -218,10 +203,8 @@ class LibraryPreferences(
         Anime.SHOW_ALL,
     )
 
-    // AM (FILLERMARK) -->
     fun filterEpisodeByFillermarked() =
         preferenceStore.getLong("default_episode_filter_by_fillermarked", Anime.SHOW_ALL)
-    // <-- AM (FILLERMARK)
 
     // and upload date
     fun sortEpisodeBySourceOrNumber() = preferenceStore.getLong(
@@ -256,9 +239,7 @@ class LibraryPreferences(
         filterEpisodeBySeen().set(anime.unseenFilterRaw)
         filterEpisodeByDownloaded().set(anime.downloadedFilterRaw)
         filterEpisodeByBookmarked().set(anime.bookmarkedFilterRaw)
-        // AM (FILLERMARK) -->
         filterEpisodeByFillermarked().set(anime.fillermarkedFilterRaw)
-        // <-- AM (FILLERMARK)
         sortEpisodeBySourceOrNumber().set(anime.sorting)
         displayEpisodeByNameOrNumber().set(anime.displayMode)
         val seasonGroupRaw = anime.episodeFlags and Anime.EPISODE_SEASON_GROUP_MASK
@@ -292,9 +273,7 @@ class LibraryPreferences(
         ToggleSeen,
         ToggleBookmark,
 
-        // AM (FILLERMARK) -->
         ToggleFillermark,
-        // <-- AM (FILLERMARK)
 
         Download,
         Disabled,
@@ -306,13 +285,11 @@ class LibraryPreferences(
         Tabs,
     }
 
-    // SY -->
     fun sortTagsForLibrary() = preferenceStore.getStringSet("sort_anime_tags_for_library", mutableSetOf())
 
     fun groupLibraryUpdateType() = preferenceStore.getEnum("group_anime_library_update_type", GroupLibraryMode.GLOBAL)
 
     fun groupLibraryBy() = preferenceStore.getInt("group_anime_library_by", LibraryGroup.BY_DEFAULT)
-    // SY <--
 
     fun useHierarchicalSeasons() = preferenceStore.getBoolean("use_hierarchical_seasons", true)
 
@@ -325,7 +302,6 @@ class LibraryPreferences(
     fun userAffinityMap() = preferenceStore.getString("user_affinity_map", "{}")
     fun lastAffinityUpdate() = preferenceStore.getLong("last_affinity_update", 0L)
 
-    // AY -->
     val filterSeasonByDownload = preferenceStore.getLong("pref_filter_season_by_download_v2", Anime.SHOW_ALL)
     val filterSeasonByUnseen = preferenceStore.getLong("pref_filter_season_by_unseen_v2", Anime.SHOW_ALL)
     val filterSeasonByStarted = preferenceStore.getLong("pref_filter_season_by_started_v2", Anime.SHOW_ALL)
@@ -367,7 +343,6 @@ class LibraryPreferences(
         seasonContinueOverlay.set(anime.seasonContinueOverlay)
         seasonDisplayMode.set(anime.seasonDisplayMode)
     }
-    // <-- AY
 
     companion object {
         const val DEVICE_ONLY_ON_WIFI = "wifi"
@@ -379,9 +354,7 @@ class LibraryPreferences(
         const val ANIME_NON_SEEN = "anime_started"
         const val ANIME_OUTSIDE_RELEASE_PERIOD = "anime_outside_release_period"
 
-        // ANZ -->
         const val FILTER_LIBRARY_CATEGORIES_INCLUDE_PREF_KEY = "pref_filter_library_categories_include"
         const val FILTER_LIBRARY_CATEGORIES_EXCLUDE_PREF_KEY = "pref_filter_library_categories_exclude"
-        // ANZ <--
     }
 }

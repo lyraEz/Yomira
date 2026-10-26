@@ -116,7 +116,7 @@ fun MoreScreen(
         containerColor = MaterialTheme.colorScheme.background
     ) { contentPadding ->
         ScrollbarLazyColumn(
-            // YMR --> the list scrolls under the floating tab bar instead of stopping above it
+            // the list scrolls under the floating tab bar instead of stopping above it
             modifier = Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding()),
             contentPadding = PaddingValues(
                 start = 16.dp,
@@ -124,18 +124,15 @@ fun MoreScreen(
                 end = 16.dp,
                 bottom = 16.dp + contentPadding.calculateBottomPadding(),
             ),
-            // YMR <--
             verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             item {
                 LogoHeader()
             }
 
-            // YMR -->
             item {
                 yomira.ui.WatchTimeCard()
             }
-            // YMR <--
 
             item {
                 MoreSection(title = "Preferences") {
@@ -219,9 +216,7 @@ fun MoreScreen(
                             onClick = {
                                 scope.launch {
                                     val homeTab = when (navItem) {
-                                        // YMR -->
                                         NavItem.HOME -> HomeScreen.HomeTab.Home
-                                        // YMR <--
                                         NavItem.LIBRARY -> HomeScreen.HomeTab.AnimeLib()
                                         NavItem.FEED -> HomeScreen.HomeTab.Feed
                                         NavItem.UPDATES -> HomeScreen.HomeTab.Updates

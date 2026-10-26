@@ -42,12 +42,10 @@ class CloudflareInterceptor(
     ): Response {
         try {
             response.close()
-            // ANZ -->
             val oldCookie = cookieManager.get(request.url)
                 .firstOrNull { it.name == "cf_clearance" }
             cookieManager.remove(request.url, COOKIE_NAMES, 0)
             android.webkit.CookieManager.getInstance().flush()
-            // ANZ <--
 
             val originalUserAgent = request.header("User-Agent") ?: run {
                 try {
@@ -178,7 +176,6 @@ class CloudflareInterceptor(
                             .let { it != null && it != oldCookie }
                     }
 
-                    // ANZ -->
                     if (isCloudFlareBypassed()) {
                         cloudflareBypassed = true
                         latch.countDown()
@@ -201,7 +198,6 @@ class CloudflareInterceptor(
                         latch.countDown()
                         return
                     }
-                    // ANZ <--
 
                     // Inject Turnstile auto-click script
                     view.evaluateJavascript(
@@ -277,8 +273,7 @@ class CloudflareInterceptor(
                     )
                 }
 
-                // ANZ -->
-                override fun onReceivedHttpError( // ANZ
+                override fun onReceivedHttpError(
                     view: WebView?,
                     request: WebResourceRequest?,
                     errorResponse: WebResourceResponse?,
@@ -300,7 +295,6 @@ class CloudflareInterceptor(
                         latch.countDown()
                     }
                 }
-                // ANZ <--
             }
 
             webview?.loadUrl(origRequestUrl, headers)

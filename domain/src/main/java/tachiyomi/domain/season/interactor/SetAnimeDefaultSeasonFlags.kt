@@ -1,4 +1,3 @@
-// AY -->
 package tachiyomi.domain.season.interactor
 
 import tachiyomi.core.common.util.lang.withNonCancellableContext
@@ -45,4 +44,3 @@ class SetAnimeDefaultSeasonFlags(
         }
     }
 }
-// <-- AY

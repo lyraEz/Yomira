@@ -15,9 +15,7 @@ kotlin {
                 api(libs.jsoup)
                 api(libs.nanohttpd)
 
-                // SY -->
                 api(kotlinx.reflect)
-                // SY <--
 
                 implementation(project.dependencies.platform(compose.bom))
                 implementation(compose.runtime)

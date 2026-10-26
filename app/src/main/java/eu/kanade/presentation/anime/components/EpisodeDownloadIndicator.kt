@@ -57,9 +57,7 @@ fun EpisodeDownloadIndicator(
     downloadStateProvider: () -> Download.State,
     downloadProgressProvider: () -> Int,
     onClick: (EpisodeDownloadAction) -> Unit,
-    // AM (FILE_SIZE) -->
     fileSize: Long?,
-    // <-- AM (FILE_SIZE)
     modifier: Modifier = Modifier,
 ) {
     when (val downloadState = downloadStateProvider()) {
@@ -79,9 +77,7 @@ fun EpisodeDownloadIndicator(
             enabled = enabled,
             modifier = modifier,
             onClick = onClick,
-            // AM (FILE_SIZE) -->
             fileSize = fileSize,
-            // <-- AM (FILE_SIZE)
         )
         Download.State.ERROR -> ErrorIndicator(
             enabled = enabled,
@@ -202,9 +198,7 @@ private fun DownloadingIndicator(
 private fun DownloadedIndicator(
     enabled: Boolean,
     onClick: (EpisodeDownloadAction) -> Unit,
-    // AM (FILE_SIZE) -->
     fileSize: Long?,
-    // <-- AM (FILE_SIZE)
     modifier: Modifier = Modifier,
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
@@ -213,7 +207,6 @@ private fun DownloadedIndicator(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // AM (FILE_SIZE) -->
         if (fileSize != null) {
             Text(
                 text = formatFileSize(fileSize),
@@ -223,7 +216,6 @@ private fun DownloadedIndicator(
                 modifier = Modifier.padding(all = 10.dp),
             )
         }
-        // <-- AM (FILE_SIZE)
 
         Box(
             modifier = Modifier
@@ -255,7 +247,6 @@ private fun DownloadedIndicator(
     }
 }
 
-// AM (FILE_SIZE) -->
 private fun formatFileSize(fileSize: Long): String {
     val megaByteSize = fileSize / 1024.0 / 1024.0
     return when {
@@ -267,7 +258,6 @@ private fun formatFileSize(fileSize: Long): String {
         else -> "${(fileSize / 1024L).coerceAtLeast(0L)} KB"
     }
 }
-// <-- AM (FILE_SIZE)
 
 @Composable
 private fun ErrorIndicator(

@@ -276,7 +276,6 @@ abstract class AnimeHttpSource : AnimeCatalogueSource {
      */
     protected abstract fun animeDetailsParse(response: Response): SAnime
 
-    // KMK -->
 
     /**
      * Whether parsing related animes in anime page or extension provide custom related animes request.
@@ -322,7 +321,6 @@ abstract class AnimeHttpSource : AnimeCatalogueSource {
      * @param response the response from the site.
      */
     protected open fun relatedAnimeListParse(response: Response): List<SAnime> = throw UnsupportedOperationException("Unsupported!")
-    // KMK <--
 
     /**
      * Get all the available episodes for an anime.
@@ -770,7 +768,6 @@ abstract class AnimeHttpSource : AnimeCatalogueSource {
      */
     override fun getFilterList() = AnimeFilterList()
 
-    // EXH -->
     private var delegate: DelegatedHttpSource? = null
         get() = if (Injekt.get<DelegateSourcePreferences>().delegateSources().get()) {
             field
@@ -781,5 +778,4 @@ abstract class AnimeHttpSource : AnimeCatalogueSource {
     fun bindDelegate(delegate: DelegatedHttpSource) {
         this.delegate = delegate
     }
-    // EXH <--
 }

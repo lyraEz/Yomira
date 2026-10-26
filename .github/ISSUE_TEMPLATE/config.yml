@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Problemas com uma extensão específica
+  - name: Problems with a specific extension
     url: https://github.com/lyraEz/Rede/issues
-    about: Extensões são mantidas nos repositórios de extensões, não no Yomira.
+    about: Extensions are maintained in their repositories, not in Yomira.

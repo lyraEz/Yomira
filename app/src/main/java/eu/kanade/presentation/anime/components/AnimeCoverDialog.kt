@@ -199,9 +199,7 @@ private fun ActionsPill(content: @Composable () -> Unit) {
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.extraLarge)
-            // KMK -->
             .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.95f)),
-        // KMK <--
     ) {
         content()
     }

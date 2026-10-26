@@ -40,9 +40,7 @@ class AnimeRestorer(
     private val getTracks: GetTracks = Injekt.get(),
     private val insertTrack: InsertTrack = Injekt.get(),
     fetchInterval: FetchInterval = Injekt.get(),
-    // SY -->
     private val setCustomAnimeInfo: SetCustomAnimeInfo = Injekt.get(),
-    // SY <--
 ) {
     private var now = ZonedDateTime.now()
     private var currentFetchWindow = fetchInterval.getWindow(now)
@@ -116,14 +114,12 @@ class AnimeRestorer(
     private fun Anime.copyFrom(newer: Anime): Anime {
         return this.copy(
             favorite = this.favorite || newer.favorite,
-            // SY -->
             ogAuthor = newer.author,
             ogArtist = newer.artist,
             ogDescription = newer.description,
             ogGenre = newer.genre,
             ogThumbnailUrl = newer.thumbnailUrl,
             ogStatus = newer.status,
-            // SY <--
             initialized = this.initialized || newer.initialized,
             version = newer.version,
         )
@@ -204,9 +200,7 @@ class AnimeRestorer(
             episode.copy(
                 id = dbEpisode.id,
                 bookmark = episode.bookmark || dbEpisode.bookmark,
-                // AM (FILLERMARK) -->
                 fillermark = episode.fillermark || dbEpisode.fillermark,
-                // <-- AM (FILLERMARK)
                 seen = episode.seen,
                 lastSecondSeen = episode.lastSecondSeen,
             )
@@ -220,15 +214,11 @@ class AnimeRestorer(
                     else -> it
                 }
             }
-                // KMK -->
                 .copy(
                     id = dbEpisode.id,
                     bookmark = episode.bookmark || dbEpisode.bookmark,
-                    // AM (FILLERMARK) -->
                     fillermark = episode.fillermark || dbEpisode.fillermark,
-                    // <-- AM (FILLERMARK)
                 )
-            // KMK <--
         }
     }
 
@@ -245,9 +235,7 @@ class AnimeRestorer(
                     scanlator = episode.scanlator,
                     seen = episode.seen,
                     bookmark = episode.bookmark,
-                    // AM (FILLERMARK) -->
                     fillermark = episode.fillermark,
-                    // <-- AM (FILLERMARK)
                     lastSecondSeen = episode.lastSecondSeen,
                     totalSeconds = episode.totalSeconds,
                     episodeNumber = episode.episodeNumber,
@@ -272,9 +260,7 @@ class AnimeRestorer(
                     scanlator = null,
                     seen = episode.seen,
                     bookmark = episode.bookmark,
-                    // AM (FILLERMARK) -->
                     fillermark = episode.fillermark,
-                    // <-- AM (FILLERMARK)
                     lastSecondSeen = episode.lastSecondSeen,
                     totalSeconds = episode.totalSeconds,
                     episodeNumber = null,

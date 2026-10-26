@@ -27,9 +27,7 @@ class GetAnime(
         return animeRepository.getAnimeByUrlAndSourceIdAsFlow(url, sourceId)
     }
 
-    // SY -->
     suspend fun await(url: String, sourceId: Long): Anime? {
         return animeRepository.getAnimeByUrlAndSourceId(url, sourceId)
     }
-    // SY <--
 }

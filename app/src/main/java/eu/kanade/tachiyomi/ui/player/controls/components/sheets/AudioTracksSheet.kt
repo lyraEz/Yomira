@@ -47,7 +47,6 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.player.playerRow
 
-// ANZ -->
 @Composable
 fun AudioTracksSheet(
     tracks: ImmutableList<VideoTrack>,
@@ -102,9 +101,7 @@ fun AudioTrackRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // YMR -->
             .playerRow()
-            // YMR <--
             .clickable(onClick = onClick)
             .padding(start = MaterialTheme.padding.small, end = MaterialTheme.padding.medium),
         verticalAlignment = Alignment.CenterVertically,
@@ -127,4 +124,3 @@ fun AudioTrackRow(
         }
     }
 }
-// ANZ <--

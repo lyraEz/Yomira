@@ -18,10 +18,8 @@ class BackupPreferences(
         setOf(FLAG_CATEGORIES, FLAG_CHAPTERS, FLAG_HISTORY, FLAG_TRACK),
     )
 
-    // KMK -->
     fun showRestoringProgressBanner() = preferenceStore.getBoolean(
         Preference.appStateKey("pref_show_restoring_progress_banner_key"),
         true,
     )
-    // KMK <--
 }

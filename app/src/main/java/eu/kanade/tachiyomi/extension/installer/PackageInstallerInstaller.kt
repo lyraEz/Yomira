@@ -23,11 +23,9 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
 
     private val packageActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            // YMR -->
             val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
             val statusMessage = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)
             logcat { "PackageInstaller status=$status message=$statusMessage" }
-            // YMR <--
             when (status) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val userAction = intent.getParcelableExtraCompat<Intent>(Intent.EXTRA_INTENT)
@@ -36,9 +34,7 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
                         continueQueue(InstallStep.Error, statusMessage)
                         return
                     }
-                    // YMR -->
                     markAwaitingConfirmation()
-                    // YMR <--
                     userAction.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     service.startActivity(userAction)
                 }
@@ -46,12 +42,10 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
                     continueQueue(InstallStep.Idle)
                 }
                 PackageInstaller.STATUS_SUCCESS -> continueQueue(InstallStep.Installed)
-                // YMR -->
                 else -> continueQueue(
                     InstallStep.Error,
                     ExtensionApkInspector.describeInstallerStatus(service, status, statusMessage),
                 )
-                // YMR <--
             }
         }
     }
@@ -99,9 +93,7 @@ class PackageInstallerInstaller(private val service: Service) : Installer(servic
             activeSession?.let { (_, sessionId) ->
                 packageInstaller.abandonSession(sessionId)
             }
-            // YMR -->
             continueQueue(InstallStep.Error, e.message ?: e.javaClass.simpleName)
-            // YMR <--
         }
     }
 

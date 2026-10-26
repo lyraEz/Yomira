@@ -170,9 +170,7 @@ class PlayerViewModel @JvmOverloads constructor(
     private val trackPreferences: TrackPreferences = Injekt.get(),
     private val trackEpisode: TrackEpisode = Injekt.get(),
     private val getAnime: GetAnime = Injekt.get(),
-    // ANZ -->
     private val getCustomAnimeInfo: GetCustomAnimeInfo = Injekt.get(),
-    // ANZ <--
     private val getNextEpisodes: GetNextEpisodes = Injekt.get(),
     private val getEpisodesByAnimeId: GetEpisodesByAnimeId = Injekt.get(),
     private val getCategories: GetCategories = Injekt.get(),
@@ -192,10 +190,8 @@ class PlayerViewModel @JvmOverloads constructor(
     uiPreferences: UiPreferences = Injekt.get(),
     private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val syncPreferences: SyncPreferences = Injekt.get(),
-    // ANZ -->
     private val animeFillerListFetcher: AnimeFillerListFetcher = AnimeFillerListFetcher(),
     private val decoderPreferences: DecoderPreferences = Injekt.get(),
-    // ANZ <--
 ) : AndroidViewModel(context) {
 
     val cachePath: String = context.applicationContext.cacheDir.path
@@ -205,7 +201,6 @@ class PlayerViewModel @JvmOverloads constructor(
         it.setOptionString("gpu-shader-cache-dir", cachePath)
         it.setOptionString("icc-cache-dir", cachePath)
         it.setOptionString("keep-open", "yes")
-        // ANZ -->
         // Start the engine at the remembered speed. This must happen here, as a pre-init option,
         // rather than as a property write after initialization: `playbackSpeed` snapshots the
         // "speed" property once when the flow is created, and the library's backing SharedFlow has
@@ -213,7 +208,6 @@ class PlayerViewModel @JvmOverloads constructor(
         // emitted to zero subscribers and silently dropped. The player would then run at the saved
         // speed while the controls kept displaying the stale 1x default.
         it.setOptionString("speed", playerPreferences.playerSpeed().get().toString())
-        // ANZ <--
     }
 
     private val _isStopped = MutableStateFlow(false)
@@ -252,9 +246,7 @@ class PlayerViewModel @JvmOverloads constructor(
     val mediaTitle = MutableStateFlow("")
     val animeTitle = MutableStateFlow("")
 
-    // ANZ -->
     val isLoading = MutableStateFlow(false)
-    // ANZ <--
     val hasLoadedTracks = MutableStateFlow(false)
     val hasLoadedSubs = MutableStateFlow(false)
     val hasLoadedAudio = MutableStateFlow(false)
@@ -266,9 +258,7 @@ class PlayerViewModel @JvmOverloads constructor(
     val externalAudioTracks = _externalAudioTracks.asStateFlow()
 
     val isCasting = MutableStateFlow(false)
-    // ANK -->
     private var castPos: Int = 0
-    // ANK <--
 
     private val _hosterList = MutableStateFlow<List<Hoster>>(emptyList())
     val hosterList = _hosterList.asStateFlow()
@@ -302,12 +292,9 @@ class PlayerViewModel @JvmOverloads constructor(
     val paused: kotlinx.coroutines.flow.StateFlow<Boolean?> = mpv.propFlow<Boolean>("pause")
     val pos: kotlinx.coroutines.flow.StateFlow<Int?> = mpv.propFlow<Int>("time-pos")
     val duration: kotlinx.coroutines.flow.StateFlow<Int?> = mpv.propFlow<Int>("duration")
-    // ANZ -->
     val demuxerCacheTime: kotlinx.coroutines.flow.StateFlow<Float?> = mpv.propFlow<Float>("demuxer-cache-time")
-    // ANZ <--
 
     val currentVolume = MutableStateFlow(audioManager.getVolume())
-    // ANZ -->
     val isPaused: Boolean get() = paused.value ?: false
 
     val selectedSubtitles = mpv.propFlow<String>("sid").combine(mpv.propFlow<String>("secondary-sid")) { sid, secSid ->
@@ -318,7 +305,6 @@ class PlayerViewModel @JvmOverloads constructor(
         it?.toIntOrNull() ?: -1
     }.stateIn(viewModelScope, SharingStarted.Eagerly, -1)
 
-    // ANZ -->
     private val _manualDecoder = MutableStateFlow<Decoder?>(null)
     val currentDecoder = combine(
         mpv.propFlow<String>("hwdec-current"),
@@ -344,14 +330,11 @@ class PlayerViewModel @JvmOverloads constructor(
         SharingStarted.Eagerly,
         if (decoderPreferences.tryHWDecoding().get()) Decoder.HWPlus else Decoder.SW,
     )
-    // ANZ <--
     val currentMPVVolume = MutableStateFlow(100)
     val isSeekingUI = MutableStateFlow(false)
     val seekPosition = MutableStateFlow(0f)
     val isLongPressing = MutableStateFlow(false)
-    // ANZ -->
     val playbackSpeed: kotlinx.coroutines.flow.StateFlow<Float?> = mpv.propFlow<Float>("speed")
-    // ANZ <--
     val readAhead = MutableStateFlow(0f)
     val videoZoom = MutableStateFlow(0f)
     val videoPanX = MutableStateFlow(0f)
@@ -359,17 +342,13 @@ class PlayerViewModel @JvmOverloads constructor(
     private val _videoAspectOverride = MutableStateFlow(-1.0)
     val videoAspectOverride = _videoAspectOverride.asStateFlow()
 
-    // ANZ -->
     fun updateVideo(video: Video) {
         _currentVideo.update { video }
     }
-    // ANZ <--
 
     val chapters = mpv.propFlow<MPVNode>("chapter-list")
         .map { (it?.toObject<List<ChapterNode>>(json) ?: persistentListOf()).map { it.toSegment() }.toImmutableList() }
-        // ANZ -->
         .flowOn(Dispatchers.Default)
-        // ANZ <--
 
     val currentChapter = chapters.combine(mpv.propFlow<Int>("chapter")) { list, idx ->
         idx?.let { list.getOrNull(it) }
@@ -377,9 +356,7 @@ class PlayerViewModel @JvmOverloads constructor(
 
     val pausedForCache: kotlinx.coroutines.flow.StateFlow<Boolean?> = mpv.propFlow<Boolean>("paused-for-cache")
     val coreIdle: kotlinx.coroutines.flow.StateFlow<Boolean?> = mpv.propFlow<Boolean>("core-idle")
-    // ANZ -->
     val seeking: kotlinx.coroutines.flow.StateFlow<Boolean?> = mpv.propFlow<Boolean>("seeking")
-    // ANZ <--
     val isLoadingTracks = MutableStateFlow(false)
 
     private val _thumbnailImage = MutableStateFlow<ImageBitmap?>(null)
@@ -390,7 +367,6 @@ class PlayerViewModel @JvmOverloads constructor(
     private var fillerEpisodes: Set<Float> = emptySet()
     val relativeTime: Boolean = uiPreferences.relativeTime().get()
     val dateFormat: java.time.format.DateTimeFormatter = UiPreferences.dateFormat(uiPreferences.dateFormat().get())
-    // ANZ <--
     private val volumeBoostCap by mpv.propFlow<Int>("volume-max").collectAsState(viewModelScope)
 
     val subtitleTracks = mpv.propFlow<MPVNode>("track-list")
@@ -402,9 +378,7 @@ class PlayerViewModel @JvmOverloads constructor(
                     ?: persistentListOf()
                 ).toImmutableList()
         }
-        // ANZ -->
         .flowOn(Dispatchers.Default)
-        // ANZ <--
 
     val audioTracks = mpv.propFlow<MPVNode>("track-list")
         .map { node ->
@@ -415,9 +389,7 @@ class PlayerViewModel @JvmOverloads constructor(
                     ?: persistentListOf()
                 ).toImmutableList()
         }
-        // ANZ -->
         .flowOn(Dispatchers.Default)
-        // ANZ <--
 
     private val _skipIntroText = MutableStateFlow<String?>(null)
     val skipIntroText = _skipIntroText.asStateFlow()
@@ -491,7 +463,6 @@ class PlayerViewModel @JvmOverloads constructor(
             .onEach { onTrackListChanged(it) }
             .launchIn(viewModelScope)
 
-        // ANZ -->
         viewModelScope.launchIO {
             try {
                 currentAnime.collect { anime ->
@@ -501,9 +472,7 @@ class PlayerViewModel @JvmOverloads constructor(
                 }
             } catch (_: Exception) {}
         }
-        // ANZ <--
 
-        // ANK -->
         // Loaded here rather than from initPlayer(): the buttons are independent of the episode
         // being opened, so they must survive a needsInit() short-circuit, and a database failure
         // must cost only the buttons instead of failing playback.
@@ -514,10 +483,7 @@ class PlayerViewModel @JvmOverloads constructor(
                 logcat(LogPriority.ERROR, e) { "Failed to load custom buttons" }
             }
         }
-        // ANK <--
-        // ANZ -->
         mpv.setPropertyInt("user-data/current-anime/intro-length", getAnimeSkipIntroLength())
-        // ANZ <--
     }
 
     /**
@@ -538,17 +504,13 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     fun fetchFonts(includeSystemFonts: Boolean): List<String> {
-        // ANK -->
         val fontFiles = mutableListOf(subtitlePreferences.subtitleFont().defaultValue())
-        // ANK <--
 
         storageManager.getFontsDirectory()?.listFiles()?.filter { file ->
             file.name?.lowercase()?.matches(FONT_EXTENSION_REGEX) == true
         }?.mapNotNull {
             try {
-                // ANK -->
                 it.openInputStream().use { s -> TTFFile.open(s) }.families.values.first()
-                // ANK <--
             } catch (_: Exception) {
                 null
             }
@@ -574,9 +536,7 @@ class PlayerViewModel @JvmOverloads constructor(
                 }?.forEach { file ->
                     try {
                         fontFiles.add(
-                            // ANK -->
                             file.inputStream().use { s -> TTFFile.open(s) }.families.values.first(),
-                            // ANK <--
                         )
                     } catch (_: Exception) { }
                 }
@@ -608,18 +568,13 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     fun clearTracks() {
-        // ANZ -->
         _manualDecoder.update { null }
-        // ANZ <--
         hasLoadedTracks.update { _ -> false }
-        // ANK -->
         clearLoadedTrackStates()
-        // ANK <--
         _externalAudioTracks.update { _ -> emptyList() }
         _externalSubtitleTracks.update { _ -> emptyList() }
     }
 
-    // ANK -->
     /**
      * `hasLoadedSubs`/`hasLoadedAudio` only ever move false -> true, so they have to be cleared
      * whenever a new file starts loading. Otherwise the next file inherits the previous one's
@@ -630,23 +585,18 @@ class PlayerViewModel @JvmOverloads constructor(
         hasLoadedSubs.update { _ -> false }
         hasLoadedAudio.update { _ -> false }
     }
-    // ANK <--
 
     fun updateIsLoadingEpisode(value: Boolean) {
-        // ANK -->
         // Clear first, so `isLoadingEpisode` is never true while the flags still describe the
         // outgoing file -- `loadVideo()` resolves the video over the network before it gets to
         // `clearTracks()`, which would leave that window wide open.
         if (value) clearLoadedTrackStates()
-        // ANK <--
         _isLoadingEpisode.update { _ -> value }
     }
 
     private fun updateEpisodeList(episodeList: List<Episode>) {
         _currentPlaylist.update { _ ->
-            // ANK -->
             episodeList.toPersistentList()
-            // ANK <--
         }
     }
 
@@ -675,9 +625,7 @@ class PlayerViewModel @JvmOverloads constructor(
         externalSubtitle.forEach { track ->
             val idx = track.title!!.split("=")[1].toInt()
             val external = externalSubtitleTracks.value
-                // ANK -->
                 .getOrNull(idx) ?: return@forEach
-            // ANK <--
 
             if (external.id != null) {
                 // External subtitle has already been added
@@ -687,19 +635,15 @@ class PlayerViewModel @JvmOverloads constructor(
             updateSubtitleTrackAt(idx) {
                 it.copy(id = track.id, state = TrackState.Loaded)
             }
-            // ANZ -->
             selectSubById(track.id)
             hasLoadedSubs.update { _ -> true }
             checkFileLoaded()
-            // ANZ <--
         }
 
         externalAudio.forEach { track ->
             val idx = track.title!!.split("=")[1].toInt()
             val external = externalAudioTracks.value
-                // ANK -->
                 .getOrNull(idx) ?: return@forEach
-            // ANK <--
 
             if (external.id != null) {
                 // External audio has already been added
@@ -709,11 +653,9 @@ class PlayerViewModel @JvmOverloads constructor(
             updateAudioTrackAt(idx) {
                 it.copy(id = track.id, state = TrackState.Loaded)
             }
-            // ANZ -->
             selectAudioById(track.id)
             hasLoadedAudio.update { _ -> true }
             checkFileLoaded()
-            // ANZ <--
         }
     }
 
@@ -721,7 +663,6 @@ class PlayerViewModel @JvmOverloads constructor(
      * Called when embedded tracks are first loaded
      */
     private fun onTracksLoaded(tracks: List<TrackNode>) {
-        // ANK -->
         // Drop whatever selection mpv carried over from the previous file before choosing this
         // file's tracks, instead of calling `selectAudio`/`selectSub` with a `force` flag:
         // selectSubById()/selectAudioById() toggle a track off when it is already the selected
@@ -737,7 +678,6 @@ class PlayerViewModel @JvmOverloads constructor(
         mpv.setPropertyBoolean("sid", false)
         mpv.setPropertyBoolean("secondary-sid", false)
         mpv.setPropertyBoolean("aid", false)
-        // ANK <--
         val embeddedSubs = tracks.filter { it.isSubtitle }
         val embeddedAudio = tracks.filter { it.isAudio }
         val externalSubs = currentVideo.value?.subtitleTracks.orEmpty().distinctBy { it.url }
@@ -768,12 +708,10 @@ class PlayerViewModel @JvmOverloads constructor(
             selectAudio(preferredAudio)
         }
 
-        // ANK -->
         // Nothing is waiting on an external track when neither branch above started a load, and
         // `track-list` can arrive after `file-loaded`, so this is the last chance to release the
         // episode-loading state. No-op while an external sub/audio load is still pending.
         checkFileLoaded()
-        // ANK <--
     }
 
     fun addAudio(uri: Uri) {
@@ -915,7 +853,7 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     private fun selectAudioById(id: Int) {
-        // ANK: `force` was removed since we reset audio ID in `onTracksLoaded()`
+        // `force` was removed since we reset audio ID in `onTracksLoaded()`
         if (id == mpv.getPropertyInt("aid")) {
             mpv.setPropertyBoolean("aid", false)
         } else {
@@ -943,13 +881,12 @@ class PlayerViewModel @JvmOverloads constructor(
         return mpv.getPropertyInt("chapter-list/count") ?: 0
     }
 
-    // YMR --> whether the file or the extension already marks an opening, ending or recap; plain
+    // whether the file or the extension already marks an opening, ending or recap; plain
     // "Chapter 1" markers do not count, so AniSkip still runs for those files
     fun hasSkipChapters(): Boolean {
         val chapters = mpv.getPropertyNode("chapter-list")?.toObject<List<ChapterNode>>(json) ?: return false
         return chapters.any { it.chapterType != ChapterType.Other || yomira.player.SkipTimes.isSkipName(it.chapterTitle) }
     }
-    // YMR <--
 
     fun addTimestamps(timestamps: List<TimeStamp>) {
         if (timestamps.isEmpty()) return
@@ -962,9 +899,7 @@ class PlayerViewModel @JvmOverloads constructor(
                     name = it.chapterTitle,
                     start = it.time,
                     index = 0,
-                    // ANK -->
                     chapterType = it.chapterType,
-                    // ANK <--
                 )
             }
         val merged = ChapterUtils.mergeChapters(current, timestamps, duration.value)
@@ -994,7 +929,6 @@ class PlayerViewModel @JvmOverloads constructor(
      * If external subs/audio tracks was selected, wait until mpv has fetched them.
      */
     fun checkFileLoaded() {
-        // ANK -->
         if (!hasLoadedSubs.value || !hasLoadedAudio.value) return
         // Track-load callbacks arrive on mpv's event thread, so a read-then-write on
         // isLoadingEpisode would let a subtitle and an audio event both pass the guard and
@@ -1007,10 +941,8 @@ class PlayerViewModel @JvmOverloads constructor(
                 unpause()
             }
         }
-        // ANK <--
     }
 
-    // ANZ -->
     fun pauseUnpause() {
         if (mpv.isInitialized) mpv.command("cycle", "pause")
     }
@@ -1020,7 +952,6 @@ class PlayerViewModel @JvmOverloads constructor(
     fun unpause() {
         if (mpv.isInitialized) mpv.setPropertyBoolean("pause", false)
     }
-    // ANZ <--
 
     private val showStatusBar = playerPreferences.showSystemStatusBar().get()
     fun showControls() {
@@ -1039,7 +970,6 @@ class PlayerViewModel @JvmOverloads constructor(
         _seekBarShown.update { true }
     }
 
-    // YMR -->
     private val _controlsInteraction = MutableStateFlow(0)
 
     /** Bumped on every hardware key handled by the visible controls, to restart their auto-hide. */
@@ -1048,7 +978,6 @@ class PlayerViewModel @JvmOverloads constructor(
     fun onControlsInteraction() {
         _controlsInteraction.update { it + 1 }
     }
-    // YMR <--
 
     fun hideControls() {
         viewModelScope.launch {
@@ -1117,7 +1046,6 @@ class PlayerViewModel @JvmOverloads constructor(
         }
     }
 
-    // ANZ -->
     fun seekBy(offset: Int, precise: Boolean = false) {
         if (mpv.isInitialized) {
             mpv.command("seek", offset.toString(), if (precise) "relative+exact" else "relative")
@@ -1129,7 +1057,6 @@ class PlayerViewModel @JvmOverloads constructor(
         if (position !in 0..(mpv.getPropertyInt("duration") ?: 0)) return
         mpv.command("seek", position.toString(), if (precise) "absolute" else "absolute+keyframes")
     }
-    // ANZ <--
 
     fun changeBrightnessTo(
         brightness: Float,
@@ -1150,9 +1077,7 @@ class PlayerViewModel @JvmOverloads constructor(
         if ((volumeBoostCap ?: audioPreferences.volumeBoostCap().get()) > 0 && currentVolume.value == maxVolume) {
             if (mpvVolume == 100 && change < 0) changeVolumeTo(currentVolume.value + change)
             val finalMPVVolume = (mpvVolume?.plus(change))?.coerceAtLeast(100)
-                // ANK -->
                 ?: (currentVolume.value + change)
-            // ANK <--
             if (finalMPVVolume in 100..(volumeBoostCap ?: audioPreferences.volumeBoostCap().get()) + 100) {
                 changeMPVVolumeTo(finalMPVVolume)
                 return
@@ -1169,12 +1094,9 @@ class PlayerViewModel @JvmOverloads constructor(
 
     fun changeMPVVolumeTo(volume: Int) {
         currentMPVVolume.update { volume }
-        // ANZ -->
         if (mpv.isInitialized) mpv.setPropertyInt("volume", volume)
-        // ANZ <--
     }
 
-    // ANZ -->
     fun setVolume(percent: Float) {
         val boostCap = (volumeBoostCap ?: audioPreferences.volumeBoostCap().get()).toFloat()
         val totalMax = 100f + boostCap
@@ -1192,7 +1114,6 @@ class PlayerViewModel @JvmOverloads constructor(
             changeMPVVolumeTo(clamped.toInt())
         }
     }
-    // ANZ <--
 
     fun displayVolumeSlider() {
         isVolumeSliderShown.update { true }
@@ -1209,15 +1130,12 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     @Suppress("DEPRECATION")
-    // ANZ -->
     fun changeVideoAspect(aspect: VideoAspect, showUpdate: Boolean = true) {
         viewModelScope.launch {
             eventChannel.send(Event.ChangeVideoAspect(aspect, showUpdate))
         }
     }
-    // ANZ <--
 
-    // ANZ -->
     /**
      * Applies an aspect ratio preset.
      *
@@ -1236,7 +1154,6 @@ class PlayerViewModel @JvmOverloads constructor(
         _videoAspectOverride.value = if (aspect == VideoAspect.Stretch) -1.0 else ratio
         if (showUpdate) playerUpdate.update { PlayerUpdates.AspectRatio }
     }
-    // ANZ <--
 
     fun cycleScreenRotations() {
         viewModelScope.launch {
@@ -1291,9 +1208,7 @@ class PlayerViewModel @JvmOverloads constructor(
             "launch_int_picker" -> {
                 val (title, nameFormat, start, stop, step, pickerProperty) = data.split("|")
                 val defaultValue = mpv.getPropertyInt(pickerProperty)
-                    // ANK -->
                     ?: return
-                // ANK <--
                 showDialog(
                     Dialogs.IntegerPicker(
                         defaultValue = defaultValue,
@@ -1413,10 +1328,9 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     fun resetHosterState() {
-        // YMR --> the old episode's video is no longer playing; loadVideo() relies on this to
+        // the old episode's video is no longer playing; loadVideo() relies on this to
         // fall back to another server instead of keeping a stale selection.
         _currentVideo.update { _ -> null }
-        // YMR <--
         _pausedState.update { _ -> false }
         _hosterState.update { _ -> emptyList() }
         _hosterList.update { _ -> emptyList() }
@@ -1499,24 +1413,18 @@ class PlayerViewModel @JvmOverloads constructor(
             }
         }
 
-        // ANK -->
         // `mpv` is owned by this (potentially retained) ViewModel, so it must only be
         // closed when the ViewModel itself is cleared, not on every activity destruction
         // (e.g. config changes), otherwise a recreated activity gets a dead MPV instance.
         mpv.close()
-        // ANK <--
     }
 
     fun updateCastProgress(position: Float) {
-        // ANK -->
         castPos = position.toInt()
-        // ANK <--
     }
 
     fun resumeFromCast() {
-        // ANK -->
         val lastPosition = castPos
-        // ANK <--
 
         logcat { "Reanudando el video local desde: $lastPosition segundos" }
 
@@ -1563,7 +1471,6 @@ class PlayerViewModel @JvmOverloads constructor(
     private var episodeToDownload: Download? = null
 
     private fun filterEpisodeList(
-        // ANK -->
         anime: Anime,
         episodes: List<DomainEpisode>,
         animeMap: Map<Long, Anime>?,
@@ -1579,7 +1486,6 @@ class PlayerViewModel @JvmOverloads constructor(
             )
         }
 
-        // ANZ -->
         if (anime.seasonGroupingMode == LibraryPreferences.SeasonGrouping.Tabs) {
             val savedSeason = libraryPreferences.lastSelectedSeason(anime.id).get()
             if (savedSeason.isNotEmpty()) {
@@ -1597,30 +1503,23 @@ class PlayerViewModel @JvmOverloads constructor(
                 }
             }
         }
-        // ANZ <--
         val skipSeen = playerPreferences.skipSeen().get()
         val skipFiltered = playerPreferences.skipFiltered().get()
 
         return when {
             (skipSeen || skipFiltered) -> {
-                // ANK <--
                 val filteredEpisodes = episodes.filterNot {
-                    // ANK -->
                     when {
                         skipSeen && it.seen -> true
                         skipFiltered -> {
-                            // ANK <--
                             (anime.unseenFilterRaw == Anime.EPISODE_SHOW_SEEN && !it.seen) ||
                                 (anime.unseenFilterRaw == Anime.EPISODE_SHOW_UNSEEN && it.seen) ||
-                                // SY -->
                                 (anime.downloadedFilterRaw == Anime.EPISODE_SHOW_DOWNLOADED && !isEpisodeDownloaded(it)) ||
                                 (anime.downloadedFilterRaw == Anime.EPISODE_SHOW_NOT_DOWNLOADED && isEpisodeDownloaded(it)) ||
-                                // SY <--
                                 (anime.bookmarkedFilterRaw == Anime.EPISODE_SHOW_BOOKMARKED && !it.bookmark) ||
                                 (anime.bookmarkedFilterRaw == Anime.EPISODE_SHOW_NOT_BOOKMARKED && it.bookmark) ||
                                 (anime.fillermarkedFilterRaw == Anime.EPISODE_SHOW_FILLERMARKED && !it.fillermark) ||
                                 (anime.fillermarkedFilterRaw == Anime.EPISODE_SHOW_NOT_FILLERMARKED && it.fillermark)
-                            // ANK -->
                         }
                         else -> false
                     }
@@ -1634,7 +1533,6 @@ class PlayerViewModel @JvmOverloads constructor(
             }
             else -> episodes
         }
-        // ANK <--
     }
 
     fun getCurrentEpisodeIndex(): Int {
@@ -1642,10 +1540,9 @@ class PlayerViewModel @JvmOverloads constructor(
     }
 
     private fun getAdjacentEpisodeId(previous: Boolean): Long {
-        // ANZ -->
         val playlist = currentPlaylist.value
         val skipFiller = playerPreferences.skipFillerEpisodes().get()
-        // YMR --> shared with the unit-tested rules in EpisodeNavigation
+        // shared with the unit-tested rules in EpisodeNavigation
         val newIndex = EpisodeNavigation.adjacentIndex(
             size = playlist.size,
             currentIndex = getCurrentEpisodeIndex(),
@@ -1656,11 +1553,8 @@ class PlayerViewModel @JvmOverloads constructor(
             },
         )
         return playlist.getOrNull(newIndex)?.id ?: -1L
-        // YMR <--
-        // ANZ <--
     }
 
-    // YMR -->
     private fun updateAdjacentEpisodeFlags() {
         val size = currentPlaylist.value.size
         val index = getCurrentEpisodeIndex()
@@ -1695,7 +1589,6 @@ class PlayerViewModel @JvmOverloads constructor(
     fun clearPlaybackError() {
         _playbackError.update { _ -> null }
     }
-    // YMR <--
 
     fun updateHasNextEpisode(value: Boolean) {
         _hasNextEpisode.update { _ -> value }
@@ -1748,7 +1641,6 @@ class PlayerViewModel @JvmOverloads constructor(
         val stringResource: StringResource,
     ) : Exception(message)
 
-    // ANZ -->
     /**
      * Loads an anime with the user's edit overlay attached.
      *
@@ -1760,7 +1652,6 @@ class PlayerViewModel @JvmOverloads constructor(
      */
     private suspend fun getAnimeWithEdits(animeId: Long): Anime? =
         getAnime.await(animeId)?.copy(customAnimeInfo = getCustomAnimeInfo.get(animeId))
-    // ANZ <--
 
     suspend fun init(
         animeId: Long,
@@ -1771,7 +1662,6 @@ class PlayerViewModel @JvmOverloads constructor(
     ): Pair<InitResult, Result<Boolean>> {
         val defaultResult = InitResult(currentHosterList, qualityIndex, null)
         if (!needsInit(animeId, initialEpisodeId)) {
-            // ANZ -->
             // The activity is reused for the same episode (onNewIntent), so nothing is re-read.
             // Refresh the overlay anyway, otherwise an edit made while the player was in the
             // background/PiP never reaches the controls.
@@ -1779,17 +1669,12 @@ class PlayerViewModel @JvmOverloads constructor(
                 _currentAnime.update { _ -> refreshed }
                 animeTitle.update { _ -> refreshed.title }
             }
-            // ANZ <--
             return Pair(defaultResult, Result.success(true))
         }
         return try {
-            // ANZ -->
             val anime = getAnimeWithEdits(animeId)
-            // ANZ <--
             if (anime != null) {
-                // ANZ -->
                 val isDifferentAnime = this.anime?.id != animeId
-                // ANZ <--
                 sourceManager.isInitialized.first { it }
                 val source = sourceManager.getOrStub(anime.source)
                 _currentAnime.update { _ -> anime }
@@ -1805,21 +1690,15 @@ class PlayerViewModel @JvmOverloads constructor(
 
                 updateEpisode(episode)
 
-                // YMR -->
                 updateAdjacentEpisodeFlags()
-                // YMR <--
 
-                // ANZ -->
                 if (isDifferentAnime) {
                     val defaultSpeed = playerPreferences.playerSpeed().get()
                     mpv.setPropertyDouble("speed", defaultSpeed.toDouble())
                 }
-                // ANZ <--
 
                 // Write to mpv table
-                // ANZ -->
                 val parentTitle = anime.parentId?.let { getAnimeWithEdits(it)?.title } ?: ""
-                // ANZ <--
                 mpv.setPropertyString("user-data/current-anime/anime-title", anime.title)
                 mpv.setPropertyString("user-data/current-anime/parent-title", parentTitle)
                 mpv.setPropertyInt("user-data/current-anime/intro-length", getAnimeSkipIntroLength())
@@ -1880,10 +1759,8 @@ class PlayerViewModel @JvmOverloads constructor(
      * Episode list for the active anime. It's retrieved lazily and should be accessed for the first
      * time in a background thread to avoid blocking the UI.
      */
-    // ANZ -->
     private suspend fun initEpisodeList(anime: Anime): List<Episode> {
         val episodes = getEpisodesByAnimeId.await(anime.id)
-    // ANZ <--
 
         return episodes
             .sortedWith(getEpisodeSort(anime, sortDescending = false))
@@ -1903,7 +1780,6 @@ class PlayerViewModel @JvmOverloads constructor(
         getHosterVideoLinksJob?.cancel()
     }
 
-    // ANK -->
     /**
      * Set when a video selection had to be postponed because every ready candidate was
      * exhausted while some hosters were still resolving. The selection is retried as
@@ -1942,9 +1818,7 @@ class PlayerViewModel @JvmOverloads constructor(
         pendingVideoFallbackMutex.withLock {
             if (!hasPendingVideoFallback.get()) return
 
-            // ANZ -->
             val (hosterIdx, videoIdx) = HosterLoader.selectBestVideo(hosterState.value, getEffectiveDefaultStreamSelector())
-            // ANZ <--
             val loaded = if (hosterIdx == -1) {
                 false
             } else {
@@ -1973,16 +1847,14 @@ class PlayerViewModel @JvmOverloads constructor(
             }
         }
     }
-    // ANK <--
 
     /**
      * Set the video list for hosters.
      */
     fun loadHosters(source: AnimeSource, hosterList: List<Hoster>, hosterIndex: Int, videoIndex: Int) {
         val hasFoundPreferredVideo = AtomicBoolean(false)
-        // ANK --> Don't carry a postponed selection over from the previous episode
+        // Don't carry a postponed selection over from the previous episode
         hasPendingVideoFallback.set(false)
-        // ANK <--
 
         _hosterList.update { _ -> hosterList }
         _hosterExpandedList.update { _ ->
@@ -2008,13 +1880,11 @@ class PlayerViewModel @JvmOverloads constructor(
                 }
             }
 
-            // ANZ -->
             val defaultSelector = if (hosterIndex == -1) {
                 getEffectiveDefaultStreamSelector()
             } else {
                 ""
             }
-            // ANZ <--
 
             try {
                 coroutineScope {
@@ -2035,7 +1905,6 @@ class PlayerViewModel @JvmOverloads constructor(
                                     }
                                 }
 
-                                // ANZ -->
                                 if (hosterIndex == -1) {
                                     if (defaultSelector.isNotBlank()) {
                                         val ranked = DefaultStreamSelector.findRankedInHosters(defaultSelector, listOf(hosterState))
@@ -2069,24 +1938,19 @@ class PlayerViewModel @JvmOverloads constructor(
                                         }
                                     }
                                 }
-                                // ANZ <--
                             }
 
-                            // ANK --> A postponed selection may be waiting on this hoster
+                            // A postponed selection may be waiting on this hoster
                             retryPendingVideoFallback(source)
-                            // ANK <--
                         }
                     }.awaitAll()
 
                     if (hasFoundPreferredVideo.compareAndSet(false, true)) {
-                        // ANZ -->
                         val (hosterIdx, videoIdx) = HosterLoader.selectBestVideo(hosterState.value, defaultSelector)
-                        // ANZ <--
                         if (hosterIdx == -1) {
-                            // YMR --> was an uncaught throw that closed the player
+                            // was an uncaught throw that closed the player
                             showPlaybackError(PlaybackError.Reason.NO_PLAYABLE_VIDEO, null)
                             return@coroutineScope
-                            // YMR <--
                         }
 
                         val video = (hosterState.value[hosterIdx] as HosterState.Ready).videoList[videoIdx]
@@ -2094,9 +1958,8 @@ class PlayerViewModel @JvmOverloads constructor(
                         loadVideo(source, video, hosterIdx, videoIdx)
                     }
 
-                    // ANK --> Nothing left to wait for; resolve any postponed selection
+                    // Nothing left to wait for; resolve any postponed selection
                     retryPendingVideoFallback(source)
-                    // ANK <--
                 }
             } catch (e: CancellationException) {
                 _hosterState.update { _ ->
@@ -2104,10 +1967,9 @@ class PlayerViewModel @JvmOverloads constructor(
                 }
 
                 throw e
-                // YMR --> loadVideo() throws once every candidate failed; keep the player open.
+                // loadVideo() throws once every candidate failed; keep the player open.
             } catch (e: ExceptionWithStringResource) {
                 showPlaybackError(PlaybackError.Reason.NO_PLAYABLE_VIDEO, e)
-                // YMR <--
             }
         }
     }
@@ -2126,30 +1988,23 @@ class PlayerViewModel @JvmOverloads constructor(
             currentHosterState.getChangedAt(
                 videoIdx,
                 currentVideo,
-                // ANK -->
                 Video.State.ERROR,
-                // ANK <--
             ),
         )
     }
 
     fun loadBestVideo(): Boolean {
         val source = currentSource.value ?: return false
-        // ANZ -->
         val (hosterIdx, videoIdx) = HosterLoader.selectBestVideo(hosterState.value, getEffectiveDefaultStreamSelector())
-        // ANZ <--
         if (hosterIdx == -1) {
-            // ANK -->
             // A hoster still resolving (Loading) might still produce a usable candidate,
             // so postpone the selection instead of reporting failure. Returning true
             // without recording it would leave playback idle forever, since loadHosters()
             // already made its own selection and won't make another one.
             return recordPendingVideoFallback(source)
-            // ANK <--
         }
         val newVideo = (hosterState.value[hosterIdx] as HosterState.Ready).videoList[videoIdx]
         viewModelScope.launchIO {
-            // ANK -->
             // loadVideo() can still exhaust every fallback candidate deep in its own
             // recursion and throw; make sure that surfaces as a graceful close instead
             // of an uncaught exception in this coroutine.
@@ -2161,7 +2016,6 @@ class PlayerViewModel @JvmOverloads constructor(
             } catch (e: ExceptionWithStringResource) {
                 eventChannel.send(Event.SetVideoLoadError(e))
             }
-            // ANK <--
         }
         return true
     }
@@ -2230,21 +2084,16 @@ class PlayerViewModel @JvmOverloads constructor(
 
         qualityIndex = Pair(hosterIndex, videoIndex)
 
-        // ANK --> Playback resumed, so drop any postponed selection
+        // Playback resumed, so drop any postponed selection
         hasPendingVideoFallback.set(false)
-        // ANK <--
-        // YMR -->
         clearPlaybackError()
-        // YMR <--
 
         eventChannel.send(Event.SetVideo(resolvedVideo))
         return true
     }
 
     fun onVideoClicked(hosterIndex: Int, videoIndex: Int) {
-        // ANZ -->
         setDefaultStreamSelector(hosterIndex, videoIndex)
-        // ANZ <--
         val hosterState = _hosterState.value[hosterIndex] as? HosterState.Ready
         val video = hosterState?.videoList
             ?.getOrNull(videoIndex)
@@ -2285,9 +2134,8 @@ class PlayerViewModel @JvmOverloads constructor(
                     )
                     _hosterState.updateAt(index, hosterState)
 
-                    // ANK --> A postponed selection may be waiting on this hoster
+                    // A postponed selection may be waiting on this hoster
                     retryPendingVideoFallback(currentSource.value)
-                    // ANK <--
                 }
             }
             is HosterState.Loading, is HosterState.Error -> {}
@@ -2306,9 +2154,7 @@ class PlayerViewModel @JvmOverloads constructor(
         val hosterList: List<Hoster>?,
         val episodeTitle: String,
         val source: AnimeSource,
-        // YMR -->
         val error: Throwable? = null,
-        // YMR <--
     )
 
     suspend fun loadEpisode(episodeId: Long?): EpisodeLoadResult? {
@@ -2319,19 +2165,15 @@ class PlayerViewModel @JvmOverloads constructor(
 
         _currentEpisode.update { _ -> chosenEpisode }
         updateEpisode(chosenEpisode)
-        // YMR -->
         updateAdjacentEpisodeFlags()
         clearPlaybackError()
         // Progress from now on belongs to the chosen episode, even if its servers fail to load.
         this@PlayerViewModel.episodeId = chosenEpisode.id ?: -1L
         // The previous episode's servers must never be offered for this one.
         currentHosterList = null
-        // YMR <--
 
         return withIOContext {
-            // YMR -->
             var error: Throwable? = null
-            // YMR <--
             try {
                 currentHosterList = EpisodeLoader.getHosters(
                     chosenEpisode.toDomainEpisode()!!,
@@ -2341,18 +2183,14 @@ class PlayerViewModel @JvmOverloads constructor(
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 logcat(LogPriority.ERROR, e) { e.message ?: "Error getting links" }
-                // YMR -->
                 error = e
-                // YMR <--
             }
 
             EpisodeLoadResult(
                 hosterList = currentHosterList,
                 episodeTitle = anime.title + " - " + chosenEpisode.name,
                 source = source,
-                // YMR -->
                 error = error,
-                // YMR <--
             )
         }
     }
@@ -2362,10 +2200,8 @@ class PlayerViewModel @JvmOverloads constructor(
      * seen, update tracking services, enqueue downloaded episode deletion and download next episode.
      */
     fun onSecondReached(position: Long) {
-        // ANK -->
         val syncTriggerOpt = syncPreferences.getSyncTriggerOptions()
         val isSyncEnabled = syncPreferences.isSyncEnabled()
-        // ANK <--
 
         if (isLoadingEpisode.value) return
         val currentEp = currentEpisode.value ?: return
@@ -2388,7 +2224,6 @@ class PlayerViewModel @JvmOverloads constructor(
 
         episodePosition = seconds
 
-        // ANK -->
         if (!incognitoMode) {
             // Save last second seen and mark as seen if needed
             currentEp.last_second_seen = seconds
@@ -2397,23 +2232,18 @@ class PlayerViewModel @JvmOverloads constructor(
             if (seconds >= totalSeconds * progress) {
                 updateEpisodeProgressOnComplete(currentEp)
 
-                // SY -->
                 // Check if syncing is enabled for episode seen:
                 if (isSyncEnabled && syncTriggerOpt.syncOnEpisodeSeen) {
                     SyncDataJob.startNow(Injekt.get<Application>())
                 }
-                // SY <--
             }
-            // ANK <--
 
             saveWatchingProgress(currentEp)
 
-            // SY -->
             // Check if syncing is enabled for episode open:
             if (isSyncEnabled && syncTriggerOpt.syncOnEpisodeOpen && currentEp.last_second_seen == 0L) {
                 SyncDataJob.startNow(Injekt.get<Application>())
             }
-            // SY <--
         }
 
         val inDownloadRange = seconds.toDouble() / totalSeconds > 0.35
@@ -2477,7 +2307,6 @@ class PlayerViewModel @JvmOverloads constructor(
         }
     }
 
-    // KMK -->
     /**
      * Deletes duplicate chapters when `removeAfterReadSlots` = "Last read chapter" (0).
      *
@@ -2492,7 +2321,6 @@ class PlayerViewModel @JvmOverloads constructor(
         if (removeAfterSeenSlots != 0) return
         enqueueDeleteSeenEpisodes(chosenEpisode)
     }
-    // KMK <--
 
     fun saveCurrentEpisodeWatchingProgress() {
         currentEpisode.value?.let { saveWatchingProgress(it) }
@@ -2742,10 +2570,8 @@ class PlayerViewModel @JvmOverloads constructor(
         if (skipIntroLength == getAnimeSkipIntroLength().toLong()) return
         viewModelScope.launchIO {
             setAnimeViewerFlags.awaitSetSkipIntroLength(anime.id, skipIntroLength)
-            // ANZ -->
             // Re-attach the edit overlay, otherwise this refresh reverts the title to the original.
             _currentAnime.update { _ -> getAnimeWithEdits(anime.id) }
-            // ANZ <--
         }
     }
 
@@ -2768,7 +2594,7 @@ class PlayerViewModel @JvmOverloads constructor(
     /**
      * Skip times (opening, ending, recap, preview) for this episode.
      */
-    // YMR --> works without tracking (AniList lookup by title), reads every tracker instead of only
+    // works without tracking (AniList lookup by title), reads every tracker instead of only
     // the first one, accepts "mixed-ed" results and falls back to Anime Skip; see yomira.player.SkipTimes
     suspend fun aniSkipResponse(playerDuration: Int?): List<TimeStamp>? {
         val currentAnime = anime ?: return null
@@ -2782,7 +2608,6 @@ class PlayerViewModel @JvmOverloads constructor(
             tracks = getTracks.await(currentAnime.id),
         )
     }
-    // YMR <--
 
     val introSkipEnabled = playerPreferences.enableSkipIntro().get()
     private val autoSkip = playerPreferences.autoSkipIntro().get()
@@ -2817,9 +2642,8 @@ class PlayerViewModel @JvmOverloads constructor(
                     context.applicationContext.stringResource(MR.strings.player_aniskip_dontskip)
                 }
                 netflixTimeout.update { _ -> defaultWaitingTime }
-            // YMR --> openings and endings with story scenes over them get the button instead
+            // openings and endings with story scenes over them get the button instead
             } else if (autoSkip && !yomira.player.SkipTimes.isMixed(chapterType, chapter.chapterTitle)) {
-                // YMR <--
                 skipIntro(chapter.chapterTitle)
             } else {
                 updateSkipIntroButton(chapterType)
@@ -2874,17 +2698,12 @@ class PlayerViewModel @JvmOverloads constructor(
         data class SetVideo(val video: Video?) : Event()
         data class SetStatusBar(val show: Boolean) : Event()
         data class SetBrightness(val brightness: Float) : Event()
-        // ANZ -->
         data class ChangeVideoAspect(val aspect: VideoAspect, val showUpdate: Boolean = true) : Event()
-        // ANZ <--
         data object CycleRotations : Event()
         data object ToggleKeyboard : Event()
         data class SetKeyboard(val show: Boolean) : Event()
-        // ANK -->
         data class SetVideoLoadError(val error: Throwable) : Event()
-        // ANK <--
     }
-    // ANZ -->
     fun setDefaultStreamSelector(hosterIndex: Int, videoIndex: Int) {
         val hoster = _hosterState.value.getOrNull(hosterIndex)
         val video = (hoster as? HosterState.Ready)
@@ -2907,7 +2726,6 @@ class PlayerViewModel @JvmOverloads constructor(
         return DefaultStreamPreferenceStore(playerPreferences).getEffectiveSelector(currentAnime.value?.id)
     }
 
-    // ANZ -->
     fun updateDecoder(decoder: Decoder) {
         _manualDecoder.update { decoder }
         mpv.setPropertyString("hwdec", decoder.value)
@@ -2917,7 +2735,6 @@ class PlayerViewModel @JvmOverloads constructor(
         val active = mpv.getPropertyString("hwdec-current") ?: "no"
         _manualDecoder.update { getDecoderFromValue(active) }
     }
-    // ANZ <--
 
     fun updateReadAhead(value: Long) {
         val floatVal = value.toFloat()
@@ -2982,7 +2799,6 @@ class PlayerViewModel @JvmOverloads constructor(
         }
     }
 
-    // ANZ -->
     /**
      * Re-applies the aspect ratio the user last chose for this session/anime.
      *
@@ -2991,7 +2807,6 @@ class PlayerViewModel @JvmOverloads constructor(
      * or the configuration changes. Rotation previously reset `video-aspect-override` by calling
      * [changeVideoAspect] with the stored [VideoAspect], which wiped any custom ratio.
      */
-    // ANZ <--
     fun restoreAspectRatio() {
         val aspect = playerPreferences.aspectState().get()
         val lastRatio = playerPreferences.lastAspectRatio().get().toDouble()
@@ -3000,16 +2815,13 @@ class PlayerViewModel @JvmOverloads constructor(
         val currentAnimeId = currentAnime.value?.id ?: -1L
 
         if (aspect == VideoAspect.Stretch) {
-            // ANZ -->
             changeVideoAspect(VideoAspect.Stretch, showUpdate = false)
-            // ANZ <--
         } else if (lastRatio != -1.0 && (rememberAspectRatio || lastRatioAnimeId == currentAnimeId)) {
             _videoAspectOverride.value = lastRatio
             mpv.setPropertyDouble("panscan", 0.0)
             mpv.setPropertyDouble("video-aspect-override", lastRatio)
             playerPreferences.aspectState().set(VideoAspect.Fit)
         } else {
-            // ANZ -->
             // Only drop the stored ratio once the playing anime is known: clearing it while
             // currentAnime is still unresolved would erase another anime's saved ratio.
             if (lastRatio != -1.0 && currentAnimeId != -1L) {
@@ -3017,10 +2829,7 @@ class PlayerViewModel @JvmOverloads constructor(
                 playerPreferences.lastAspectRatioAnimeId().set(-1L)
             }
             _videoAspectOverride.value = -1.0
-            // ANZ <--
-            // ANZ -->
             changeVideoAspect(aspect, showUpdate = false)
-            // ANZ <--
         }
     }
 
@@ -3118,7 +2927,6 @@ class PlayerViewModel @JvmOverloads constructor(
             }
         }
     }
-    // ANZ <--
 
 }
 

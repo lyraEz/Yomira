@@ -20,9 +20,8 @@ internal fun LazyLibraryGrid(
 ) {
     FastScrollLazyVerticalGrid(
         columns = if (columns == 0) GridCells.Adaptive(128.dp) else GridCells.Fixed(columns),
-        // YMR --> back from an entry, the remote focus returns to it
+        // back from an entry, the remote focus returns to it
         modifier = modifier,
-        // YMR <--
         contentPadding = contentPadding + PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(CommonAnimeItemDefaults.GridVerticalSpacer),
         horizontalArrangement = Arrangement.spacedBy(CommonAnimeItemDefaults.GridHorizontalSpacer),

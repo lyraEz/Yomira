@@ -12,10 +12,9 @@ import tachiyomi.core.common.util.system.logcat
 import kotlin.coroutines.resume
 
 object WebViewUtil {
-    // ANZ -->
     private const val CHROME_PACKAGE = "com.android.chrome"
 
-    fun spoofedPackageName(context: Context): String? { // ANZ
+    fun spoofedPackageName(context: Context): String? {
         return try {
             context.packageManager.getPackageInfo(CHROME_PACKAGE, PackageManager.GET_META_DATA)
 
@@ -29,7 +28,6 @@ object WebViewUtil {
             }
         }
     }
-    // ANZ <--
 
     const val MINIMUM_WEBVIEW_VERSION = 118
 
@@ -90,10 +88,8 @@ fun WebView.setDefaultSettings() {
         loadWithOverviewMode = true
         cacheMode = WebSettings.LOAD_DEFAULT
 
-        // ANZ -->
         // Handle popups properly
         setSupportMultipleWindows(true)
-        // ANZ <--
 
         // Allow zooming
         setSupportZoom(true)

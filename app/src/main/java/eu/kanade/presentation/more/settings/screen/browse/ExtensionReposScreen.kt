@@ -87,7 +87,6 @@ class ExtensionReposScreen(
                     repo = dialog.url,
                 )
             }
-            // YMR -->
             is RepoDialog.Error -> {
                 ExtensionRepoErrorDialog(
                     message = dialog.message,
@@ -96,7 +95,6 @@ class ExtensionReposScreen(
                     onDismissRequest = screenModel::dismissDialog,
                 )
             }
-            // YMR <--
         }
 
         LaunchedEffect(Unit) {
@@ -104,11 +102,9 @@ class ExtensionReposScreen(
                 if (event is RepoEvent.LocalizedMessage) {
                     context.toast(event.stringRes)
                 }
-                // YMR -->
                 if (event is RepoEvent.Formatted) {
                     context.toast(context.stringResource(event.stringRes, *event.args.toTypedArray()))
                 }
-                // YMR <--
             }
         }
     }

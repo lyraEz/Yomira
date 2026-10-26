@@ -41,7 +41,6 @@ object CoverColorObserver {
     private val _ratios = MutableStateFlow<Map<Long, Float>>(emptyMap())
     val ratios = _ratios.asStateFlow()
 
-    // ANZ -->
     /**
      * Compose mirror of `_ratios`: one snapshot state per anime id.
      *
@@ -53,7 +52,6 @@ object CoverColorObserver {
      * changed recomposes.
      */
     private val ratioStates = ConcurrentHashMap<Long, MutableState<Float?>>()
-    // ANZ <--
 
     /** Version of the cover each cached color/ratio was extracted from. */
     private val lastModified = ConcurrentHashMap<Long, Long>()
@@ -111,11 +109,9 @@ object CoverColorObserver {
             val sameValue = previous != null && Math.abs(previous - ratio) < 0.01f
             if (!sameValue || previousVersion != coverLastModified) {
                 _ratios.update { it + (animeId to ratio) }
-                // ANZ -->
                 // Same lock as the store write, so a composition can never read the store and
                 // miss the mirror (or vice versa).
                 publishRatio(animeId, ratio)
-                // ANZ <--
                 lastModified[animeId] = coverLastModified
                 pendingRatios += encode(animeId, coverLastModified, ratio)
                 changed = true
@@ -154,7 +150,6 @@ object CoverColorObserver {
         return _ratios.value[animeId]
     }
 
-    // ANZ -->
     /**
      * Ratio for [animeId] as composition-observable state, or null while it is unmeasured.
      *
@@ -186,7 +181,6 @@ object CoverColorObserver {
     private fun publishRatios(ratios: Map<Long, Float>) {
         ratios.forEach { (animeId, ratio) -> publishRatio(animeId, ratio) }
     }
-    // ANZ <--
 
     // endregion
 
@@ -242,11 +236,9 @@ object CoverColorObserver {
             // (freshest) win over the prefs snapshot; prefs fill in ids not yet seen.
             if (colors.isNotEmpty()) _vibrantColors.value = colors + _vibrantColors.value
             if (ratios.isNotEmpty()) _ratios.value = ratios + _ratios.value
-            // ANZ -->
             // Mirror what was just hydrated: a screen composed while this load was running holds
             // states created from the pre-hydration store. States created later read [_ratios].
             if (ratios.isNotEmpty()) publishRatios(ratios)
-            // ANZ <--
             // Same rule for versions: keep the in-memory (newer) version when present.
             versions.forEach { (id, v) -> lastModified.putIfAbsent(id, v) }
 

@@ -15,9 +15,7 @@ data class BackupEpisode(
     @ProtoNumber(5) var bookmark: Boolean = false,
     // lastSecondSeen is called progress in 1.x
     @ProtoNumber(6) var lastSecondSeen: Long = 0,
-    // AY -->
     @ProtoNumber(16) var totalSeconds: Long = 0,
-    // <-- AY
     @ProtoNumber(7) var dateFetch: Long = 0,
     @ProtoNumber(8) var dateUpload: Long = 0,
     // episodeNumber is called number is 1.x
@@ -26,12 +24,10 @@ data class BackupEpisode(
     @ProtoNumber(11) var lastModifiedAt: Long = 0,
     @ProtoNumber(12) var version: Long = 0,
 
-    // AY -->
     // Aniyomi specific values
     @ProtoNumber(501) var fillermark: Boolean = false,
     @ProtoNumber(502) var summary: String? = null,
     @ProtoNumber(503) var previewUrl: String? = null,
-    // <-- AY
 ) {
     fun toEpisodeImpl(): Episode {
         return Episode.create().copy(
@@ -39,19 +35,13 @@ data class BackupEpisode(
             name = this@BackupEpisode.name,
             episodeNumber = this@BackupEpisode.episodeNumber.toDouble(),
             scanlator = this@BackupEpisode.scanlator,
-            // AY -->
             summary = this@BackupEpisode.summary,
             previewUrl = this@BackupEpisode.previewUrl,
-            // <-- AY
             seen = this@BackupEpisode.seen,
             bookmark = this@BackupEpisode.bookmark,
-            // AY -->
             fillermark = this@BackupEpisode.fillermark,
-            // <-- AY
             lastSecondSeen = this@BackupEpisode.lastSecondSeen,
-            // AY -->
             totalSeconds = this@BackupEpisode.totalSeconds,
-            // <-- AY
             dateFetch = this@BackupEpisode.dateFetch,
             dateUpload = this@BackupEpisode.dateUpload,
             sourceOrder = this@BackupEpisode.sourceOrder,

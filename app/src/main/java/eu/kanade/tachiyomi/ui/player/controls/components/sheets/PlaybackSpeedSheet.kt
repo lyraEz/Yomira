@@ -51,7 +51,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-// ANZ -->
 @Composable
 fun PlaybackSpeedSheet(
     pitchCorrection: Boolean,
@@ -209,4 +208,3 @@ fun Float.toFixed(precision: Int = 1): Float {
     val factor = 10.0f.pow(precision)
     return (this * factor).roundToInt() / factor
 }
-// ANZ <--

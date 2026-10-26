@@ -23,7 +23,6 @@ import `is`.xyz.mpv.MPV
 import logcat.LogPriority
 import logcat.logcat
 
-// ANZ -->
 fun applyFilter(mpv: MPV?, filter: VideoFilters, value: Int, prefs: DecoderPreferences) {
     val property = filter.mpvProperty
 
@@ -54,7 +53,6 @@ fun applyDebandMode(mpv: MPV?, mode: Debanding, prefs: DecoderPreferences) {
 fun applyDebandSetting(mpv: MPV?, setting: DebandSettings, value: Int) {
     mpv?.setPropertyInt(setting.mpvProperty, value)
 }
-// ANZ <--
 
 fun buildVFChain(decoderPreferences: DecoderPreferences): String {
     val useYuv420p = decoderPreferences.useYUV420P().get()
@@ -66,7 +64,6 @@ fun buildVFChain(decoderPreferences: DecoderPreferences): String {
     }
 }
 
-// ANZ -->
 fun applyTheme(mpv: MPV?, theme: VideoFilterTheme, prefs: DecoderPreferences) {
     prefs.brightnessFilter().set(theme.brightness)
     prefs.contrastFilter().set(theme.contrast)
@@ -107,9 +104,8 @@ fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, 
     val gpuNext = prefs.gpuNext().get()
     if (enabled && gpuNext) {
         logcat("Anime4K", LogPriority.WARN) { "Anime4K is incompatible with gpu-next. Skipping." }
-        // YMR --> keep the color correction/grading shader
+        // keep the color correction/grading shader
         if (!isInit) mpv?.setPropertyString("glsl-shaders", yomira.player.ColorGrading.withColor(""))
-        // YMR <--
         return
     }
 
@@ -127,9 +123,8 @@ fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, 
     // Ensure initialization happened
     manager.initialize()
 
-    // YMR --> the color correction/grading shader goes after Anime4K
+    // the color correction/grading shader goes after Anime4K
     val chain = yomira.player.ColorGrading.withColor(if (enabled) manager.getShaderChain(mode, quality) else "")
-    // YMR <--
     logcat("Anime4K", LogPriority.DEBUG) { "Applying Anime4K chain (enabled=$enabled): $chain" }
 
     if (chain.isNotEmpty()) {
@@ -146,4 +141,3 @@ fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, 
         }
     }
 }
-// ANZ <--

@@ -44,7 +44,6 @@ data class BackupAnime(
     @ProtoNumber(110) var notes: String = "",
     @ProtoNumber(111) var initialized: Boolean = false,
 
-    // AM (CUSTOM_INFORMATION) -->
     // Bump values by 200
     @ProtoNumber(200) var customStatus: Int = 0,
     @ProtoNumber(201) var customTitle: String? = null,
@@ -52,13 +51,11 @@ data class BackupAnime(
     @ProtoNumber(203) var customAuthor: String? = null,
     @ProtoNumber(204) var customDescription: String? = null,
     @ProtoNumber(205) var customGenre: List<String>? = null,
-    // <-- AM (CUSTOM_INFORMATION)
     // Since ProtoNumber 108 was previously used in the past, we cannot reuse it. May cause issues with aniyomi
     // AM -->
     @ProtoNumber(206) var excludedScanlators: List<String> = emptyList(),
     // <-- AM
 
-    // AY -->
     // Aniyomi specific values
     @ProtoNumber(500) var backgroundUrl: String? = null,
     // @ProtoNumber(501) Broken in aniyomi, do not use
@@ -68,7 +65,6 @@ data class BackupAnime(
     @ProtoNumber(505) var seasonNumber: Double = -1.0,
     @ProtoNumber(506) var seasonSourceOrder: Long = 0,
     @ProtoNumber(507) var fetchType: FetchType = FetchType.Episodes,
-    // <-- AY
 ) {
     fun getAnimeImpl(): Anime {
         return Anime.create().copy(
@@ -97,7 +93,6 @@ data class BackupAnime(
         )
     }
 
-    // AM (CUSTOM_INFORMATION) -->
     fun getCustomAnimeInfo(): CustomAnimeInfo? {
         if (customTitle != null ||
             customArtist != null ||
@@ -118,5 +113,4 @@ data class BackupAnime(
         }
         return null
     }
-    // <-- AM (CUSTOM_INFORMATION)
 }

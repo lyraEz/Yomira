@@ -3,7 +3,7 @@
 # Prepares signed release APKs for publishing:
 #   - renames them to Yomira-v<version>-<abi>.apk
 #   - verifies the signature and checks the certificate against
-#     docs/yomira/signing-certificate.sha256 (so a different key is never published)
+#     docs/signing-certificate.sha256 (so a different key is never published)
 #   - writes SHA256SUMS.txt and release-notes.md (from the CHANGELOG.md section, see release-notes.py)
 #
 # Usage: scripts/yomira/package-release.sh <apk-dir> <out-dir>
@@ -16,7 +16,7 @@ SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
 BT="$(ls -d "$SDK"/build-tools/* 2>/dev/null | sort -V | tail -1)"
 APKSIGNER="$BT/apksigner"
 AAPT2="$BT/aapt2"
-EXPECTED_CERT_FILE="$ROOT/docs/yomira/signing-certificate.sha256"
+EXPECTED_CERT_FILE="$ROOT/docs/signing-certificate.sha256"
 
 mkdir -p "$OUT"
 rm -f "$OUT"/*.apk "$OUT/SHA256SUMS.txt"

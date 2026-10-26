@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.ui.player.utils.ChapterUtils
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// ANZ -->
 @Serializable
 data class ChapterNode(
     val time: Float,
@@ -137,4 +136,3 @@ sealed interface VideoTrack {
             is Internal -> data.id
         }
 }
-// ANZ <--

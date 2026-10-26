@@ -44,9 +44,7 @@ interface Tab : cafe.adriel.voyager.navigator.tab.Tab {
 
     suspend fun onReselect(navigator: Navigator) {}
 
-    // SY -->
     fun isEnabled(): Boolean = true
-    // SY <--
 
     @Composable
     fun currentNavigationStyle(): NavStyle = uiPreferences.navStyle().collectAsState().value
@@ -85,7 +83,6 @@ fun DefaultNavigatorScreenTransition(
     modifier: Modifier = Modifier,
 ) {
     val animatedTransitions by uiPreferences.animatedTransitions().collectAsState()
-    // YMR -->
     ScreenTransition(
         navigator = navigator,
         transition = {
@@ -98,7 +95,6 @@ fun DefaultNavigatorScreenTransition(
         modifier = modifier,
         predictiveBack = animatedTransitions,
     )
-    // YMR <--
 }
 
 @Composable
@@ -106,17 +102,13 @@ fun ScreenTransition(
     navigator: Navigator,
     transition: AnimatedContentTransitionScope<Screen>.() -> ContentTransform,
     modifier: Modifier = Modifier,
-    // YMR -->
     predictiveBack: Boolean = false,
-    // YMR <--
     content: ScreenTransitionContent = { it.Content() },
 ) {
-    // YMR -->
     if (predictiveBack) {
         yomira.ui.PredictiveScreenTransition(navigator, transition, modifier, content)
         return
     }
-    // YMR <--
     AnimatedContent(
         targetState = navigator.lastItem,
         transitionSpec = transition,

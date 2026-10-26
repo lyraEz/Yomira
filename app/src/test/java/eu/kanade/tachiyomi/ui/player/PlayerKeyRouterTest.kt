@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.ui.player.PlayerKeyRouter.Decision
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
-// YMR -->
 class PlayerKeyRouterTest {
 
     private val hidden = PlayerKeyRouter.State(textInputActive = false, overlayOpen = false, controlsShown = false)
@@ -112,4 +111,3 @@ class PlayerKeyRouterTest {
         PlayerKeyRouter.route(KeyEvent.KEYCODE_S, shown) shouldBe Decision.Mpv
     }
 }
-// YMR <--

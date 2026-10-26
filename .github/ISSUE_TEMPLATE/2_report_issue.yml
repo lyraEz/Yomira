@@ -1,53 +1,53 @@
-name: Problema
-description: Relate um problema no Yomira
-labels: [problema]
+name: Bug report
+description: Report a problem in Yomira
+labels: [bug]
 body:
   - type: textarea
     id: reproduce-steps
     attributes:
-      label: Como reproduzir
+      label: Steps to reproduce
       placeholder: |
-        1. Abri ...
-        2. Apertei OK em ...
-        3. Aconteceu ...
+        1. Opened ...
+        2. Tapped OK on ...
+        3. Then ...
     validations:
       required: true
 
   - type: textarea
     id: expected-behavior
     attributes:
-      label: O que deveria acontecer
+      label: What should happen
     validations:
       required: true
 
   - type: textarea
     id: actual-behavior
     attributes:
-      label: O que aconteceu
+      label: What happened
     validations:
       required: true
 
   - type: textarea
     id: diagnostics
     attributes:
-      label: Diagnóstico ou registros
+      label: Report or logs
       description: |
-        Para extensões, use "Diagnóstico → Copiar diagnóstico" na lista de extensões. Para travamentos,
-        Mais → Configurações → Avançado → Compartilhar os registros de travamentos. Com ADB: `adb logcat -d > log.txt`.
+        For extensions, use "Report > Copy report" in the extension list. For crashes,
+        More > Settings > Advanced > Share crash logs. With ADB: `adb logcat -d > log.txt`.
 
   - type: input
     id: app-version
     attributes:
-      label: Versão do Yomira
-      description: Mais → Sobre.
+      label: Yomira version
+      description: More > About.
     validations:
       required: true
 
   - type: input
     id: device
     attributes:
-      label: Aparelho, sistema e arquitetura
-      description: "Modelo do celular, versão do Android e arquitetura (Configurações → Sobre o telefone)."
+      label: Phone, Android version and architecture
+      description: "Phone model, Android version and architecture (Settings > About phone)."
       placeholder: "Galaxy A54, Android 14, arm64-v8a"
     validations:
       required: true
@@ -55,5 +55,5 @@ body:
   - type: input
     id: extension
     attributes:
-      label: Extensão e repositório (se for o caso)
-      placeholder: "RedeToons 1000-9, repositório Rede"
+      label: Extension and repository (if relevant)
+      placeholder: "Extension name and version, repository"

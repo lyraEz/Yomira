@@ -21,9 +21,7 @@ import java.util.concurrent.TimeUnit
 open /* SY <-- */ class NetworkHelper(
     private val context: Context,
     private val preferences: NetworkPreferences,
-    // SY -->
     val isDebugBuild: Boolean,
-    // SY <--
 ) {
 
     /* SY --> */
@@ -31,7 +29,6 @@ open /* SY <-- */ class NetworkHelper(
 
     /* SY --> */
     open /* SY <-- */val client: OkHttpClient =
-        // KMK -->
         clientWithTimeOut()
 
     /**
@@ -74,7 +71,6 @@ open /* SY <-- */ class NetworkHelper(
         connectTimeout: Long = 30,
         readTimeout: Long = 30,
         callTimeout: Long = 120,
-        // KMK <--
     ): OkHttpClient = run {
         val builder = OkHttpClient.Builder()
             .fastFallback(true)
@@ -87,11 +83,9 @@ open /* SY <-- */ class NetworkHelper(
             )
             .connectionPool(ConnectionPool(64, 5, TimeUnit.MINUTES))
             .cookieJar(cookieJar)
-            // KMK -->
             .connectTimeout(connectTimeout, TimeUnit.SECONDS)
             .readTimeout(readTimeout, TimeUnit.SECONDS)
             .callTimeout(callTimeout, TimeUnit.SECONDS)
-            // KMK <--
             .cache(
                 Cache(
                     directory = File(context.cacheDir, "network_cache"),
@@ -133,7 +127,6 @@ open /* SY <-- */ class NetworkHelper(
         builder.build()
     }
 
-    // KMK <--
 
     /**
      * @deprecated Since extension-lib 1.5

@@ -34,7 +34,7 @@ inline fun ComponentActivity.setComposeContent(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
             ) {
-                // YMR --> liquid glass style; links never crash
+                // liquid glass style; links never crash
                 CompositionLocalProvider(
                     LocalUriHandler provides yomira.util.SafeUriHandler(this@setComposeContent),
                 ) {
@@ -42,7 +42,6 @@ inline fun ComponentActivity.setComposeContent(
                         content()
                     }
                 }
-                // YMR <--
             }
         }
     }

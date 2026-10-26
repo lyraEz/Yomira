@@ -43,9 +43,7 @@ dependencyResolutionManagement {
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
-// YMR -->
 rootProject.name = "Yomira"
-// YMR <--
 include(":app")
 include(":core-metadata")
 include(":core:archive")
@@ -53,17 +51,11 @@ include(":core:common")
 include(":data")
 include(":domain")
 include(":i18n")
-// KMK -->
 include(":i18n-kmk")
 include(":i18n-ank")
 include(":flagkit")
-// KMK <--
-// SY -->
 include(":i18n-sy")
-// SY <--
-// YMR -->
 include(":i18n-ymr")
-// YMR <--
 include(":macrobenchmark")
 include(":presentation-core")
 include(":presentation-widget")

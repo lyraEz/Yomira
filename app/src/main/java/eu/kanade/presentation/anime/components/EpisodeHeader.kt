@@ -37,7 +37,7 @@ fun EpisodeHeader(
     modifier: Modifier = Modifier,
     fetchType: FetchType = FetchType.Episodes,
 ) {
-    // YMR --> episode count in a frosted capsule, with a hint that tapping it opens the filters
+    // episode count in a frosted capsule, with a hint that tapping it opens the filters
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -78,7 +78,6 @@ fun EpisodeHeader(
 
         MissingEpisodesWarning(fetchType, missingEpisodeCount)
     }
-    // YMR <--
 }
 
 @Composable

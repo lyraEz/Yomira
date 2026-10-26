@@ -6,7 +6,5 @@ interface ReleaseService {
 
     suspend fun latest(repository: String): Release
 
-    // KMK -->
     suspend fun releaseNotes(repository: String): List<Release>
-    // KMK <--
 }

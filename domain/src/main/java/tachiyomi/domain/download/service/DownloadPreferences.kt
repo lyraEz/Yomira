@@ -29,9 +29,7 @@ class DownloadPreferences(
 
     fun removeBookmarkedChapters() = preferenceStore.getBoolean("pref_remove_bookmarked", false)
 
-    // AM (FILLERMARK) -->
     fun notDownloadFillermarkedItems() = preferenceStore.getBoolean("pref_no_download_fillermarked", false)
-    // <-- AM (FILLERMARK)
 
     fun removeExcludeCategories() = preferenceStore.getStringSet(
         "remove_exclude_anime_categories",
@@ -63,7 +61,5 @@ class DownloadPreferences(
 
     fun downloadNewUnreadChaptersOnly() = preferenceStore.getBoolean("download_new_unread_episodes_only", false)
 
-    // KMK -->
     fun downloadCacheRenewInterval() = preferenceStore.getInt("download_cache_renew_interval", 1)
-    // KMK <--
 }

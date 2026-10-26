@@ -62,12 +62,10 @@ fun AnimeToolbar(
     onClickEditNotes: () -> Unit,
     onClickSettings: (() -> Unit)?,
     onClickSuggestions: (() -> Unit)?,
-    // SY -->
     onClickEditInfo: (() -> Unit)?,
     onClickClearAnime: (() -> Unit)?,
     onClickOpenAnimeFolder: (() -> Unit)?,
     onClickMerge: (() -> Unit)?,
-    // SY <--
     // Anime only
     changeAnimeSkipIntro: (() -> Unit)?,
     // For action mode
@@ -86,7 +84,7 @@ fun AnimeToolbar(
 
     // Capture the surface color during composition; alpha is applied during draw only.
     val bgColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-    // YMR --> liquid glass over the cover: the bar fades in as glass, buttons float in glass orbs
+    // liquid glass over the cover: the bar fades in as glass, buttons float in glass orbs
     val backdrop = yomira.glass.LocalGlassBackdrop.current
     val glassStyle = yomira.glass.LocalGlassStyle.current
     val barTint = (glassStyle.tintAlpha + 0.32f).coerceAtMost(0.88f)
@@ -224,7 +222,6 @@ fun AnimeToolbar(
                                         onClick = onClickEditNotes,
                                     ),
                                 )
-                                // SY -->
                                 if (onClickMerge != null) {
                                     add(
                                         AppBar.OverflowAction(
@@ -241,7 +238,7 @@ fun AnimeToolbar(
                                         ),
                                     )
                                 }
-                                // YMR --> pick the right TMDB show, season and numbering
+                                // pick the right TMDB show, season and numbering
                                 yomira.metadata.LocalTmdbMatchAction.current?.let { openTmdbMatch ->
                                     add(
                                         AppBar.OverflowAction(
@@ -250,7 +247,6 @@ fun AnimeToolbar(
                                         ),
                                     )
                                 }
-                                // YMR <--
                                 if (onClickOpenAnimeFolder != null) {
                                     add(
                                         AppBar.OverflowAction(
@@ -283,7 +279,6 @@ fun AnimeToolbar(
                                         ),
                                     )
                                 }
-                                // SY <--
                             }
                             .build(),
                     )
@@ -298,5 +293,4 @@ fun AnimeToolbar(
         )
     }
     }
-    // YMR <--
 }

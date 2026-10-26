@@ -15,13 +15,11 @@ fun ListGroupHeader(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    // KMK -->
     Surface(
         modifier = modifier
             .fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
-        // KMK <--
         Text(
             text = text,
             modifier = Modifier

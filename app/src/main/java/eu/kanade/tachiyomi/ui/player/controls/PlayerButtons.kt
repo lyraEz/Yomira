@@ -175,23 +175,19 @@ fun RenderPlayerButton(
             )
         }
         PlayerButton.PlaybackSpeed -> {
-            // ANZ -->
             val currentSpeed = playbackSpeed ?: viewModel.playerPreferences.playerSpeed().get()
             ControlsButton(
                 text = stringResource(MR.strings.player_speed, currentSpeed),
                 onClick = {
                     val newSpeed = if (currentSpeed >= 2f) 0.25f else (currentSpeed + 0.25f).toFixed(2)
-                    // ANZ -->
                     if (viewModel.mpv.isInitialized) {
                         viewModel.mpv.setPropertyDouble("speed", newSpeed.toDouble())
                     }
                     // Remember the choice so reopening the player starts at this speed again.
                     viewModel.playerPreferences.playerSpeed().set(newSpeed)
-                    // ANZ <--
                 },
                 onLongClick = { viewModel.showSheet(Sheets.PlaybackSpeed) },
             )
-            // ANZ <--
         }
         PlayerButton.CurrentChapter -> {
             AnimatedVisibility(

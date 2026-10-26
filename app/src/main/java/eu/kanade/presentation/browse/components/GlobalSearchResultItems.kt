@@ -30,9 +30,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 @Composable
 fun GlobalSearchResultItem(
     title: String,
-    // SY -->
     subtitle: String?,
-    // SY <--
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,

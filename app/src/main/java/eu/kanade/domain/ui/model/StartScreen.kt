@@ -12,9 +12,8 @@ import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 
 enum class StartScreen(val titleRes: StringResource, val tab: Tab) {
-    // YMR --> streaming-style catalog
+    // streaming-style catalog
     HOME(yomira.i18n.YMR.strings.home_tab, yomira.home.HomeCatalogTab),
-    // YMR <--
     LIBRARY(MR.strings.label_library, LibraryTab),
     FEED(SYMR.strings.feed, FeedTab),
     UPDATES(MR.strings.label_recent_updates, UpdatesTab),

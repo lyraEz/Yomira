@@ -319,7 +319,7 @@ private fun AnimeGridCover(
     badgesEnd: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable (BoxScope.() -> Unit)? = null,
 ) {
-    // YMR --> soft shadow under the cover (a hardware shadow, drawn once per layer)
+    // soft shadow under the cover (a hardware shadow, drawn once per layer)
     val shadowColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.32f)
     Box(
         modifier = modifier
@@ -333,7 +333,6 @@ private fun AnimeGridCover(
                 spotShadowColor = shadowColor
             },
     ) {
-        // YMR <--
         cover()
         content?.invoke(this)
         if (badgesStart != null) {
@@ -388,9 +387,8 @@ internal fun GridItemSelectable(
     content: @Composable () -> Unit,
 ) {
     val scale = if (isSelected) 0.95f else 1f
-    // YMR --> a little rounder than the cover it surrounds (4 dp padding)
+    // a little rounder than the cover it surrounds (4 dp padding)
     val shape = RoundedCornerShape(20.dp)
-    // YMR <--
     val borderColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
@@ -413,9 +411,7 @@ internal fun GridItemSelectable(
                     drawRoundRect(
                         color = borderColor,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx()),
-                        // YMR -->
                         cornerRadius = androidx.compose.ui.geometry.CornerRadius(20.dp.toPx()),
-                        // YMR <--
                     )
                 }
             }
@@ -470,7 +466,6 @@ fun AnimeListItem(
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
-    // ANZ -->
     // Resolve the effective value before sizing the row: keying the height on the *nullable*
     // parameter left callers that pass nothing (the season list) at the book height while their
     // covers still rendered at the panorama aspect.
@@ -478,7 +473,6 @@ fun AnimeListItem(
     val height = remember(panorama) {
         if (panorama) 96.dp else 76.dp
     }
-    // ANZ <--
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -539,9 +533,7 @@ private fun ContinueWatchingButton(
     Box(modifier = modifier) {
         FilledIconButton(
             onClick = onClick,
-            // YMR -->
             shape = androidx.compose.foundation.shape.CircleShape,
-            // YMR <--
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                 contentColor = contentColorFor(MaterialTheme.colorScheme.primaryContainer),

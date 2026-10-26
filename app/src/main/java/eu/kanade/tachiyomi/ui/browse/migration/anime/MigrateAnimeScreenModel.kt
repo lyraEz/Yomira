@@ -35,11 +35,9 @@ class MigrateAnimeScreenModel(
     private val _events: Channel<MigrationAnimeEvent> = Channel()
     val events: Flow<MigrationAnimeEvent> = _events.receiveAsFlow()
 
-    // KMK -->
     // First and last selected index in list
     private val selectedPositions: Array<Int> = arrayOf(-1, -1)
     private val selectedAnimeIds: HashSet<Long> = HashSet()
-    // KMK <--
 
     init {
         screenModelScope.launch {
@@ -60,11 +58,9 @@ class MigrateAnimeScreenModel(
                         state.copy(titles = persistentListOf(), selection = persistentListOf(), isLoading = false)
                     }
                 }
-                // KMK -->
                 .map { anime ->
                     toMigrationAnimeScreenItems(anime)
                 }
-                // KMK <--
                 .map { anime ->
                     anime
                         .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.anime.title })
@@ -82,7 +78,6 @@ class MigrateAnimeScreenModel(
         }
     }
 
-    // KMK -->
     private fun toMigrationAnimeScreenItems(animes: List<Anime>): List<MigrateAnimeItem> {
         return animes.map { anime ->
             MigrateAnimeItem(
@@ -193,7 +188,6 @@ class MigrateAnimeScreenModel(
     fun clearSelection() {
         toggleAllSelection(false)
     }
-    // KMK <--
 
     @Immutable
     data class State(
@@ -211,10 +205,8 @@ sealed interface MigrationAnimeEvent {
     data object FailedFetchingFavorites : MigrationAnimeEvent
 }
 
-// KMK -->
 @Immutable
 data class MigrateAnimeItem(
     val anime: Anime,
     val selected: Boolean,
 )
-// KMK <--

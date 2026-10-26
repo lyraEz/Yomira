@@ -25,20 +25,26 @@ class GetApplicationRelease(
             return Result.NoNewUpdate
         }
 
-        // KMK -->
-        val releases = service.releaseNotes(arguments.repository)
+        // Stable releases (from the main repository, or the fallback while it cannot be read) and,
+        // when asked, the betas published in the beta repository.
+        val stable = releasesWithFallback(arguments.repository, arguments.fallbackRepository)
+            .filter { !it.preRelease }
+        val betas = arguments.betaRepository
+            ?.let { repo -> runCatching { service.releaseNotes(repo) }.getOrDefault(emptyList()) }
+            .orEmpty()
+            .filter { it.preRelease }
+        val releases = (stable + betas)
             .filter {
-                !it.preRelease &&
-                    isNewVersion(
-                        arguments.isPreview,
-                        arguments.commitCount,
-                        arguments.versionName,
-                        it.version,
-                    )
+                isNewVersion(
+                    arguments.isPreview,
+                    arguments.commitCount,
+                    arguments.versionName,
+                    it.version,
+                )
             }
+            .sortedByDescending { AppVersion.parse(it.version) }
 
         val latest = releases.getLatest() ?: return Result.NoNewUpdate
-        // KMK <--
 
         lastChecked.set(now.toEpochMilli())
 
@@ -56,9 +62,8 @@ class GetApplicationRelease(
         }
     }
 
-    // KMK -->
     suspend fun awaitReleaseNotes(arguments: Arguments): Result {
-        val releases = service.releaseNotes(arguments.repository)
+        val releases = releasesWithFallback(arguments.repository, arguments.fallbackRepository)
             .filter { !it.preRelease }
         val checksumRegex = """---(\R|.)*Checksums(\R|.)*""".toRegex()
 
@@ -72,7 +77,6 @@ class GetApplicationRelease(
         if (release == null) return Result.NoNewUpdate
         return Result.NewUpdate(release)
     }
-    // KMK <--
 
     /**
      * [isPreview] is if current version is Preview (beta) build
@@ -89,29 +93,26 @@ class GetApplicationRelease(
         versionName: String,
         versionTag: String,
     ): Boolean {
-        // Removes prefixes like "r" or "v"
-        val newVersion = versionTag.replace("[^\\d.]".toRegex(), "")
         return if (isPreview) {
             // Preview builds: based on releases in the app repository
             // tagged as something like "r1234"
-            newVersion.toInt() > commitCount
+            versionTag.replace("[^\\d]".toRegex(), "").toInt() > commitCount
         } else {
-            // Release builds: based on releases in the app repository
-            // tagged as something like "v0.1.2"
-            val oldVersion = versionName.replace("[^\\d.]".toRegex(), "")
-
-            val newSemVer = newVersion.split(".").map { it.toInt() }
-            val oldSemVer = oldVersion.split(".").map { it.toInt() }
-
-            oldSemVer.mapIndexed { index, i ->
-                if (newSemVer[index] > i) {
-                    return true
-                }
-                if (newSemVer[index] < i) return false
-            }
-
-            false
+            // Release builds: tags like "v1.12.0" or "v1.13.0-beta.2"
+            AppVersion.isNewer(versionTag, versionName)
         }
+    }
+
+    /** Releases of [repository], or of [fallback] when the first cannot be read or has none. */
+    private suspend fun releasesWithFallback(repository: String, fallback: String?): List<Release> {
+        val primary = try {
+            service.releaseNotes(repository)
+        } catch (e: Exception) {
+            if (fallback == null) throw e
+            null
+        }
+        if (!primary.isNullOrEmpty() || fallback == null) return primary.orEmpty()
+        return service.releaseNotes(fallback)
     }
 
     data class Arguments(
@@ -125,6 +126,10 @@ class GetApplicationRelease(
         val versionName: String,
         /** Repository name */
         val repository: String,
+        /** Read instead of [repository] when that one cannot be read or has no releases */
+        val fallbackRepository: String? = null,
+        /** Also offer the pre-releases (betas) published here */
+        val betaRepository: String? = null,
         /** Force check for new update */
         val forceCheck: Boolean = false,
     )
@@ -137,7 +142,6 @@ class GetApplicationRelease(
     }
 }
 
-// KMK --.
 internal fun List<Release>.getLatest(): Release? {
     val checksumRegex = """---(\R|.)*Checksums(\R|.)*""".toRegex()
 
@@ -149,4 +153,3 @@ internal fun List<Release>.getLatest(): Release? {
             },
         )
 }
-// KMK <--

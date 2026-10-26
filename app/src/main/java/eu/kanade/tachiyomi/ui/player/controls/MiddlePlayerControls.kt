@@ -68,9 +68,7 @@ fun MiddlePlayerControls(
     exit: ExitTransition,
     modifier: Modifier = Modifier,
 ) {
-    // YMR -->
     val big = 96.dp * yomira.player.LocalPlayerButtonLook.current.scale
-    // YMR <--
     Row(
         modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -91,7 +89,6 @@ fun MiddlePlayerControls(
             }
         }
 
-        // ANZ -->
         when {
             (isLoading || isLoadingEpisode) && showLoadingCircle -> {
                 CircularProgressIndicator(Modifier.size(big))
@@ -123,7 +120,7 @@ fun MiddlePlayerControls(
                     enter = enter,
                     exit = exit,
                 ) {
-                    // YMR --> big play/pause glyph made of liquid glass, no orb around it
+                    // big play/pause glyph made of liquid glass, no orb around it
                     Box(
                         modifier = Modifier
                             .size(big)
@@ -140,11 +137,9 @@ fun MiddlePlayerControls(
                             interactionSource = interaction,
                         )
                     }
-                    // YMR <--
                 }
             }
         }
-        // ANZ <--
 
         AnimatedVisibility(
             visible = controlsShown && !areControlsLocked,

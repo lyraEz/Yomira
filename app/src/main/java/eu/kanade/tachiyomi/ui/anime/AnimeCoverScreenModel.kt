@@ -36,9 +36,7 @@ import uy.kohesive.injekt.api.get
 class AnimeCoverScreenModel(
     private val animeId: Long,
     private val getAnime: GetAnime = Injekt.get(),
-    // ANZ -->
     private val getCustomAnimeInfo: GetCustomAnimeInfo = Injekt.get(),
-    // ANZ <--
     private val imageSaver: ImageSaver = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val updateAnime: UpdateAnime = Injekt.get(),
@@ -48,7 +46,6 @@ class AnimeCoverScreenModel(
 
     init {
         screenModelScope.launchIO {
-            // ANZ -->
             // Attach the user's edit overlay. `Anime.title` is derived as
             // `customAnimeInfo?.title ?: ogTitle`, and the repository flow carries no overlay, so
             // without this the saved cover landed in a Pictures folder named after the source's
@@ -58,7 +55,6 @@ class AnimeCoverScreenModel(
                     anime.copy(customAnimeInfo = customInfo)
                 }
                 .collect { newAnime -> mutableState.update { newAnime } }
-            // ANZ <--
         }
     }
 
@@ -118,13 +114,11 @@ class AnimeCoverScreenModel(
             imageSaver.save(
                 Image.Cover(
                     bitmap = bitmap,
-                    // ANZ -->
                     // Match upstream Anikku: a flat "<title>-cover.jpg" in the pictures folder,
                     // resolved through the edit overlay so the name uses the title the user set.
                     // Previously this wrote "cover.jpg" into a per-anime subfolder.
                     name = "${anime.title}-cover",
                     location = if (temp) Location.Cache else Location.Pictures.create(),
-                    // ANZ <--
                 ),
             )
         }

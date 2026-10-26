@@ -118,9 +118,7 @@ object SettingsDataScreen : SearchableSettings {
             getStorageLocationPref(storagePreferences = storagePreferences),
             Preference.PreferenceItem.InfoPreference(stringResource(MR.strings.pref_storage_location_info)),
             getBackupAndRestoreGroup(backupPreferences = backupPreferences),
-            // AM (FILE_SIZE) -->
             getDataGroup(storagePreferences = storagePreferences),
-            // <-- AM (FILE_SIZE)
         ) + getSyncPreferences(syncPreferences = syncPreferences, syncService = syncService)
     }
 
@@ -311,7 +309,6 @@ object SettingsDataScreen : SearchableSettings {
         var cacheReadableSizeSema by remember { mutableIntStateOf(0) }
         val cacheReadableSize = remember(cacheReadableSizeSema) { chapterCache.readableSize }
 
-        // AM (FILE_SIZE) -->
         LaunchedEffect(Unit) {
             storagePreferences.showEpisodeFileSize().changes()
                 .drop(1)
@@ -321,7 +318,6 @@ object SettingsDataScreen : SearchableSettings {
                     }
                 }
         }
-        // <-- AM (FILE_SIZE)
 
         return Preference.PreferenceGroup(
             title = stringResource(MR.strings.pref_storage_usage),
@@ -339,12 +335,10 @@ object SettingsDataScreen : SearchableSettings {
                     )
                 },
 
-                // AM (FILE_SIZE) -->
                 Preference.PreferenceItem.SwitchPreference(
                     pref = storagePreferences.showEpisodeFileSize(),
                     title = stringResource(AMR.strings.pref_show_downloaded_episode_file_size),
                 ),
-                // <-- AM (FILE_SIZE)
 
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(MR.strings.label_storage),
@@ -391,7 +385,7 @@ object SettingsDataScreen : SearchableSettings {
                     Preference.PreferenceItem.ListPreference(
                         pref = syncPreferences.syncService(),
                         title = stringResource(SYMR.strings.pref_sync_service),
-                        // YMR --> Google Drive needs an OAuth client owned by whoever builds the app.
+                        // Google Drive needs an OAuth client owned by whoever builds the app.
                         entries = buildMap {
                             put(SyncManager.SyncService.NONE.value, stringResource(MR.strings.off))
                             put(SyncManager.SyncService.SYNCYOMI.value, stringResource(SYMR.strings.syncyomi))
@@ -399,7 +393,6 @@ object SettingsDataScreen : SearchableSettings {
                                 put(SyncManager.SyncService.GOOGLE_DRIVE.value, stringResource(SYMR.strings.google_drive))
                             }
                         }.toPersistentMap(),
-                        // YMR <--
                         onValueChanged = { true },
                     ),
                 ),

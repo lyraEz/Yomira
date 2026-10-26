@@ -146,7 +146,6 @@ abstract class ParsedAnimeHttpSource : AnimeHttpSource() {
      */
     protected abstract fun animeDetailsParse(document: Document): SAnime
 
-    // KMK -->
 
     /**
      * Parses the response from the site and returns a list of related animes.
@@ -174,7 +173,6 @@ abstract class ParsedAnimeHttpSource : AnimeHttpSource() {
      * @param element an element obtained from [relatedAnimeListSelector].
      */
     protected open fun relatedAnimeFromElement(element: Element): SAnime = popularAnimeFromElement(element)
-    // KMK <--
 
     /**
      * Parses the response from the site and returns a list of episodes.

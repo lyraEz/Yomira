@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// YMR --> grouped iOS-style sections: caption header, rounded card, hairline dividers between rows
+// grouped iOS-style sections: caption header, rounded card, hairline dividers between rows
 
 /** Inset of the row dividers: they start after the icon tile, like iOS lists. */
 private val DividerInset = 58.dp
@@ -241,4 +241,3 @@ private fun MoreRow(
         trailing()
     }
 }
-// YMR <--

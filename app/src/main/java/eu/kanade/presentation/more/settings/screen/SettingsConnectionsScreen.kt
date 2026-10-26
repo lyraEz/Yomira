@@ -1,4 +1,3 @@
-// AM (CONNECTIONS) -->
 package eu.kanade.presentation.more.settings.screen
 
 import android.content.Context
@@ -82,11 +81,10 @@ object SettingsConnectionsScreen : SearchableSettings {
             }
         }
 
-        // YMR --> Rich Presence through the Discord app on the phone (no account login); see yomira.discord
+        // Rich Presence through the Discord app on the phone (no account login); see yomira.discord
         if (!BuildConfig.DISCORD_RPC_ENABLED) {
             return yomira.discord.discordPresenceGroups()
         }
-        // YMR <--
         return listOf(
             Preference.PreferenceGroup(
                 title = stringResource(R.string.special_services),
@@ -291,4 +289,3 @@ private data class LoginConnectionsDialog(
 internal data class LogoutConnectionsDialog(
     val service: ConnectionsService,
 )
-// <-- AM (CONNECTIONS)

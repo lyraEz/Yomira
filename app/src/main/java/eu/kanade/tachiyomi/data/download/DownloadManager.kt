@@ -158,10 +158,8 @@ class DownloadManager(
         alt: Boolean = false,
         video: Video? = null,
     ) {
-        // AM (FILLERMARK) -->
         val filteredEpisodes = getEpisodesToDownload(episodes)
         downloader.queueEpisodes(anime, filteredEpisodes, autoStart, alt, video)
-        // <-- AM (FILLERMARK)
     }
 
     /**
@@ -204,9 +202,8 @@ class DownloadManager(
         if (files.isEmpty()) {            throw Exception(context.stringResource(MR.strings.video_list_empty_error))
         }
 
-        // YMR --> the Anime4K version (Enhanced Downloads) is played when it is there
+        // the Anime4K version (Enhanced Downloads) is played when it is there
         val file = yomira.anime4k.EnhancedDownloads.preferEnhanced(files) { it.name }[0]
-        // YMR <--
 
         val subtitleTracks = episodeDir?.listFiles().orEmpty()
             .filter {
@@ -344,7 +341,6 @@ class DownloadManager(
                 deleteAnime(anime, source, removeQueued = false)
             }
 
-            // KMK -->
             // Clean up sandbox
             val sandboxRoot = context.getExternalFilesDir("downloads")
             if (sandboxRoot != null && sandboxRoot.exists()) {
@@ -353,7 +349,6 @@ class DownloadManager(
                     File(sandboxRoot, episodeDirname).deleteRecursively()
                 }
             }
-            // KMK <--
 
             // Delete anime directory if empty
             if (animeDir?.listFiles()?.isEmpty() == true) {
@@ -377,7 +372,6 @@ class DownloadManager(
             provider.findAnimeDir(anime.ogTitle, source)?.delete()
             cache.removeAnime(anime)
 
-            // KMK -->
             // Clean up sandbox for this anime
             val sandboxRoot = context.getExternalFilesDir("downloads")
             if (sandboxRoot != null && sandboxRoot.exists()) {
@@ -387,7 +381,6 @@ class DownloadManager(
                 // But according to downloadEpisode, we use episodeDirname directly under sandboxRoot.
                 // To be safe, we'd need to know all episodes, but usually deleteAnime is called when everything is already gone.
             }
-            // KMK <--
 
             // Delete source directory if empty
             val sourceDir = provider.findSourceDir(source)
@@ -499,7 +492,6 @@ class DownloadManager(
         }
     }
 
-    // AM (FILLERMARK) -->
     private fun getEpisodesToDownload(episodes: List<Episode>): List<Episode> {
         return if (!downloadPreferences.notDownloadFillermarkedItems().get()) {
             episodes.filterNot { it.fillermark }
@@ -507,7 +499,6 @@ class DownloadManager(
             episodes
         }
     }
-    // <-- AM (FILLERMARK)
 
     fun statusFlow(): Flow<Download> = queueState
         .flatMapLatest { downloads ->

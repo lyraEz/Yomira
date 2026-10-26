@@ -25,9 +25,7 @@ import tachiyomi.presentation.core.theme.header
 @Composable
 fun CollapsibleBox(
     heading: String,
-    // SY -->
     startExpanded: Boolean = false,
-    // SY <--
     content: @Composable () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(/* SY --> */startExpanded/* SY <-- */) }

@@ -15,7 +15,6 @@ interface AnimeCatalogueSource : AnimeSource {
     /**
      * Whether the source has support for latest updates.
      */
-    // ANZ -->
     override val supportsLatest: Boolean
 
     /**
@@ -57,7 +56,6 @@ interface AnimeCatalogueSource : AnimeSource {
      * Returns the list of filters for the source.
      */
     override fun getFilterList(): AnimeFilterList
-    // ANZ <--
 
     // Should be replaced as soon as Anime Extension reach 1.5
     @Deprecated(
@@ -80,7 +78,6 @@ interface AnimeCatalogueSource : AnimeSource {
     )
     fun fetchLatestUpdates(page: Int): Observable<AnimesPage>
 
-    // KMK -->
 
     /**
      * Whether parsing related animes in anime page or extension provide custom related animes request.
@@ -146,5 +143,4 @@ interface AnimeCatalogueSource : AnimeSource {
      * @throws UnsupportedOperationException if a source doesn't support related animes.
      */
     suspend fun fetchRelatedAnimeList(anime: eu.kanade.tachiyomi.animesource.model.SAnime): List<eu.kanade.tachiyomi.animesource.model.SAnime> = throw UnsupportedOperationException("Unsupported!")
-    // KMK <--
 }

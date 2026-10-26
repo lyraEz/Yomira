@@ -17,7 +17,6 @@ class GetLibraryAnime(
 
     fun subscribe(): Flow<List<LibraryAnime>> {
         return animeRepository.getLibraryAnimeAsFlow()
-            // SY -->
             .retry {
                 if (it is NullPointerException) {
                     delay(5.seconds)
@@ -26,6 +25,5 @@ class GetLibraryAnime(
                     false
                 }
             }
-        // SY <--
     }
 }

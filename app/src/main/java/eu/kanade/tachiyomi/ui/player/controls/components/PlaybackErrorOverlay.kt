@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.ui.player.PlaybackError
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.i18n.YMR
 
-// YMR -->
 /**
  * Shown instead of closing the player when an episode or stream fails.
  *
@@ -158,4 +157,3 @@ private fun ActionLabel(icon: ImageVector, label: String) {
     Icon(imageVector = icon, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
     Text(text = label, color = Color.Unspecified)
 }
-// YMR <--

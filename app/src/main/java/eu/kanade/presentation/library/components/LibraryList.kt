@@ -57,9 +57,7 @@ internal fun LibraryList(
     val selectedIds = remember(selection) { selection.map { it.id }.toSet() }
 
     FastScrollLazyColumn(
-        // YMR -->
         modifier = Modifier.fillMaxSize(),
-        // YMR <--
         contentPadding = contentPadding + PaddingValues(vertical = 8.dp),
     ) {
         item {

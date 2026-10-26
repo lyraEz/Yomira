@@ -298,9 +298,7 @@ private fun onViewCreated(
     binding.mangaGenresTags.clearFocus()
 
     binding.resetTags.setOnClickListener { resetTags(anime, binding, scope) }
-    // SY -->
     binding.resetInfo.setOnClickListener { resetInfo(anime, binding, scope) }
-    // SY <--
 
     binding.autofillFromTracker.setOnClickListener {
         scope.launch {

@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import tachiyomi.presentation.core.util.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -75,14 +76,10 @@ object AboutScreen : Screen() {
         val navigator = LocalNavigator.currentOrThrow
         var isCheckingUpdates by remember { mutableStateOf(false) }
 
-        // KMK -->
         var isCheckingWhatsNew by remember { mutableStateOf(false) }
         var isCheckingWhatsComing by remember { mutableStateOf(false) }
-        // KMK <--
 
-        // SY -->
         var showWhatsNewDialog by remember { mutableStateOf(false) }
-        // SY <--
 
         Scaffold(
             topBar = { scrollBehavior ->
@@ -142,7 +139,17 @@ object AboutScreen : Screen() {
                             },
                         )
 
-                        // KMK -->
+                        // opt in to beta versions
+                        val updatePreferences = remember { yomira.update.UpdatePreferences() }
+                        val betaUpdates by updatePreferences.betaUpdates().collectAsState()
+                        MoreItem(
+                            title = stringResource(YMR.strings.update_beta),
+                            subtitle = stringResource(
+                                if (betaUpdates) YMR.strings.update_beta_on else YMR.strings.update_beta_off,
+                            ),
+                            onClick = { updatePreferences.betaUpdates().set(!betaUpdates) },
+                        )
+
                         MoreItem(
                             title = stringResource(MR.strings.whats_new),
                             subtitle = if (isCheckingWhatsNew) "Checking..." else null,
@@ -171,13 +178,10 @@ object AboutScreen : Screen() {
                             },
                         )
 
-                        // YMR --> Yomira has no separate preview channel to peek into.
-                        // YMR <--
-                        // KMK <--
+                        // Yomira has no separate preview channel to peek into.
                     }
                 }
 
-                // YMR -->
                 item {
                     MoreSection(title = stringResource(YMR.strings.about_project)) {
                         MoreItem(
@@ -203,12 +207,10 @@ object AboutScreen : Screen() {
             }
         }
 
-        // SY -->
-        // KMK: Unused now
+        // Unused now
         if (showWhatsNewDialog) {
             WhatsNewDialog(onDismissRequest = { showWhatsNewDialog = false })
         }
-        // SY <--
     }
 
     /**
@@ -218,14 +220,10 @@ object AboutScreen : Screen() {
         context: Context,
         onAvailableUpdate: (GetApplicationRelease.Result.NewUpdate) -> Unit,
         onFinish: () -> Unit,
-        // KMK -->
         peekIntoPreview: Boolean = false,
-        // KMK <--
     ) {
         val updateChecker = AppUpdateChecker(
-            // KMK -->
             peekIntoPreview = peekIntoPreview,
-            // KMK <--
         )
         withUIContext {
             try {
@@ -250,7 +248,6 @@ object AboutScreen : Screen() {
         }
     }
 
-    // KMK -->
     private suspend fun getReleaseNotes(
         context: Context,
         onAvailableUpdate: (GetApplicationRelease.Result.NewUpdate) -> Unit,
@@ -273,7 +270,6 @@ object AboutScreen : Screen() {
             }
         }
     }
-    // KMK <--
 
     fun getVersionName(withBuildDate: Boolean): String {
         return when {
@@ -323,8 +319,6 @@ object AboutScreen : Screen() {
         }
     }
 
-    // YMR -->
     private const val YOMIRA_REPO_URL = "https://github.com/lyraEz/Yomira"
 
-    // YMR <--
 }

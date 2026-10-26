@@ -1,4 +1,3 @@
-// AY -->
 package eu.kanade.presentation.anime
 
 import androidx.compose.foundation.layout.Arrangement
@@ -380,4 +379,3 @@ private fun SetAsDefaultDialog(
         },
     )
 }
-// <-- AY

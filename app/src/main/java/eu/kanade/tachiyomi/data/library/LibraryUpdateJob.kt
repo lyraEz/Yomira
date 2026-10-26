@@ -142,10 +142,8 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         val showBanner = libraryPreferences.showUpdatingProgressBanner().get()
 
         val categoryId = inputData.getLong(KEY_CATEGORY, -1L)
-        // SY -->
         val group = inputData.getInt(KEY_GROUP, LibraryGroup.BY_DEFAULT)
         val groupExtra = inputData.getString(KEY_GROUP_EXTRA)
-        // SY <--
         addAnimeToQueue(categoryId, group, groupExtra)
 
         return withIOContext {
@@ -192,9 +190,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
     private suspend fun addAnimeToQueue(categoryId: Long, group: Int, groupExtra: String?) {
         val libraryAnime = getLibraryAnime.await()
 
-        // SY -->
         val groupAnimeLibraryUpdateType = libraryPreferences.groupLibraryUpdateType().get()
-        // SY <--
 
         val listToUpdate = if (categoryId != -1L) {
             libraryAnime.filter { it.category == categoryId }
@@ -261,7 +257,6 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
                 LibraryGroup.UNGROUPED -> libraryAnime
                 else -> libraryAnime
             }
-            // SY <--
         }
 
         val includeSeasonsGlobal = libraryPreferences.useHierarchicalSeasons().get()
@@ -292,9 +287,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         val (_, fetchWindowUpperBound) = fetchInterval.getWindow(ZonedDateTime.now())
 
         animeToUpdate = lastToUpdateWithSeasons
-            // SY -->
             .distinctBy { it.anime.id }
-            // SY <--
             .filter {
                 when {
                     it.anime.updateStrategy != UpdateStrategy.ALWAYS_UPDATE -> {
@@ -627,13 +620,11 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
          */
         private const val KEY_CATEGORY = "animeCategory"
 
-        // SY -->
         /**
          * Key for group to update.
          */
         const val KEY_GROUP = "group"
         const val KEY_GROUP_EXTRA = "group_extra"
-        // SY <--
 
         fun cancelAllWorks(context: Context) {
             context.workManager.cancelAllWorkByTag(TAG)
@@ -683,10 +674,8 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         fun startNow(
             context: Context,
             category: Category? = null,
-            // SY -->
             group: Int = LibraryGroup.BY_DEFAULT,
             groupExtra: String? = null,
-            // SY <--
         ): Boolean {
             val wm = context.workManager
             // Check if the LibraryUpdateJob is already running
@@ -697,10 +686,8 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
 
             val inputData = workDataOf(
                 KEY_CATEGORY to category?.id,
-                // SY -->
                 KEY_GROUP to group,
                 KEY_GROUP_EXTRA to groupExtra,
-                // SY <--
             )
 
             val syncPreferences: SyncPreferences = Injekt.get()

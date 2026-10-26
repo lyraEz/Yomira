@@ -35,9 +35,7 @@ object HistoryMapper {
         id = historyId,
         episodeId = episodeId,
         animeId = animeId,
-        // SY -->
         ogTitle = title,
-        // SY <--
         episodeNumber = episodeNumber,
         seen = seen,
         seenAt = seenAt,

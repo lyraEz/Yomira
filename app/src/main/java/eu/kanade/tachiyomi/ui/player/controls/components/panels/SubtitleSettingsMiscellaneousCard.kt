@@ -63,7 +63,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-// ANZ -->
 @Composable
 fun SubtitlesMiscellaneousCard(
     modifier: Modifier = Modifier,
@@ -212,4 +211,3 @@ fun SubtitlesMiscellaneousCard(
         }
     }
 }
-// ANZ <--

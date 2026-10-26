@@ -211,7 +211,6 @@ class AnimeScreenModel(
     private val fetchInterval: FetchInterval = Injekt.get(),
     private val removeHistory: tachiyomi.domain.history.interactor.RemoveHistory = Injekt.get(),
     private val animeMergeRepository: tachiyomi.domain.anime.repository.AnimeMergeRepository = Injekt.get(),
-    // AY <--
     private val getExcludedScanlators: tachiyomi.domain.episode.interactor.GetExcludedScanlators = Injekt.get(),
     private val setExcludedScanlators: tachiyomi.domain.episode.interactor.SetExcludedScanlators = Injekt.get(),
     private val getAvailableScanlators: tachiyomi.domain.episode.interactor.GetAvailableScanlators = Injekt.get(),
@@ -273,9 +272,7 @@ class AnimeScreenModel(
         hasPromptedToAddBefore: Boolean = this.hasPromptedToAddBefore,
         suggestions: ImmutableList<Anime> = this.suggestions,
         seasons: ImmutableList<Season> = this.seasons,
-        // AY -->
         processedSeasonItems: ImmutableList<AnimeSeasonItem> = this.processedSeasonItems,
-        // <-- AY
         availableScanlators: ImmutableList<String> = this.availableScanlators,
         excludedScanlators: ImmutableSet<String> = this.excludedScanlators,
         nextAiringEpisode: Pair<Int, Long> = this.nextAiringEpisode,
@@ -532,9 +529,7 @@ class AnimeScreenModel(
             suggestions = suggestions,
             isSuggestionsLoading = isSuggestionsLoading,
             seasons = seasons,
-            // AY -->
             processedSeasonItems = processedSeasonItems,
-            // <-- AY
             availableScanlators = availableScanlators,
             excludedScanlators = excludedScanlators,
             nextAiringEpisode = nextAiringEpisode,
@@ -1465,12 +1460,11 @@ class AnimeScreenModel(
     fun runEpisodeDownloadActions(items: List<EpisodeList.Item>, action: EpisodeDownloadAction) {
         when (action) {
             EpisodeDownloadAction.START -> {
-                // YMR --> Enhanced Downloads asks "Original or Anime4K" first
+                // Enhanced Downloads asks "Original or Anime4K" first
                 if (yomira.anime4k.Anime4KPreferences().let { it.enhancedDownloads().get() && it.downloadChoice().get() == "ask" }) {
                     updateSuccessState { it.copySuccess(dialog = Dialog.Anime4KDownload(items.map { item -> item.episode })) }
                     return
                 }
-                // YMR <--
                 startDownload(items.map { it.episode }, false)
                 if (items.any { it.downloadState == Download.State.ERROR }) downloadManager.startDownloads()
             }
@@ -1489,24 +1483,22 @@ class AnimeScreenModel(
             DownloadAction.NEXT_25_EPISODES -> getUnseenEpisodesSorted().take(25)
             DownloadAction.UNSEEN_EPISODES -> getUnseenEpisodes()
         }
-        // YMR --> Enhanced Downloads asks "Original or Anime4K" first
+        // Enhanced Downloads asks "Original or Anime4K" first
         if (episodesToDownload.isNotEmpty() &&
             yomira.anime4k.Anime4KPreferences().let { it.enhancedDownloads().get() && it.downloadChoice().get() == "ask" }
         ) {
             updateSuccessState { it.copySuccess(dialog = Dialog.Anime4KDownload(episodesToDownload)) }
             return
         }
-        // YMR <--
         if (episodesToDownload.isNotEmpty()) startDownload(episodesToDownload, false)
     }
 
-    // YMR --> the choice from the Anime4K dialog: null downloads the original only
+    // the choice from the Anime4K dialog: null downloads the original only
     fun startAnime4KDownload(episodes: List<Episode>, preset: yomira.anime4k.Anime4KPreset?) {
         dismissDialog()
         if (preset != null) yomira.anime4k.EnhancedDownloads.request(episodes.map { it.id }, preset)
         startDownload(episodes, false)
     }
-    // YMR <--
 
     private fun cancelDownload(episodeId: Long) {
         val activeDownload = downloadManager.getQueuedDownloadOrNull(episodeId) ?: return
@@ -1657,7 +1649,6 @@ class AnimeScreenModel(
         screenModelScope.launchNonCancellable { setAnimeEpisodeFlags.awaitSetDisplayMode(anime, mode) }
     }
 
-    // AY -->
     fun setSeasonDownloadedFilter(state: TriState) {
         val anime = successState?.anime ?: return
 
@@ -1824,7 +1815,6 @@ class AnimeScreenModel(
             )
         }
     }
-    // <-- AY
 
     fun setSorting(sort: Long) {
         val anime = successState?.anime ?: return
@@ -2031,9 +2021,7 @@ class AnimeScreenModel(
         data object EpisodeSettingsSheet : Dialog
         data object TrackSheet : Dialog
         data object FullCover : Dialog
-        // YMR -->
         data class Anime4KDownload(val episodes: List<Episode>) : Dialog
-        // YMR <--
     }
 
     fun toggleDiscoveryExpansion() {
@@ -2210,9 +2198,7 @@ class AnimeScreenModel(
             val isSuggestionsLoading: Boolean = true,
             val suggestionSections: ImmutableList<SuggestionSection> = persistentListOf(),
             val seasons: ImmutableList<Season> = persistentListOf(),
-            // AY -->
             val processedSeasonItems: ImmutableList<AnimeSeasonItem> = persistentListOf(),
-            // <-- AY
             val availableSeasons: ImmutableList<String> = persistentListOf(),
             val selectedSeason: String? = null,
             val discoveryExpanded: Boolean = false,
@@ -2237,10 +2223,8 @@ class AnimeScreenModel(
                     isRefreshingData: Boolean,
                     dialog: Dialog?,
                     selectedSeason: String? = null,
-                    // AY -->
                     seasons: ImmutableList<tachiyomi.domain.anime.model.Season> = persistentListOf(),
                     processedSeasonItems: ImmutableList<AnimeSeasonItem> = persistentListOf(),
-                    // <-- AY
                     skipDupeEpisodes: Boolean = false,
                     hideMissingEpisodes: Boolean = false,
                     availableScanlators: ImmutableList<String> = persistentListOf(),
@@ -2446,10 +2430,8 @@ class AnimeScreenModel(
                         episodeToSeason = episodeToSeason,
                         showEpisodeSummary = anime.showSummaries(),
                         showEpisodeThumbnail = anime.showPreviews(),
-                        // AY -->
                         seasons = seasons,
                         processedSeasonItems = processedSeasonItems,
-                        // <-- AY
                         availableScanlators = availableScanlators,
                         excludedScanlators = excludedScanlators,
                     )

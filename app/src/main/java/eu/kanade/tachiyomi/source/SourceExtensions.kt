@@ -31,14 +31,12 @@ fun Source.getNameForAnimeInfo(): String {
 
 fun Source.isLocalOrStub(): Boolean = isLocal() || this is StubSource
 
-// AM (DISCORD) -->
 fun Source?.isNsfw(): Boolean {
     if (this == null || this.isLocalOrStub()) return false
     val sourceUsed: eu.kanade.tachiyomi.extension.model.Extension.Installed = Injekt.get<ExtensionManager>().installedExtensionsFlow.value
         .find { ext: eu.kanade.tachiyomi.extension.model.Extension.Installed -> ext.sources.any { it.id == this.id } }!!
     return sourceUsed.isNsfw
 }
-// <-- AM (DISCORD)
 
 // (TORRENT) -->
 fun Source?.isSourceForTorrents(): Boolean {

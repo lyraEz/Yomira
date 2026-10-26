@@ -22,7 +22,7 @@ fun PreferenceGroupHeader(title: String) {
             .fillMaxWidth()
             .padding(bottom = 6.dp, top = 18.dp, start = 12.dp),
     ) {
-        // YMR --> iOS-style group caption
+        // iOS-style group caption
         Text(
             text = title.uppercase(),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
@@ -31,7 +31,6 @@ fun PreferenceGroupHeader(title: String) {
                 fontWeight = FontWeight.Medium,
                 letterSpacing = 0.6.sp,
             ),
-            // YMR <--
         )
     }
 }

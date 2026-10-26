@@ -797,11 +797,10 @@ class Downloader(
         notifier.dismissProgress(download)
 
         cache.addEpisode(filename, publicDir, download.anime)
-        // YMR --> "Anime4K Enhanced" downloads are processed now that the file is in place
+        // "Anime4K Enhanced" downloads are processed now that the file is in place
         runCatching {
             yomira.anime4k.EnhancedDownloads.onDownloaded(context, download.anime, download.episode, publicDir.findFile(filename))
         }.onFailure { logcat(LogPriority.WARN, it) { "Anime4K: could not queue ${download.episode.name}" } }
-        // YMR <--
     }
 
     private suspend fun copyUniFile(source: UniFile, dest: UniFile, download: Download) {

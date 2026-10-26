@@ -100,10 +100,8 @@ fun MoreSheet(
     val advancedPreferences = remember { Injekt.get<AdvancedPlayerPreferences>() }
     val audioPreferences = remember { Injekt.get<AudioPreferences>() }
     val gesturePreferences = remember { Injekt.get<GesturePreferences>() }
-    // ANZ -->
     val activity = LocalContext.current as? PlayerActivity
     val mpv = activity?.viewModel?.mpv
-    // ANZ <--
     val longPressAction by gesturePreferences.longPressAction().collectAsState()
     val pausedLongPressAction by gesturePreferences.pausedLongPressAction().collectAsState()
     val longPressSliding by gesturePreferences.gestureLongPressSpeedSliding().collectAsState()
@@ -172,10 +170,9 @@ fun MoreSheet(
                 }
             }
 
-            // YMR --> Discord Rich Presence on or off; the options live in the filters panel
+            // Discord Rich Presence on or off; the options live in the filters panel
             yomira.discord.DiscordQuickRow(onOpenOptions = onEnterFiltersPanel)
             yomira.anime4k.Anime4KSmartRow()
-            // YMR <--
 
             Text(stringResource(MR.strings.player_hwdec_mode))
             LazyRow(
@@ -224,7 +221,6 @@ fun MoreSheet(
                             
                             if (isPageSix) {
                                 // If switching TO page 6, hide internal stats and show native Page 6
-                                // ANZ -->
                                 if (wasInternalPage) {
                                     mpv?.command("script-binding", "stats/display-stats-toggle")
                                 }
@@ -247,7 +243,6 @@ fun MoreSheet(
                                         mpv?.command("script-binding", "stats/display-stats-toggle")
                                     }
                                 }
-                                // ANZ <--
                             }
                             advancedPreferences.playerStatisticsPage().set(page)
                         },
@@ -278,10 +273,8 @@ fun MoreSheet(
                                 modifier = Modifier
                                     .matchParentSize()
                                     .combinedClickable(
-                                        // ANZ -->
                                         onClick = { mpv?.let { button.execute(it) } },
                                         onLongClick = { mpv?.let { button.executeLongPress(it) } },
-                                        // ANZ <--
                                         interactionSource = inputChipInteractionSource,
                                         indication = null,
                                     ),
@@ -303,14 +296,12 @@ fun MoreSheet(
                         selected = audioChannels == it,
                         onClick = {
                             audioPreferences.audioChannels().set(it)
-                            // ANZ -->
                             if (it == AudioChannels.ReverseStereo) {
                                 mpv?.setPropertyString(AudioChannels.AutoSafe.property, AudioChannels.AutoSafe.value)
                             } else {
                                 mpv?.setPropertyString(AudioChannels.ReverseStereo.property, "")
                             }
                             mpv?.setPropertyString(it.property, it.value)
-                            // ANZ <--
                         },
                         label = { Text(text = stringResource(it.titleRes)) },
                     )

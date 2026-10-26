@@ -29,9 +29,7 @@ class UiPreferences(
 
     fun themeMode() = preferenceStore.getEnum("pref_theme_mode_key", ThemeMode.SYSTEM)
 
-    // YMR -->
     fun appTheme() = preferenceStore.getEnum("pref_app_theme", AppTheme.YOMIRA)
-    // YMR <--
 
     fun colorTheme() = preferenceStore.getInt("pref_color_theme", 0)
 
@@ -43,9 +41,8 @@ class UiPreferences(
 
     fun tabletUiMode() = preferenceStore.getEnum("tablet_ui_mode", TabletUiMode.AUTOMATIC)
 
-    // YMR --> the catalog is the start screen
+    // the catalog is the start screen
     fun startScreen() = preferenceStore.getEnum("start_screen", StartScreen.HOME)
-    // YMR <--
 
     // Keep the default bottom bar compact while making the schedule available from More.
     fun navStyle() = preferenceStore.getEnum("bottom_rail_nav_style", NavStyle.MOVE_SCHEDULE_TO_MORE)
@@ -170,7 +167,6 @@ class UiPreferences(
 
     fun showFeedInBrowse() = preferenceStore.getBoolean("show_feed_in_browse", false)
 
-    // SY -->
     fun bottomBarLabels() = preferenceStore.getBoolean("pref_show_bottom_bar_labels", true)
 
     fun dynamicAnimeTheme() = preferenceStore.getBoolean("pref_dynamic_manga_theme", true)
@@ -206,14 +202,13 @@ class UiPreferences(
 
     fun containerStyles() = preferenceStore.getStringSet(
         "pref_ui_container_styles",
-        // YMR --> the library grid runs edge to edge under the glass bars; lists keep their cards
+        // the library grid runs edge to edge under the glass bars; lists keep their cards
         setOf(
             ContainerStyle.UPDATES,
             ContainerStyle.HISTORY,
             ContainerStyle.SETTINGS,
             ContainerStyle.BROWSE,
         ),
-        // YMR <--
     )
 
     fun animatedTransitions() = preferenceStore.getBoolean("pref_animated_transitions_key", true)
@@ -223,7 +218,6 @@ class UiPreferences(
     fun hazeEnabled() = preferenceStore.getBoolean("pref_haze_enabled", false)
 
     fun animeDetailsFabOnLeft() = preferenceStore.getBoolean("anime_details_fab_on_left", false)
-    // SY <--
 
     companion object {
         fun dateFormat(format: String): DateTimeFormatter = when (format) {

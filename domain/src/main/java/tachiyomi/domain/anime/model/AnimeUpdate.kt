@@ -34,9 +34,7 @@ data class AnimeUpdate(
     val backgroundUrl: String? = null,
     val backgroundLastModified: Long? = null,
     val cast: List<Credit>? = null,
-    // SY -->
     val filteredScanlators: List<String>? = null,
-    // SY <--
 )
 
 fun Anime.toAnimeUpdate(): AnimeUpdate {
@@ -52,7 +50,6 @@ fun Anime.toAnimeUpdate(): AnimeUpdate {
         episodeFlags = episodeFlags,
         coverLastModified = coverLastModified,
         url = url,
-        // SY -->
         title = ogTitle,
         artist = ogArtist,
         author = ogAuthor,
@@ -60,7 +57,6 @@ fun Anime.toAnimeUpdate(): AnimeUpdate {
         description = ogDescription,
         genre = ogGenre,
         status = ogStatus,
-        // SY <--
         updateStrategy = updateStrategy,
         initialized = initialized,
         version = version,

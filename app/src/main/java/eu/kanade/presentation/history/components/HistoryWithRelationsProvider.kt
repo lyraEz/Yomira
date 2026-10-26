@@ -11,9 +11,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         id = 1L,
         episodeId = 2L,
         animeId = 3L,
-        // SY -->
         ogTitle = "Test Title",
-        // SY <--
         episodeNumber = 10.2,
         seen = true,
         seenAt = Date(1697247357L),
@@ -31,9 +29,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         id = 1L,
         episodeId = 2L,
         animeId = 3L,
-        // SY -->
         ogTitle = "Test Title",
-        // SY <--
         episodeNumber = 10.2,
         seen = true,
         seenAt = null,
@@ -51,9 +47,7 @@ internal class HistoryWithRelationsProvider : PreviewParameterProvider<HistoryWi
         id = 1L,
         episodeId = 2L,
         animeId = 3L,
-        // SY -->
         ogTitle = "Test Title",
-        // SY <--
         episodeNumber = -2.0,
         seen = true,
         seenAt = Date(1697247357L),

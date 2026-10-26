@@ -42,9 +42,8 @@ fun TopLeftPlayerControls(
     onTitleClick: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    // YMR --> line under the titles (clock, battery, end time)
+    // line under the titles (clock, battery, end time)
     info: @Composable () -> Unit = {},
-    // YMR <--
 ) {
     Row(
         modifier = modifier,
@@ -77,9 +76,7 @@ fun TopLeftPlayerControls(
                 style = MaterialTheme.typography.bodyLarge,
                 fontStyle = FontStyle.Italic,
             )
-            // YMR -->
             info()
-            // YMR <--
         }
     }
 }

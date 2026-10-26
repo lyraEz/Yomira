@@ -46,7 +46,6 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.player.playerRow
 
-// ANZ -->
 @Composable
 fun <T> GenericTracksSheet(
     tracks: ImmutableList<T>,
@@ -82,9 +81,7 @@ fun AddTrackRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // YMR -->
             .playerRow()
-            // YMR <--
             .clickable(onClick = onClick)
             .height(48.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -172,4 +169,3 @@ fun TrackSheetTitle(
         }
     }
 }
-// ANZ <--

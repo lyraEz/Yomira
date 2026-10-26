@@ -92,7 +92,6 @@ fun SubtitleDelayPanel(
     ) {
         val delayControlCard = createRef()
 
-        // ANZ -->
         val activity = LocalContext.current as? PlayerActivity
         val mpv = activity?.viewModel?.mpv
 
@@ -124,7 +123,6 @@ fun SubtitleDelayPanel(
                 ).toInt()
             delay = ((mpv?.getPropertyDouble("sub-delay") ?: 0.0) * 1000).toInt()
         }
-        // ANZ <--
         SubtitleDelayCard(
             delay = if (affectedSubtitle == SubtitleDelayType.Secondary) secondaryDelay else delay,
             onDelayChange = {

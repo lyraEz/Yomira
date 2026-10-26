@@ -51,7 +51,6 @@ fun getCategoriesLabel(
         stringResource(MR.strings.exclude, excludedItemsText)
 }
 
-// AM (DISCORD) -->
 @ReadOnlyComposable
 @Composable
 fun getCategoriesLabel(
@@ -79,4 +78,3 @@ fun getCategoriesLabel(
     }
     return stringResource(MR.strings.include, includedItemsText)
 }
-// <-- AM (DISCORD)

@@ -15,30 +15,23 @@ class GetUpdates(
 ) {
 
     suspend fun await(seen: Boolean, after: Long): List<UpdatesWithRelations> {
-        // SY -->
         return flow {
             emit(repository.awaitWithSeen(seen, after, limit = 500))
         }
             .catchNPE()
             .first()
-        // SY <--
     }
 
     fun subscribe(instant: Instant): Flow<List<UpdatesWithRelations>> {
         return repository.subscribeAll(instant.toEpochMilli(), limit = 500)
-            // SY -->
             .catchNPE()
-        // SY <--
     }
 
     fun subscribe(seen: Boolean, after: Long): Flow<List<UpdatesWithRelations>> {
         return repository.subscribeWithSeen(seen, after, limit = 500)
-            // SY -->
             .catchNPE()
-        // SY <--
     }
 
-    // SY -->
     private fun <T> Flow<T>.catchNPE() = retry {
         if (it is NullPointerException) {
             delay(5.seconds)
@@ -47,5 +40,4 @@ class GetUpdates(
             false
         }
     }
-    // SY <--
 }

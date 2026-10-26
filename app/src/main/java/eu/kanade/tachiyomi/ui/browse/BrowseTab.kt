@@ -134,9 +134,7 @@ data object BrowseTab : Tab {
             searchQuery = searchQuery,
             onChangeSearchQuery = extensionsScreenModel::search,
             scrollable = false,
-            // YMR -->
             largeTitle = true,
-            // YMR <--
         )
         LaunchedEffect(state, showFeedInBrowse) {
             switchToExtensionTabChannel.receiveAsFlow()
@@ -148,9 +146,7 @@ data object BrowseTab : Tab {
 
         LaunchedEffect(Unit) {
             (context as? MainActivity)?.ready = true
-            // AM (DISCORD) -->
             DiscordRPCService.setAnimeScreen(context, DiscordScreen.BROWSE)
-            // <-- AM (DISCORD)
         }
     }
 }

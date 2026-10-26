@@ -31,9 +31,7 @@ import kotlinx.coroutines.sync.withLock
 class DownloadProvider(
     private val context: Context,
     private val storageManager: StorageManager = Injekt.get(),
-    // AM (FILE_SIZE) -->
     private val localFileSystem: LocalAnimeSourceFileSystem = Injekt.get(),
-    // <-- AM (FILE_SIZE)
 ) {
 
     private val downloadsDir: UniFile?
@@ -262,7 +260,6 @@ class DownloadProvider(
         return listOf(episodeDirName, oldEpisodeDirName)
     }
 
-    // AM (FILE_SIZE) -->
     /**
      * Returns an episode file size in bytes.
      * Returns null if the episode is not found in expected location
@@ -288,5 +285,4 @@ class DownloadProvider(
             findEpisodeDir(episodeName, episodeScanlator, animeTitle, source, episodeNumber)?.size()
         }
     }
-    // <-- AM (FILE_SIZE)
 }

@@ -58,12 +58,9 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
     private val notifier = AppUpdateNotifier(context)
     private val network: NetworkHelper by injectLazy()
 
-    // KMK -->
     private val preferences = Injekt.get<UnsortedPreferences>()
-    // KMK <--
 
     override suspend fun doWork(): Result {
-        // KMK -->
         val idleRun = inputData.getBoolean(SCHEDULED_RUN, false)
         if (idleRun) {
             if (!context.packageManager.canRequestPackageInstalls()) {
@@ -80,7 +77,6 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
                 }
             }
         }
-        // KMK <--
 
         val url = inputData.getString(EXTRA_DOWNLOAD_URL)
         val title = inputData.getString(EXTRA_DOWNLOAD_TITLE) ?: context.stringResource(MR.strings.app_name)
@@ -90,17 +86,13 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
         }
 
         setForegroundSafely()
-        // KMK -->
         instance = WeakReference(this)
-        // KMK <--
 
         withIOContext {
             downloadApk(title, url)
         }
 
-        // KMK -->
         instance = null
-        // KMK <--
 
         return Result.success()
     }
@@ -127,10 +119,8 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
         notifier.onDownloadStarted(title)
 
         val progressListener = object : ProgressListener {
-            // KMK -->
             // Total size of the downloading file, should be set when starting and kept over retries
             var totalSize = 0L
-            // KMK <--
 
             // Progress of the download
             var savedProgress = 0
@@ -139,11 +129,9 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
             var lastTick = 0L
 
             override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                // KMK -->
                 if (totalSize == 0L && contentLength > 0) {
                     totalSize = contentLength
                 }
-                // KMK <--
                 val progress = if (totalSize > 0) {
                     (100 * (bytesRead.toFloat() / totalSize)).toInt()
                 } else {
@@ -162,19 +150,15 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
             // File where the apk will be saved.
             val apkFile = File(context.externalCacheDir, "update.apk")
 
-            // KMK -->
             network.downloadFile(url, apkFile, progressListener)
             if (isStopped) {
                 cancel()
                 return@coroutineScope
             }
-            // KMK <--
             notifier.cancel()
-            // KMK -->
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 startInstalling(apkFile, title)
             } else {
-                // KMK <--
                 notifier.promptInstall(apkFile.getUriCompat(context))
             }
         } catch (e: Exception) {
@@ -187,15 +171,12 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
             } else {
                 notifier.onDownloadError(
                     url,
-                    // KMK -->
                     e.message,
-                    // KMK <--
                 )
             }
         }
     }
 
-    // KMK -->
     @RequiresApi(31)
     private suspend fun startInstalling(file: File, title: String) {
         try {
@@ -250,32 +231,25 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
             notifier.promptInstall(file.getUriCompat(context))
         }
     }
-    // KMK <--
 
     companion object {
         private const val TAG = "AppUpdateDownload"
 
-        // KMK -->
         const val PACKAGE_INSTALLED_ACTION =
             "${BuildConfig.APPLICATION_ID}.SESSION_SELF_API_PACKAGE_INSTALLED"
         internal const val EXTRA_FILE_URI = "${BuildConfig.APPLICATION_ID}.AppInstaller.FILE_URI"
         private const val SCHEDULED_RUN = "scheduled_run"
-        // KMK <--
 
         const val EXTRA_DOWNLOAD_URL = "DOWNLOAD_URL"
         const val EXTRA_DOWNLOAD_TITLE = "DOWNLOAD_TITLE"
 
-        // KMK -->
         private var instance: WeakReference<AppUpdateDownloadJob>? = null
-        // KMK <--
 
         fun start(
             context: Context,
             url: String,
             title: String? = null,
-            // KMK -->
             scheduled: Boolean = false,
-            // KMK <--
         ) {
             val data = Data.Builder()
             data.putString(EXTRA_DOWNLOAD_URL, url)
@@ -283,7 +257,6 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
             val request = OneTimeWorkRequestBuilder<AppUpdateDownloadJob>()
                 .addTag(TAG)
                 .apply {
-                    // KMK -->
                     if (scheduled) {
                         data.putBoolean(SCHEDULED_RUN, true)
                         val restrictions = Injekt.get<UnsortedPreferences>().appShouldAutoUpdate().get()
@@ -311,7 +284,6 @@ class AppUpdateDownloadJob(private val context: Context, workerParams: WorkerPar
                         setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.MINUTES)
                     } else {
                         setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                        // KMK <--
                         setConstraints(
                             Constraints(
                                 requiredNetworkType = NetworkType.CONNECTED,

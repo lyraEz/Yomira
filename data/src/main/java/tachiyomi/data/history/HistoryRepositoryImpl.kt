@@ -73,7 +73,6 @@ class HistoryRepositoryImpl(
         }
     }
 
-    // SY -->
     override suspend fun upsertHistory(historyUpdates: List<HistoryUpdate>) {
         try {
             handler.await(true) {
@@ -93,5 +92,4 @@ class HistoryRepositoryImpl(
     override suspend fun getByAnimeId(animeId: Long): List<History> {
         return handler.awaitList { historyQueries.getHistoryByAnimeId(animeId, HistoryMapper::mapHistory) }
     }
-    // SY <--
 }

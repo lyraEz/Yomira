@@ -1,4 +1,3 @@
-// AM (CONNECTIONS) -->
 package eu.kanade.tachiyomi.data.connections
 
 import androidx.annotation.CallSuper
@@ -48,4 +47,3 @@ abstract class ConnectionsService(val id: Long) {
         get() = getUsername().isNotEmpty() &&
             getPassword().isNotEmpty()
 }
-// <-- AM (CONNECTIONS)

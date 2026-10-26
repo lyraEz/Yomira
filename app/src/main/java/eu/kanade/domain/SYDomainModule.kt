@@ -96,9 +96,7 @@ class SYDomainModule : InjektModule {
         addFactory { DeleteByMergeId(get()) }
         addFactory { DeleteMergeById(get()) }
         addFactory { GetMergedAnimeForDownloading(get()) }
-        // KMK -->
 //        addFactory { SmartSearchMerge(get()) }
-        // KMK <--
 
 //        addFactory { GetFavoriteEntries(get()) }
 //        addFactory { InsertFavoriteEntries(get()) }
@@ -122,9 +120,7 @@ class SYDomainModule : InjektModule {
         addFactory { GetSavedSearchGlobalFeed(get()) }
         addFactory { GetSavedSearchBySourceIdFeed(get()) }
         addFactory { UpdateFeedSavedSearch(get()) }
-        // KMK -->
         addFactory { ReorderFeed(get()) }
-        // KMK <--
 
         addSingletonFactory<FeedSavedSearchCategoryRepository> { FeedSavedSearchCategoryRepositoryImpl(get()) }
         addFactory { GetFeedSavedSearchCategories(get()) }

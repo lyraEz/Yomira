@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Writes the text of a GitHub release (also shown by the in-app updater) from CHANGELOG.md.
 
-The section "## Yomira [<version>]" is turned into short, friendly notes:
+The section "## Yomira [<version>]" is turned into short notes:
   intro paragraph   -> lead line in bold
-  ### Added         -> ✨ Novidades
-  ### Changed/Improved -> 🚀 Melhorias
-  ### Fixed         -> 🐛 Correções
-  ### Removed       -> 🗑️ Removido (only when the section exists, i.e. something big went away)
+  ### Added         -> New
+  ### Changed/Improved -> Improved
+  ### Fixed         -> Fixed
+  ### Removed       -> Removed (only when the section exists)
   ### Other         -> left out (technical)
 followed by a short "how to update" footer.
 
@@ -18,14 +18,13 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CHANGELOG = ROOT / "CHANGELOG.md"
-CERT_FILE = ROOT / "docs" / "yomira" / "signing-certificate.sha256"
+CERT_FILE = ROOT / "docs" / "signing-certificate.sha256"
 
-# Section titles carry an emoji; the items themselves stay plain text.
 SECTIONS = [
-    ("✨ Novidades", ("added",)),
-    ("🚀 Melhorias", ("changed", "improved")),
-    ("🐛 Correções", ("fixed",)),
-    ("🗑️ Removido", ("removed",)),
+    ("New", ("added",)),
+    ("Improved", ("changed", "improved")),
+    ("Fixed", ("fixed",)),
+    ("Removed", ("removed",)),
 ]
 
 
@@ -70,7 +69,7 @@ def notes(version: str) -> str:
     section = changelog_section(version)
     out: list[str] = []
     if section is None:
-        out.append("Correções e melhorias.")
+        out.append("Fixes and improvements.")
     else:
         intro, groups = parse(section)
         if intro:
@@ -84,16 +83,16 @@ def notes(version: str) -> str:
     cert = CERT_FILE.read_text(encoding="utf-8").strip().lower() if CERT_FILE.exists() else ""
     footer = [
         "---",
-        "**📲 Como atualizar:** no app, em *Mais → Sobre → Verificar atualizações*, ou baixe um dos APKs abaixo. "
-        "Instala por cima da versão anterior sem perder nada.",
+        "**How to update:** in the app, *More > About > Check for updates*, or download one of the APKs "
+        "below. It installs over the previous version and keeps your data.",
         "\n".join([
-            f"- `Yomira-v{version}-arm64-v8a.apk`: a maioria dos celulares",
-            f"- `Yomira-v{version}-armeabi-v7a.apk`: celulares de 32 bits",
-            f"- `Yomira-v{version}-universal.apk`: qualquer celular (arquivo maior)",
+            f"- `Yomira-v{version}-arm64-v8a.apk`: most phones",
+            f"- `Yomira-v{version}-armeabi-v7a.apk`: 32-bit phones",
+            f"- `Yomira-v{version}-universal.apk`: any phone (larger file)",
         ]),
     ]
     if cert:
-        footer.append(f"*Assinatura SHA-256 `{cert}`. Somas dos arquivos em `SHA256SUMS.txt`.*")
+        footer.append(f"*Signing certificate SHA-256 `{cert}`. File checksums are in `SHA256SUMS.txt`.*")
     out.extend(footer)
     return "\n\n".join(out) + "\n"
 

@@ -45,7 +45,7 @@
         tools:ignore="ProtectedPermissions" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <!-- YMR: Anime4K processing runs as a media processing service on Android 15+ -->
+    <!-- Anime4K processing runs as a media processing service on Android 15+ -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
 
     <!-- Remove permission from Firebase dependency -->
@@ -53,7 +53,7 @@
         android:name="com.google.android.gms.permission.AD_ID"
         tools:node="remove" />
 
-    <!-- YMR: the Discord SDK is only used for Rich Presence; drop what its voice chat needs -->
+    <!-- the Discord SDK is only used for Rich Presence; drop what its voice chat needs -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" tools:node="remove" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" tools:node="remove" />
@@ -62,7 +62,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:node="remove" />
 
     <queries>
-        <!-- YMR: the Discord app, for Rich Presence -->
+        <!-- the Discord app, for Rich Presence -->
         <package android:name="com.discord" />
         <intent>
             <action android:name="eu.kanade.tachiyomi.ANIMESOURCE" />
@@ -107,7 +107,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- YMR -->
                 <data android:scheme="yomira" />
                 <data android:scheme="aniyomi" />
                 <data android:scheme="mihon" />
@@ -154,7 +153,7 @@
             android:exported="false"
             android:process=":error_handler" />
 
-        <!-- YMR: plain-View crash report in its own process; see yomira.diagnostics.CrashGuard -->
+        <!-- plain-View crash report in its own process; see yomira.diagnostics.CrashGuard -->
         <activity
             android:name="yomira.diagnostics.CrashReportActivity"
             android:exported="false"
@@ -359,7 +358,7 @@
                 android:value="true" />
         </service>
 
-        <!-- YMR: mediaProcessing for the Anime4K worker (Android 15+) -->
+        <!-- mediaProcessing for the Anime4K worker (Android 15+) -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync|mediaProcessing"
@@ -405,7 +404,7 @@
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
 
-        <!-- YMR: Discord SDK login screen and voice service, unused by Rich Presence -->
+        <!-- Discord SDK login screen and voice service, unused by Rich Presence -->
         <activity
             android:name="com.discord.socialsdk.AuthenticationActivity"
             tools:node="remove" />

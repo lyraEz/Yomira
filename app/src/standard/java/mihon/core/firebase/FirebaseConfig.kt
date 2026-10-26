@@ -15,11 +15,9 @@ object FirebaseConfig {
         analytics = FirebaseAnalytics.getInstance(context)
         FirebaseApp.initializeApp(context)
         crashlytics = FirebaseCrashlytics.getInstance()
-        // KMK -->
         if (isPreviewBuildType) {
             analytics.setUserProperty("preview_version", BuildConfig.COMMIT_COUNT)
         }
-        // KMK <--
     }
 
     fun setAnalyticsEnabled(enabled: Boolean) {

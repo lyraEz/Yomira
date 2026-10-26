@@ -68,7 +68,6 @@ import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-// ANZ -->
 @Composable
 fun SubtitleSettingsColorsCard(
     modifier: Modifier = Modifier,
@@ -147,7 +146,6 @@ fun SubtitleSettingsColorsCard(
         }
     }
 }
-// ANZ <--
 
 fun Int.copyAsArgb(
     alpha: Int = this.alpha,
@@ -181,7 +179,6 @@ enum class SubColorType(
     ),
 }
 
-// ANZ -->
 fun resetColors(mpv: MPV?, preferences: SubtitlePreferences, type: SubColorType) {
     when (type) {
         SubColorType.Text -> {
@@ -209,7 +206,6 @@ fun getCurrentMPVColor(mpv: MPV?, colorType: SubColorType): Int {
         runCatching { android.graphics.Color.parseColor(it.uppercase()) }.getOrNull()
     } ?: android.graphics.Color.WHITE
 }
-// ANZ <--
 
 @Composable
 fun SubtitlesColorPicker(

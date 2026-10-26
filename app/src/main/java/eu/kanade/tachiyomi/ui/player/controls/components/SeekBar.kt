@@ -103,7 +103,7 @@ fun SeekbarWithTimers(
             },
             modifier = Modifier.width(videoTimerWidth),
         )
-        // YMR --> liquid glass slider (iOS style) instead of the Material seeker
+        // liquid glass slider (iOS style) instead of the Material seeker
         yomira.player.GlassSeekBar(
             value = position.coerceIn(0f, duration),
             range = 0f..duration.coerceAtLeast(0.001f),
@@ -116,7 +116,6 @@ fun SeekbarWithTimers(
                     .map { it.start }
             },
             modifier = Modifier.weight(1f),
-            // YMR <--
         )
         VideoTimer(
             value = if (timersInverted.second) position - duration else duration,

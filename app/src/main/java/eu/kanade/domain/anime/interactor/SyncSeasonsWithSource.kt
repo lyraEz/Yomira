@@ -1,4 +1,3 @@
-// AY -->
 package eu.kanade.domain.anime.interactor
 
 import eu.kanade.tachiyomi.animesource.AnimeSource
@@ -114,4 +113,3 @@ class SyncSeasonsWithSource(
         return sourceSeasons
     }
 }
-// <-- AY

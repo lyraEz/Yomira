@@ -96,9 +96,7 @@ fun createPipAction(
             context,
             requestCode,
             Intent(PIP_INTENTS_FILTER).putExtra(PIP_INTENT_ACTION, controlType).setPackage(context.packageName),
-            // ANZ -->
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-            // ANZ <--
         ),
     )
     action.isEnabled = isEnabled

@@ -5,7 +5,6 @@ import `is`.xyz.mpv.MPVNode
 import logcat.LogPriority
 import logcat.logcat
 
-// ANZ -->
 class PlayerObserver(val activity: PlayerActivity) :
     MPV.EventObserver,
     MPV.LogObserver {
@@ -65,4 +64,3 @@ class PlayerObserver(val activity: PlayerActivity) :
         const val TRACK_LOAD_FAILURE = "Can not open external file "
     }
 }
-// ANZ <--

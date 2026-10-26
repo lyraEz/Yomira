@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.player
 
 import eu.kanade.tachiyomi.animesource.model.Hoster
 
-// YMR -->
 /**
  * Pure rules for moving between episodes inside the player.
  *
@@ -77,4 +76,3 @@ data class PlaybackError(
         STREAM_FAILED,
     }
 }
-// YMR <--

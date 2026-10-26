@@ -52,9 +52,7 @@ enum class AnimeCover(val ratio: Float) {
     Square(1f / 1f),
     Book(2f / 3f),
 
-    // KMK -->
     Panorama(3f / 2f),
-    // KMK <--
     ;
 
     enum class Size {
@@ -70,7 +68,6 @@ enum class AnimeCover(val ratio: Float) {
         contentDescription: String = "",
         shape: Shape = MaterialTheme.shapes.medium,
         onClick: (() -> Unit)? = null,
-        // KMK -->
         alpha: Float = 1f,
         bgColor: Color? = null,
         @ColorInt tint: Int? = null,
@@ -86,7 +83,6 @@ enum class AnimeCover(val ratio: Float) {
          * when a screen can force panorama on or off independently.
          */
         measureRatio: Boolean = CoverSettings.panoramaCover,
-        // KMK <--
     ) {
         val context = LocalContext.current
         val animatedTransitions = CoverSettings.animatedTransitions
@@ -336,12 +332,10 @@ enum class AnimeCover(val ratio: Float) {
         fun getRatio(animeId: Long): Float {
             if (!CoverSettings.panoramaCover) return Book.ratio
 
-            // ANZ -->
             // Observed, not `remember(animeId)`-ed: the ratio is measured only once the cover
             // has loaded, i.e. after the first composition here. Memoising the fallback made
             // every caller keep the book aspect until its cell was recycled and composed again.
             return CoverColorObserver.ratioState(animeId).value ?: Book.ratio
-            // ANZ <--
         }
 
         @Composable
@@ -352,13 +346,11 @@ enum class AnimeCover(val ratio: Float) {
             // the default configuration and every cover on screen reads it.
             if (!usePanorama) return Book to Book.ratio
 
-            // ANZ -->
             // See getRatio: the measured ratio has to be observed, not memoised, or a cell that
             // composed before its cover loaded stays book-shaped until it is recycled.
             val ratio = CoverColorObserver.ratioState(animeId).value ?: Book.ratio
 
             return if (ratio > RatioSwitchToPanorama) Panorama to ratio else Book to ratio
-            // ANZ <--
         }
 
         /**
@@ -384,7 +376,6 @@ enum class AnimeCoverHide(private val ratio: Float) {
         contentDescription: String = "",
         shape: Shape = MaterialTheme.shapes.medium,
         onClick: (() -> Unit)? = null,
-        // KMK -->
         /** background color, which used for loading/error indicator */
         bgColor: Color? = CoverPlaceholderColor,
         /** onBackground color, which used for loading/error indicator */

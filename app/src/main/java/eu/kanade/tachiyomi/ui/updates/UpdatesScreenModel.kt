@@ -124,9 +124,7 @@ class UpdatesScreenModel(
                     downloadStateProvider = { downloadState },
                     downloadProgressProvider = { activeDownload?.progress ?: 0 },
                     selected = update.episodeId in selectedEpisodeIds,
-                    // AM (FILE_SIZE) -->
                     fileSize = null,
-                    // <-- AM (FILE_SIZE)
                 )
             }
             .toPersistentList()
@@ -294,7 +292,6 @@ class UpdatesScreenModel(
         toggleAllSelection(false)
     }
 
-    // AM (FILLERMARK) -->
     /**
      * Fillermarks the given list of episodes.
      * @param updates the list of episodes to fillermark.
@@ -308,7 +305,6 @@ class UpdatesScreenModel(
         }
         toggleAllSelection(false)
     }
-    // <-- AM (FILLERMARK)
 
     /**
      * Downloads the given list of episodes with the manager.
@@ -535,9 +531,7 @@ data class UpdatesItem(
     val downloadStateProvider: () -> Download.State,
     val downloadProgressProvider: () -> Int,
     val selected: Boolean = false,
-    // AM (FILE_SIZE) -->
     var fileSize: Long?,
-    // <-- AM (FILE_SIZE)
 )
 
 /** String to identify which anime's update on which day it is collapsing */

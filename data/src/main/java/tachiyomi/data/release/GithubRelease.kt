@@ -13,10 +13,8 @@ data class GithubRelease(
     @SerialName("body") val info: String,
     @SerialName("html_url") val releaseLink: String,
     @SerialName("assets") val assets: List<GitHubAssets>,
-    // KMK -->
     @SerialName("prerelease") val preRelease: Boolean = false,
     @SerialName("draft") val draft: Boolean = false,
-    // KMK <--
 )
 
 /**
@@ -42,7 +40,6 @@ val gitHubUsernameMentionRegex =
         RegexOption.IGNORE_CASE,
     )
 
-// KMK -->
 /**
  * Convert from: https://github.com/lyraEz/Yomira/compare/23d862d17...48fb4a2e6
  * to: [lyraEz/Yomira@23d862d17...48fb4a2e6](https://github.com/lyraEz/Yomira/compare/23d862d17...48fb4a2e6)
@@ -50,7 +47,6 @@ val gitHubUsernameMentionRegex =
 val gitHubCommitsCompareRegex =
     """(\[[^]]+]\()?https://github.com/(?<owner>[^/]+)/(?<repo>[^/]+)/compare/(?<from>[0-9a-f.rv]+)\.\.\.(?<to>[0-9a-f.rv]+)\)?"""
         .toRegex(RegexOption.IGNORE_CASE)
-// KMK <--
 
 val releaseMapper: (GithubRelease) -> Release = {
     Release(
@@ -59,7 +55,6 @@ val releaseMapper: (GithubRelease) -> Release = {
             .replace(gitHubUsernameMentionRegex) { mention ->
                 "[${mention.value}](https://github.com/${mention.value.substring(1)})"
             }
-            // KMK -->
             .replace(gitHubCommitsCompareRegex) { matchResult ->
                 val owner = matchResult.groups["owner"]!!.value
                 val repo = matchResult.groups["repo"]!!.value
@@ -68,12 +63,9 @@ val releaseMapper: (GithubRelease) -> Release = {
 
                 "[$owner/$repo@$from...$to](https://github.com/$owner/$repo/compare/$from...$to)"
             },
-        // KMK <--
         it.releaseLink,
         it.assets.map(GitHubAssets::downloadLink),
-        // KMK -->
         preRelease = it.preRelease,
         draft = it.draft,
-        // KMK <--
     )
 }

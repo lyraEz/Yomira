@@ -163,7 +163,6 @@ abstract class SearchScreenModel(
                             source.getSearchAnime(1, query, FilterList())
                         }
 
-                        // ANZ -->
                         // Some sources list the same title twice on one page. Each entry then resolves
                         // to the same local anime id, and the global search card row keys its LazyRow by
                         // that id, so a duplicate crashes the app with
@@ -172,7 +171,6 @@ abstract class SearchScreenModel(
                         val titles = page.animes
                             .map { networkToLocalAnime.await(it.toDomainAnime(source.id)) }
                             .distinctBy { it.id }
-                        // ANZ <--
 
                         if (isActive) {
                             updateItem(source, SearchItemResult.Success(titles))

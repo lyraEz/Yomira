@@ -99,9 +99,7 @@ object PlayerSettingsPlayerScreen : SearchableSettings {
             ),
             getDisplayGroup(playerPreferences = playerPreferences),
             getIntroSkipGroup(playerPreferences = playerPreferences),
-            // YMR -->
             yomira.metadata.metadataPreferencesGroup(),
-            // YMR <--
             getFillerSkipGroup(playerPreferences = playerPreferences),
             if (deviceSupportsPip) getPipGroup(playerPreferences = playerPreferences) else null,
             getExternalPlayerGroup(

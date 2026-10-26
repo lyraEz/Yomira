@@ -79,12 +79,8 @@ fun LibrarySettingsDialog(
     onDismissRequest: () -> Unit,
     screenModel: LibrarySettingsScreenModel,
     category: Category?,
-    // SY -->
     hasCategories: Boolean,
-    // SY <--
-    // KMK -->
     categories: List<Category>,
-    // KMK <--
 ) {
     TabbedDialog(
         onDismissRequest = onDismissRequest,
@@ -92,9 +88,7 @@ fun LibrarySettingsDialog(
             stringResource(MR.strings.action_filter),
             stringResource(MR.strings.action_sort),
             stringResource(MR.strings.action_display),
-            // SY -->
             stringResource(SYMR.strings.group),
-            // SY <--
         ),
     ) { page ->
         Column(
@@ -105,9 +99,7 @@ fun LibrarySettingsDialog(
             when (page) {
                 0 -> FilterPage(
                     screenModel = screenModel,
-                    // KMK -->
                     categories = categories,
-                    // KMK <--
                 )
                 1 -> SortPage(
                     category = category,
@@ -116,12 +108,10 @@ fun LibrarySettingsDialog(
                 2 -> DisplayPage(
                     screenModel = screenModel,
                 )
-                // SY -->
                 3 -> GroupPage(
                     screenModel = screenModel,
                     hasCategories = hasCategories,
                 )
-                // SY <--
             }
         }
     }
@@ -135,7 +125,7 @@ private fun ColumnScope.FilterPage(
 ) {
     val filterDownloaded by screenModel.libraryPreferences.filterDownloaded().collectAsState()
     val downloadedOnly by screenModel.preferences.downloadedOnly().collectAsState()
-    // ANZ: Yomira exposes this as a Preference value, not a function.
+    // Yomira exposes this as a Preference value, not a function.
     val autoUpdateAnimeRestrictions by screenModel.libraryPreferences.autoUpdateAnimeRestrictions.collectAsState()
 
     TriStateItem(
@@ -148,7 +138,7 @@ private fun ColumnScope.FilterPage(
         enabled = !downloadedOnly,
         onClick = { screenModel.toggleFilter(LibraryPreferences::filterDownloaded) },
     )
-    // ANZ: upstream names this filter "unread".
+    // upstream names this filter "unread".
     val filterUnseen by screenModel.libraryPreferences.filterUnseen().collectAsState()
     TriStateItem(
         label = stringResource(MR.strings.action_filter_unseen),
@@ -182,21 +172,17 @@ private fun ColumnScope.FilterPage(
             onClick = { screenModel.toggleFilter(LibraryPreferences::filterIntervalCustom) },
         )
     }
-    // SY -->
     val filterLewd by screenModel.libraryPreferences.filterLewd().collectAsState()
     TriStateItem(
         label = stringResource(SYMR.strings.lewd),
         state = filterLewd,
         onClick = { screenModel.toggleFilter(LibraryPreferences::filterLewd) },
     )
-    // SY <--
 
-    // KMK -->
     CategoriesFilter(
         libraryPreferences = screenModel.libraryPreferences,
         categories = categories,
     )
-    // KMK <--
 
     val trackers by screenModel.trackersFlow.collectAsState()
     when (trackers.size) {
@@ -233,7 +219,6 @@ private fun ColumnScope.SortPage(
     screenModel: LibrarySettingsScreenModel,
 ) {
     val trackers by screenModel.trackersFlow.collectAsState()
-    // SY -->
     val globalSortMode by screenModel.libraryPreferences.sortingMode().collectAsState()
     val sortingMode = if (screenModel.grouping == LibraryGroup.BY_DEFAULT) {
         category.sort.type
@@ -249,7 +234,6 @@ private fun ColumnScope.SortPage(
         screenModel.libraryPreferences.sortTagsForLibrary().changes()
             .map { it.isNotEmpty() }
     }.collectAsState(initial = screenModel.libraryPreferences.sortTagsForLibrary().get().isNotEmpty())
-    // SY <--
 
     val options = remember(trackers.isEmpty()/* SY --> */, hasSortTags/* SY <-- */) {
         val trackerMeanPair = if (trackers.isNotEmpty()) {
@@ -257,16 +241,14 @@ private fun ColumnScope.SortPage(
         } else {
             null
         }
-        // SY -->
         val tagSortPair = if (hasSortTags) {
             SYMR.strings.tag_sorting to LibrarySort.Type.TagList
         } else {
             null
         }
-        // SY <--
         listOfNotNull(
             MR.strings.action_sort_alpha to LibrarySort.Type.Alphabetical,
-            // ANZ: upstream names these types TotalChapters/LastRead/UnreadCount/LatestChapter/ChapterFetchDate.
+            // upstream names these types TotalChapters/LastRead/UnreadCount/LatestChapter/ChapterFetchDate.
             MR.strings.action_sort_total_episodes to LibrarySort.Type.TotalEpisodes,
             MR.strings.action_sort_last_seen to LibrarySort.Type.LastSeen,
             AMR.strings.action_sort_last_update_check to LibrarySort.Type.LastUpdate,
@@ -276,9 +258,7 @@ private fun ColumnScope.SortPage(
             MR.strings.action_sort_date_added to LibrarySort.Type.DateAdded,
             trackerMeanPair,
             MR.strings.action_sort_airing_time to LibrarySort.Type.AiringTime,
-            // SY -->
             tagSortPair,
-            // SY <--
             MR.strings.action_sort_random to LibrarySort.Type.Random,
         )
     }
@@ -323,7 +303,7 @@ private val displayModes = listOf(
     MR.strings.action_display_comfortable_grid to LibraryDisplayMode.ComfortableGrid,
     MR.strings.action_display_list to LibraryDisplayMode.List,
     MR.strings.action_display_cover_only_grid to LibraryDisplayMode.CoverOnlyGrid,
-    // ANZ: upstream adds a `ComfortableGridPanorama` display mode here; Yomira keeps panorama
+    // upstream adds a `ComfortableGridPanorama` display mode here; Yomira keeps panorama
     // as its own PanoramaMode preference (rendered below) and has no such enum entry.
 )
 
@@ -343,7 +323,6 @@ private fun ColumnScope.DisplayPage(
         }
     }
 
-    // ANZ -->
     // Yomira-specific: panorama mode and the chip-based grid design. Upstream instead offers a
     // panorama display mode plus a SliderItem whose overload this branch of presentation-core
     // does not have, so these blocks are kept as-is.
@@ -391,14 +370,13 @@ private fun ColumnScope.DisplayPage(
             )
         }
     }
-    // ANZ <--
 
     HeadingItem(MR.strings.overlay_header)
     CheckboxItem(
         label = stringResource(MR.strings.action_display_download_badge_anime),
         pref = screenModel.libraryPreferences.downloadBadge(),
     )
-    // ANZ: ported from upstream; the library renderer does not show this badge yet.
+    // ported from upstream; the library renderer does not show this badge yet.
     CheckboxItem(
         label = stringResource(AMR.strings.action_display_unseen_badge),
         pref = screenModel.libraryPreferences.unreadBadge(),
@@ -411,7 +389,6 @@ private fun ColumnScope.DisplayPage(
         label = stringResource(MR.strings.action_display_language_badge),
         pref = screenModel.libraryPreferences.languageBadge(),
     )
-    // KMK -->
     val showLang by screenModel.libraryPreferences.languageBadge().collectAsState()
     if (showLang) {
         CheckboxItem(
@@ -423,7 +400,6 @@ private fun ColumnScope.DisplayPage(
         label = stringResource(KMR.strings.action_display_source_badge),
         pref = screenModel.libraryPreferences.showSourceIcon(),
     )
-    // KMK <--
     CheckboxItem(
         label = stringResource(AMR.strings.action_display_show_continue_watching_button),
         pref = screenModel.libraryPreferences.showContinueWatchingButton(),
@@ -434,22 +410,19 @@ private fun ColumnScope.DisplayPage(
         label = stringResource(MR.strings.action_display_show_tabs),
         pref = screenModel.libraryPreferences.categoryTabs(),
     )
-    // KMK -->
     CheckboxItem(
         label = stringResource(KMR.strings.action_show_hidden_categories),
         pref = screenModel.libraryPreferences.showHiddenCategories(),
     )
-    // KMK <--
     CheckboxItem(
         label = stringResource(MR.strings.action_display_show_number_of_items),
         pref = screenModel.libraryPreferences.categoryNumberOfItems(),
     )
 }
 
-// SY -->
 data class GroupMode(
     val int: Int,
-    // ANZ: Yomira's LibraryGroup.groupTypeStringRes returns an android R.string id, not a
+    // Yomira's LibraryGroup.groupTypeStringRes returns an android R.string id, not a
     // moko StringResource as in upstream.
     val nameRes: Int,
     val drawableRes: Int,
@@ -505,9 +478,7 @@ private fun ColumnScope.GroupPage(
         )
     }
 }
-// SY <--
 
-// KMK -->
 @Composable
 private fun CategoriesFilter(
     libraryPreferences: LibraryPreferences,
@@ -560,4 +531,3 @@ private fun CategoriesFilter(
         }
     }
 }
-// KMK <--

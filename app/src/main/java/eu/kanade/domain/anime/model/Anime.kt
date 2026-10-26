@@ -22,16 +22,13 @@ fun Anime.episodesFiltered(): Boolean {
     return unseenFilter != TriState.DISABLED ||
         downloadedFilter != TriState.DISABLED ||
         bookmarkedFilter != TriState.DISABLED ||
-        // AM (FILLERMARK) -->
         fillermarkedFilter != TriState.DISABLED
-    // <-- AM (FILLERMARK)
 }
 fun Anime.forceDownloaded(): Boolean {
     return favorite && Injekt.get<BasePreferences>().downloadedOnly().get()
 }
 
 fun Anime.copyFrom(other: SAnime): Anime {
-    // SY -->
     val author = other.author ?: ogAuthor
     val artist = other.artist ?: ogArtist
     val thumbnailUrl = other.thumbnail_url ?: ogThumbnailUrl
@@ -43,19 +40,14 @@ fun Anime.copyFrom(other: SAnime): Anime {
     } else {
         ogGenre
     }
-    // SY <--
     return this.copy(
-        // SY -->
         ogAuthor = author,
         ogArtist = artist,
         ogThumbnailUrl = thumbnailUrl,
         ogDescription = description,
         ogGenre = genres,
-        // SY <--
         backgroundUrl = backgroundUrl,
-        // SY -->
         ogStatus = other.status.toLong(),
-        // SY <--
         updateStrategy = other.update_strategy,
         initialized = other.initialized && initialized,
     )

@@ -12,7 +12,6 @@ import tachiyomi.core.common.i18n.stringResource
 import yomira.i18n.YMR
 import java.io.File
 
-// YMR -->
 /**
  * Reads a downloaded extension APK before it is handed to the system installer, so problems the
  * installer would only report as "App not installed" get a precise explanation instead.
@@ -131,4 +130,3 @@ object ExtensionApkInspector {
         return signatures.orEmpty().map { Hash.sha256(it.toByteArray()) }
     }
 }
-// YMR <--

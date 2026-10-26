@@ -109,14 +109,13 @@ internal class PermissionStep : OnboardingStep {
                     val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                         data = Uri.parse("package:${context.packageName}")
                     }
-                    // YMR --> some firmwares do not offer this screen; never crash the first-run setup
+                    // some firmwares do not offer this screen; never crash the first-run setup
                     val opened = context.startFirstAvailableActivity(
                         intent,
                         Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS),
                         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")),
                     )
                     if (!opened) context.toast(YMR.strings.settings_screen_unavailable)
-                    // YMR <--
                 },
             )
         }

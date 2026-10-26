@@ -143,13 +143,9 @@ class MainActivity : BaseActivity() {
 
     private var navigator: Navigator? = null
 
-    // AM (CONNECTIONS) -->
     private val connectionsPreferences: ConnectionsPreferences by injectLazy()
-    // <-- AM (CONNECTIONS)
 
-    // ANK -->
     private val mpvConfig: animiru.feature.mpvfiles.MpvConfig by injectLazy()
-    // ANK <--
 
     init {
         registerSecureActivity(this)
@@ -163,7 +159,7 @@ class MainActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
-        // YMR --> repeated launches that never got stable (e.g. a native renderer crash): show
+        // repeated launches that never got stable (e.g. a native renderer crash): show
         // the crash report instead of crashing again
         if (isLaunch && yomira.diagnostics.CrashGuard.onLaunch(this)) {
             startActivity(android.content.Intent(this, yomira.diagnostics.CrashReportActivity::class.java))
@@ -172,7 +168,6 @@ class MainActivity : BaseActivity() {
             android.os.Process.killProcess(android.os.Process.myPid())
             return
         }
-        // YMR <--
 
         val didMigration = Migrator.awaitAndRelease()
 
@@ -295,7 +290,6 @@ class MainActivity : BaseActivity() {
                         }
                         .launchIn(this)
 
-                    // AM (DISCORD) -->
                     connectionsPreferences.enableDiscordRPC().changes()
                         .drop(1)
                         .onEach {
@@ -325,7 +319,6 @@ class MainActivity : BaseActivity() {
                         .onEach {
                             DiscordRPCService.setAnimeScreen(this@MainActivity, DiscordRPCService.lastUsedScreen)
                         }.launchIn(this)
-                    // <-- AM (DISCORD)
                 }
 
                 HandleOnNewIntent(context = context, navigator = navigator)
@@ -392,15 +385,12 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    // ANK -->
     override fun onResume() {
         super.onResume()
         mpvConfig.copyFiles()
-        // YMR --> a few seconds on screen without crashing counts as a stable launch
+        // a few seconds on screen without crashing counts as a stable launch
         window.decorView.postDelayed({ yomira.diagnostics.CrashGuard.markStable(this) }, 8_000)
-        // YMR <--
     }
-    // ANK <--
 
     @Composable
     private fun HandleOnNewIntent(context: Context, navigator: Navigator) {
@@ -425,9 +415,7 @@ class MainActivity : BaseActivity() {
             if (updaterEnabled) {
                 kotlinx.coroutines.delay(15000) // Delay to let the app settle
                 try {
-                    // KMK -->
                     AppUpdateJob.setupTask(context)
-                    // KMK <--
                     // Heavy work (network + PackageManager/PackageInfo parsing) must stay off
                     // the main thread: running it here froze the whole UI for ~0.5s on
                     // mid-range devices a few seconds after every cold start.
@@ -607,9 +595,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun Intent.isAddExtensionRepoIntent(): Boolean {
-        // YMR -->
         val validSchemes = setOf("yomira", "aniyomi", "mihon", "tachiyomi")
-        // YMR <--
         val validHosts = setOf("add-repo", "extension-store")
         return scheme in validSchemes && data?.host in validHosts
     }
@@ -687,5 +673,3 @@ private const val SPLASH_MIN_DURATION = 500 // ms
 private const val SPLASH_MAX_DURATION = 5000 // ms
 private const val SPLASH_EXIT_ANIM_DURATION = 400L // ms
 
-// YMR -->
-// YMR <--

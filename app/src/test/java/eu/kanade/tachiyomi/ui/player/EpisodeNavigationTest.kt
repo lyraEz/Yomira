@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 
-// YMR -->
 /**
  * Regression tests for moving to the next episode inside the player.
  *
@@ -94,4 +93,3 @@ class EpisodeNavigationTest {
         outcome.reason shouldBe PlaybackError.Reason.NO_HOSTERS
     }
 }
-// YMR <--

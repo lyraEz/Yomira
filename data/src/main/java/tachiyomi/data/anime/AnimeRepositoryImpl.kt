@@ -101,11 +101,9 @@ class AnimeRepositoryImpl(
 
     override suspend fun insert(anime: Anime): Long? {
         return handler.awaitOneOrNullExecutable(inTransaction = true) {
-            // SY -->
             if (animesQueries.getIdByUrlAndSource(anime.url, anime.source).executeAsOneOrNull() != null) {
                 return@awaitOneOrNullExecutable animesQueries.getIdByUrlAndSource(anime.url, anime.source)
             }
-            // SY <--
             animesQueries.insert(
                 source = anime.source,
                 url = anime.url,
@@ -199,7 +197,6 @@ class AnimeRepositoryImpl(
         }
     }
 
-    // SY -->
     override suspend fun getAnimeBySourceId(sourceId: Long): List<Anime> {
         return handler.awaitList { animesQueries.getBySource(sourceId, AnimeMapper::mapAnime) }
     }
@@ -243,5 +240,4 @@ class AnimeRepositoryImpl(
             false
         }
     }
-    // SY <--
 }

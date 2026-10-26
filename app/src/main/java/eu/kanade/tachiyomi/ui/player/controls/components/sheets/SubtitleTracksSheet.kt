@@ -50,7 +50,6 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.player.playerRow
 
-// ANZ -->
 @Composable
 fun SubtitlesSheet(
     tracks: ImmutableList<VideoTrack>,
@@ -126,9 +125,7 @@ fun SubtitleTrackRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // YMR -->
             .playerRow()
-            // YMR <--
             .clickable(onClick = onClick)
             .padding(start = MaterialTheme.padding.small, end = MaterialTheme.padding.medium),
         verticalAlignment = Alignment.CenterVertically,
@@ -156,4 +153,3 @@ fun SubtitleTrackRow(
         }
     }
 }
-// ANZ <--

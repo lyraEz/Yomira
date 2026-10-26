@@ -1,0 +1,4 @@
+{
+  "$comment": "Spotless checks the Kotlin and XML files added after this commit (see buildSrc mihon.code.lint.gradle.kts). Pass -Pyomira.spotless.all=true to check every file.",
+  "baseCommit": "becbe2d13195a3b79b46026b5e410f29080ab06a"
+}

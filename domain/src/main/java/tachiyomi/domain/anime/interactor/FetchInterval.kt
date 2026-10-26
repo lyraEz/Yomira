@@ -147,7 +147,6 @@ class FetchInterval(
 
         private const val GRACE_PERIOD = 1L
 
-        // KMK -->
-        const val MANUAL_DISABLE = -1 // KMK <--
+        const val MANUAL_DISABLE = -1
     }
 }

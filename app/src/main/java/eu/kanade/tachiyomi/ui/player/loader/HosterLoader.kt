@@ -25,7 +25,6 @@ class HosterLoader {
          *
          * @return the indices of the hoster & video
          */
-        // ANZ -->
         fun selectBestVideo(hosterState: List<HosterState>, defaultSelector: String = ""): Pair<Int, Int> {
             if (defaultSelector.isNotBlank()) {
                 val strictRanked = DefaultStreamSelector.findRankedInHosters(defaultSelector, hosterState)
@@ -45,7 +44,6 @@ class HosterLoader {
                     }
                 }
             }
-            // ANZ <--
 
             val availableHosters = hosterState.withIndex()
                 .filter { (_, state) -> state is HosterState.Ready }

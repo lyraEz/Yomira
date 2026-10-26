@@ -21,11 +21,9 @@ interface SourceManager {
 
     fun getCatalogueSources(): List<CatalogueSource>
 
-    // SY -->
     fun getVisibleOnlineSources(): List<HttpSource>
 
     fun getVisibleCatalogueSources(): List<CatalogueSource>
-    // SY <--
 
     fun getStubSources(): List<StubSource>
 }

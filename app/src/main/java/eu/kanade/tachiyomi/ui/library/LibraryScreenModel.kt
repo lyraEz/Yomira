@@ -120,11 +120,9 @@ class LibraryScreenModel(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val downloadCache: DownloadCache = Injekt.get(),
     private val trackerManager: TrackerManager = Injekt.get(),
-    // SY -->
     private val getTracks: GetTracks = Injekt.get(),
     private val insertTrack: InsertTrack = Injekt.get(),
     private val deleteTrack: DeleteTrack = Injekt.get(),
-    // SY <--
 ) : StateScreenModel<LibraryScreenModel.State>(State()) {
 
     val useExternalDownloader = downloadPreferences.useExternalDownloader().get()
@@ -313,16 +311,12 @@ class LibraryScreenModel(
                     prefs.filterUnseen,
                     prefs.filterStarted,
                     prefs.filterBookmarked,
-                    // AM (FILLERMARK) -->
                     prefs.filterFillermarked,
-                    // <-- AM (FILLERMARK)
                     prefs.filterCompleted,
                     prefs.filterIntervalCustom,
                 ) + trackFilter.values
                 ).any { it != TriState.DISABLED } ||
-                // ANZ -->
                 prefs.filterCategories
-                // ANZ <--
         }
             .distinctUntilChanged()
             .onEach {
@@ -332,7 +326,6 @@ class LibraryScreenModel(
             }
             .launchIn(screenModelScope)
 
-        // SY -->
         libraryPreferences.groupLibraryBy().changes()
             .onEach {
                 mutableState.update { state ->
@@ -340,7 +333,6 @@ class LibraryScreenModel(
                 }
             }
             .launchIn(screenModelScope)
-        // SY <--
     }
 
     private suspend fun AnimeLibraryMap.applyFilters(
@@ -355,9 +347,7 @@ class LibraryScreenModel(
         val filterUnseen = prefs.filterUnseen
         val filterStarted = prefs.filterStarted
         val filterBookmarked = prefs.filterBookmarked
-        // AM (FILLERMARK) -->
         val filterFillermarked = prefs.filterFillermarked
-        // <-- AM (FILLERMARK)
         val filterCompleted = prefs.filterCompleted
         val filterIntervalCustom = prefs.filterIntervalCustom
 
@@ -387,11 +377,9 @@ class LibraryScreenModel(
             applyFilter(filterBookmarked) { it.libraryAnime.hasBookmarks }
         }
 
-        // AM (FILLERMARK) -->
         val filterFnFillermarked: (LibraryItem) -> Boolean = {
             applyFilter(filterFillermarked) { it.libraryAnime.hasFillermarks }
         }
-        // <-- AM (FILLERMARK)
 
         val filterFnCompleted: (LibraryItem) -> Boolean = {
             applyFilter(filterCompleted) { it.libraryAnime.anime.status.toInt() == SAnime.COMPLETED }
@@ -418,7 +406,6 @@ class LibraryScreenModel(
             !isExcluded && isIncluded
         }
 
-        // ANZ -->
         // Category filter. Each LibraryItem is a single (anime, category) pair, because
         // libraryView.sq LEFT JOINs animes_categories without aggregating, so an anime in N
         // categories yields N rows. Membership on the item's own category is therefore the
@@ -433,22 +420,17 @@ class LibraryScreenModel(
 
             prefs.includedCategories.isEmpty() || category in prefs.includedCategories
         }
-        // ANZ <--
 
         val filterFn: (LibraryItem) -> Boolean = {
             filterFnDownloaded(it) &&
                 filterFnUnseen(it) &&
                 filterFnStarted(it) &&
                 filterFnBookmarked(it) &&
-                // AM (FILLERMARK) -->
                 filterFnFillermarked(it) &&
-                // <-- AM (FILLERMARK)
                 filterFnCompleted(it) &&
                 filterFnIntervalCustom(it) &&
                 filterFnTracking(it) &&
-                // ANZ -->
                 filterFnCategories(it)
-                // ANZ <--
         }
 
         return this
@@ -481,10 +463,8 @@ class LibraryScreenModel(
 
         val keys = this.keys
         fun LibrarySort.comparator(): Comparator<LibraryItem> = Comparator { i1, i2 ->
-            // SY -->
             // Use groupSort when provided, otherwise use the sort from the category
             val sort = groupSort ?: keys.find { it.id == i1.libraryAnime.category }?.sort ?: LibrarySort.default
-            // SY <--
             when (sort.type) {
                 LibrarySort.Type.Alphabetical -> {
                     sortAlphabetically(i1, i2)
@@ -566,18 +546,14 @@ class LibraryScreenModel(
             libraryPreferences.filterUnseen().changes(),
             libraryPreferences.filterStarted().changes(),
             libraryPreferences.filterBookmarked().changes(),
-            // AM (FILLERMARK) -->
             libraryPreferences.filterFillermarkedAnime().changes(),
-            // <-- AM (FILLERMARK)
             libraryPreferences.filterCompleted().changes(),
             libraryPreferences.filterIntervalCustom().changes(),
             libraryPreferences.showSourceIcon().changes(),
             libraryPreferences.showLanguageIcon().changes(),
-            // ANZ -->
             libraryPreferences.filterCategories().changes(),
             libraryPreferences.filterCategoriesInclude().changes(),
             libraryPreferences.filterCategoriesExclude().changes(),
-            // ANZ <--
             transform = {
                 ItemPreferences(
                     downloadBadge = it[0] as Boolean,
@@ -589,18 +565,14 @@ class LibraryScreenModel(
                     filterUnseen = it[6] as TriState,
                     filterStarted = it[7] as TriState,
                     filterBookmarked = it[8] as TriState,
-                    // AM (FILLERMARK) -->
                     filterFillermarked = it[9] as TriState,
                     filterCompleted = it[10] as TriState,
                     filterIntervalCustom = it[11] as TriState,
-                    // <-- AM (FILLERMARK)
                     showSourceIcon = it[12] as Boolean,
                     showLanguageIcon = it[13] as Boolean,
-                    // ANZ -->
                     filterCategories = it[14] as Boolean,
                     includedCategories = (it[15] as Set<*>).mapNotNull { id -> (id as? String)?.toLongOrNull() }.toSet(),
                     excludedCategories = (it[16] as Set<*>).mapNotNull { id -> (id as? String)?.toLongOrNull() }.toSet(),
-                    // ANZ <--
                 )
             },
         )
@@ -675,7 +647,6 @@ class LibraryScreenModel(
         }
     }
 
-    // SY -->
     private fun AnimeLibraryMap.applyGrouping(groupType: Int, tracks: Map<Long, List<Track>>): AnimeLibraryMap {
         val items = when (groupType) {
             LibraryGroup.BY_DEFAULT -> this
@@ -702,7 +673,6 @@ class LibraryScreenModel(
 
         return items
     }
-    // SY <--
 
     /**
      * Flow of tracking filter preferences
@@ -1105,7 +1075,6 @@ class LibraryScreenModel(
         data class DeleteAnime(val anime: List<Anime>) : Dialog
     }
 
-    // SY -->
     /** Returns first unread chapter of a anime */
     suspend fun getFirstUnseen(anime: Anime): Episode? {
         return getNextEpisodes.await(anime.id).firstOrNull()
@@ -1326,18 +1295,14 @@ class LibraryScreenModel(
         val filterUnseen: TriState,
         val filterStarted: TriState,
         val filterBookmarked: TriState,
-        // AM (FILLERMARK) -->
         val filterFillermarked: TriState,
-        // <-- AM (FILLERMARK)
         val filterCompleted: TriState,
         val filterIntervalCustom: TriState,
         val showSourceIcon: Boolean,
         val showLanguageIcon: Boolean,
-        // ANZ -->
         val filterCategories: Boolean,
         val includedCategories: Set<Long>,
         val excludedCategories: Set<Long>,
-        // ANZ <--
     )
 
     @Immutable
@@ -1351,11 +1316,8 @@ class LibraryScreenModel(
         val showAnimeCount: Boolean = false,
         val showAnimeContinueButton: Boolean = false,
         val dialog: Dialog? = null,
-        // KMK -->
         val showEmptyCategoriesSearch: Boolean = true,
-        // KMK <--
-        // SY -->
-        val groupType: Int = LibraryGroup.BY_DEFAULT,        // SY <--
+        val groupType: Int = LibraryGroup.BY_DEFAULT,
         val folders: List<tachiyomi.domain.library.model.LibraryFolder> = emptyList(),
         val openFolderId: Long? = null,
     ) {

@@ -82,7 +82,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 @SuppressLint("MutableCollectionMutableState")
-// ANZ -->
 @Composable
 fun SubtitleSettingsTypographyCard(
     modifier: Modifier = Modifier,
@@ -238,7 +237,6 @@ fun SubtitleSettingsTypographyCard(
                     }
                 }
             }
-// ANZ <--
             Row(
                 modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium),
@@ -256,9 +254,7 @@ fun SubtitleSettingsTypographyCard(
                     onValueChangedEvent = {
                         font = it
                         preferences.subtitleFont().set(it)
-                        // ANZ -->
                         mpv?.setPropertyString("sub-font", it)
-                        // ANZ <--
                     },
                     leadingIcon = fontsLoadingIndicator,
                 )
@@ -272,9 +268,7 @@ fun SubtitleSettingsTypographyCard(
                 onChange = {
                     fontSize = it
                     preferences.subtitleFontSize().set(it)
-                    // ANZ -->
                     mpv?.setPropertyInt("sub-font-size", it)
-                    // ANZ <--
                 },
             ) {
                 Icon(Icons.Default.FormatSize, null)
@@ -316,9 +310,7 @@ fun SubtitleSettingsTypographyCard(
                             onClick = {
                                 borderStyle = it
                                 preferences.borderStyleSubtitles().set(it)
-                                // ANZ -->
                                 mpv?.setPropertyString("sub-border-style", it.value)
-                                // ANZ <--
                                 selectingBorderStyle = false
                             },
                             trailingIcon = {
@@ -340,9 +332,7 @@ fun SubtitleSettingsTypographyCard(
                 onChange = {
                     borderSize = it
                     preferences.subtitleBorderSize().set(it)
-                    // ANZ -->
                     mpv?.setPropertyInt("sub-border-size", it)
-                    // ANZ <--
                 },
                 max = 100,
                 icon = { Icon(Icons.Default.BorderColor, null) },
@@ -354,9 +344,7 @@ fun SubtitleSettingsTypographyCard(
                 onChange = {
                     shadowOffset = it
                     preferences.shadowOffsetSubtitles().set(it)
-                    // ANZ -->
                     mpv?.setPropertyInt("sub-shadow-offset", it)
-                    // ANZ <--
                 },
                 max = 100,
                 icon = { Icon(painterResource(R.drawable.sharp_shadow_24), null) },
@@ -367,7 +355,6 @@ fun SubtitleSettingsTypographyCard(
 
 private val FONT_EXTENSION_REGEX = Regex(""".*\.[ot]tf${'$'}""")
 
-// ANZ -->
 fun resetTypography(mpv: MPV?, preferences: SubtitlePreferences) {
     mpv?.setPropertyBoolean("sub-bold", preferences.boldSubtitles().deleteAndGet())
     mpv?.setPropertyBoolean("sub-italic", preferences.italicSubtitles().deleteAndGet())
@@ -378,7 +365,6 @@ fun resetTypography(mpv: MPV?, preferences: SubtitlePreferences) {
     mpv?.setPropertyInt("sub-shadow-offset", preferences.shadowOffsetSubtitles().deleteAndGet())
     mpv?.setPropertyString("sub-border-style", preferences.borderStyleSubtitles().deleteAndGet().value)
 }
-// ANZ <--
 
 enum class SubtitlesBorderStyle(
     val value: String,

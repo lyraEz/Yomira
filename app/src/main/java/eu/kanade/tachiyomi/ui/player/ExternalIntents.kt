@@ -95,21 +95,18 @@ class ExternalIntents {
 
         val pkgName = playerPreferences.externalPlayerPreference().get()
 
-        // AM (DISCORD) -->
         withIOContext {
             DiscordRPCService.setPlayerActivity(
                 context = context,
                 playerData = PlayerData(
                     incognitoMode = source.isNsfw() || basePreferences.incognitoMode().get(),
                     animeId = anime.id,
-                    // AM (CU)>
                     animeTitle = anime.ogTitle,
                     episodeNumber = episode.episodeNumber.toString(),
                     thumbnailUrl = anime.thumbnailUrl,
                 ),
             )
         }
-        // <-- AM (DISCORD)
 
         return if (videoUrl.toString().startsWith("magnet:")) {
             torrentIntentForPackage(context, videoUrl, video)
@@ -460,9 +457,7 @@ class ExternalIntents {
 
         // Update the episode's progress and history
         launchIO {
-            // AM (DISCORD) -->
             DiscordRPCService.setAnimeScreen(context, DiscordRPCService.lastUsedScreen)
-            // <-- AM (DISCORD)
             if (cause == "playback_completion" || (currentPosition == duration && duration == 0L)) {
                 saveEpisodeProgress(
                     currentExtEpisode,
@@ -531,9 +526,7 @@ class ExternalIntents {
                     id = currEp.id,
                     seen = seen,
                     bookmark = currEp.bookmark,
-                    // AM (FILLERMARK) -->
                     fillermark = currEp.fillermark,
-                    // <-- AM (FILLERMARK)
                     lastSecondSeen = lastSecondSeen,
                     totalSeconds = totalSeconds,
                 ),

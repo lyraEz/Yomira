@@ -133,19 +133,14 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class PlayerActivity : BaseActivity() {
 
-    // YMR --> never pin the highest refresh rate during playback: the video sets the pace
+    // never pin the highest refresh rate during playback: the video sets the pace
     override val pinHighRefreshRate: Boolean = false
-    // YMR <--
-    // ANZ -->
     private var httpServer: HttpServer? = null
 
-    // YMR -->
     private var previousUncaughtHandler: Thread.UncaughtExceptionHandler? = null
 
-    // YMR <--
     internal val viewModel by viewModels<PlayerViewModel>()
     internal val player by lazy { AniyomiMPVView(this, null) }
-    // ANZ <--
     private val mpv by lazy { viewModel.mpv }
     private val playerObserver by lazy { PlayerObserver(this) }
     private val windowInsetsController by lazy { WindowCompat.getInsetsController(window, window.decorView) }
@@ -159,17 +154,13 @@ class PlayerActivity : BaseActivity() {
     private val advancedPlayerPreferences: AdvancedPlayerPreferences = Injekt.get()
     private val subtitlePreferences: SubtitlePreferences = Injekt.get()
 
-    // ANK -->
     private val mpvConfig: MpvConfig = Injekt.get()
-    // ANK <--
 
     // Cast -->
     val castManager: CastManager by lazy { CastManager(this, Injekt.get()) }
     // <-- Cast
 
-    // AM (CONNECTIONS) -->
     private val connectionsPreferences: ConnectionsPreferences = Injekt.get()
-    // <-- AM (CONNECTIONS)
 
     private var audioFocusRequest: AudioFocusRequestCompat? = null
     private var restoreAudioFocus: () -> Unit = {}
@@ -182,7 +173,6 @@ class PlayerActivity : BaseActivity() {
 
     private var pipReceiver: BroadcastReceiver? = null
 
-    // ANZ -->
     /**
      * True from the moment PiP is entered until the activity is resumed again.
      *
@@ -195,7 +185,6 @@ class PlayerActivity : BaseActivity() {
      * user dismissed the window.
      */
     private var wasInPictureInPictureMode = false
-    // ANZ <--
 
     private val noisyReceiver = object : BroadcastReceiver() {
         var initialized = false
@@ -226,18 +215,14 @@ class PlayerActivity : BaseActivity() {
             }
         }
 
-        // ANK -->
         /** Upper bound on how long player startup blocks on a pending mpv config copy. */
         private const val MPV_COPY_AWAIT_TIMEOUT_MS = 5_000L
-        // ANK <--
 
-        // ANK -->
         /** mpv option names start alphanumeric and hold nothing but these; anything else is not one. */
         private val MPV_OPTION_NAME_REGEX = Regex("^[a-zA-Z0-9][a-zA-Z0-9_-]*$")
 
         /** A value made up of only these needs none of mpv's escaping mechanisms. */
         private val MPV_PLAIN_OPTION_VALUE_REGEX = Regex("^[a-zA-Z0-9_.:/+-]*$")
-        // ANK <--
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -270,7 +255,7 @@ class PlayerActivity : BaseActivity() {
                     "Unknown error",
                 )
                 withUIContext {
-                    // YMR --> once the episode is known the error stays inside the player, where the
+                    // once the episode is known the error stays inside the player, where the
                     // user can retry or pick another episode; without one there is nothing to show.
                     if (viewModel.currentEpisode.value != null && viewModel.currentSource.value != null) {
                         val reason = if (exception is PlayerViewModel.ExceptionWithStringResource &&
@@ -284,23 +269,19 @@ class PlayerActivity : BaseActivity() {
                     } else {
                         setInitialEpisodeError(exception)
                     }
-                    // YMR <--
                 }
-                // YMR --> loading hosters after a failed init dereferenced a null source
+                // loading hosters after a failed init dereferenced a null source
                 return@launchNonCancellable
-                // YMR <--
             }
 
             viewModel.updateIsLoadingHosters(false)
 
-            // ANZ -->
             viewModel.loadHosters(
                 source = viewModel.currentSource.value!!,
                 hosterList = initResult.first.hosterList ?: emptyList(),
                 hosterIndex = initResult.first.videoIndex.first,
                 videoIndex = initResult.first.videoIndex.second,
             )
-            // ANZ <--
         }
 
         setIntent(intent)
@@ -311,25 +292,20 @@ class PlayerActivity : BaseActivity() {
         enableEdgeToEdge()
         registerSecureActivity(this)
         super.onCreate(savedInstanceState)
-        // YMR --> Anime4K processing waits (or slows down) while the player is open
+        // Anime4K processing waits (or slows down) while the player is open
         yomira.anime4k.Anime4KQueue.setPlayerOpen(applicationContext, true)
-        // YMR <--
-        // YMR --> one-time return to the light player defaults (fixes the overheating presets)
+        // one-time return to the light player defaults (fixes the overheating presets)
         yomira.player.PlayerDefaults.migrate()
-        // YMR <--
 
-        // ANK -->
         // Registers before setupPlayerMPV() so MpvConfig stops wiping the config directory for as
         // long as this player lives.
         mpvConfig.onPlayerCreated()
-        // ANK <--
 
         setupPlayerMPV()
         setupPlayerAudio()
         setupMediaSession()
         setupPlayerOrientation()
 
-        // YMR -->
         // The player used to replace the process-wide handler with one that finished this activity,
         // so any background failure (e.g. while loading the next episode) closed the player, and the
         // handler outlived the activity. Background failures now surface as an in-player error;
@@ -352,7 +328,6 @@ class PlayerActivity : BaseActivity() {
                 }
             }
         }
-        // YMR <--
 
         viewModel.eventFlow
             .onEach { event ->
@@ -391,9 +366,7 @@ class PlayerActivity : BaseActivity() {
                         }
                     }
                     is PlayerViewModel.Event.ChangeVideoAspect -> {
-                        // ANZ -->
                         changeVideoAspect(event.aspect, event.showUpdate)
-                        // ANZ <--
                     }
                     PlayerViewModel.Event.CycleRotations -> {
                         cycleRotations()
@@ -408,26 +381,21 @@ class PlayerActivity : BaseActivity() {
                     PlayerViewModel.Event.ToggleKeyboard -> {
                         toggleShowSoftwareKeyboard()
                     }
-                    // ANK -->
                     is PlayerViewModel.Event.SetVideoLoadError -> {
-                        // YMR --> stay in the player; the overlay offers retry, servers and exit
+                        // stay in the player; the overlay offers retry, servers and exit
                         if (viewModel.currentEpisode.value != null) {
                             viewModel.showPlaybackError(PlaybackError.Reason.NO_PLAYABLE_VIDEO, event.error)
                         } else {
                             setInitialEpisodeError(event.error)
                         }
-                        // YMR <--
                     }
-                    // ANK <--
                 }
             }
             .launchIn(lifecycleScope)
 
-        // AM (DISCORD) -->
         viewModel.viewModelScope.launchIO {
             updateDiscordRPC(exitingPlayer = false)
         }
-        // <-- AM (DISCORD)
 
         // Cast -->
         castManager
@@ -435,10 +403,9 @@ class PlayerActivity : BaseActivity() {
 
         setContent {
             TachiyomiTheme {
-                // YMR --> liquid glass style and rounded shapes for the controls
+                // liquid glass style and rounded shapes for the controls
                 yomira.player.ProvidePlayerShapes {
                 yomira.glass.ProvideGlassStyle {
-                // YMR <--
                 Box(modifier = Modifier.fillMaxSize()) {
                     AndroidView(
                         factory = { player },
@@ -454,11 +421,9 @@ class PlayerActivity : BaseActivity() {
                             }
                         },
                     )
-                    // YMR -->
                     yomira.player.WarmFilterOverlay()
                     Box(modifier = Modifier.fillMaxSize()) {
-                    // YMR <--
-                    // YMR --> live glass over a small copy of the video while the controls show
+                    // live glass over a small copy of the video while the controls show
                     val controlsVisible by viewModel.controlsShown.collectAsState()
                     // The "Skip opening" button is glass too, even with the controls hidden.
                     val skipVisible by viewModel.skipIntroText.collectAsState()
@@ -469,31 +434,22 @@ class PlayerActivity : BaseActivity() {
                         active = controlsVisible || skipVisible != null,
                         paused = videoPaused == true,
                     ) {
-                    // YMR <--
                     PlayerControls(
                         viewModel = viewModel,
                         castManager = castManager, // Pass the castManager instance
-                        // ANZ -->
                         onBackPress = { backPressed() },
-                        // ANZ <--
                     )
-                    // YMR -->
                     }
                     }
                     yomira.player.FrameStatsOverlay(mpv = { viewModel.mpv })
-                    // YMR <--
-                    // YMR -->
                     }
-                    // YMR <--
-                }
-                // YMR -->
                 }
                 }
-                // YMR <--
+                }
             }
         }
 
-        // YMR --> match the screen's refresh rate to the video's frame rate
+        // match the screen's refresh rate to the video's frame rate
         lifecycleScope.launch {
             repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
                 launch { yomira.player.Smoothness.frameRateLoop(player, { viewModel.mpv }) }
@@ -535,9 +491,7 @@ class PlayerActivity : BaseActivity() {
                 }
             }
         }
-        // YMR <--
 
-        // ANK -->
         // Migrate system back gesture handling to OnBackPressedDispatcher
         onBackPressedDispatcher.addCallback(
             this,
@@ -545,7 +499,6 @@ class PlayerActivity : BaseActivity() {
                 override fun handleOnBackPressed() = backPressed()
             },
         )
-        // ANK <--
 
         onNewIntent(this.intent)
     }
@@ -553,14 +506,11 @@ class PlayerActivity : BaseActivity() {
     override fun onDestroy() {
         player.isExiting = true
 
-        // YMR -->
         if (previousUncaughtHandler != null) {
             Thread.setDefaultUncaughtExceptionHandler(previousUncaughtHandler)
             previousUncaughtHandler = null
         }
-        // YMR <--
 
-        // ANZ -->
         val serverToStop = httpServer
         httpServer = null
         if (serverToStop != null) {
@@ -568,7 +518,6 @@ class PlayerActivity : BaseActivity() {
                 runCatching { serverToStop.stop() }
             }
         }
-        // ANZ <--
 
         audioFocusRequest?.let {
             AudioManagerCompat.abandonAudioFocusRequest(audioManager, it)
@@ -587,32 +536,22 @@ class PlayerActivity : BaseActivity() {
 
         mpv.removeLogObserver(playerObserver)
         mpv.removeObserver(playerObserver)
-        // ANK -->
         // `mpv` is owned by the retained PlayerViewModel and must survive activity
         // recreation (e.g. config changes), so it's closed in onCleared() instead of here.
         // mpv.close()
-        // ANK <--
         castManager.cleanup()
 
-        // ANK -->
         mpvConfig.onPlayerDestroyed()
-        // ANK <--
 
-        // AM (DISCORD) -->
         updateDiscordRPC(exitingPlayer = true)
-        // <-- AM (DISCORD)
-        // YMR -->
         yomira.discord.PlayerPresence.onDestroy(this)
         yomira.anime4k.Anime4KQueue.setPlayerOpen(applicationContext, false)
-        // YMR <--
 
-        // ANZ -->
         pipReceiver?.let {
             runCatching { unregisterReceiver(it) }
             pipReceiver = null
         }
         runCatching { viewModel.pause() }
-        // ANZ <--
 
         super.onDestroy()
     }
@@ -623,9 +562,7 @@ class PlayerActivity : BaseActivity() {
         // Maintain active Cast session
         castManager.maintainCastSessionBackground()
 
-        // AM (DISCORD) -->
         updateDiscordRPC(exitingPlayer = true)
-        // <-- AM (DISCORD)
 
         if (isInPictureInPictureMode) {
             super.onPause()
@@ -634,7 +571,6 @@ class PlayerActivity : BaseActivity() {
 
         player.isExiting = true
 
-        // ANZ -->
         val serverToStop = httpServer
         httpServer = null
         if (serverToStop != null) {
@@ -642,13 +578,10 @@ class PlayerActivity : BaseActivity() {
                 runCatching { serverToStop.stop() }
             }
         }
-        // ANZ <--
-        // ANZ -->
         if (isFinishing) {
             viewModel.deletePendingEpisodes()
         }
         viewModel.pause()
-        // ANZ <--
 
         super.onPause()
     }
@@ -660,7 +593,6 @@ class PlayerActivity : BaseActivity() {
             }
         }
 
-        // ANZ -->
         // Either signal means we are leaving a PiP window: the latched flag covers devices that
         // report the exit callback before onStop(), and isInPictureInPictureMode covers devices
         // that report it after (or auto-enter without latching). A screen-off stop is excluded by
@@ -689,7 +621,6 @@ class PlayerActivity : BaseActivity() {
             viewModel.saveCurrentEpisodeWatchingProgress()
             viewModel.pause()
         }
-        // ANZ <--
 
         super.onStop()
     }
@@ -701,9 +632,7 @@ class PlayerActivity : BaseActivity() {
         super.onUserLeaveHint()
     }
 
-    // ANK -->
     private fun backPressed() {
-        // ANK <--
         if (isPipSupportedAndEnabled && viewModel.paused.value == false && playerPreferences.pipOnExit().get()) {
             if (viewModel.sheetShown.value == Sheets.None &&
                 viewModel.panelShown.value == Panels.None &&
@@ -711,12 +640,10 @@ class PlayerActivity : BaseActivity() {
             ) {
                 enterPictureInPictureMode()
             }
-            // ANK -->
             return
         }
 
         // Default behavior: finish the activity
-        // ANZ -->
         if (isTaskRoot) {
             finishAndRemoveTask()
             startActivity(
@@ -726,9 +653,7 @@ class PlayerActivity : BaseActivity() {
             )
             return
         }
-        // ANZ <--
         finish()
-        // ANK <--
     }
 
     override fun onStart() {
@@ -763,9 +688,7 @@ class PlayerActivity : BaseActivity() {
             }
         }
 
-        // AM (DISCORD) -->
         updateDiscordRPC(exitingPlayer = false)
-        // <-- AM (DISCORD)
 
         castManager.apply {
             // Register session listener cast
@@ -798,7 +721,6 @@ class PlayerActivity : BaseActivity() {
         val mpvInputFile = mpvDir.createFile("input.conf")!!
         advancedPlayerPreferences.mpvInput().get().let { mpvInputFile.writeText(it) }
 
-        // ANK -->
         // mpv reads scripts/, script-opts/ and shaders/ during init, so it must not start while
         // MpvConfig is midway through deleting and rewriting them.
         val copied = runBlocking {
@@ -807,7 +729,6 @@ class PlayerActivity : BaseActivity() {
         if (!copied) {
             logcat(LogPriority.WARN) { "Timed out waiting for the mpv config copy; initializing anyway" }
         }
-        // ANK <--
 
         player.init(mpv)
 
@@ -869,10 +790,8 @@ class PlayerActivity : BaseActivity() {
     }
 
     override fun onResume() {
-        // ANZ -->
         // Resuming means the PiP window was expanded back to full screen, not dismissed.
         wasInPictureInPictureMode = false
-        // ANZ <--
 
         // Reconnect cast if it was active
         castManager.apply {
@@ -880,9 +799,7 @@ class PlayerActivity : BaseActivity() {
             registerSessionListener()
         }
 
-        // AM (DISCORD) -->
         updateDiscordRPC(exitingPlayer = false)
-        // <-- AM (DISCORD)
 
         if (!player.isExiting) {
             super.onResume()
@@ -901,11 +818,9 @@ class PlayerActivity : BaseActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         if (!isInPictureInPictureMode) {
-            // ANZ -->
             // Restoring instead of applying the stored VideoAspect keeps a custom aspect ratio
             // alive across rotation; applying the preset cleared `video-aspect-override`.
             viewModel.restoreAspectRatio()
-            // ANZ <--
         } else {
             viewModel.hideControls()
         }
@@ -934,16 +849,12 @@ class PlayerActivity : BaseActivity() {
             "pause" if value -> {
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-                // ANK -->
                 updateDiscordRPC(exitingPlayer = false)
-                // ANK <--
             }
             "pause" -> {
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-                // ANK -->
                 updateDiscordRPC(exitingPlayer = false)
-                // ANK <--
             }
             "eof-reached" -> endFile(value)
         }
@@ -962,11 +873,9 @@ class PlayerActivity : BaseActivity() {
         when (property) {
             "video-params/aspect" -> {
                 if (isPipSupportedAndEnabled) createPipParams()
-                // ANZ -->
                 // Video params are known at this point (fresh file, file switch or rotation),
                 // which is the reliable moment to re-apply a remembered custom aspect ratio.
                 viewModel.restoreAspectRatio()
-                // ANZ <--
             }
         }
     }
@@ -984,12 +893,9 @@ class PlayerActivity : BaseActivity() {
             }
             MPV.mpvEvent.MPV_EVENT_PLAYBACK_RESTART -> {
                 player.isExiting = false
-                // ANZ -->
                 viewModel.restoreAspectRatio()
-                // ANZ <--
-                // YMR --> the Discord progress bar follows seeks and the resume position
+                // the Discord progress bar follows seeks and the resume position
                 yomira.discord.PlayerPresence.onSeek(this)
-                // YMR <--
             }
             MPV.mpvEvent.MPV_EVENT_END_FILE -> {
                 val errorNode = node.asMap()?.get("file_error") ?: return
@@ -1006,7 +912,7 @@ class PlayerActivity : BaseActivity() {
 
                 viewModel.setCurrentVideoError()
 
-                // YMR --> an expired or broken stream shows the error overlay instead of closing
+                // an expired or broken stream shows the error overlay instead of closing
                 val streamError = RuntimeException(errorMessage)
                 if (playerPreferences.switchOnFailure().get()) {
                     if (!viewModel.loadBestVideo()) {
@@ -1015,14 +921,11 @@ class PlayerActivity : BaseActivity() {
                 } else {
                     viewModel.showPlaybackError(PlaybackError.Reason.STREAM_FAILED, streamError)
                 }
-                // YMR <--
             }
         }
     }
 
-    // ANZ -->
     fun createPipParams(isPaused: Boolean? = null): PictureInPictureParams {
-    // ANZ <--
         val builder = PictureInPictureParams.Builder()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val anime = viewModel.currentAnime.value
@@ -1032,7 +935,6 @@ class PlayerActivity : BaseActivity() {
                 builder.setTitle(anime.title).setSubtitle(episode.name)
             }
         }
-        // ANZ -->
         val pausedState = isPaused ?: (viewModel.paused.value ?: true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val autoEnter = playerPreferences.pipOnExit().get()
@@ -1048,9 +950,7 @@ class PlayerActivity : BaseActivity() {
                 playlistPosition = viewModel.getCurrentEpisodeIndex(),
             ),
         )
-        // ANZ <--
         builder.setSourceRectHint(pipRect)
-        // ANZ -->
         if (mpv.isInitialized) {
             mpv.getPropertyInt("video-params/h")?.let { height ->
                 player.getVideoOutAspect()?.let { aspect ->
@@ -1060,17 +960,14 @@ class PlayerActivity : BaseActivity() {
                 }
             }
         }
-        // ANZ <--
         return builder.build()
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
-        // ANZ -->
         // Latch that we entered PiP. Whether leaving it was a dismissal or an expand is decided in
         // onStop()/onResume(), because this callback's ordering against them is not guaranteed.
         if (isInPictureInPictureMode) wasInPictureInPictureMode = true
-        // ANZ <--
         if (!isInPictureInPictureMode) {
             pipReceiver?.let {
                 unregisterReceiver(pipReceiver)
@@ -1087,7 +984,6 @@ class PlayerActivity : BaseActivity() {
                 override fun onReceive(context: Context?, intent: Intent?) {
                     if (intent == null || intent.action != PIP_INTENTS_FILTER) return
                     when (intent.getIntExtra(PIP_INTENT_ACTION, 0)) {
-                        // ANZ -->
                         PIP_PAUSE -> {
                             viewModel.pause()
                             setPictureInPictureParams(createPipParams(isPaused = true))
@@ -1096,18 +992,15 @@ class PlayerActivity : BaseActivity() {
                             viewModel.unpause()
                             setPictureInPictureParams(createPipParams(isPaused = false))
                         }
-                        // ANZ <--
                         PIP_NEXT -> viewModel.changeEpisode(false)
                         PIP_PREVIOUS -> viewModel.changeEpisode(true)
                         PIP_SKIP -> viewModel.seekBy(10)
                     }
-                    // ANZ -->
                     // Remote action update was already dispatched above for pause/play;
                     // refresh once more for track changes or seek actions if needed.
                     if (intent.getIntExtra(PIP_INTENT_ACTION, 0) !in listOf(PIP_PAUSE, PIP_PLAY)) {
                         setPictureInPictureParams(createPipParams())
                     }
-                    // ANZ <--
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -1122,7 +1015,6 @@ class PlayerActivity : BaseActivity() {
 
     private fun setupPlayerOrientation() {
         if (player.isExiting) return
-        // ANZ -->
         val target = when (playerPreferences.defaultPlayerOrientationType().get()) {
             PlayerOrientation.Free -> ActivityInfo.SCREEN_ORIENTATION_SENSOR
             PlayerOrientation.Video -> if ((player.getVideoOutAspect() ?: 0.0) > 1.0) {
@@ -1141,7 +1033,6 @@ class PlayerActivity : BaseActivity() {
         if (requestedOrientation != target) {
             requestedOrientation = target
         }
-        // ANZ <--
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -1164,9 +1055,7 @@ class PlayerActivity : BaseActivity() {
 
             // other keys should be bound by the user in input.conf ig
             else -> {
-                // ANZ -->
                 if (!isTextInputActive()) event?.let { player.onKey(it) }
-                // ANZ <--
                 super.onKeyDown(keyCode, event)
             }
         }
@@ -1174,9 +1063,7 @@ class PlayerActivity : BaseActivity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        // ANZ -->
         if (!isTextInputActive() && player.onKey(event!!)) return true
-        // ANZ <--
         return super.onKeyUp(keyCode, event)
     }
 
@@ -1317,7 +1204,6 @@ class PlayerActivity : BaseActivity() {
         viewModel.isLoading.update { _ -> true }
         viewModel.resetHosterState()
 
-        // ANZ -->
         lifecycleScope.launchIO {
             viewModel.updateIsLoadingEpisode(true)
             viewModel.updateIsLoadingHosters(true)
@@ -1334,13 +1220,12 @@ class PlayerActivity : BaseActivity() {
                         launchUI { toast(MR.strings.no_next_episode) }
                     }
                     viewModel.isLoading.update { _ -> false }
-                    // YMR --> nothing was switched; keep showing the current episode
+                    // nothing was switched; keep showing the current episode
                     viewModel.updateIsLoadingEpisode(false)
-                    // YMR <--
                 }
 
                 else -> {
-                    // YMR --> a failed episode keeps the player open with an actionable error
+                    // a failed episode keeps the player open with an actionable error
                     // instead of finishing the activity (the "next episode closes the player" bug).
                     when (
                         val outcome = EpisodeNavigation.afterEpisodeLoad(
@@ -1360,7 +1245,6 @@ class PlayerActivity : BaseActivity() {
                             viewModel.showPlaybackError(outcome.reason, outcome.cause)
                         }
                     }
-                    // YMR <--
 
                     if (isInPictureInPictureMode && pipEpisodeToasts) {
                         launchUI { toast(switchMethod.episodeTitle) }
@@ -1368,7 +1252,6 @@ class PlayerActivity : BaseActivity() {
                 }
             }
         }
-        // ANZ <--
     }
 
     fun setVideo(video: Video?, position: Long? = null) {
@@ -1395,7 +1278,6 @@ class PlayerActivity : BaseActivity() {
             }
         }
 
-        // ANZ -->
         val serverToStop = httpServer
         httpServer = null
         if (serverToStop != null) {
@@ -1403,7 +1285,6 @@ class PlayerActivity : BaseActivity() {
                 runCatching { serverToStop.stop() }
             }
         }
-        // ANZ <--
 
         if (video.videoUrl.startsWith(TorrentServerUtils.hostUrl) ||
             video.videoUrl.startsWith("magnet") ||
@@ -1412,12 +1293,9 @@ class PlayerActivity : BaseActivity() {
             launchIO {
                 TorrentServerService.start()
                 TorrentServerService.wait(10)
-                // ANK -->
                 torrentLinkHandler(video.videoUrl, video.videoTitle, video.mpvArgs)
-                // ANK <--
             }
         } else {
-            // ANZ -->
             val httpSource = viewModel.currentSource.value as? AnimeHttpSource
             var videoUrl: String = video.videoUrl
             if (video.usesHttpServer() && httpSource != null) {
@@ -1434,15 +1312,11 @@ class PlayerActivity : BaseActivity() {
                 viewModel.updateVideo(newVideo)
             }
             loadFile(parseVideoUrl(videoUrl)!!, video.mpvArgs)
-            // ANZ <--
         }
 
-        // AM (DISCORD) -->
         updateDiscordRPC(exitingPlayer = false)
-        // <-- AM (DISCORD)
     }
 
-    // ANK -->
     /**
      * Issues a `loadfile` for [url], appending the per-file options that have to apply no matter
      * which branch started the load. Keeping this in one place is what stops the torrent path from
@@ -1494,14 +1368,11 @@ class PlayerActivity : BaseActivity() {
             }
         }
     }
-    // ANK <--
 
     private fun torrentLinkHandler(
         videoUrl: String,
         quality: String,
-        // ANK -->
         mpvArgs: List<Pair<String, String>> = emptyList(),
-        // ANK <--
     ) {
         var index = 0
 
@@ -1510,9 +1381,7 @@ class PlayerActivity : BaseActivity() {
             val videoInputStream = applicationContext.contentResolver.openInputStream(videoUrl.toUri())
             val torrent = TorrentServerApi.uploadTorrent(videoInputStream!!, quality, "", "", false)
             val torrentUrl = TorrentServerUtils.getTorrentPlayLink(torrent, 0)
-            // ANK -->
             loadFile(torrentUrl, mpvArgs)
-            // ANK <--
             return
         }
 
@@ -1529,9 +1398,7 @@ class PlayerActivity : BaseActivity() {
 
         val currentTorrent = TorrentServerApi.addTorrent(videoUrl, quality, "", "", false)
         val videoTorrentUrl = TorrentServerUtils.getTorrentPlayLink(currentTorrent, index)
-        // ANK -->
         loadFile(videoTorrentUrl, mpvArgs)
-        // ANK <--
     }
 
     /**
@@ -1627,9 +1494,7 @@ class PlayerActivity : BaseActivity() {
         )
     }
 
-    // ANZ -->
     private fun changeVideoAspect(aspect: VideoAspect, showUpdate: Boolean = true) {
-    // ANZ <--
         var ratio = -1.0
         val pan: Double
         when (aspect) {
@@ -1649,9 +1514,7 @@ class PlayerActivity : BaseActivity() {
                 pan = 0.0
             }
         }
-        // ANZ -->
         viewModel.setAspect(aspect, pan, ratio, showUpdate)
-        // ANZ <--
     }
 
     private fun cycleRotations() {
@@ -1692,23 +1555,18 @@ class PlayerActivity : BaseActivity() {
 
         setMpvOptions()
         setMpvMediaTitle()
-        // ANZ -->
         runOnUiThread { setupPlayerOrientation() }
-        // ANZ <--
         setupChapters()
         viewModel.checkFileLoaded()
-        // ANZ -->
         viewModel.restoreAspectRatio()
-        // ANZ <--
-        // YMR --> audio extras, A-B loop reset and per-anime speed for every file
+        // audio extras, A-B loop reset and per-anime speed for every file
         yomira.player.PlayerTools.onFileLoaded(viewModel.mpv, viewModel.currentAnime.value?.id)
         // Smart Anime4K: use or prepare the Anime4K version of this episode
         yomira.anime4k.PlayerAnime4K.onEpisodeStarted(this)
-        // YMR <--
 
         // aniSkip stuff
         viewModel.viewModelScope.launchIO {
-            // YMR --> only skip times already in the file or from the extension turn AniSkip off,
+            // only skip times already in the file or from the extension turn AniSkip off,
             // and the length is read from this file (the flow may still hold the previous one)
             if (viewModel.introSkipEnabled && playerPreferences.aniSkipEnabled().get() &&
                 !(playerPreferences.disableAniSkipOnChapters().get() && viewModel.hasSkipChapters())
@@ -1718,7 +1576,6 @@ class PlayerActivity : BaseActivity() {
                     viewModel.addTimestamps(it)
                 }
             }
-            // YMR <--
         }
     }
 
@@ -1742,10 +1599,8 @@ class PlayerActivity : BaseActivity() {
                 ?: return
 
             opts.forEach { parts ->
-                // AY -->
                 if (parts.size == 2) {
                     val (option, value) = parts
-                    // <-- AY
                     mpv.setPropertyString(option, value)
                 }
             }
@@ -1795,19 +1650,16 @@ class PlayerActivity : BaseActivity() {
     }
 
     private fun endFile(eofReached: Boolean) {
-        // YMR --> "stop at the end of this episode" skips autoplay once
+        // "stop at the end of this episode" skips autoplay once
         if (eofReached && yomira.player.PlayerTools.consumeStopAfterEpisode()) return
-        // YMR <--
         if (eofReached && playerPreferences.autoplayEnabled().get()) {
             viewModel.changeEpisode(previous = false, autoPlay = true)
         }
     }
 
-    // AM (DISCORD) -->
     private fun updateDiscordRPC(exitingPlayer: Boolean) {
-        // YMR --> Rich Presence through the Discord app on the phone; see yomira.discord
+        // Rich Presence through the Discord app on the phone; see yomira.discord
         yomira.discord.PlayerPresence.onPlayerEvent(this, exitingPlayer)
-        // YMR <--
         if (!connectionsPreferences.enableDiscordRPC().get()) return
 
         lifecycleScope.launchIO {
@@ -1862,7 +1714,6 @@ class PlayerActivity : BaseActivity() {
         }
     }
 
-    // ANZ -->
     fun setCustomVideoAspect(ratio: Double, label: String) {
         viewModel.setCustomVideoAspect(ratio, label)
     }
@@ -1878,7 +1729,7 @@ class PlayerActivity : BaseActivity() {
     private fun isTextInputActive(): Boolean = inputMethodManager.isActive
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        // YMR --> hardware key routing (keyboards, headsets, media keys); see PlayerKeyRouter
+        // hardware key routing (keyboards, headsets, media keys); see PlayerKeyRouter
         val state = PlayerKeyRouter.State(
             textInputActive = isTextInputActive(),
             overlayOpen = viewModel.sheetShown.value != Sheets.None ||
@@ -1905,11 +1756,8 @@ class PlayerActivity : BaseActivity() {
                 return true
             }
         }
-        // YMR <--
     }
-    // ANZ <--
 
-    // YMR -->
     private fun performKeyAction(action: PlayerKeyRouter.Action) {
         when (action) {
             PlayerKeyRouter.Action.SHOW_CONTROLS -> viewModel.showControls()
@@ -1928,5 +1776,4 @@ class PlayerActivity : BaseActivity() {
             PlayerKeyRouter.Action.EXIT -> backPressed()
         }
     }
-    // YMR <--
 }

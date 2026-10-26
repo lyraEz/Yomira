@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.player
 
 import android.view.KeyEvent
 
-// YMR -->
 /**
  * Decides who handles a key in the player: the Compose UI, the player logic or mpv.
  *
@@ -111,4 +110,3 @@ object PlayerKeyRouter {
         KeyEvent.KEYCODE_TAB,
     )
 }
-// YMR <--

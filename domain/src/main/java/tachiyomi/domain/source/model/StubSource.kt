@@ -22,13 +22,11 @@ class StubSource(
     override suspend fun getVideoList(episode: SEpisode): List<Video> =
         throw SourceNotInstalledException()
 
-    // KMK -->
     override suspend fun getRelatedAnimeList(
         anime: SAnime,
         exceptionHandler: (Throwable) -> Unit,
         pushResults: suspend (relatedAnime: Pair<String, List<SAnime>>, completed: Boolean) -> Unit,
     ) = throw SourceNotInstalledException()
-    // KMK <--
 
     override fun toString(): String =
         if (!isInvalid) "$name (${lang.uppercase()})" else id.toString()

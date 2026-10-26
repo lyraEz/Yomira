@@ -69,14 +69,12 @@ fun AudioDelayPanel(
     ) {
         val delayControlCard = createRef()
 
-        // ANZ -->
         val activity = LocalContext.current as? PlayerActivity
         val mpv = activity?.viewModel?.mpv
         var delay by remember { mutableIntStateOf(((mpv?.getPropertyDouble("audio-delay") ?: 0.0) * 1000).toInt()) }
         LaunchedEffect(delay) {
             mpv?.setPropertyDouble("audio-delay", delay / 1000.0)
         }
-        // ANZ <--
         DelayCard(
             delay = delay,
             onDelayChange = { delay = it },

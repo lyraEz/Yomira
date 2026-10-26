@@ -23,7 +23,7 @@ import coil3.compose.AsyncImage
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 
-// YMR --> profile-style header card at the top of "More"
+// profile-style header card at the top of "More"
 @Composable
 fun LogoHeader() {
     val colors = MaterialTheme.colorScheme
@@ -75,4 +75,3 @@ fun LogoHeader() {
         }
     }
 }
-// YMR <--

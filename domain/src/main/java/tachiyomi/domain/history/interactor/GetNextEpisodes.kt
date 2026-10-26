@@ -11,9 +11,7 @@ import kotlin.math.max
 
 class GetNextEpisodes(
     private val getEpisodesByAnimeId: GetEpisodesByAnimeId,
-    // SY -->
     private val getMergedEpisodesByAnimeId: GetMergedEpisodesByAnimeId,
-    // SY <--
     private val getAnime: GetAnime,
     private val historyRepository: HistoryRepository,
 ) {
@@ -26,7 +24,6 @@ class GetNextEpisodes(
     suspend fun await(animeId: Long, onlyUnseen: Boolean = true): List<Episode> {
         val anime = getAnime.await(animeId) ?: return emptyList()
 
-        // SY -->
         if (anime.source == MERGED_SOURCE_ID) {
             val episodes = getMergedEpisodesByAnimeId.await(animeId, applyScanlatorFilter = true)
                 .sortedWith(getEpisodeSort(anime, sortDescending = false))
@@ -37,7 +34,6 @@ class GetNextEpisodes(
                 episodes
             }
         }
-        // SY <--
 
         val episodes = getEpisodesByAnimeId.await(animeId, applyScanlatorFilter = true)
             .sortedWith(getEpisodeSort(anime, sortDescending = false))

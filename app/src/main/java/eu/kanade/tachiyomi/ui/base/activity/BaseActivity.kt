@@ -20,9 +20,8 @@ open class BaseActivity :
         super.attachBaseContext(newBase.prepareTabletUiContext())
     }
 
-    // YMR --> the player picks its own refresh rate to match each video
+    // the player picks its own refresh rate to match each video
     protected open val pinHighRefreshRate: Boolean = true
-    // YMR <--
 
     override fun onCreate(savedInstanceState: Bundle?) {
         applyAppTheme(this)

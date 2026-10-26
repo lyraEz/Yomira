@@ -7,11 +7,9 @@ interface TrackRepository {
 
     suspend fun getTrackById(id: Long): Track?
 
-    // SY -->
     suspend fun getTracks(): List<Track>
 
     suspend fun getTracksByAnimeIds(animeIds: List<Long>): List<Track>
-    // SY <--
 
     suspend fun getTracksByAnimeId(animeId: Long): List<Track>
 

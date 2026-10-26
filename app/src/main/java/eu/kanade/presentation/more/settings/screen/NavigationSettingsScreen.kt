@@ -307,8 +307,7 @@ class NavigationSettingsScreen(
                     )
                 }
 
-                // YMR --> "Adaptive Navigation" only fed the Smart Suggestion card, which Yomira removed
-                // YMR <--
+                // "Adaptive Navigation" only fed the Smart Suggestion card, which Yomira removed
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))

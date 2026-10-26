@@ -1,4 +1,3 @@
-// AM (DISCORD) -->
 
 // Original library from https://github.com/dead8309/KizzyRPC (Thank you)
 // Thank you to the 最高 man for the refactored and simplified code
@@ -199,4 +198,3 @@ class DiscordLoginActivity : BaseActivity() {
         }
     }
 }
-// <-- AM (DISCORD)

@@ -226,7 +226,6 @@ internal fun PreferenceItem(
                     onClick = { if (isLoggedIn) item.logout() else item.login() },
                 )
             }
-            // AM (CONNECTIONS) -->
             is Preference.PreferenceItem.ConnectionsPreference -> {
                 val uName by Injekt.get<PreferenceStore>()
                     .getString(ConnectionsPreferences.connectionsUsername(item.service.id))
@@ -239,7 +238,6 @@ internal fun PreferenceItem(
                     )
                 }
             }
-            // <-- AM (CONNECTIONS)
             is Preference.PreferenceItem.InfoPreference -> {
                 InfoWidget(text = item.title)
             }

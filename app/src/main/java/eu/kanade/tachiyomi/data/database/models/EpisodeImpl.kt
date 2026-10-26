@@ -21,9 +21,7 @@ class EpisodeImpl : Episode {
 
     override var bookmark: Boolean = false
 
-    // AM (FILLERMARK) -->
     override var fillermark: Boolean = false
-    // <-- AM (FILLERMARK)
 
     override var summary: String? = null
 

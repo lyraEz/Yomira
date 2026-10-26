@@ -8,8 +8,7 @@ import android.provider.Settings
 import androidx.core.net.toUri
 import java.util.Collections
 
-// ANZ -->
-fun Context.defaultBrowserPackageName(): String? { // ANZ
+fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, "http://".toUri())
     val resolveInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         packageManager.resolveActivity(
@@ -57,7 +56,7 @@ fun Context.isPackageInstalled(packageName: String): Boolean {
 }
 
 fun Context.launchRequestPackageInstallsPermission() {
-    // YMR --> some TV firmwares (Fire OS included) have no per-app "install unknown apps" screen;
+    // some TV firmwares (Fire OS included) have no per-app "install unknown apps" screen;
     // fall back to the security and general settings instead of crashing.
     startFirstAvailableActivity(
         Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData("package:$packageName".toUri()),
@@ -65,10 +64,8 @@ fun Context.launchRequestPackageInstallsPermission() {
         Intent(Settings.ACTION_SECURITY_SETTINGS),
         Intent(Settings.ACTION_SETTINGS),
     )
-    // YMR <--
 }
 
-// YMR -->
 /** Starts the first intent the system can handle; returns false when none can be opened. */
 fun Context.startFirstAvailableActivity(vararg intents: Intent): Boolean {
     for (intent in intents) {
@@ -84,5 +81,3 @@ fun Context.startFirstAvailableActivity(vararg intents: Intent): Boolean {
     }
     return false
 }
-// YMR <--
-// ANZ <--

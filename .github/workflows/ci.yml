@@ -59,7 +59,7 @@ jobs:
           :domain:testDebugUnitTest --tests 'mihon.domain.extensionrepo.*'
 
       # Two inherited domain tests (LibraryFlagsTest, FetchIntervalTest) already fail on the
-      # AniZen base commit; the full suite is reported here without blocking the build.
+      # recorded lint base commit; the full suite is reported here without blocking the build.
       - name: Inherited domain tests (informational)
         continue-on-error: true
         run: ./gradlew --no-daemon :domain:testDebugUnitTest

@@ -1,15 +1,17 @@
 name: Release
 
-# Publishes signed APKs as a release of the public repository lyraEz/Yomira-releases, which the
-# in-app updater reads (this source repository is private).
+# Publishes signed APKs when versionName in app/build.gradle.kts changes on main.
 #
-# Runs on every push to the development branch and on demand. A cheap first job reads
-# versionName from app/build.gradle.kts and stops when release v<versionName> already exists
-# there, so only a version bump produces a new release.
+#   - Stable versions ("1.12.0") become a release of this repository, which is where the in-app
+#     updater looks first. A copy goes to lyraEz/Yomira-releases so that older app versions, which
+#     only read that repository, keep updating.
+#   - Beta versions ("1.13.0-beta.1") become a pre-release in lyraEz/Yomira-releases only. The app
+#     offers them when "Beta versions" is turned on in More > About.
 #
-# The release text (also shown by the in-app updater) comes from the CHANGELOG.md section of
-# that version, via scripts/yomira/release-notes.py. Running the workflow by hand with
-# "update_notes" rewrites the text of the existing release after the changelog was edited.
+# A cheap first job stops when the release already exists, so only a version bump publishes.
+# The release text (also shown by the in-app updater) comes from the CHANGELOG.md section of that
+# version, via scripts/yomira/release-notes.py. Running the workflow by hand with "update_notes"
+# rewrites the text of the existing release after the changelog was edited.
 #
 # Required repository secrets (Settings > Secrets and variables > Actions):
 #   YOMIRA_KEYSTORE_BASE64    base64 of the release keystore (.jks)
@@ -24,13 +26,9 @@ name: Release
 on:
   push:
     branches:
-      - ccr-c637b615-t3byst
+      - main
   workflow_dispatch:
     inputs:
-      prerelease:
-        description: Mark the release as a pre-release
-        type: boolean
-        default: false
       update_notes:
         description: Only rewrite the text of the existing release from CHANGELOG.md
         type: boolean
@@ -41,10 +39,10 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
 
 env:
-  RELEASES_REPO: lyraEz/Yomira-releases
+  BETA_REPO: lyraEz/Yomira-releases
 
 jobs:
   check:
@@ -52,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      beta: ${{ steps.version.outputs.beta }}
       exists: ${{ steps.version.outputs.exists }}
     steps:
       - name: Clone repo
@@ -60,7 +59,8 @@ jobs:
       - name: Read version and look for its release
         id: version
         env:
-          GH_TOKEN: ${{ secrets.YOMIRA_RELEASES_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
+          BETA_TOKEN: ${{ secrets.YOMIRA_RELEASES_TOKEN || github.token }}
         run: |
           version="$(sed -n 's/^ *versionName = "\(.*\)".*/\1/p' app/build.gradle.kts | head -1)"
           if [ -z "$version" ]; then
@@ -68,12 +68,17 @@ jobs:
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          if gh release view "v$version" --repo "$RELEASES_REPO" > /dev/null 2>&1; then
+          case "$version" in
+            *-beta*) beta=true; repo="$BETA_REPO"; token="$BETA_TOKEN" ;;
+            *)       beta=false; repo="$GITHUB_REPOSITORY"; token="$GH_TOKEN" ;;
+          esac
+          echo "beta=$beta" >> "$GITHUB_OUTPUT"
+          if GH_TOKEN="$token" gh release view "v$version" --repo "$repo" > /dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Release v$version already exists; nothing to publish."
+            echo "Release v$version already exists in $repo; nothing to publish."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "Release v$version not found; it will be built and published."
+            echo "Release v$version not found in $repo; it will be built and published."
           fi
 
   release:
@@ -106,7 +111,7 @@ jobs:
           RELEASES_TOKEN: ${{ secrets.YOMIRA_RELEASES_TOKEN }}
         run: |
           if [ -z "$RELEASES_TOKEN" ]; then
-            echo "::error::YOMIRA_RELEASES_TOKEN is not set; it is needed to publish in $RELEASES_REPO."
+            echo "::error::YOMIRA_RELEASES_TOKEN is not set; it is needed to publish in $BETA_REPO."
             exit 1
           fi
 
@@ -142,17 +147,50 @@ jobs:
         if: always()
         run: rm -f "$RUNNER_TEMP/yomira-release.jks"
 
-      - name: Publish release
+      - name: Publish stable release
+        if: needs.check.outputs.beta != 'true'
         uses: softprops/action-gh-release@v2
         with:
-          repository: ${{ env.RELEASES_REPO }}
+          tag_name: v${{ steps.collect.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: Yomira ${{ steps.collect.outputs.version }}
+          draft: false
+          make_latest: true
+          prerelease: false
+          body_path: dist/release-notes.md
+          files: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
+
+      - name: Copy the stable release to Yomira-releases (for older app versions)
+        if: needs.check.outputs.beta != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ env.BETA_REPO }}
           token: ${{ secrets.YOMIRA_RELEASES_TOKEN }}
           tag_name: v${{ steps.collect.outputs.version }}
           target_commitish: main
           name: Yomira ${{ steps.collect.outputs.version }}
           draft: false
-          make_latest: ${{ inputs.prerelease != true }}
-          prerelease: ${{ inputs.prerelease == true }}
+          make_latest: true
+          prerelease: false
+          body_path: dist/release-notes.md
+          files: |
+            dist/*.apk
+            dist/SHA256SUMS.txt
+
+      - name: Publish beta
+        if: needs.check.outputs.beta == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: ${{ env.BETA_REPO }}
+          token: ${{ secrets.YOMIRA_RELEASES_TOKEN }}
+          tag_name: v${{ steps.collect.outputs.version }}
+          target_commitish: main
+          name: Yomira ${{ steps.collect.outputs.version }} (beta)
+          draft: false
+          make_latest: false
+          prerelease: true
           body_path: dist/release-notes.md
           files: |
             dist/*.apk
@@ -169,8 +207,13 @@ jobs:
 
       - name: Write notes from CHANGELOG.md and update the release
         env:
-          GH_TOKEN: ${{ secrets.YOMIRA_RELEASES_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          BETA_TOKEN: ${{ secrets.YOMIRA_RELEASES_TOKEN }}
           VERSION: ${{ needs.check.outputs.version }}
+          BETA: ${{ needs.check.outputs.beta }}
         run: |
           python3 -I scripts/yomira/release-notes.py "$VERSION" "$RUNNER_TEMP/release-notes.md"
-          gh release edit "v$VERSION" --repo "$RELEASES_REPO" --notes-file "$RUNNER_TEMP/release-notes.md"
+          if [ "$BETA" != "true" ]; then
+            gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/release-notes.md"
+          fi
+          GH_TOKEN="$BETA_TOKEN" gh release edit "v$VERSION" --repo "$BETA_REPO" --notes-file "$RUNNER_TEMP/release-notes.md" || true

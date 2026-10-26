@@ -1,4 +1,3 @@
-// AY -->
 package eu.kanade.presentation.anime.components
 
 import androidx.compose.runtime.Composable
@@ -125,4 +124,3 @@ fun AnimeSeasonListItem(
         }
     }
 }
-// <-- AY

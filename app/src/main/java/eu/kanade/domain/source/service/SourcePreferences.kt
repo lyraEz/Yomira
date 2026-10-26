@@ -67,7 +67,6 @@ class SourcePreferences(
         SetMigrateSorting.Direction.ASCENDING,
     )
 
-    // KMK -->
     fun migrationSources() = preferenceStore.getStringSet("pref_migration_sources", emptySet())
 
     fun migrationFlags() = preferenceStore.getInt("migration_flags", Int.MAX_VALUE)
@@ -81,7 +80,6 @@ class SourcePreferences(
     fun migrationHideWithoutUpdates() = preferenceStore.getBoolean("migration_hide_without_updates", false)
 
     fun migrationSmartSearchSingleEntry() = preferenceStore.getBoolean("migration_smart_search_single_entry", false)
-    // KMK <--
 
     fun trustedExtensions() = preferenceStore.getStringSet(
         Preference.appStateKey("trusted_extensions"),
@@ -115,7 +113,6 @@ class SourcePreferences(
 
     fun autoSearch() = preferenceStore.getBoolean("pref_auto_search", true)
 
-    // SY -->
 
     // fun enableSourceBlacklist() = preferenceStore.getBoolean("eh_enable_source_blacklist", true)
 
@@ -165,5 +162,4 @@ class SourcePreferences(
         WSRV_NL,
         RESMUSH_IT,
     }
-    // SY <--
 }

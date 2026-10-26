@@ -89,7 +89,6 @@ fun PlayerSheets(
     onUpdateDecoder: (Decoder) -> Unit,
 
     // Speed sheet
-    // ANZ -->
     pitchCorrection: Boolean,
     onPitchCorrectionChange: (Boolean) -> Unit,
     speed: Float,
@@ -106,7 +105,6 @@ fun PlayerSheets(
     onResetLongPressSpeedPresets: () -> Unit,
     onMakeDefaultSpeed: (Float) -> Unit,
     onResetDefaultSpeed: () -> Unit,
-    // ANZ <--
 
     // More sheet
     sleepTimerTimeRemaining: Int,
@@ -244,7 +242,6 @@ fun PlayerSheets(
         }
 
         Sheets.PlaybackSpeed -> {
-            // ANZ -->
             PlaybackSpeedSheet(
                 pitchCorrection = pitchCorrection,
                 onPitchCorrectionChange = onPitchCorrectionChange,
@@ -264,7 +261,6 @@ fun PlayerSheets(
                 onResetDefault = onResetDefaultSpeed,
                 onDismissRequest = onDismissRequest,
             )
-            // ANZ <--
         }
 
         Sheets.Screenshot -> {

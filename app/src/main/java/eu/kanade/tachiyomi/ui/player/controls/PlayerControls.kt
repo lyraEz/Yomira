@@ -146,18 +146,14 @@ fun PlayerControls(
     val areControlsLocked by viewModel.areControlsLocked.collectAsState()
     val seekBarShown by viewModel.seekBarShown.collectAsState()
     val pausedForCache by viewModel.pausedForCache.collectAsState()
-    // ANZ -->
     val coreIdle by viewModel.coreIdle.collectAsState()
     val seeking by viewModel.seeking.collectAsState()
-    // ANZ <--
     val isLoadingEpisode by viewModel.isLoadingEpisode.collectAsState()
     val isStopped by viewModel.isStopped.collectAsState()
     val duration by viewModel.duration.collectAsState()
     val position by viewModel.pos.collectAsState()
     val paused by viewModel.paused.collectAsState()
-    // ANZ -->
     val showLoadingCircle by playerPreferences.showLoadingCircle().collectAsState()
-    // ANZ <--
     val gestureSeekAmount by viewModel.gestureSeekAmount.collectAsState()
     val doubleTapSeekAmount by viewModel.doubleTapSeekAmount.collectAsState()
     val showDoubleTapOvals by playerPreferences.showDoubleTapOvals().collectAsState()
@@ -174,11 +170,9 @@ fun PlayerControls(
     val playerTimeToDisappear by playerPreferences.playerTimeToDisappear().collectAsState()
     var resetControls by remember { mutableStateOf(true) }
     val isSeekingUI by viewModel.isSeekingUI.collectAsState()
-    // ANZ -->
     val isBuffering = (pausedForCache == true) ||
         (seeking == true && !isSeekingUI) ||
         (coreIdle == true && paused == false && !isSeekingUI)
-    // ANZ <--
     val seekPosition by viewModel.seekPosition.collectAsState()
     val chaptersList = chapters
 
@@ -198,7 +192,7 @@ fun PlayerControls(
     val customButtons by viewModel.customButtons.collectAsState()
     val customButton by viewModel.primaryButton.collectAsState()
 
-    // YMR --> premium ("Cinema") layout and its pause screen
+    // premium ("Cinema") layout and its pause screen
     val cinemaPrefs = remember { yomira.player.CinemaPreferences() }
     val cinema by cinemaPrefs.enabled().collectAsState()
     val pauseScreen by cinemaPrefs.pauseScreen().collectAsState()
@@ -208,19 +202,15 @@ fun PlayerControls(
     val dialogForPause by viewModel.dialogShown.collectAsState()
     val noOverlayOpen = sheetForPause == Sheets.None && panelForPause == Panels.None &&
         dialogForPause == Dialogs.None
-    // YMR <--
 
-    // YMR -->
     val controlsInteraction by viewModel.controlsInteraction.collectAsState()
-    // YMR <--
     LaunchedEffect(
         controlsShown,
         paused,
         isSeekingUI,
         resetControls,
-        // YMR --> key navigation keeps the controls on screen
+        // key navigation keeps the controls on screen
         controlsInteraction,
-        // YMR <--
     ) {
         if (controlsShown && paused == false && !isSeekingUI) {
             delay(playerTimeToDisappear.toLong())
@@ -228,7 +218,7 @@ fun PlayerControls(
         }
     }
 
-    // YMR --> paused and untouched for a few seconds: hide the controls so the pause screen shows
+    // paused and untouched for a few seconds: hide the controls so the pause screen shows
     LaunchedEffect(
         controlsShown,
         paused,
@@ -245,7 +235,6 @@ fun PlayerControls(
             viewModel.hideControls()
         }
     }
-    // YMR <--
 
     val transparentOverlay by animateFloatAsState(
         if (controlsShown && !areControlsLocked) .8f else 0f,
@@ -264,13 +253,12 @@ fun PlayerControls(
         showSeekTime = showSeekTime,
         interactionSource = interactionSource,
     )
-    // YMR --> "You are watching" while paused with the controls hidden
+    // "You are watching" while paused with the controls hidden
     yomira.player.PauseOverlay(
         viewModel = viewModel,
         visible = cinema && pauseScreen && paused == true && !controlsShown && !areControlsLocked &&
             !isLoadingEpisode && (duration ?: 0) > 0 && noOverlayOpen,
     )
-    // YMR <--
     CompositionLocalProvider(
         LocalRippleConfiguration provides playerRippleConfiguration,
         LocalPlayerButtonsClickEvent provides { resetControls = !resetControls },
@@ -283,7 +271,7 @@ fun PlayerControls(
                 modifier = modifier
                     .fillMaxSize()
                     .background(
-                        // YMR --> the premium layout keeps the middle clear and darkens the bottom more
+                        // the premium layout keeps the middle clear and darkens the bottom more
                         if (cinema) {
                             Brush.verticalGradient(
                                 Pair(0f, Color.Black.copy(alpha = 0.72f)),
@@ -299,7 +287,6 @@ fun PlayerControls(
                                 Pair(1f, Color.Black),
                             )
                         },
-                        // YMR <--
                         alpha = transparentOverlay,
                     )
                     .padding(horizontal = MaterialTheme.padding.medium),
@@ -469,7 +456,6 @@ fun PlayerControls(
                     )
                 }
                 val isLongPressing by viewModel.isLongPressing.collectAsState()
-                // ANZ -->
                 AnimatedVisibility(
                     visible = (
                         (controlsShown && !areControlsLocked || gestureSeekAmount != null) ||
@@ -483,12 +469,10 @@ fun PlayerControls(
                         start.linkTo(parent.absoluteLeft)
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
-                        // YMR -->
                         if (cinema) width = Dimension.fillToConstraints
-                        // YMR <--
                     },
                 ) {
-                    // YMR --> side buttons spread with the screen width
+                    // side buttons spread with the screen width
                     if (cinema) {
                         yomira.player.CinemaCenterControls(
                             viewModel = viewModel,
@@ -504,7 +488,6 @@ fun PlayerControls(
                             hasNext = hasNextEpisode,
                         )
                     } else {
-                    // YMR <--
                     MiddlePlayerControls(
                         hasPrevious = hasPreviousEpisode,
                         onSkipPrevious = { viewModel.changeEpisode(true) },
@@ -522,11 +505,8 @@ fun PlayerControls(
                         enter = fadeIn(playerControlsEnterAnimationSpec()),
                         exit = fadeOut(playerControlsExitAnimationSpec()),
                     )
-                    // YMR -->
                     }
-                    // YMR <--
                 }
-                // ANZ <--
                 AnimatedVisibility(
                     visible = (controlsShown || seekBarShown) && !areControlsLocked && !isLongPressing,
                     enter = if (!reduceMotion) {
@@ -542,14 +522,13 @@ fun PlayerControls(
                         fadeOut(playerControlsExitAnimationSpec())
                     },
                     modifier = Modifier.constrainAs(seekbar) {
-                        // YMR --> premium layout: title, bar and buttons in one block at the bottom
+                        // premium layout: title, bar and buttons in one block at the bottom
                         if (cinema) {
                             bottom.linkTo(parent.bottom, spacing.small)
                             start.linkTo(parent.start)
                             end.linkTo(parent.end)
                             width = Dimension.fillToConstraints
                         } else if (isLandscape) {
-                            // YMR <--
                             bottom.linkTo(bottomLeftControls.top)
                         } else {
                             bottom.linkTo(portraitBottomBar.top)
@@ -570,9 +549,8 @@ fun PlayerControls(
                             (videoTimerWidth - durationInkWidthPx.toDp()) / 2
                         }.coerceAtLeast(0.dp)
                         AnimatedVisibility(
-                            // YMR --> skip prompts use the glass button (SkipSegmentButton); only the custom action stays here
+                            // skip prompts use the glass button (SkipSegmentButton); only the custom action stays here
                             visible = actionButton != null && customButtonTitle.isNotEmpty(),
-                            // YMR <--
                             enter = fadeIn(playerControlsEnterAnimationSpec()) +
                                 expandVertically(expandFrom = Alignment.Bottom),
                             exit = fadeOut(playerControlsExitAnimationSpec()) +
@@ -582,23 +560,18 @@ fun PlayerControls(
                                 .padding(end = pillEndInset)
                                 .offset(y = spacing.small),
                         ) {
-                            // YMR --> (the skip prompt is the glass SkipSegmentButton now)
+                            // (the skip prompt is the glass SkipSegmentButton now)
                             if (actionButton != null && customButtonTitle.isNotEmpty()) {
-                            // YMR <--
-                                // ANZ -->
                                 FilledControlsButton(
                                     text = customButtonTitle,
                                     onClick = { actionButton.execute(viewModel.mpv) },
                                     onLongClick = { actionButton.executeLongPress(viewModel.mpv) },
                                 )
-                                // ANZ <--
                             }
                         }
 
                         val invertDuration by playerPreferences.invertDuration().collectAsState()
-                        // ANZ -->
                         val readAhead by viewModel.demuxerCacheTime.collectAsState()
-                        // ANZ <--
                     val preciseSeeking by gesturePreferences.playerSmoothSeek().collectAsState()
 
                     var wasPlayerAlreadyPause by remember { mutableStateOf(false) }
@@ -630,7 +603,7 @@ fun PlayerControls(
                         }
                     }
 
-                        // YMR --> one set of seek callbacks for both layouts
+                        // one set of seek callbacks for both layouts
                         val onSeekChange: (Float) -> Unit = {
                             if (!viewModel.isSeekingUI.value) {
                                 wasPlayerAlreadyPause = viewModel.paused.value == true
@@ -673,7 +646,6 @@ fun PlayerControls(
                                 modifier = Modifier.padding(horizontal = if (isLandscape) 28.dp else 4.dp),
                             )
                         } else {
-                        // YMR <--
                         SeekbarWithTimers(
                             position = sliderPosition,
                             duration = totalDuration,
@@ -691,9 +663,7 @@ fun PlayerControls(
                             },
                             chapters = chaptersList,
                         )
-                        // YMR -->
                         }
-                        // YMR <--
                     }
                 }
                 val mediaTitle by viewModel.mediaTitle.collectAsState()
@@ -719,7 +689,7 @@ fun PlayerControls(
                         end.linkTo(topRightControls.start)
                     },
                 ) {
-                    // YMR --> premium layout: the title moves to the bottom; clock and battery stay here,
+                    // premium layout: the title moves to the bottom; clock and battery stay here,
                     // centred on the buttons at the right
                     if (cinema) {
                         val look = yomira.player.LocalPlayerButtonLook.current
@@ -730,7 +700,6 @@ fun PlayerControls(
                             yomira.player.PlayerInfoLine(viewModel, Modifier.padding(start = 8.dp, bottom = 6.dp))
                         }
                     } else {
-                    // YMR <--
                     val animeTitle by viewModel.animeTitle.collectAsState()
                     val mediaTitle by viewModel.mediaTitle.collectAsState()
                     TopLeftPlayerControls(
@@ -738,13 +707,9 @@ fun PlayerControls(
                         mediaTitle = mediaTitle,
                         onTitleClick = { viewModel.showEpisodeListDialog() },
                         onBackClick = onBackPress,
-                        // YMR -->
                         info = { yomira.player.PlayerInfoLine(viewModel) },
-                        // YMR <--
                     )
-                    // YMR -->
                     }
-                    // YMR <--
                 }
                 // Top right controls
                 AnimatedVisibility(
@@ -766,7 +731,7 @@ fun PlayerControls(
                         end.linkTo(parent.end)
                     },
                 ) {
-                    // YMR --> premium layout: buttons, then back at the far right
+                    // premium layout: buttons, then back at the far right
                     if (cinema) {
                         yomira.player.CinemaTopRow(
                             buttons = topRightButtonsList,
@@ -776,7 +741,6 @@ fun PlayerControls(
                             onCastClick = { showCastSheet = true },
                         )
                     } else {
-                    // YMR <--
                     TopRightPlayerControls(
                         buttons = topRightButtonsList,
                         viewModel = viewModel,
@@ -784,16 +748,13 @@ fun PlayerControls(
                         onBackPress = onBackPress,
                         onCastClick = { showCastSheet = true },
                     )
-                    // YMR -->
                     }
-                    // YMR <--
                 }
 
                 // Portrait bottom bar
                 AnimatedVisibility(
-                    // YMR --> (premium layout draws its own bottom row)
+                    // (premium layout draws its own bottom row)
                     visible = controlsShown && !areControlsLocked && !isLongPressing && !isLandscape && !cinema,
-                    // YMR <--
                     enter = fadeIn(),
                     exit = fadeOut(),
                     modifier = Modifier.constrainAs(portraitBottomBar) {
@@ -824,9 +785,8 @@ fun PlayerControls(
 
                 // Bottom right controls
                 AnimatedVisibility(
-                    // YMR --> (premium layout draws its own bottom row)
+                    // (premium layout draws its own bottom row)
                     controlsShown && !areControlsLocked && !isLongPressing && isLandscape && !cinema,
-                    // YMR <--
                     enter = if (!reduceMotion) {
                         slideInHorizontally(playerControlsEnterAnimationSpec()) { it } +
                             fadeIn(playerControlsEnterAnimationSpec())
@@ -854,9 +814,8 @@ fun PlayerControls(
                 }
                 // Bottom left controls
                 AnimatedVisibility(
-                    // YMR --> (premium layout draws its own bottom row)
+                    // (premium layout draws its own bottom row)
                     controlsShown && !areControlsLocked && !isLongPressing && isLandscape && !cinema,
-                    // YMR <--
                     enter = if (!reduceMotion) {
                         slideInHorizontally(playerControlsEnterAnimationSpec()) { -it } +
                             fadeIn(playerControlsEnterAnimationSpec())
@@ -902,9 +861,8 @@ fun PlayerControls(
             }
         }
 
-        // YMR --> glass "Skip opening" button, with or without the controls
+        // glass "Skip opening" button, with or without the controls
         yomira.player.SkipSegmentButton(viewModel = viewModel, controlsShown = controlsShown && !areControlsLocked)
-        // YMR <--
 
         val sheetShown by viewModel.sheetShown.collectAsState()
         val dismissSheet by viewModel.dismissSheet.collectAsState()
@@ -939,13 +897,11 @@ fun PlayerControls(
         val highlightDefaultStream = perAnimeDefaultStream && showDefaultStreamHighlight
         val autoScrollToDefault = perAnimeDefaultStream && autoScrollDefaultStream
         val decoder by viewModel.currentDecoder.collectAsState()
-        // ANZ -->
         val playbackSpeed by viewModel.playbackSpeed.collectAsState()
         val speedPresets by playerPreferences.speedPresets().collectAsState()
         val longPressSpeed by playerPreferences.playerSpeedLongPress().collectAsState()
         val longPressSpeedPresets by playerPreferences.longPressSpeedPresets().collectAsState()
         val pitchCorrection by audioPreferences.enablePitchCorrection().collectAsState()
-        // ANZ <--
         val sleepTimerTimeRemaining by viewModel.remainingTime.collectAsState()
         val showSubtitles by subtitlePreferences.screenshotSubtitles().collectAsState()
         val showFailedHosters by playerPreferences.showFailedHosters().collectAsState()
@@ -984,7 +940,6 @@ fun PlayerControls(
             },
             decoder = decoder,
             onUpdateDecoder = viewModel::updateDecoder,
-            // ANZ -->
             pitchCorrection = pitchCorrection,
             onPitchCorrectionChange = {
                 audioPreferences.enablePitchCorrection().set(it)
@@ -992,7 +947,6 @@ fun PlayerControls(
             },
             speed = playbackSpeed ?: playerPreferences.playerSpeed().get(),
             speedPresets = speedPresets.map { it.toFloat() }.sorted().toPersistentList(),
-            // ANZ -->
             onSpeedChange = {
                 val newSpeed = it.toFixed(2)
                 if (viewModel.mpv.isInitialized) {
@@ -1001,7 +955,6 @@ fun PlayerControls(
                 // Remember the choice so reopening the player starts at this speed again.
                 playerPreferences.playerSpeed().set(newSpeed)
             },
-            // ANZ <--
             onMakeDefaultSpeed = { playerPreferences.playerSpeed().set(it.toFixed(2)) },
             onAddSpeedPreset = { playerPreferences.speedPresets() += it.toFixed(2).toString() },
             onRemoveSpeedPreset = { playerPreferences.speedPresets() -= it.toFixed(2).toString() },
@@ -1017,7 +970,6 @@ fun PlayerControls(
                 playerPreferences.playerSpeedLongPress().delete()
                 viewModel.mpv.setPropertyDouble("speed", defaultSpeed.toDouble())
             },
-            // ANZ <--
             sleepTimerTimeRemaining = sleepTimerTimeRemaining,
             onStartSleepTimer = viewModel::startTimer,
             buttons = customButtons,
@@ -1050,7 +1002,6 @@ fun PlayerControls(
         val anime by viewModel.currentAnime.collectAsState()
         val playlist by viewModel.currentPlaylist.collectAsState()
 
-        // YMR -->
         val playbackError by viewModel.playbackError.collectAsState()
         val errorHosters by viewModel.hosterList.collectAsState()
         val errorHasNext by viewModel.hasNextEpisode.collectAsState()
@@ -1074,7 +1025,6 @@ fun PlayerControls(
                 )
             }
         }
-        // YMR <--
 
         PlayerDialogs(
             dialogShown = dialog,

@@ -196,7 +196,7 @@ fun AnimeInfoBox(
             modifier = Modifier
                 .matchParentSize()
                 .clipToBounds()
-                // YMR --> the blurred cover fades out smoothly instead of ending in a straight line
+                // the blurred cover fades out smoothly instead of ending in a straight line
                 .graphicsLayer {
                     alpha = 0.42f
                     compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
@@ -214,7 +214,6 @@ fun AnimeInfoBox(
                 }
                 // A strong blur turns the cover into a soft glow of its colours (drawn once, then cached)
                 .blur(24.dp, androidx.compose.ui.draw.BlurredEdgeTreatment.Unbounded),
-                // YMR <--
         )
 
         // Anime & source info
@@ -305,7 +304,7 @@ fun AnimeActionRow(
         modifier = modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 4.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // YMR --> one rounded tile per action (iOS style)
+        // one rounded tile per action (iOS style)
         run {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -928,7 +927,7 @@ private fun RowScope.AnimeActionButton(
     onLongClick: (() -> Unit)? = null,
     iconContent: (@Composable () -> Unit)? = null,
 ) {
-    // YMR --> rounded tile with the icon in a tinted circle
+    // rounded tile with the icon in a tinted circle
     val shape = RoundedCornerShape(20.dp)
     androidx.compose.foundation.layout.Box(
         modifier = Modifier
@@ -969,5 +968,4 @@ private fun RowScope.AnimeActionButton(
             )
         }
     }
-    // YMR <--
 }

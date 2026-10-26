@@ -39,7 +39,6 @@ import logcat.LogPriority
 import logcat.logcat
 import uy.kohesive.injekt.injectLazy
 
-// ANZ -->
 class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(context, attributes) {
 
     private val playerPreferences: PlayerPreferences by injectLazy()
@@ -127,16 +126,13 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
             mpv?.setOptionString(it.mpvProperty, value.toString())
         }
 
-        // ANZ -->
         mpv?.setPropertyDouble("speed", playerPreferences.playerSpeed().get().toDouble())
-        // ANZ <--
         // workaround for <https://github.com/mpv-player/mpv/issues/14651>
         setSafeOptionString("vd-lavc-film-grain", "cpu")
 
         postInitOptions()
-        // YMR --> smooth motion (display-resample + interpolation) when enabled
+        // smooth motion (display-resample + interpolation) when enabled
         yomira.player.Smoothness.applyMpvOptions(context, mpv)
-        // YMR <--
         setupSubtitlesOptions()
         setupAudioOptions()
         observeProperties()
@@ -261,4 +257,3 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
         mpv?.setOptionString("sub-scale", subtitlePreferences.subtitleFontScale().get().toString())
     }
 }
-// ANZ <--

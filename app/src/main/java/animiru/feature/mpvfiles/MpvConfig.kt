@@ -30,7 +30,6 @@ class MpvConfig(
     private val advancedPlayerPreferences: AdvancedPlayerPreferences,
     private val getCustomButtons: GetCustomButtons,
 ) {
-    // ANK -->
     // A plain CoroutineScope lets any failure reach the default uncaught handler and kill the app,
     // so the scope swallows and logs instead.
     private val scope = CoroutineScope(
@@ -43,12 +42,10 @@ class MpvConfig(
     /** Number of live [eu.kanade.tachiyomi.ui.player.PlayerActivity] instances. */
     private val playerSessions = AtomicInteger(0)
     private val copyPending = AtomicBoolean(false)
-    // ANK <--
 
     private var copyJob: Job? = null
 
     fun copyFiles() {
-        // ANK -->
         // Copying wipes the scripts/script-opts/shaders/fonts directories first, which must never
         // happen underneath a running mpv instance. MainActivity stays resumed behind the player in
         // picture-in-picture and split-screen, so defer while any player lives.
@@ -81,10 +78,8 @@ class MpvConfig(
                 // still-pending request once it is safe again.
             } while (copyPending.get() && playerSessions.get() == 0)
         }
-        // ANK <--
     }
 
-    // ANK -->
     /**
      * Suspends until any in-flight copy has finished, so mpv never initializes against a
      * directory tree that is still being deleted and rewritten.
@@ -103,7 +98,6 @@ class MpvConfig(
             copyFiles()
         }
     }
-    // ANK <--
 
     private fun getMpvDir(): UniFile {
         return UniFile.fromFile(context.filesDir)!!.createDirectory(MPV_DIR)!!
@@ -213,9 +207,7 @@ class MpvConfig(
             "<dir>/system/fonts/</dir>",
             "<dir>/product/fonts/</dir>",
             // User provided fonts
-            // ANK -->
             mpvDir.createDirectory(MPV_FONTS_DIR)?.filePath?.let { filePath -> "<dir>$filePath</dir>" },
-            // ANK <--
             // Point fontconfig to the right cache path so that caching works
             "<cachedir>${context.cacheDir.path}</cachedir>",
             // Conveniently there is *no* Java API to query the system default fonts, but we can

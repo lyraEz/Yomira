@@ -48,14 +48,13 @@ fun ExtensionReposScreen(
                 title = stringResource(MR.strings.label_extension_repos),
                 scrollBehavior = scrollBehavior,
                 actions = {
-                    // YMR --> a visible, focusable add action; the FAB is awkward to reach with a remote
+                    // a visible, focusable add action; the FAB is awkward to reach with a remote
                     IconButton(onClick = onClickCreate) {
                         Icon(
                             imageVector = Icons.Outlined.Add,
                             contentDescription = stringResource(MR.strings.action_add_repo),
                         )
                     }
-                    // YMR <--
                     IconButton(onClick = onClickRefresh) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -72,7 +71,6 @@ fun ExtensionReposScreen(
             )
         },
     ) { paddingValues ->
-        // YMR -->
         if (state.isAdding) {
             LinearProgressIndicator(
                 modifier = Modifier
@@ -80,12 +78,10 @@ fun ExtensionReposScreen(
                     .fillMaxWidth(),
             )
         }
-        // YMR <--
         if (state.isEmpty) {
             EmptyScreen(
                 MR.strings.information_empty_repos,
                 modifier = Modifier.padding(paddingValues),
-                // YMR -->
                 actions = persistentListOf(
                     EmptyScreenAction(
                         stringRes = MR.strings.action_add_repo,
@@ -93,7 +89,6 @@ fun ExtensionReposScreen(
                         onClick = onClickCreate,
                     ),
                 ),
-                // YMR <--
             )
             return@Scaffold
         }

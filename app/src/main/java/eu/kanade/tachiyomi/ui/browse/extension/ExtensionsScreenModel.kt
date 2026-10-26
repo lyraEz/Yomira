@@ -53,9 +53,8 @@ class ExtensionsScreenModel(
 
     init {
         val context = Injekt.get<Application>()
-        // YMR --> install errors travel with the item so the list can explain a failure
+        // install errors travel with the item so the list can explain a failure
         var installErrors: Map<String, String> = emptyMap()
-        // YMR <--
         val extensionMapper: (Map<String, InstallStep>) -> ((Extension) -> ExtensionUiModel.Item) = { map ->
             {
                 val author = when (it) {
@@ -63,7 +62,6 @@ class ExtensionsScreenModel(
                     is Extension.Installed -> it.author
                     is Extension.Untrusted -> it.author
                 }
-                // YMR -->
                 val step = map[it.pkgName] ?: InstallStep.Idle
                 ExtensionUiModel.Item(
                     extension = it,
@@ -71,7 +69,6 @@ class ExtensionsScreenModel(
                     repoName = author,
                     installError = installErrors[it.pkgName].takeIf { step == InstallStep.Error },
                 )
-                // YMR <--
             }
         }
         val queryFilter: (String) -> ((Extension) -> Boolean) = { query ->
@@ -119,13 +116,9 @@ class ExtensionsScreenModel(
                 state.map { it.nsfwOnly }.distinctUntilChanged(),
                 currentDownloads,
                 getExtensions.subscribe(),
-                // YMR -->
                 extensionManager.installErrors,
-                // YMR <--
             ) { query: String?, nsfwOnly: Boolean, downloads: Map<String, InstallStep>, extensions: eu.kanade.domain.extension.model.Extensions, errors: Map<String, String> ->
-                // YMR -->
                 installErrors = errors
-                // YMR <--
                 val (_updates, _installed, _available, _untrusted) = extensions
                 val searchQuery = query ?: ""
 
@@ -186,11 +179,9 @@ class ExtensionsScreenModel(
         }
         screenModelScope.launchIO { findAvailableExtensions() }
 
-        // YMR -->
         extensionManager.failedExtensionsFlow
             .onEach { failures -> mutableState.update { it.copy(failures = failures.toImmutableList()) } }
             .launchIn(screenModelScope)
-        // YMR <--
 
         preferences.animeExtensionUpdatesCount().changes()
             .onEach { mutableState.update { state -> state.copy(updates = it) } }
@@ -273,7 +264,6 @@ class ExtensionsScreenModel(
         }
     }
 
-    // YMR -->
     fun reloadExtensions() {
         screenModelScope.launchIO {
             mutableState.update { it.copy(isRefreshing = true) }
@@ -290,7 +280,6 @@ class ExtensionsScreenModel(
 
     suspend fun diagnosticsFor(extension: Extension?, pkgName: String, installError: String?): String =
         ExtensionDiagnostics.build(Injekt.get<Application>(), extension, pkgName, installError)
-    // YMR <--
 
     @Immutable
     data class State(
@@ -301,13 +290,9 @@ class ExtensionsScreenModel(
         val installer: BasePreferences.ExtensionInstaller? = null,
         val searchQuery: String? = null,
         val nsfwOnly: Boolean = false,
-        // YMR -->
         val failures: ImmutableList<ExtensionLoadFailure> = persistentListOf(),
-        // YMR <--
     ) {
-        // YMR -->
         val isEmpty = items.isEmpty() && failures.isEmpty()
-        // YMR <--
     }
 }
 
@@ -325,8 +310,6 @@ object ExtensionUiModel {
         val extension: Extension,
         val installStep: InstallStep,
         val repoName: String? = null,
-        // YMR -->
         val installError: String? = null,
-        // YMR <--
     )
 }

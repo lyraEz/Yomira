@@ -46,9 +46,7 @@ fun TabbedScreen(
     scrollable: Boolean = false,
     searchQuery: String? = null,
     onChangeSearchQuery: (String?) -> Unit = {},
-    // YMR -->
     largeTitle: Boolean = false,
-    // YMR <--
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -56,9 +54,7 @@ fun TabbedScreen(
     val hazeEnabled by uiPreferences.hazeEnabled().collectAsStatePref()
 
     Scaffold(
-        // YMR -->
         largeTopBar = largeTitle,
-        // YMR <--
         topBar = { scrollBehavior ->
             val tab = tabs.getOrNull(state.currentPage) ?: tabs.getOrNull(0)
             val currentTitleRes = titleRes ?: tab?.titleRes
@@ -79,9 +75,7 @@ fun TabbedScreen(
                     onChangeSearchQuery = onChangeSearchQuery,
                     actions = { AppBarActions(tab?.actions ?: persistentListOf()) },
                     navigateUp = tab?.navigateUp,
-                    // YMR -->
                     scrollBehavior = scrollBehavior.takeIf { largeTitle },
-                    // YMR <--
                 )
             }
         },
@@ -92,21 +86,19 @@ fun TabbedScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // YMR --> the bottom inset goes to the pages, so lists scroll under the floating bar
+                // the bottom inset goes to the pages, so lists scroll under the floating bar
                 .padding(
                     start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
                     top = contentPadding.calculateTopPadding(),
                     end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
                 ),
-                // YMR <--
         ) {
-            // YMR --> capsule tabs instead of the Material tab row
+            // capsule tabs instead of the Material tab row
             yomira.glass.CapsuleTabs(
                 tabs = tabs.map { yomira.glass.CapsuleTab(stringResource(it.titleRes), it.badgeNumber) },
                 selectedIndex = state.currentPage.coerceIn(0, maxOf(0, tabs.lastIndex)),
                 onSelect = { index -> scope.launch { state.animateScrollToPage(index) } },
             )
-            // YMR <--
 
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),

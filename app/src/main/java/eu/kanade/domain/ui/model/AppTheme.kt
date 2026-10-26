@@ -6,9 +6,7 @@ import tachiyomi.i18n.kmk.KMR
 import yomira.i18n.YMR
 
 enum class AppTheme(val titleRes: StringResource?) {
-    // YMR -->
     YOMIRA(YMR.strings.theme_yomira),
-    // YMR <--
     DEFAULT(MR.strings.label_default),
     MONET(MR.strings.theme_monet),
     CUSTOM(KMR.strings.theme_custom),

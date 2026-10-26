@@ -26,7 +26,6 @@ class SavedSearchRepositoryImpl(
     }
 
     override suspend fun insert(savedSearch: SavedSearch): Long {
-        // KMK -->
         return handler.await(true) {
             val currentSavedSearches = handler.awaitList {
                 saved_searchQueries.selectAll(SavedSearchMapper::map)
@@ -39,7 +38,6 @@ class SavedSearchRepositoryImpl(
             }?.id
 
             existedSavedSearchId
-                // KMK <--
                 ?: handler.awaitOneExecutable(true) {
                     saved_searchQueries.insert(
                         savedSearch.source,

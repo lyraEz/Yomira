@@ -40,7 +40,6 @@ interface AnimeRepository {
 
     suspend fun updateAll(animeUpdates: List<AnimeUpdate>): Boolean
 
-    // SY -->
     suspend fun getAnimeBySourceId(sourceId: Long): List<Anime>
 
     suspend fun getAll(): List<Anime>
@@ -54,5 +53,4 @@ interface AnimeRepository {
     suspend fun removeParentIdByIds(ids: List<Long>): Boolean
 
     fun getAnimeSeasonsByIdAsFlow(parentId: Long): Flow<List<SeasonAnime>>
-    // SY <--
 }

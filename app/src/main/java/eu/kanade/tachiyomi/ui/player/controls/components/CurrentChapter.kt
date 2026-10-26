@@ -57,9 +57,7 @@ fun CurrentChapter(
 ) {
     Box(
         modifier = modifier
-            // YMR -->
             .clip(RoundedCornerShape(percent = 50))
-            // YMR <--
             .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6F))
             .clickable(onClick = onClick)
             .padding(horizontal = MaterialTheme.padding.mediumSmall, vertical = MaterialTheme.padding.small),

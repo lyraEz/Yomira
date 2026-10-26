@@ -177,9 +177,7 @@ object NavConfigValidator {
     const val MAX_BOTTOM_TABS = 6
     val REQUIRED_TABS = setOf(NavItem.LIBRARY.id, NavItem.MORE.id)
     private val ALL_STANDARD_TABS = setOf(
-        // YMR -->
         NavItem.HOME.id,
-        // YMR <--
         NavItem.LIBRARY.id,
         NavItem.FEED.id,
         NavItem.UPDATES.id,
@@ -239,9 +237,8 @@ object NavConfigValidator {
 
 object NavPresets {
     val DEFAULT = NavConfig(
-        // YMR --> Home first
+        // Home first
         visibleTabs = persistentListOf(NavItem.HOME.id, NavItem.LIBRARY.id, NavItem.UPDATES.id, NavItem.HISTORY.id, NavItem.BROWSE.id, NavItem.MORE.id),
-        // YMR <--
         hiddenTabs = persistentListOf(NavItem.FEED.id)
     )
 
@@ -265,7 +262,7 @@ enum class NavItem(
     val iconVector: ImageVector? = null,
     val behavior: NavBehavior = NavBehavior()
 ) {
-    // YMR --> streaming-style catalog
+    // streaming-style catalog
     HOME(
         "home",
         yomira.i18n.YMR.strings.home_tab,
@@ -274,7 +271,6 @@ enum class NavItem(
         R.drawable.ic_animelibrary_outline_24dp,
         Icons.Outlined.Home,
     ),
-    // YMR <--
     LIBRARY("library", MR.strings.label_library, LibraryTab, R.drawable.anim_library_enter, R.drawable.ic_animelibrary_outline_24dp),
     FEED("feed", MR.strings.feed, FeedTab, R.drawable.ic_dynamic_feed_24dp, R.drawable.ic_dynamic_feed_24dp),
     UPDATES("updates", MR.strings.label_recent_updates, UpdatesTab, R.drawable.anim_updates_enter, R.drawable.ic_updates_outline_24dp),

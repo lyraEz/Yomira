@@ -30,9 +30,7 @@ data class ExtensionDetailsScreen(
             )
         }
         val state by screenModel.state.collectAsState()
-        // YMR -->
         var showDiagnostics by remember { mutableStateOf(false) }
-        // YMR <--
 
         if (state.isLoading) {
             LoadingScreen()
@@ -50,12 +48,9 @@ data class ExtensionDetailsScreen(
             onClickClearCookies = screenModel::clearCookies,
             onClickUninstall = screenModel::uninstallExtension,
             onClickSource = screenModel::toggleSource,
-            // YMR -->
             onClickDiagnostics = { showDiagnostics = true },
-            // YMR <--
         )
 
-        // YMR -->
         if (showDiagnostics) {
             val extension = state.extension
             yomira.extensions.ExtensionDiagnosticsDialog(
@@ -68,7 +63,6 @@ data class ExtensionDetailsScreen(
                 onDismissRequest = { showDiagnostics = false },
             )
         }
-        // YMR <--
 
         LaunchedEffect(Unit) {
             screenModel.events.collectLatest { event ->

@@ -55,9 +55,7 @@ class UpdatesRepositoryImpl(
         scanlator: String?,
         seen: Boolean,
         bookmark: Boolean,
-        // AM (FILLERMARK) -->
         fillermark: Boolean,
-        // <-- AM (FILLERMARK)
         lastSecondSeen: Long,
         totalSeconds: Long,
         sourceId: Long,
@@ -68,18 +66,14 @@ class UpdatesRepositoryImpl(
         dateFetch: Long,
     ): UpdatesWithRelations = UpdatesWithRelations(
         animeId = animeId,
-        // SY -->
         ogAnimeTitle = animeTitle,
-        // SY <--
         episodeId = episodeId,
         episodeName = episodeName,
         episodeNumber = episodeNumber,
         scanlator = scanlator,
         seen = seen,
         bookmark = bookmark,
-        // AM (FILLERMARK) -->
         fillermark = fillermark,
-        // <-- AM (FILLERMARK)
         lastSecondSeen = lastSecondSeen,
         totalSeconds = totalSeconds,
         sourceId = sourceId,

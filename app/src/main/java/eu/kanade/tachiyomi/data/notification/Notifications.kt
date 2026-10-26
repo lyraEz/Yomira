@@ -83,13 +83,11 @@ object Notifications {
     const val CHANNEL_HTTP_SERVER = "http_server_channel"
     const val ID_HTTP_SERVER = -901
 
-    // AM (DISCORD) -->
     /**
      * Notification channel used for Discord RPC
      */
     const val CHANNEL_DISCORD_RPC = "${RICH_PRESENCE_TAG}_channel"
     const val ID_DISCORD_RPC = -1701
-    // <-- AM (DISCORD)
 
     /**
      * Notification channel and ids used for Airing Schedule.
@@ -106,10 +104,8 @@ object Notifications {
     const val ID_APP_UPDATE_PROMPT = 2
     const val ID_APP_UPDATE_ERROR = 3
 
-    // KMK -->
     const val ID_APP_INSTALL = 4
     const val ID_APP_INSTALLED = 5
-    // KMK <--
 
     const val CHANNEL_EXTENSIONS_UPDATE = "ext_apk_update_channel"
     const val ID_UPDATES_TO_EXTS = -401
@@ -207,11 +203,9 @@ object Notifications {
                     setName("Extension HTTP server")
                     setShowBadge(false)
                 },
-                // AM (DISCORD) -->
                 buildNotificationChannel(CHANNEL_DISCORD_RPC, IMPORTANCE_LOW) {
                     setName(context.getString(R.string.pref_discord_rpc))
                 },
-                // <-- AM (DISCORD)
                 buildNotificationChannel(CHANNEL_APP_UPDATE, IMPORTANCE_DEFAULT) {
                     setGroup(GROUP_APK_UPDATES)
                     setName(context.stringResource(MR.strings.channel_app_updates))

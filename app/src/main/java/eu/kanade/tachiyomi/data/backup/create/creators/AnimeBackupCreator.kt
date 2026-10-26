@@ -97,10 +97,8 @@ private fun Anime.toBackupAnime() =
         favoriteModifiedAt = this@toBackupAnime.favoriteModifiedAt
         version = this@toBackupAnime.version
         
-        // AY -->
         parentId = this@toBackupAnime.parentId
         seasonNumber = this@toBackupAnime.seasonNumber ?: -1.0
         seasonSourceOrder = this@toBackupAnime.seasonOrder ?: 0L
         fetchType = FetchType.Episodes
-        // <-- AY
     }

@@ -72,19 +72,16 @@ class PlayerPreferences(
         false,
     )
     fun waitingTimeIntroSkip() = preferenceStore.getInt("pref_waiting_time_aniskip", 5)
-    // YMR --> on by default: skip times no longer need the anime to be tracked
+    // on by default: skip times no longer need the anime to be tracked
     fun aniSkipEnabled() = preferenceStore.getBoolean("pref_enable_ani_skip", true)
-    // YMR <--
     fun disableAniSkipOnChapters() = preferenceStore.getBoolean("pref_disabled_ani_skip_chapters", true)
 
     // Filler skip
     
     fun skipFillerEpisodes() = preferenceStore.getBoolean("pref_skip_filler_episodes", false)
-    // ANZ -->
     fun folderPerAnime() = preferenceStore.getBoolean("create_folder_per_anime", false)
     fun skipSeen() = preferenceStore.getBoolean("skip_seen", false)
     fun skipFiltered() = preferenceStore.getBoolean("skip_filtered", true)
-    // ANZ <--
 
     // PiP
 

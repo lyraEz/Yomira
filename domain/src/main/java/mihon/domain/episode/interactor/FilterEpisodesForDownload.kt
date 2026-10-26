@@ -41,7 +41,6 @@ class FilterEpisodesForDownload(
 
         if (!downloadPreferences.downloadNewUnreadChaptersOnly().get()) return newEpisodes
 
-        // SY -->
         val existingEpisodes = if (anime.source == MERGED_SOURCE_ID) {
             getMergedEpisodesByAnimeId.await(anime.id)
         } else {
@@ -49,7 +48,6 @@ class FilterEpisodesForDownload(
         }
 
         val seenEpisodeNumbers = existingEpisodes
-            // SY <--
             .asSequence()
             .filter { it.seen && it.isRecognizedNumber }
             .map { it.episodeNumber }

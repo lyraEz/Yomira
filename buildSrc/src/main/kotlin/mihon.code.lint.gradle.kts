@@ -18,12 +18,10 @@ val xmlFormatExclude = buildList(2) {
 }
     .toTypedArray()
 
-// YMR -->
-// Inherited AniZen code does not pass spotless (12 modules fail on the upstream base), and
-// reformatting it would bury every future upstream merge in conflicts. By default only files
-// added since the recorded upstream base are checked; -Pyomira.spotless.all=true restores the
-// upstream behaviour of checking everything.
-val yomiraUpstreamBase: String? = rootProject.file(".yomira/upstream.json")
+// Older code does not pass spotless (12 modules fail on the recorded base), and reformatting it
+// all at once would make the history hard to read. By default only files added since the base in
+// .yomira/lint-base.json are checked; -Pyomira.spotless.all=true checks everything.
+val yomiraUpstreamBase: String? = rootProject.file(".yomira/lint-base.json")
     .takeIf { it.exists() }
     ?.readText()
     ?.let { Regex("\"baseCommit\"\\s*:\\s*\"([0-9a-f]+)\"").find(it)?.groupValues?.get(1) }
@@ -49,30 +47,25 @@ val yomiraAddedFiles: List<String> by lazy {
 
 fun yomiraTargets(vararg extensions: String): List<String> =
     yomiraAddedFiles.filter { path -> extensions.any { path.endsWith(it) } && !path.contains("/build/") }
-// YMR <--
 
 spotless {
     kotlin {
-        // YMR -->
         if (checkAllFiles || yomiraUpstreamBase == null) {
             target("**/*.kt", "**/*.kts")
         } else {
             target(yomiraTargets(".kt", ".kts"))
         }
-        // YMR <--
         targetExclude("**/build/**/*.kt")
         ktlint(libs.ktlint.core.get().version)
         trimTrailingWhitespace()
         endWithNewline()
     }
     format("xml") {
-        // YMR -->
         if (checkAllFiles || yomiraUpstreamBase == null) {
             target("**/*.xml")
         } else {
             target(yomiraTargets(".xml"))
         }
-        // YMR <--
         targetExclude(*xmlFormatExclude)
         trimTrailingWhitespace()
         endWithNewline()

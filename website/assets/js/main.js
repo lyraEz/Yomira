@@ -325,6 +325,57 @@
     });
   });
 
+  /* Discord card: the bar runs like a sped-up episode, pauses with the button, seeks on tap. */
+
+  var rpc = $("#rpc");
+  if (rpc) {
+    var demo = rpc.parentElement, fill = $(".rpc-bar i", rpc), rpcBar = $("#rpc-bar"), rpcPos = $("#rpc-pos");
+    var playBtn = $("#rpc-play"), playLabel = playBtn && $("span", playBtn);
+    var TOTAL = 24 * 60, SPEED = reduceMotion ? 1 : 24; // one minute of page time plays the whole episode
+    var t = 8 * 60 + 12, playing = true, visible = false, last = 0, raf = 0;
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var drawRpc = function () {
+      fill.style.transform = "scaleX(" + (t / TOTAL).toFixed(4) + ")";
+      rpcPos.textContent = pad(Math.floor(t / 60)) + ":" + pad(Math.floor(t % 60));
+      rpcBar.setAttribute("aria-valuenow", String(Math.round(t)));
+    };
+    var tick = function (now) {
+      raf = 0;
+      if (!visible) return;
+      if (last && playing) { t += Math.min(0.1, (now - last) / 1000) * SPEED; if (t >= TOTAL) t = 0; }
+      last = now;
+      drawRpc();
+      raf = requestAnimationFrame(tick);
+    };
+    new IntersectionObserver(function (en) {
+      visible = en[0].isIntersecting;
+      if (visible && !raf) { last = 0; raf = requestAnimationFrame(tick); }
+    }).observe(rpc);
+    var seek = function (x) {
+      var r = rpcBar.getBoundingClientRect();
+      t = Math.max(0, Math.min(1, (x - r.left) / r.width)) * TOTAL;
+      drawRpc();
+    };
+    rpcBar.addEventListener("pointerdown", function (e) { seek(e.clientX); rpcBar.setPointerCapture(e.pointerId); });
+    rpcBar.addEventListener("pointermove", function (e) { if (rpcBar.hasPointerCapture(e.pointerId)) seek(e.clientX); });
+    rpcBar.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") t = Math.min(TOTAL - 1, t + 30);
+      else if (e.key === "ArrowLeft") t = Math.max(0, t - 30);
+      else return;
+      e.preventDefault(); drawRpc();
+    });
+    if (playBtn) playBtn.addEventListener("click", function () {
+      playing = !playing;
+      demo.classList.toggle("paused", !playing);
+      playBtn.setAttribute("aria-pressed", playing ? "false" : "true");
+      var key = playing ? "discord.pause" : "discord.play";
+      playLabel.setAttribute("data-i18n", key);
+      var d = dict[currentLang] || dict.en || {};
+      playLabel.textContent = d[key] || (dict.en || {})[key] || playLabel.textContent;
+    });
+    drawRpc();
+  }
+
   /* Latest release: version and direct APK links. Falls back to the release page. ----------- */
 
   function applyRelease(rel) {

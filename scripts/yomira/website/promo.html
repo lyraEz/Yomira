@@ -12,6 +12,7 @@
   .sky { position: absolute; }
   .layer { position: absolute; inset: 0; }
   .center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; }
+  .center img { margin: 0 auto; } /* the site stylesheet makes images blocks */
   .big-mark { width: 360px; filter: drop-shadow(0 20px 60px rgba(124,92,255,.55)); }
   .title { font-size: 120px; font-weight: 800; font-style: italic; letter-spacing: -.02em; margin: 26px 0 0; }
   .subtitle { font-size: 44px; font-weight: 700; font-style: italic; color: rgba(244,241,255,.78); margin-top: 14px; }
@@ -30,23 +31,8 @@
   .chips { position: absolute; left: 340px; top: 900px; display: flex; gap: 14px; }
   .chips .chip { font-size: 24px; padding: 12px 24px; font-family: system-ui, sans-serif; }
   .navphone { position: absolute; width: 400px; margin: 0; }
-  .discord { position: absolute; width: 640px; padding: 28px; border-radius: 30px; font-size: 26px; }
-  .discord .who { gap: 18px; margin-bottom: 20px; }
-  .discord .avatar { width: 78px; height: 78px; }
-  .discord .avatar::after { width: 24px; height: 24px; border-width: 4px; }
-  .discord .name { font-size: 30px; }
-  .discord .tag { font-size: 22px; }
-  .discord .act { padding: 22px; border-radius: 20px; }
-  .discord .act-title { font-size: 20px; margin-bottom: 16px; }
-  .discord .act-title img { width: 34px; height: 34px; }
-  .discord .cover { width: 116px; border-radius: 12px; }
-  .discord .meta b { font-size: 30px; }
-  .discord .meta span { font-size: 24px; }
-  .discord .meta em { font-size: 21px; }
-  .discord .bar { height: 7px; margin-top: 20px; }
-  .discord .bar i { animation: none; }
-  .discord .times { font-size: 19px; }
-  .discord .cta a { font-size: 22px; padding: 14px; border-radius: 12px; }
+  .rpc-shot { position: absolute; width: 760px; border-radius: 19px; overflow: hidden; box-shadow: 0 60px 120px -40px rgba(0,0,0,.95), 0 0 0 1px rgba(255,255,255,.05); }
+  .rpc-shot img { width: 100%; }
   .end-icon { width: 220px; border-radius: 52px; box-shadow: 0 40px 90px -30px rgba(124,92,255,.8); }
   .end .title { font-size: 104px; }
   .end .subtitle { font-size: 34px; font-style: normal; font-family: system-ui, sans-serif; font-weight: 500; }
@@ -130,19 +116,7 @@
       <h2>Show what you watch. No login.</h2>
       <p>Through the Discord app on your phone. No token, no password.</p>
     </div>
-    <div class="discord" id="s5-card" style="left: 1060px; top: 250px;">
-      <div class="who"><div class="avatar"></div><div><div class="name">you</div><div class="tag">Watching anime</div></div></div>
-      <div class="act">
-        <div class="act-title"><span>Watching Yomira</span><img src="../../../website/assets/img/icon-192.png" alt=""></div>
-        <div class="row">
-          <div class="cover"><img src="../../../website/assets/img/details.webp" alt=""></div>
-          <div class="meta"><b>Tokyo Ghoul</b><span>Tragedy</span><em>Season 1, Episode 1</em></div>
-        </div>
-        <div class="bar"><i id="s5-bar"></i></div>
-        <div class="times"><span id="s5-time">08:45</span><span>24:10</span></div>
-        <div class="cta"><a>Watch on Yomira</a></div>
-      </div>
-    </div>
+    <div class="rpc-shot" id="s5-card" style="left: 1010px; top: 335px;"><img src="../../../website/assets/img/rpc-real.webp" alt=""></div>
   </div>
 
   <!-- 6: end -->
@@ -228,11 +202,7 @@
     var v5 = life(t, 18.6, 23.6, 0.8, 0.6);
     $("s5").style.opacity = v5;
     set($("s5-cap"), ease((t - 18.8) / 0.8), -40 * (1 - ease((t - 18.8) / 0.8)), 0);
-    set($("s5-card"), ease((t - 19.1) / 0.8), 0, 60 * (1 - ease((t - 19.1) / 0.9)), 0.94 + 0.06 * ease((t - 19.1) / 0.9));
-    var prog = 0.36 + clamp((t - 19.1) / 4.5, 0, 1) * 0.08;
-    $("s5-bar").style.width = (prog * 100).toFixed(2) + "%";
-    var secs = Math.round(prog * (24 * 60 + 10));
-    $("s5-time").textContent = String(Math.floor(secs / 60)).padStart(2, "0") + ":" + String(secs % 60).padStart(2, "0");
+    set($("s5-card"), ease((t - 19.1) / 0.8), 0, 60 * (1 - ease((t - 19.1) / 0.9)) - (t - 19.1) * 6, 0.94 + 0.06 * ease((t - 19.1) / 0.9));
 
     // 6: end (23.2 - end)
     var v6 = ease((t - 23.2) / 0.9);

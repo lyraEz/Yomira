@@ -1465,6 +1465,12 @@ class AnimeScreenModel(
     fun runEpisodeDownloadActions(items: List<EpisodeList.Item>, action: EpisodeDownloadAction) {
         when (action) {
             EpisodeDownloadAction.START -> {
+                // YMR --> Enhanced Downloads asks "Original or Anime4K" first
+                if (yomira.anime4k.Anime4KPreferences().let { it.enhancedDownloads().get() && it.downloadChoice().get() == "ask" }) {
+                    updateSuccessState { it.copySuccess(dialog = Dialog.Anime4KDownload(items.map { item -> item.episode })) }
+                    return
+                }
+                // YMR <--
                 startDownload(items.map { it.episode }, false)
                 if (items.any { it.downloadState == Download.State.ERROR }) downloadManager.startDownloads()
             }
@@ -1483,8 +1489,24 @@ class AnimeScreenModel(
             DownloadAction.NEXT_25_EPISODES -> getUnseenEpisodesSorted().take(25)
             DownloadAction.UNSEEN_EPISODES -> getUnseenEpisodes()
         }
+        // YMR --> Enhanced Downloads asks "Original or Anime4K" first
+        if (episodesToDownload.isNotEmpty() &&
+            yomira.anime4k.Anime4KPreferences().let { it.enhancedDownloads().get() && it.downloadChoice().get() == "ask" }
+        ) {
+            updateSuccessState { it.copySuccess(dialog = Dialog.Anime4KDownload(episodesToDownload)) }
+            return
+        }
+        // YMR <--
         if (episodesToDownload.isNotEmpty()) startDownload(episodesToDownload, false)
     }
+
+    // YMR --> the choice from the Anime4K dialog: null downloads the original only
+    fun startAnime4KDownload(episodes: List<Episode>, preset: yomira.anime4k.Anime4KPreset?) {
+        dismissDialog()
+        if (preset != null) yomira.anime4k.EnhancedDownloads.request(episodes.map { it.id }, preset)
+        startDownload(episodes, false)
+    }
+    // YMR <--
 
     private fun cancelDownload(episodeId: Long) {
         val activeDownload = downloadManager.getQueuedDownloadOrNull(episodeId) ?: return
@@ -2009,6 +2031,9 @@ class AnimeScreenModel(
         data object EpisodeSettingsSheet : Dialog
         data object TrackSheet : Dialog
         data object FullCover : Dialog
+        // YMR -->
+        data class Anime4KDownload(val episodes: List<Episode>) : Dialog
+        // YMR <--
     }
 
     fun toggleDiscoveryExpansion() {

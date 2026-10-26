@@ -45,6 +45,8 @@
         tools:ignore="ProtectedPermissions" />
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- YMR: Anime4K processing runs as a media processing service on Android 15+ -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROCESSING" />
 
     <!-- Remove permission from Firebase dependency -->
     <uses-permission
@@ -348,9 +350,10 @@
                 android:value="true" />
         </service>
 
+        <!-- YMR: mediaProcessing for the Anime4K worker (Android 15+) -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
+            android:foregroundServiceType="dataSync|mediaProcessing"
             tools:node="merge" />
 
         <service

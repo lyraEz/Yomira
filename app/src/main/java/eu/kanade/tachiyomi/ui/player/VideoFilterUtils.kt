@@ -107,7 +107,9 @@ fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, 
     val gpuNext = prefs.gpuNext().get()
     if (enabled && gpuNext) {
         logcat("Anime4K", LogPriority.WARN) { "Anime4K is incompatible with gpu-next. Skipping." }
-        if (!isInit) mpv?.setPropertyString("glsl-shaders", "")
+        // YMR --> keep the color correction/grading shader
+        if (!isInit) mpv?.setPropertyString("glsl-shaders", yomira.player.ColorGrading.withColor(""))
+        // YMR <--
         return
     }
 
@@ -125,7 +127,9 @@ fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, 
     // Ensure initialization happened
     manager.initialize()
 
-    val chain = if (enabled) manager.getShaderChain(mode, quality) else ""
+    // YMR --> the color correction/grading shader goes after Anime4K
+    val chain = yomira.player.ColorGrading.withColor(if (enabled) manager.getShaderChain(mode, quality) else "")
+    // YMR <--
     logcat("Anime4K", LogPriority.DEBUG) { "Applying Anime4K chain (enabled=$enabled): $chain" }
 
     if (chain.isNotEmpty()) {

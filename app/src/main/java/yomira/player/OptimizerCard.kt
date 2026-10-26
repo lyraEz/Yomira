@@ -199,7 +199,7 @@ fun ResetPlayerButton() {
             PlayerDefaults.reset()
             mpv?.let { m ->
                 listOf(
-                    "glsl-shaders" to "",
+                    "glsl-shaders" to ColorGrading.withColor(""),
                     "interpolation" to "no",
                     "video-sync" to "audio",
                     "deband" to "no",

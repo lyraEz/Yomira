@@ -374,6 +374,16 @@ class AnimeScreen(
                     )
                 }
 
+                // YMR -->
+                is AnimeScreenModel.Dialog.Anime4KDownload -> {
+                    yomira.anime4k.Anime4KDownloadDialog(
+                        episodeCount = dialog.episodes.size,
+                        onDismiss = onDismissRequest,
+                        onConfirm = { preset -> screenModel.startAnime4KDownload(dialog.episodes, preset) },
+                    )
+                }
+                // YMR <--
+
                 is AnimeScreenModel.Dialog.ShowQualities -> {
                     EpisodeOptionsDialogScreen.onDismissDialog = onDismissRequest
                     val episodeTitle = if (dialog.anime.displayMode == Anime.EPISODE_DISPLAY_NUMBER) {

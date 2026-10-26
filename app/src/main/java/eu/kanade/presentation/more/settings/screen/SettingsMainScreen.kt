@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CallToAction
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.CollectionsBookmark
@@ -118,6 +119,14 @@ object SettingsMainScreen : Screen() {
                         icon = Icons.Outlined.Sync,
                         screen = SettingsTrackingScreen,
                     ),
+                    // YMR --> Anime4K offline processing (Enhanced Downloads, Smart Anime4K)
+                    Item(
+                        titleRes = yomira.i18n.YMR.strings.a4k_title,
+                        subtitleRes = yomira.i18n.YMR.strings.a4k_settings_summary,
+                        icon = Icons.Outlined.AutoAwesome,
+                        screen = yomira.anime4k.SettingsAnime4KScreen,
+                    ),
+                    // YMR <--
                     Item(
                         titleRes = MR.strings.pref_category_ai,
                         subtitleRes = MR.strings.pref_ai_summary,

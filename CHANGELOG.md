@@ -10,6 +10,24 @@ The format is a modified version of [Keep a Changelog](https://keepachangelog.co
 - `Fixed` - for any bug fixes.
 - `Other` - for technical stuff.
 
+## Yomira [1.11.0] - 2026-10-26
+
+Anime4K processado no próprio vídeo (Enhanced Downloads e Smart Anime4K) e correção e gradação de cor no player.
+
+### Added
+- Configurações → Anime4K, com tudo desligado por padrão:
+  - *Enhanced Downloads*: ao baixar, escolha Original ou Anime4K Enhanced (modos A, B, C, A+A, B+B e C+A, Fast ou High). O vídeo é processado depois do download e salvo como `<nome>.anime4k.mkv` ao lado do original, que é mantido. Áudio, legendas, fontes e capítulos originais são copiados sem recompressão;
+  - *Smart Anime4K*: prepara o episódio aberto (e, se quiser, o próximo) em segundo plano, num cache com limite de tamanho. Quando fica pronto, o player oferece trocar no mesmo ponto em *Mais*;
+  - fila com progresso, tempo estimado, pausar, retomar e tentar de novo, e limites de carregador, calor e armazenamento;
+  - teste de desempenho, que mede quanto tempo o celular leva por episódio.
+- Player → Filtros:
+  - *Correção de cor*: temperatura, tonalidade, exposição, sombras, realces e vibrância;
+  - *Gradação de cor*: visuais prontos (Cinema, Quente, Frio, Vivo, Vintage, Pastel, Dramático, Preto e branco), cor e intensidade das sombras e dos realces, equilíbrio, curva de contraste, intensidade das cores e desbotar.
+- As duas rodam como um shader leve depois do Anime4K em tempo real, valem em todos os episódios e não mexem nas legendas.
+
+### Other
+- O processamento Anime4K é pesado: no Galaxy A15, um episódio no modo High leva horas. O teste de desempenho mostra o tempo real no seu celular.
+
 ## Yomira [1.10.1] - 2026-10-26
 
 ### Fixed

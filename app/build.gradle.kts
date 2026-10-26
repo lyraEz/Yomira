@@ -75,8 +75,8 @@ android {
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
         // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/yomira/RELEASES.md.
-        versionCode = 11001
-        versionName = "1.10.1"
+        versionCode = 11100
+        versionName = "1.11.0"
 
         manifestPlaceholders["author"] = "@lyraEz"
         // YMR <--
@@ -485,6 +485,11 @@ dependencies {
     implementation(aniyomilibs.bundles.cast)
     // nanohttpd server
     implementation(aniyomilibs.nanohttpd)
+    // YMR --> Anime4K offline processing: Media3 decodes, runs the GPU effect and encodes
+    implementation(androidx.media3.transformer)
+    implementation(androidx.media3.effect)
+    implementation(androidx.media3.common)
+    // YMR <--
     // YMR --> Discord Social SDK (Rich Presence through the installed Discord app)
     implementation(files("libs/discord_partner_sdk.aar"))
     // YMR <--

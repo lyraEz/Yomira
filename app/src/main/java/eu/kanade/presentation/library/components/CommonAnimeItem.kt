@@ -53,7 +53,6 @@ import eu.kanade.presentation.anime.components.AnimeCover
 import eu.kanade.presentation.anime.components.CoverSettings
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.BadgeGroup
-import uy.kohesive.injekt.api.get
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
 import tachiyomi.domain.anime.model.AnimeCover as EntryCoverModel
@@ -66,11 +65,11 @@ object CommonAnimeItemDefaults {
     const val BrowseFavoriteCoverAlpha = 0.34f
 }
 
-private val ContinueWatchingButtonSizeSmall = 30.dp
-private val ContinueWatchingButtonSizeLarge = 34.dp
+private val ContinueWatchingButtonSizeSmall = 28.dp
+private val ContinueWatchingButtonSizeLarge = 30.dp
 
-private val ContinueWatchingButtonIconSizeSmall = 18.dp
-private val ContinueWatchingButtonIconSizeLarge = 22.dp
+private val ContinueWatchingButtonIconSizeSmall = 16.dp
+private val ContinueWatchingButtonIconSizeLarge = 18.dp
 
 private val ContinueWatchingButtonGridPadding = 8.dp
 private val ContinueWatchingButtonListSpacing = 8.dp

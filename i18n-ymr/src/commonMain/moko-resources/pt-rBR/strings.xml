@@ -642,7 +642,7 @@
     <string name="library_empty_title">Sua biblioteca está vazia</string>
     <string name="library_empty">Encontre animes no Navegar e adicione. Eles aparecem aqui com o seu progresso e os episódios que faltam assistir.</string>
     <string name="library_empty_browse">Explorar fontes</string>
-    <string name="library_card_progress">%1$d de %2$d vistos</string>
+    <string name="library_card_progress">%1$d/%2$d vistos</string>
     <string name="library_card_done">Tudo assistido</string>
     <string name="browse_continue">Continuar navegando</string>
     <string name="browse_all_sources">Todas as fontes</string>

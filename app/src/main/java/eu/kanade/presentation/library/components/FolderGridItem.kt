@@ -26,7 +26,6 @@ import eu.kanade.presentation.anime.components.AnimeCover
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayItem
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import tachiyomi.domain.library.model.LibraryDisplayMode
-import uy.kohesive.injekt.api.get
 
 @Composable
 fun FolderGridItem(

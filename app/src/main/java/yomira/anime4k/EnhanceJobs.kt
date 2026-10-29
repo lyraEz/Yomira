@@ -60,7 +60,7 @@ object EnhanceJobs {
      * Reads the saved list one job at a time, so a job this version cannot read is dropped alone
      * instead of losing the whole list. Jobs of the removed Smart Anime4K are dropped too.
      */
-    private fun decode(text: String): List<EnhanceJob> = json.parseToJsonElement(text).jsonArray.mapNotNull { element ->
+    internal fun decode(text: String): List<EnhanceJob> = json.parseToJsonElement(text).jsonArray.mapNotNull { element ->
         if ((element as? JsonObject)?.get("kind")?.jsonPrimitive?.content == LEGACY_SMART_KIND) return@mapNotNull null
         runCatching { json.decodeFromJsonElement(EnhanceJob.serializer(), element) }
             .onFailure { logcat(LogPriority.WARN, it) { "Anime4K: dropped a job that could not be read" } }

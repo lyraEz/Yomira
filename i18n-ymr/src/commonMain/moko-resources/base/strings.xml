@@ -643,7 +643,7 @@
     <string name="library_empty_title">Your library is empty</string>
     <string name="library_empty">Find anime in Browse and add them. They show up here with your progress and the episodes left to watch.</string>
     <string name="library_empty_browse">Explore sources</string>
-    <string name="library_card_progress">%1$d of %2$d watched</string>
+    <string name="library_card_progress">%1$d/%2$d watched</string>
     <string name="library_card_done">All watched</string>
     <string name="browse_continue">Continue browsing</string>
     <string name="browse_all_sources">All sources</string>

@@ -55,7 +55,6 @@ object EnhancedDownloads {
         val settings = prefs.settings(preset.id)
         val job = EnhanceJob(
             id = EnhanceJobs.newId(),
-            kind = JobKind.DOWNLOAD,
             animeId = anime.id,
             episodeId = episode.id,
             sourceId = anime.source,

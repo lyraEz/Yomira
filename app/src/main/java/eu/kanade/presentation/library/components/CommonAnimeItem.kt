@@ -1,9 +1,6 @@
 package eu.kanade.presentation.library.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -24,14 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -58,34 +51,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.anime.components.AnimeCover
 import eu.kanade.presentation.anime.components.CoverSettings
-import eu.kanade.presentation.browse.components.SourceIcon
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.BadgeGroup
-import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import eu.kanade.domain.ui.UiPreferences
-import androidx.compose.runtime.collectAsState
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.selectedBackground
-import tachiyomi.domain.source.model.Source
 import tachiyomi.domain.anime.model.AnimeCover as EntryCoverModel
 
 object CommonAnimeItemDefaults {
-    val GridHorizontalSpacer = 4.dp
-    val GridVerticalSpacer = 4.dp
+    val GridHorizontalSpacer = 6.dp
+    val GridVerticalSpacer = 8.dp
 
     @Suppress("ConstPropertyName")
     const val BrowseFavoriteCoverAlpha = 0.34f
 }
 
-private val ContinueWatchingButtonSizeSmall = 28.dp
-private val ContinueWatchingButtonSizeLarge = 32.dp
+private val ContinueWatchingButtonSizeSmall = 30.dp
+private val ContinueWatchingButtonSizeLarge = 34.dp
 
-private val ContinueWatchingButtonIconSizeSmall = 16.dp
-private val ContinueWatchingButtonIconSizeLarge = 20.dp
+private val ContinueWatchingButtonIconSizeSmall = 18.dp
+private val ContinueWatchingButtonIconSizeLarge = 22.dp
 
-private val ContinueWatchingButtonGridPadding = 6.dp
+private val ContinueWatchingButtonGridPadding = 8.dp
 private val ContinueWatchingButtonListSpacing = 8.dp
 
 private const val GRID_SELECTED_COVER_ALPHA = 0.76f
@@ -107,6 +94,7 @@ fun AnimeCompactGridItem(
     coverBadgeEnd: @Composable (RowScope.() -> Unit)? = null,
     usePanorama: Boolean? = null,
     modifier: Modifier = Modifier,
+    progress: Float? = null,
 ) {
     GridItemSelectable(
         isSelected = isSelected,
@@ -141,8 +129,9 @@ fun AnimeCompactGridItem(
                     )
                 }
             }
-        val contentBlock: @Composable BoxScope.() -> Unit = remember(title, onClickContinueWatching) {
+        val contentBlock: @Composable BoxScope.() -> Unit = remember(title, onClickContinueWatching, progress) {
             {
+                if (progress != null) CoverProgress(progress)
                 if (title != null) {
                     CoverTextOverlay(
                         title = title,
@@ -245,6 +234,9 @@ fun AnimeComfortableGridItem(
     coverBadgeEnd: @Composable (RowScope.() -> Unit)? = null,
     usePanorama: Boolean? = null,
     modifier: Modifier = Modifier,
+    progress: Float? = null,
+    subtitle: String? = null,
+    subtitleAccent: Boolean = false,
 ) {
     GridItemSelectable(
         isSelected = isSelected,
@@ -273,8 +265,9 @@ fun AnimeComfortableGridItem(
                     )
                 }
             }
-        val contentBlock: @Composable BoxScope.() -> Unit = remember(onClickContinueWatching) {
+        val contentBlock: @Composable BoxScope.() -> Unit = remember(onClickContinueWatching, progress) {
             {
+                if (progress != null) CoverProgress(progress)
                 if (onClickContinueWatching != null) {
                     ContinueWatchingButton(
                         size = ContinueWatchingButtonSizeLarge,
@@ -296,12 +289,24 @@ fun AnimeComfortableGridItem(
                 content = contentBlock,
             )
             GridItemTitle(
-                modifier = Modifier.padding(4.dp),
+                modifier = Modifier.padding(start = 2.dp, end = 2.dp, top = 6.dp),
                 title = title,
-                style = MaterialTheme.typography.titleSmall,
-                minLines = 2,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                minLines = if (subtitle != null) 1 else 2,
                 maxLines = titleMaxLines,
             )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    modifier = Modifier.padding(start = 2.dp, end = 2.dp, top = 1.dp, bottom = 2.dp),
+                    color = if (subtitleAccent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = if (subtitleAccent) FontWeight.SemiBold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }
@@ -366,8 +371,8 @@ internal fun GridItemTitle(
     Text(
         modifier = modifier,
         text = title,
-        fontSize = 12.sp,
-        lineHeight = 18.sp,
+        fontSize = 13.sp,
+        lineHeight = 17.sp,
         minLines = minLines,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
@@ -464,6 +469,7 @@ fun AnimeListItem(
     containerHeight: Int = 0,
     usePanorama: Boolean? = null,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
 ) {
     val density = LocalDensity.current
     // Resolve the effective value before sizing the row: keying the height on the *nullable*
@@ -502,15 +508,28 @@ fun AnimeListItem(
             ratio = ratio,
             measureRatio = panorama,
         )
-        Text(
-            text = title,
+        Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 14.dp)
                 .weight(1f),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        ) {
+            Text(
+                text = title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+        }
         BadgeGroup(content = badge)
         if (onClickContinueWatching != null) {
             ContinueWatchingButton(
@@ -530,21 +549,43 @@ private fun ContinueWatchingButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier) {
-        FilledIconButton(
-            onClick = onClick,
-            shape = androidx.compose.foundation.shape.CircleShape,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                contentColor = contentColorFor(MaterialTheme.colorScheme.primaryContainer),
-            ),
-            modifier = Modifier.size(size),
-        ) {
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = stringResource(MR.strings.action_resume),
-                modifier = Modifier.size(iconSize),
-            )
-        }
+    // white disc with a dark play mark, like the play buttons of Home and the details page
+    val shadow = Color.Black.copy(alpha = 0.45f)
+    Box(
+        modifier = modifier
+            .size(size)
+            .graphicsLayer {
+                shadowElevation = 4.dp.toPx()
+                shape = CircleShape
+                clip = true
+                ambientShadowColor = shadow
+                spotShadowColor = shadow
+            }
+            .background(Color.White)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Filled.PlayArrow,
+            contentDescription = stringResource(MR.strings.action_resume),
+            tint = Color(0xFF111114),
+            modifier = Modifier.size(iconSize),
+        )
     }
+}
+
+/** How much of the anime was watched, as a thin accent line along the bottom of the cover. */
+@Composable
+internal fun BoxScope.CoverProgress(progress: Float) {
+    val accent = MaterialTheme.colorScheme.primary
+    Spacer(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .height(3.dp)
+            .drawBehind {
+                drawRect(Color.Black.copy(alpha = 0.45f))
+                drawRect(accent, size = size.copy(width = size.width * progress.coerceIn(0f, 1f)))
+            },
+    )
 }

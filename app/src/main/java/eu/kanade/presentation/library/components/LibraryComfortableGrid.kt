@@ -7,17 +7,11 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.util.fastAny
-import eu.kanade.tachiyomi.ui.library.LibraryItem
 import kotlinx.collections.immutable.ImmutableList
 import tachiyomi.domain.anime.model.AnimeCover
 import tachiyomi.domain.library.model.LibraryAnime
 import eu.kanade.tachiyomi.ui.library.LibraryDisplayItem
 import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun LibraryComfortableGrid(
@@ -70,6 +64,7 @@ internal fun LibraryComfortableGrid(
                 is LibraryDisplayItem.Anime -> {
                     val libraryItem = displayItem.libraryItem
                     val anime = libraryItem.libraryAnime.anime
+                    val status = libraryItem.cardStatus()
                     AnimeComfortableGridItem(
                         isSelected = libraryItem.libraryAnime.id in selectedIds,
                         title = anime.title,
@@ -102,6 +97,9 @@ internal fun LibraryComfortableGrid(
                             null
                         },
                         usePanorama = usePanorama,
+                        progress = libraryItem.watchProgress(),
+                        subtitle = status?.text,
+                        subtitleAccent = status?.accent == true,
                     )
                 }
                 is LibraryDisplayItem.Folder -> {
@@ -114,11 +112,7 @@ internal fun LibraryComfortableGrid(
                     )
                 }
                 is LibraryDisplayItem.Header -> {
-                    Text(
-                        text = displayItem.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)
-                    )
+                    LibrarySectionTitle(displayItem.name)
                 }
             }
         }

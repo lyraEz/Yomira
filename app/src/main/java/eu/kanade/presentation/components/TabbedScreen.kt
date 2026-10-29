@@ -1,6 +1,8 @@
 package eu.kanade.presentation.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -10,20 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import dev.icerock.moko.resources.StringResource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -31,7 +27,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import eu.kanade.domain.ui.UiPreferences
 import tachiyomi.presentation.core.components.material.Scaffold
-import tachiyomi.presentation.core.components.material.TabText
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
 import uy.kohesive.injekt.Injekt
@@ -58,7 +53,29 @@ fun TabbedScreen(
         topBar = { scrollBehavior ->
             val tab = tabs.getOrNull(state.currentPage) ?: tabs.getOrNull(0)
             val currentTitleRes = titleRes ?: tab?.titleRes
-            if (currentTitleRes != null) {
+            if (currentTitleRes != null && largeTitle) {
+                // main tab (Browse): big title, the page's summary and round buttons
+                val searchEnabled = tab?.searchEnabled ?: false
+                yomira.ui.TabHeader(
+                    title = stringResource(currentTitleRes),
+                    subtitle = tab?.subtitle,
+                    scrollBehavior = scrollBehavior,
+                    search = yomira.ui.TabHeaderSearch(
+                        query = if (searchEnabled) searchQuery else null,
+                        onQueryChange = onChangeSearchQuery,
+                    ),
+                    actions = {
+                        if (searchEnabled) {
+                            yomira.ui.HeaderButton(
+                                icon = Icons.Outlined.Search,
+                                contentDescription = stringResource(tachiyomi.i18n.MR.strings.action_search),
+                                onClick = { onChangeSearchQuery("") },
+                            )
+                        }
+                        yomira.ui.HeaderActions(tab?.actions ?: persistentListOf())
+                    },
+                )
+            } else if (currentTitleRes != null) {
                 val searchEnabled = tab?.searchEnabled ?: false
 
                 SearchToolbar(
@@ -124,5 +141,7 @@ data class TabContent(
     val numberTitle: Int = 0,
     val cancelAction: () -> Unit = {},
     val navigateUp: (() -> Unit)? = null,
+    /** Short line under the big title while this page is shown ("12 sources"). */
+    val subtitle: String? = null,
 )
 

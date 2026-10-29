@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.util.system.isPackageInstalled
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.map
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.i18n.YMR
 
@@ -37,13 +38,24 @@ fun extensionsTab(
     val context = LocalContext.current
 
     val updates by extensionsScreenModel.state.map { it.updates }.collectAsStateWithLifecycle(0)
+    val installed by extensionsScreenModel.state
+        .map { state -> state.items.values.flatten().map { it.extension }.filterIsInstance<Extension.Installed>().distinctBy { it.pkgName }.size }
+        .collectAsStateWithLifecycle(0)
+    val installedText = pluralStringResource(YMR.plurals.browse_extensions_installed, installed, installed)
+    val updatesText = pluralStringResource(YMR.plurals.browse_extension_updates, updates, updates)
+    val subtitle = when {
+        installed == 0 && updates == 0 -> null
+        updates > 0 -> "$installedText · $updatesText"
+        else -> installedText
+    }
     val actionFilter = stringResource(MR.strings.action_filter)
     val labelExtensionRepos = stringResource(MR.strings.label_extension_repos)
     val labelReload = stringResource(YMR.strings.ext_reload)
 
-    return remember(updates, actionFilter, labelExtensionRepos, labelReload) {
+    return remember(updates, actionFilter, labelExtensionRepos, labelReload, subtitle) {
         TabContent(
             titleRes = MR.strings.label_extensions,
+            subtitle = subtitle,
             badgeNumber = updates.takeIf { it > 0 },
             searchEnabled = true,
             actions = persistentListOf(

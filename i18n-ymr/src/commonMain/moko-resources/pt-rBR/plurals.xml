@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="library_count">
+        <item quantity="one">%d anime</item>
+        <item quantity="other">%d animes</item>
+    </plurals>
+    <plurals name="library_new">
+        <item quantity="one">%d com episódios para assistir</item>
+        <item quantity="other">%d com episódios para assistir</item>
+    </plurals>
+    <plurals name="library_card_episodes">
+        <item quantity="one">%d episódio</item>
+        <item quantity="other">%d episódios</item>
+    </plurals>
+    <plurals name="browse_sources">
+        <item quantity="one">%d fonte</item>
+        <item quantity="other">%d fontes</item>
+    </plurals>
+    <plurals name="browse_extensions_installed">
+        <item quantity="one">%d instalada</item>
+        <item quantity="other">%d instaladas</item>
+    </plurals>
+    <plurals name="browse_extension_updates">
+        <item quantity="one">%d atualização</item>
+        <item quantity="other">%d atualizações</item>
+    </plurals>
+    <plurals name="browse_migrate_sources">
+        <item quantity="one">%d fonte com animes na biblioteca</item>
+        <item quantity="other">%d fontes com animes na biblioteca</item>
+    </plurals>
+</resources>

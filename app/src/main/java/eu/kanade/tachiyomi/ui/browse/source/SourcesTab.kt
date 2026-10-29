@@ -9,8 +9,6 @@ import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.TravelExplore
 import yomira.glass.AlertDialog
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,9 +30,12 @@ import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import tachiyomi.domain.source.model.FeedSavedSearchCategory
 import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import yomira.i18n.YMR
+import eu.kanade.presentation.browse.SourceUiModel
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun Screen.sourcesTab(): TabContent {
@@ -43,10 +44,15 @@ fun Screen.sourcesTab(): TabContent {
 
     val globalSearch = stringResource(MR.strings.action_global_search)
     val actionFilter = stringResource(MR.strings.action_filter)
+    val sourceCount by screenModel.state
+        .map { state -> state.items.filterIsInstance<SourceUiModel.Item>().distinctBy { it.source.id }.size }
+        .collectAsStateWithLifecycle(0)
+    val subtitle = pluralStringResource(YMR.plurals.browse_sources, sourceCount, sourceCount).takeIf { sourceCount > 0 }
 
-    return remember(globalSearch, actionFilter) {
+    return remember(globalSearch, actionFilter, subtitle) {
         TabContent(
             titleRes = MR.strings.label_sources,
+            subtitle = subtitle,
             searchEnabled = false,
             actions = persistentListOf(
                 AppBar.Action(

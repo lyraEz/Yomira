@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.murgupluoglu.flagkit.FlagKit
 import eu.kanade.domain.source.model.icon
-import eu.kanade.presentation.browse.components.SourceIcon
 import eu.kanade.presentation.theme.TachiyomiPreviewTheme
 import tachiyomi.domain.source.model.Source
 import tachiyomi.presentation.core.components.Badge
@@ -81,7 +80,12 @@ internal fun DownloadsBadge(count: Long) {
 @Composable
 internal fun UnviewedBadge(count: Long) {
     if (count > 0) {
-        Badge(text = "$count")
+        // episodes left to watch, in the accent so it reads at a glance over any cover
+        Badge(
+            text = "$count",
+            color = MaterialTheme.colorScheme.primary,
+            textColor = MaterialTheme.colorScheme.onPrimary,
+        )
     }
 }
 

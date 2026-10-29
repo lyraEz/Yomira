@@ -172,7 +172,6 @@ fun MoreSheet(
 
             // Discord Rich Presence on or off; the options live in the filters panel
             yomira.discord.DiscordQuickRow(onOpenOptions = onEnterFiltersPanel)
-            yomira.anime4k.Anime4KSmartRow()
 
             Text(stringResource(MR.strings.player_hwdec_mode))
             LazyRow(

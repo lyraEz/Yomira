@@ -1,30 +1,41 @@
 package eu.kanade.presentation.library.components
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.FlipToBack
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SelectAll
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.components.AppBar
-import eu.kanade.presentation.components.AppBarActions
-import eu.kanade.presentation.components.SearchToolbar
 import kotlinx.collections.immutable.persistentListOf
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
-import tachiyomi.presentation.core.components.Pill
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.presentation.core.theme.active
+import yomira.i18n.YMR
+import yomira.ui.HeaderActions
+import yomira.ui.HeaderButton
+import yomira.ui.TabHeader
+import yomira.ui.TabHeaderSearch
 
 @Composable
 fun LibraryToolbar(
@@ -42,16 +53,18 @@ fun LibraryToolbar(
     searchQuery: String?,
     onSearchQueryChange: (String?) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
-    navigateUp: (() -> Unit)? = null,
+    subtitle: String? = null,
 ) = when {
     selectedCount > 0 -> LibrarySelectionToolbar(
         selectedCount = selectedCount,
         onClickUnselectAll = onClickUnselectAll,
         onClickSelectAll = onClickSelectAll,
         onClickInvertSelection = onClickInvertSelection,
+        scrollBehavior = scrollBehavior,
     )
     else -> LibraryRegularToolbar(
         title = title,
+        subtitle = subtitle,
         hasFilters = hasActiveFilters,
         searchQuery = searchQuery,
         onSearchQueryChange = onSearchQueryChange,
@@ -61,13 +74,13 @@ fun LibraryToolbar(
         onClickOpenRandomEntry = onClickOpenRandomEntry,
         onClickSyncNow = onClickSyncNow,
         scrollBehavior = scrollBehavior,
-        navigateUp = navigateUp,
     )
 }
 
 @Composable
 private fun LibraryRegularToolbar(
     title: LibraryToolbarTitle,
+    subtitle: String?,
     hasFilters: Boolean,
     searchQuery: String?,
     onSearchQueryChange: (String?) -> Unit,
@@ -77,39 +90,30 @@ private fun LibraryRegularToolbar(
     onClickOpenRandomEntry: () -> Unit,
     onClickSyncNow: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior?,
-    navigateUp: (() -> Unit)?,
 ) {
-    val pillAlpha = if (isSystemInDarkTheme()) 0.12f else 0.08f
-    SearchToolbar(
-        titleContent = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = title.text,
-                    maxLines = 1,
-                    modifier = Modifier.weight(1f, false),
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (title.numberOfEntries != null) {
-                    Pill(
-                        text = "${title.numberOfEntries}",
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = pillAlpha),
-                        fontSize = 14.sp,
-                    )
-                }
-            }
-        },
-        searchQuery = searchQuery,
-        onChangeSearchQuery = onSearchQueryChange,
+    TabHeader(
+        title = title.text,
+        subtitle = subtitle,
+        scrollBehavior = scrollBehavior,
+        search = TabHeaderSearch(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            placeholder = stringResource(YMR.strings.library_search_hint),
+        ),
         actions = {
-            val filterTint = if (hasFilters) MaterialTheme.colorScheme.active else LocalContentColor.current
-            AppBarActions(
+            HeaderButton(
+                icon = Icons.Outlined.Search,
+                contentDescription = stringResource(MR.strings.action_search),
+                onClick = { onSearchQueryChange("") },
+            )
+            HeaderButton(
+                icon = Icons.Outlined.FilterList,
+                contentDescription = stringResource(MR.strings.action_filter),
+                onClick = onClickFilter,
+                active = hasFilters,
+            )
+            HeaderActions(
                 persistentListOf(
-                    AppBar.Action(
-                        title = stringResource(MR.strings.action_filter),
-                        icon = Icons.Outlined.FilterList,
-                        iconTint = filterTint,
-                        onClick = onClickFilter,
-                    ),
                     AppBar.OverflowAction(
                         title = stringResource(MR.strings.action_update_library),
                         onClick = onClickGlobalUpdate,
@@ -119,7 +123,7 @@ private fun LibraryRegularToolbar(
                         onClick = onClickRefresh,
                     ),
                     AppBar.OverflowAction(
-                        title = stringResource(MR.strings.action_open_random_manga),
+                        title = stringResource(YMR.strings.library_random),
                         onClick = onClickOpenRandomEntry,
                     ),
                     AppBar.OverflowAction(
@@ -129,39 +133,59 @@ private fun LibraryRegularToolbar(
                 ),
             )
         },
-        scrollBehavior = scrollBehavior,
-        navigateUp = navigateUp,
     )
 }
 
+/** While picking anime: how many are picked, and select all / invert / done. */
 @Composable
 private fun LibrarySelectionToolbar(
     selectedCount: Int,
     onClickUnselectAll: () -> Unit,
     onClickSelectAll: () -> Unit,
     onClickInvertSelection: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?,
 ) {
-    AppBar(
-        titleContent = { Text(text = "$selectedCount") },
-        actions = {
-            AppBarActions(
-                persistentListOf(
-                    AppBar.Action(
-                        title = stringResource(MR.strings.action_select_all),
-                        icon = Icons.Outlined.SelectAll,
-                        onClick = onClickSelectAll,
-                    ),
-                    AppBar.Action(
-                        title = stringResource(MR.strings.action_select_inverse),
-                        icon = Icons.Outlined.FlipToBack,
-                        onClick = onClickInvertSelection,
-                    ),
-                ),
-            )
-        },
-        isActionMode = true,
-        onCancelActionMode = onClickUnselectAll,
-    )
+    if (scrollBehavior != null) {
+        SideEffect {
+            scrollBehavior.state.heightOffsetLimit = 0f
+            scrollBehavior.state.heightOffset = 0f
+        }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(TopAppBarDefaults.windowInsets)
+            .height(60.dp)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HeaderButton(
+            icon = Icons.Outlined.Close,
+            contentDescription = stringResource(MR.strings.action_cancel),
+            onClick = onClickUnselectAll,
+        )
+        Text(
+            text = stringResource(YMR.strings.library_selected, selectedCount),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 4.dp),
+            style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.3).sp),
+            color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        HeaderButton(
+            icon = Icons.Outlined.SelectAll,
+            contentDescription = stringResource(MR.strings.action_select_all),
+            onClick = onClickSelectAll,
+        )
+        HeaderButton(
+            icon = Icons.Outlined.FlipToBack,
+            contentDescription = stringResource(MR.strings.action_select_inverse),
+            onClick = onClickInvertSelection,
+        )
+    }
 }
 
 @Immutable

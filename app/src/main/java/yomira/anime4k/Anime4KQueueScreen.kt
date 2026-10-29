@@ -95,10 +95,7 @@ private fun JobCard(job: EnhanceJob) {
     Card {
         Text("${job.animeTitle} · ${job.episodeName}", style = MaterialTheme.typography.titleSmall, maxLines = 2)
         Text(
-            text = stringResource(
-                if (job.kind == JobKind.SMART) YMR.strings.a4k_job_smart else YMR.strings.a4k_job_download,
-                job.preset.label,
-            ),
+            text = stringResource(YMR.strings.a4k_job_download, job.preset.label),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )

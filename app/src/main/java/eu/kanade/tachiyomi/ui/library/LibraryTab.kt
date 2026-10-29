@@ -5,13 +5,12 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -22,13 +21,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -57,7 +53,6 @@ import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchScreen
 import eu.kanade.tachiyomi.ui.category.CategoryScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.player.PlayerActivity
 import eu.kanade.tachiyomi.ui.player.settings.PlayerPreferences
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.collections.immutable.persistentListOf
@@ -73,10 +68,10 @@ import tachiyomi.domain.anime.model.Anime
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.episode.model.Episode
 import tachiyomi.domain.library.model.LibraryAnime
-import tachiyomi.domain.library.model.LibraryGroup
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.EmptyScreenAction
@@ -86,6 +81,7 @@ import tachiyomi.presentation.core.util.collectAsState as collectAsStatePref
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import yomira.i18n.YMR
 
 data object LibraryTab : Tab {
 
@@ -173,6 +169,23 @@ data object LibraryTab : Tab {
 
         val defaultTitle = stringResource(MR.strings.label_library)
 
+        // "128 anime · 9 with new episodes": the whole library under the tabs, else this category
+        val summaryCounts = remember(state.library, state.showCategoryTabs, screenModel.activeCategoryIndex) {
+            val items = if (state.showCategoryTabs) {
+                state.library.values.flatten().distinctBy { it.libraryAnime.id }
+            } else {
+                state.getAnimelibItemsByPage(screenModel.activeCategoryIndex)
+            }
+            items.size to items.count { it.unseenCount > 0 }
+        }
+        val summaryTotal = pluralStringResource(YMR.plurals.library_count, summaryCounts.first, summaryCounts.first)
+        val summaryNew = pluralStringResource(YMR.plurals.library_new, summaryCounts.second, summaryCounts.second)
+        val librarySubtitle = when {
+            state.isLoading || state.isLibraryEmpty -> null
+            summaryCounts.second > 0 -> "$summaryTotal · $summaryNew"
+            else -> summaryTotal
+        }
+
         val uiPreferences = remember { Injekt.get<UiPreferences>() }
         val globalPanorama by uiPreferences.panoramaCover().collectAsStatePref()
         val libraryMode by uiPreferences.libraryPanoramaMode().collectAsStatePref()
@@ -232,6 +245,7 @@ data object LibraryTab : Tab {
                         onSearchQueryChange = screenModel::search,
                         // the large title always follows the scroll
                         scrollBehavior = scrollBehavior,
+                        subtitle = librarySubtitle,
                     )
                 },
                 bottomBar = {
@@ -271,9 +285,15 @@ data object LibraryTab : Tab {
                     state.searchQuery.isNullOrEmpty() && !state.hasActiveFilters && state.isLibraryEmpty -> {
                         val handler = LocalUriHandler.current
                         EmptyScreen(
-                            stringRes = MR.strings.information_empty_library,
+                            stringRes = YMR.strings.library_empty,
+                            title = stringResource(YMR.strings.library_empty_title),
                             modifier = Modifier.padding(contentPadding),
                             actions = persistentListOf(
+                                EmptyScreenAction(
+                                    stringRes = YMR.strings.library_empty_browse,
+                                    icon = Icons.Outlined.Explore,
+                                    onClick = { scope.launch { HomeScreen.openTab(HomeScreen.HomeTab.Browse()) } },
+                                ),
                                 EmptyScreenAction(
                                     stringRes = MR.strings.getting_started_guide,
                                     icon = Icons.AutoMirrored.Outlined.HelpOutline,

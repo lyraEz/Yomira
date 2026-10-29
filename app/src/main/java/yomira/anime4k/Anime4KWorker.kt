@@ -11,28 +11,18 @@ import android.os.StatFs
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.FFmpegKitConfig
-import com.arthenica.ffmpegkit.ReturnCode
 import com.hippo.unifile.UniFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.suspendCancellableCoroutine
 import logcat.LogPriority
 import tachiyomi.core.common.i18n.stringResource
 import tachiyomi.core.common.util.system.logcat
-import tachiyomi.domain.anime.interactor.GetAnime
-import tachiyomi.domain.episode.interactor.GetEpisode
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import yomira.i18n.YMR
 import java.io.File
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
- * Runs the Anime4K jobs one after another in a foreground service: gets the episode (Smart), copies
- * the original next to the pieces, processes, joins, checks and delivers the result. Heat, battery,
+ * Runs the Anime4K jobs one after another in a foreground service: copies the downloaded original
+ * next to the pieces, processes, joins, checks and delivers the result to the download. Heat, battery,
  * the charger and the player pause it between pieces; the job continues from there later.
  */
 class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -180,7 +170,7 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         if (job.state == JobState.PAUSED) return REASON_USER
         if (isStopped) return REASON_STOPPED
         if (prefs.onlyWhileCharging().get() && !isCharging()) return REASON_CHARGER
-        if (prefs.prioritizePlayer().get() && Anime4KQueue.playerOpen && job.kind == JobKind.DOWNLOAD) return REASON_PLAYER
+        if (prefs.prioritizePlayer().get() && Anime4KQueue.playerOpen) return REASON_PLAYER
         if (prefs.pauseWhenHot().get() && thermalStatus() >= PowerManager.THERMAL_STATUS_SEVERE) return REASON_HEAT
         return null
     }
@@ -189,8 +179,6 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     private fun throttleMillis(eta: EtaTracker): Long {
         val status = thermalStatus()
         val frame = ((eta.secondsPerFrame ?: 0.0) * 1000).toLong()
-        // Smart jobs keep going during playback, at half speed so the player stays smooth.
-        if (prefs.prioritizePlayer().get() && Anime4KQueue.playerOpen) return frame.coerceIn(50, 4000)
         if (!prefs.pauseWhenHot().get()) return 0
         return when {
             status >= PowerManager.THERMAL_STATUS_MODERATE -> frame.coerceIn(50, 4000)
@@ -226,7 +214,6 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     /** The original as a local file: a download in shared storage is copied next to the pieces. */
     private suspend fun obtainSource(job: EnhanceJob, workDir: File): File {
-        if (job.kind == JobKind.SMART && job.sourceUri == null) return downloadStream(job, workDir)
         val uri = Uri.parse(job.sourceUri ?: throw IllegalStateException("job without a source"))
         if (uri.scheme == "file" || uri.scheme == null) return File(uri.path!!)
         val local = File(workDir, "source.${job.videoExtension()}")
@@ -238,62 +225,9 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         return local
     }
 
-    /**
-     * Smart: downloads the stream (with its headers) without re-encoding. A saved address can expire
-     * while the job waits, so a failed download looks the episode up again once.
-     */
-    private suspend fun downloadStream(job: EnhanceJob, workDir: File): File {
-        update(job.id) { it.copy(state = JobState.DOWNLOADING, message = null) }
-        val target = File(workDir, "source.mkv")
-        val saved = job.streamUrl?.let { it to job.streamHeaders }
-        try {
-            ffmpegDownload(saved ?: resolve(job), target)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            if (saved == null) throw e
-            ffmpegDownload(resolve(job), target)
-        }
-        update(job.id) { it.copy(sourceUri = Uri.fromFile(target).toString()) }
-        return target
-    }
-
-    private suspend fun resolve(job: EnhanceJob): Pair<String, Map<String, String>> {
-        val anime = Injekt.get<GetAnime>().await(job.animeId) ?: throw IllegalStateException("anime not found")
-        val episode = Injekt.get<GetEpisode>().await(job.episodeId) ?: throw IllegalStateException("episode not found")
-        return SmartAnime4K.resolveStream(anime, episode)
-            ?: throw IllegalStateException(applicationContext.stringResource(YMR.strings.a4k_error_stream))
-    }
-
-    private suspend fun ffmpegDownload(stream: Pair<String, Map<String, String>>, target: File) {
-        val (url, headerMap) = stream
-        val workDir = target.parentFile!!
-        val tmp = File(workDir, "source.part.mkv")
-        tmp.delete()
-        val headers = headerMap.entries.joinToString("") { "${it.key}: ${it.value}\r\n" }
-        val args = buildList {
-            if (headers.isNotEmpty()) addAll(listOf("-headers", headers))
-            addAll(listOf("-i", url, "-map", "0:v:0", "-map", "0:a?", "-map", "0:s?", "-c", "copy", "-f", "matroska", "-y", tmp.absolutePath))
-        }
-        suspendCancellableCoroutine { continuation ->
-            val session = FFmpegKit.executeWithArgumentsAsync(args.toTypedArray()) { result ->
-                if (ReturnCode.isSuccess(result.returnCode)) {
-                    continuation.resume(Unit)
-                } else if (!ReturnCode.isCancel(result.returnCode)) {
-                    continuation.resumeWithException(IllegalStateException("download failed (${result.returnCode})"))
-                }
-            }
-            continuation.invokeOnCancellation { FFmpegKitConfig.getSession(session.sessionId)?.cancel() }
-        }
-        if (!tmp.renameTo(target)) throw IllegalStateException("could not keep the download")
-    }
-
-    /** Puts the result where it is used: the download folder, or the Smart cache. */
+    /** Puts the result into the download folder, next to (or instead of) the original. */
     private fun deliver(job: EnhanceJob, output: File, source: File) {
-        when (job.kind) {
-            JobKind.DOWNLOAD -> EnhancedDownloads.deliver(applicationContext, job, output)
-            JobKind.SMART -> SmartAnime4K.store(applicationContext, job, output)
-        }
+        EnhancedDownloads.deliver(applicationContext, job, output)
         // The original copied for processing is not needed any more (the download keeps its own).
         if (source.parentFile == EnhanceJobs.workDir(applicationContext, job)) source.delete()
     }

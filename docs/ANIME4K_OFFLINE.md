@@ -1,4 +1,4 @@
-# Offline Anime4K: Enhanced Downloads and Smart Anime4K
+# Offline Anime4K: Enhanced Downloads
 
 Shipped in 1.11.0. The engine was validated on a PC (below); the rest is covered by unit tests and
 was tried on a Galaxy A15.
@@ -103,7 +103,7 @@ Other limits:
 ## Enhanced Downloads
 
 When the option is on, downloading offers Original or Anime4K Enhanced, with mode and quality.
-After the download: local copy of the original → pieces processed (waiting, downloading,
+After the download: local copy of the original → pieces processed (waiting,
 processing, waiting for a reason, paused, joining, done, failed) → joined with the original
 audio, subtitles, fonts and chapters without re-encoding → validated (video present, audio present,
 length within 2 seconds) → `"<name>.anime4k.mkv"` in the episode folder. The player plays that
@@ -113,18 +113,12 @@ after the copy is verified. Failing or cancelling never touches the original.
 Pause and resume work per piece (at most the piece in progress is lost). The job list is saved on
 every change; when the app opens, whatever was running goes back to the queue.
 
-## Smart Anime4K
+## Smart Anime4K (removed in 1.13.0)
 
-When an episode opens (the first one too) and its version is in the cache, the player says so and
-offers **Switch** at the same position (More tab > Smart Anime4K). Otherwise the job goes to the
-front of the queue: it downloads the stream being played (with its headers) and processes it. It
-can also prepare the next episode. The cache has a size limit and drops the oldest first.
-
-Left out on purpose: swapping piece by piece during playback. With mpv that would mean mixing
-local files and the remote stream in an EDL list with audio sync, prone to stalls and drift, and on
-a phone like the A15 processing is many times slower than playback, so it would never catch up.
-Switching is not automatic either: the prepared file may be another variant of the episode (dubbed,
-another quality).
+1.11.0 also prepared, in the background, the episode being watched so the player could switch to
+its Anime4K version. In practice it rarely finished in time and, on mid-range phones, running it
+during playback made the video stutter, so 1.13.0 removed it. Updating deletes its cache of
+prepared episodes, its unfinished jobs and its settings. Enhanced Downloads is unchanged.
 
 ## Remote processing
 

@@ -1561,8 +1561,6 @@ class PlayerActivity : BaseActivity() {
         viewModel.restoreAspectRatio()
         // audio extras, A-B loop reset and per-anime speed for every file
         yomira.player.PlayerTools.onFileLoaded(viewModel.mpv, viewModel.currentAnime.value?.id)
-        // Smart Anime4K: use or prepare the Anime4K version of this episode
-        yomira.anime4k.PlayerAnime4K.onEpisodeStarted(this)
 
         // aniSkip stuff
         viewModel.viewModelScope.launchIO {

@@ -31,7 +31,7 @@ you choose.
   (temperature, tint, exposure, shadows, highlights, vibrance) and **color grading** (looks, tinted
   shadows and highlights, contrast curve, fade).
 - **Offline Anime4K**: *Enhanced Downloads* processes downloaded episodes into an Anime4K version
-  that plays first; *Smart Anime4K* prepares the episode you opened in the background.
+  that plays first, with a speed test that shows how long an episode takes on your phone.
 - **Discord Rich Presence without logging in**: a Crunchyroll-style card on your Discord profile
   while you watch, through the Discord app on the phone. No token, no password. Fully configurable.
 - **Episode names and artwork from TMDB**, skip intro without tracking (AniList, AniSkip, Anime

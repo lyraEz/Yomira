@@ -25,38 +25,24 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalLayoutDirection
-import eu.kanade.domain.ui.ContainerStyle
-import eu.kanade.domain.ui.UiPreferences
-import tachiyomi.presentation.core.util.collectAsState
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import eu.kanade.domain.source.interactor.SetMigrateSorting
@@ -77,6 +63,8 @@ import tachiyomi.presentation.core.components.BadgeGroup
 import tachiyomi.presentation.core.components.FastScrollLazyColumn
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
+import yomira.ui.groupedRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import tachiyomi.presentation.core.icons.FlagEmoji
 import tachiyomi.presentation.core.screens.EmptyScreen
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -149,10 +137,6 @@ private fun MigrateSourceList(
     onMatchPinned: () -> Unit,
     onMigrate: () -> Unit,
 ) {
-    val uiPreferences = remember { Injekt.get<UiPreferences>() }
-    val containerStyles by uiPreferences.containerStyles().collectAsState()
-    val useContainer = remember(containerStyles) { ContainerStyle.BROWSE in containerStyles }
-    
     val lazyListState = rememberLazyListState()
 
     BackHandler(enabled = !state.searchQuery.isNullOrBlank()) {
@@ -174,54 +158,28 @@ private fun MigrateSourceList(
                 bottom = contentPadding.calculateBottomPadding() + if (state.selectionMode) 80.dp else 0.dp,
             ),
         ) {
-            items(
+            itemsIndexed(
                 items = list,
-                key = { (item, _) -> "migrate-${item.source.id}" },
-            ) { (item, count) ->
+                key = { _, (item, _) -> "migrate-${item.source.id}" },
+            ) { index, (item, count) ->
                 val isSelected = state.selectedSources.contains(item.source.id)
-                if (useContainer) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 2.dp),
-                        shape = MaterialTheme.shapes.large,
-                        color = yomira.ui.GlassCard.color(),
-                        border = yomira.ui.GlassCard.border(),
-                        tonalElevation = 0.dp,
-                    ) {
-                        MigrateSourceItem(
-                            modifier = Modifier.animateItemFastScroll(),
-                            item = item,
-                            count = count,
-                            isSelected = isSelected,
-                            isSelectionMode = state.selectionMode,
-                            onClickItem = {
-                                if (state.selectionMode) {
-                                    onToggleSelection(item.source.id)
-                                } else {
-                                    onClickItem(item.source)
-                                }
-                            },
-                            onLongClickItem = { onToggleSelection(item.source.id) },
-                        )
-                    }
-                } else {
-                    MigrateSourceItem(
-                        modifier = Modifier.animateItemFastScroll(),
-                        item = item,
-                        count = count,
-                        isSelected = isSelected,
-                        isSelectionMode = state.selectionMode,
-                        onClickItem = {
-                            if (state.selectionMode) {
-                                onToggleSelection(item.source.id)
-                            } else {
-                                onClickItem(item.source)
-                            }
-                        },
-                        onLongClickItem = { onToggleSelection(item.source.id) },
-                    )
-                }
+                MigrateSourceItem(
+                    modifier = Modifier
+                        .animateItemFastScroll()
+                        .groupedRow(first = index == 0, last = index == list.lastIndex),
+                    item = item,
+                    count = count,
+                    isSelected = isSelected,
+                    isSelectionMode = state.selectionMode,
+                    onClickItem = {
+                        if (state.selectionMode) {
+                            onToggleSelection(item.source.id)
+                        } else {
+                            onClickItem(item.source)
+                        }
+                    },
+                    onLongClickItem = { onToggleSelection(item.source.id) },
+                )
             }
         }
 

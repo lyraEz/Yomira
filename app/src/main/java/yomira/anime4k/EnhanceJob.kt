@@ -2,17 +2,10 @@ package yomira.anime4k
 
 import kotlinx.serialization.Serializable
 
-/** What happens to a job's result: it goes into the download, or into the Smart cache. */
-@Serializable
-enum class JobKind { DOWNLOAD, SMART }
-
 @Serializable
 enum class JobState {
     /** Waiting for its turn. */
     QUEUED,
-
-    /** Getting the episode (Smart). */
-    DOWNLOADING,
 
     /** Pieces being processed. */
     PROCESSING,
@@ -29,17 +22,16 @@ enum class JobState {
     FAILED,
     ;
 
-    val isActive: Boolean get() = this == QUEUED || this == DOWNLOADING || this == PROCESSING || this == WAITING || this == JOINING
+    val isActive: Boolean get() = this == QUEUED || this == PROCESSING || this == WAITING || this == JOINING
 }
 
 /**
- * One video to process. Saved as JSON after every change, so a job survives the app being closed;
+ * One downloaded episode to process (Enhanced Downloads). Saved as JSON after every change, so a job survives the app being closed;
  * the pieces in [workDir][EnhanceJobs.workDir] make it resume where it stopped.
  */
 @Serializable
 data class EnhanceJob(
     val id: String,
-    val kind: JobKind,
     val animeId: Long,
     val episodeId: Long,
     val sourceId: Long,
@@ -51,15 +43,12 @@ data class EnhanceJob(
     val output: String,
     val codec: String,
     val quality: String,
-    /** Original video (DOWNLOAD: the downloaded file; SMART: filled once downloaded). */
+    /** The downloaded video. */
     val sourceUri: String? = null,
     /** Episode folder of the download that receives the result. */
     val targetDir: String? = null,
     /** Name of the downloaded video without extension. */
     val videoBaseName: String? = null,
-    /** SMART: stream to download, with its headers. */
-    val streamUrl: String? = null,
-    val streamHeaders: Map<String, String> = emptyMap(),
     val state: JobState = JobState.QUEUED,
     val doneFrames: Long = 0,
     val totalFrames: Long = 0,

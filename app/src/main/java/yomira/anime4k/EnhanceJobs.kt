@@ -7,16 +7,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import java.io.File
 import java.util.UUID
 
 /**
- * The Anime4K job list, shared by Enhanced Downloads and Smart Anime4K: one queue, one worker,
- * one engine. Saved to anime4k/jobs.json after every change.
+ * The Anime4K job list of Enhanced Downloads: one queue, one worker, one engine. Saved to
+ * anime4k/jobs.json after every change.
  */
 object EnhanceJobs {
+
+    private const val LEGACY_SMART_KIND = "SMART"
 
     private val json = Json { ignoreUnknownKeys = true }
     private val _jobs = MutableStateFlow<List<EnhanceJob>>(emptyList())
@@ -30,26 +35,58 @@ object EnhanceJobs {
 
     fun workDir(context: Context, job: EnhanceJob): File = File(root(context), "jobs/${job.id}")
 
-    fun smartDir(context: Context): File = File(root(context), "smart").also { it.mkdirs() }
-
     private fun file(context: Context) = File(root(context), "jobs.json")
 
     fun load(context: Context) {
         if (loaded) return
         synchronized(lock) {
             if (loaded) return
-            val saved = runCatching {
-                file(context).takeIf { it.exists() }?.readText()?.let { json.decodeFromString(ListSerializer(EnhanceJob.serializer()), it) }
-            }.onFailure { logcat(LogPriority.WARN, it) { "Anime4K: could not read the job list" } }.getOrNull().orEmpty()
+            val saved = runCatching { file(context).takeIf { it.exists() }?.readText()?.let(::decode) }
+                .onFailure { logcat(LogPriority.WARN, it) { "Anime4K: could not read the job list" } }
+                .getOrNull().orEmpty()
             // A job cut off by the app closing continues where it stopped.
             _jobs.value = saved.map {
-                if (it.state == JobState.PROCESSING || it.state == JobState.JOINING || it.state == JobState.DOWNLOADING) {
+                if (it.state == JobState.PROCESSING || it.state == JobState.JOINING) {
                     it.copy(state = JobState.QUEUED)
                 } else {
                     it
                 }
             }
             loaded = true
+        }
+    }
+
+    /**
+     * Reads the saved list one job at a time, so a job this version cannot read is dropped alone
+     * instead of losing the whole list. Jobs of the removed Smart Anime4K are dropped too.
+     */
+    private fun decode(text: String): List<EnhanceJob> = json.parseToJsonElement(text).jsonArray.mapNotNull { element ->
+        if ((element as? JsonObject)?.get("kind")?.jsonPrimitive?.content == LEGACY_SMART_KIND) return@mapNotNull null
+        runCatching { json.decodeFromJsonElement(EnhanceJob.serializer(), element) }
+            .onFailure { logcat(LogPriority.WARN, it) { "Anime4K: dropped a job that could not be read" } }
+            .getOrNull()
+    }
+
+    /**
+     * Removes what Smart Anime4K left behind: its cache of prepared episodes, the pieces of its
+     * unfinished jobs and the jobs themselves. Run once when updating to 1.13.0.
+     */
+    fun removeSmartLeftovers(context: Context) {
+        File(root(context), "smart").deleteRecursively()
+        val text = file(context).takeIf { it.exists() }?.readText() ?: return
+        val smartIds = runCatching {
+            json.parseToJsonElement(text).jsonArray.mapNotNull { element ->
+                val job = element as? JsonObject ?: return@mapNotNull null
+                job["id"]?.jsonPrimitive?.content?.takeIf { job["kind"]?.jsonPrimitive?.content == LEGACY_SMART_KIND }
+            }
+        }.getOrDefault(emptyList())
+        smartIds.forEach { File(root(context), "jobs/$it").deleteRecursively() }
+        if (smartIds.isNotEmpty()) {
+            synchronized(lock) {
+                loaded = false
+                load(context)
+                save(context)
+            }
         }
     }
 
@@ -72,8 +109,7 @@ object EnhanceJobs {
         load(context)
         synchronized(lock) {
             _jobs.value.firstOrNull {
-                it.kind == job.kind &&
-                    it.resultKey == job.resultKey &&
+                it.resultKey == job.resultKey &&
                     it.episodeId == job.episodeId &&
                     (it.state.isActive || it.state == JobState.DONE || it.state == JobState.PAUSED)
             }?.let { return it }
@@ -103,11 +139,10 @@ object EnhanceJobs {
         workDir(context, job).deleteRecursively()
     }
 
-    /** The next job to run: Smart before downloads (someone is waiting for it), then oldest first. */
+    /** The next job to run: the oldest waiting one. */
     fun next(): EnhanceJob? = _jobs.value
         .filter { it.state == JobState.QUEUED || it.state == JobState.WAITING }
-        .sortedWith(compareBy<EnhanceJob> { if (it.kind == JobKind.SMART) 0 else 1 }.thenBy { it.createdAt })
-        .firstOrNull()
+        .minByOrNull { it.createdAt }
 
     fun newId(): String = UUID.randomUUID().toString()
 

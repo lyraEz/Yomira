@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
@@ -23,20 +22,11 @@ object Anime4KQueue {
         EnhanceJobs.load(context)
         if (EnhanceJobs.next() == null) return
         val prefs = Anime4KPreferences()
-        val needsNetwork = EnhanceJobs.jobs.value.any {
-            it.kind == JobKind.SMART && it.sourceUri == null && (it.state == JobState.QUEUED || it.state == JobState.WAITING)
-        }
+        // Jobs work on downloaded files, so no network is needed.
         val constraints = Constraints.Builder()
             .setRequiresCharging(prefs.onlyWhileCharging().get())
             .setRequiresBatteryNotLow(true)
             .setRequiresStorageNotLow(true)
-            .setRequiredNetworkType(
-                when {
-                    !needsNetwork -> NetworkType.NOT_REQUIRED
-                    prefs.smartWifiOnly().get() -> NetworkType.UNMETERED
-                    else -> NetworkType.CONNECTED
-                },
-            )
             .build()
         val request = OneTimeWorkRequestBuilder<Anime4KWorker>()
             .setConstraints(constraints)

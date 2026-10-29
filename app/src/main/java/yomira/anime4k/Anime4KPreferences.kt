@@ -4,7 +4,7 @@ import tachiyomi.core.common.preference.PreferenceStore
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-/** Settings → Anime4K: Enhanced Downloads, Smart Anime4K and how processing runs. */
+/** Settings → Anime4K: Enhanced Downloads and how processing runs. */
 class Anime4KPreferences(private val store: PreferenceStore = Injekt.get()) {
 
     // Enhanced Downloads
@@ -35,29 +35,11 @@ class Anime4KPreferences(private val store: PreferenceStore = Injekt.get()) {
     /** Pause processing while the player is open, so playback never stutters. */
     fun prioritizePlayer() = store.getBoolean("yomira_a4k_prioritize_player", true)
 
-    /** Space Yomira may use for pieces and the Smart cache, in GB. */
+    /** Space Yomira may use for the pieces of videos being processed, in GB. */
     fun storageLimitGb() = store.getInt("yomira_a4k_storage_gb", 12)
 
     /** Delete the pieces as soon as a video is finished. */
     fun cleanTemporary() = store.getBoolean("yomira_a4k_clean_temp", true)
-
-    // Smart Anime4K
-
-    fun smartEnabled() = store.getBoolean("yomira_a4k_smart", false)
-
-    fun smartPreset() = store.getString("yomira_a4k_smart_preset", "A_FAST")
-
-    /** Prepare the episode that was just opened. */
-    fun smartCurrent() = store.getBoolean("yomira_a4k_smart_current", true)
-
-    /** Also prepare the next episode. */
-    fun smartNext() = store.getBoolean("yomira_a4k_smart_next", false)
-
-    /** Space for prepared episodes, in GB; the oldest go first. */
-    fun smartCacheGb() = store.getInt("yomira_a4k_smart_cache_gb", 6)
-
-    /** Download episodes for Smart only on Wi-Fi. */
-    fun smartWifiOnly() = store.getBoolean("yomira_a4k_smart_wifi", true)
 
     // Last benchmark on this phone, for time estimates
 
@@ -82,6 +64,16 @@ class Anime4KPreferences(private val store: PreferenceStore = Injekt.get()) {
     }
 
     companion object {
+        /** Settings of Smart Anime4K, removed in 1.13.0; the migration deletes them. */
+        val REMOVED_SMART_KEYS = listOf(
+            "yomira_a4k_smart",
+            "yomira_a4k_smart_preset",
+            "yomira_a4k_smart_current",
+            "yomira_a4k_smart_next",
+            "yomira_a4k_smart_cache_gb",
+            "yomira_a4k_smart_wifi",
+        )
+
         fun benchmarkKey(preset: Anime4KPreset, height: Int, output: OutputSize) = "${preset.id}@${height}p>${output.key}"
     }
 }

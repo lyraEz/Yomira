@@ -43,7 +43,7 @@ another module is named.
 | TMDB names, descriptions, stills and logos (cache in `files/yomira/meta`), season by AniList premiere date, manual match | `yomira/metadata/` |
 | Packed "season.episode" numbers (1.001 = S1 E1); split seasons matched to TMDB | `yomira/metadata/EpisodeNumbers.kt`, `EpisodeMetadata.kt` (`reconcile`) |
 | Discord Rich Presence through the Discord Social SDK: JNI bridge with one SDK thread, cards built by `PresenceBuilder`, at most one update every 4 seconds | `app/src/main/cpp/`, `yomira/discord/` |
-| Offline Anime4K (Enhanced Downloads and Smart Anime4K); see [ANIME4K_OFFLINE.md](ANIME4K_OFFLINE.md) | `app/src/main/cpp/anime4k/`, `yomira/anime4k/` |
+| Offline Anime4K (Enhanced Downloads); see [ANIME4K_OFFLINE.md](ANIME4K_OFFLINE.md) | `app/src/main/cpp/anime4k/`, `yomira/anime4k/` |
 
 ## Robustness
 

@@ -1,21 +1,17 @@
 package eu.kanade.tachiyomi.ui.browse.migration.sources
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Numbers
-import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.SortByAlpha
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.map
-import androidx.compose.ui.platform.LocalUriHandler
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -28,19 +24,27 @@ import eu.kanade.tachiyomi.ui.browse.migration.anime.MigrateAnimeScreen
 import kotlinx.collections.immutable.persistentListOf
 import tachiyomi.i18n.MR
 import tachiyomi.i18n.sy.SYMR
+import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import yomira.i18n.YMR
 
 @Composable
 fun Screen.migrateSourceTab(): TabContent {
-    val uriHandler = LocalUriHandler.current
     val navigator = LocalNavigator.currentOrThrow
     val screenModel = rememberScreenModel { MigrateSourceScreenModel() }
     val selectionMode by screenModel.state.map { it.selectionMode }.collectAsStateWithLifecycle(false)
     val selectedSourcesCount by screenModel.state.map { it.selectedSources.size }.collectAsStateWithLifecycle(0)
+    val migrateCount by screenModel.state.map { it.items.size }.collectAsStateWithLifecycle(0)
+    val selectedText = stringResource(YMR.strings.library_selected, selectedSourcesCount)
+    val countText = pluralStringResource(YMR.plurals.browse_migrate_sources, migrateCount, migrateCount)
+    val subtitle = when {
+        selectionMode -> selectedText
+        migrateCount > 0 -> countText
+        else -> null
+    }
     val sortingMode by screenModel.state.map { it.sortingMode }.collectAsStateWithLifecycle(SetMigrateSorting.Mode.ALPHABETICAL)
     val sortingDirection by screenModel.state.map { it.sortingDirection }.collectAsStateWithLifecycle(SetMigrateSorting.Direction.ASCENDING)
 
-    val migrationHelpGuide = stringResource(MR.strings.migration_help_guide)
     val actionSelectAll = stringResource(MR.strings.action_select_all)
     val actionSelectNone = stringResource(SYMR.strings.select_none)
     
@@ -61,11 +65,11 @@ fun Screen.migrateSourceTab(): TabContent {
     }
 
     return remember(
+        subtitle,
         selectionMode,
         selectedSourcesCount,
         sortingMode,
         sortingDirection,
-        migrationHelpGuide,
         actionSelectAll,
         actionSelectNone,
         sortModeTitle,
@@ -73,6 +77,7 @@ fun Screen.migrateSourceTab(): TabContent {
     ) {
         TabContent(
             titleRes = if (selectionMode) MR.strings.label_migration else MR.strings.migrate,
+            subtitle = subtitle,
             numberTitle = if (selectionMode) selectedSourcesCount else 0,
             searchEnabled = false,
             actions = persistentListOf<AppBar.AppBarAction>().builder()
@@ -113,15 +118,6 @@ fun Screen.migrateSourceTab(): TabContent {
                                     Icons.Outlined.ArrowDownward
                                 },
                                 onClick = screenModel::toggleSortingDirection,
-                            ),
-                        )
-                        add(
-                            AppBar.Action(
-                                title = migrationHelpGuide,
-                                icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                                onClick = {
-                                    uriHandler.openUri("https://aniyomi.org/help/guides/source-migration/")
-                                },
                             ),
                         )
                     }

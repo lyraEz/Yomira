@@ -87,7 +87,6 @@ object Anime4KNotifier {
         val eta = job.remainingSeconds?.let { formatDuration(context, it) }
         return when (job.state) {
             JobState.QUEUED -> context.stringResource(YMR.strings.a4k_state_queued)
-            JobState.DOWNLOADING -> context.stringResource(YMR.strings.a4k_state_downloading)
             JobState.PROCESSING -> if (eta != null) {
                 context.stringResource(YMR.strings.a4k_state_processing_eta, percent, eta)
             } else {

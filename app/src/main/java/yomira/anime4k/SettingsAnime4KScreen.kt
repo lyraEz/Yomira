@@ -1,12 +1,10 @@
 package yomira.anime4k
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.more.settings.Preference
@@ -19,7 +17,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import yomira.i18n.YMR
 import tachiyomi.presentation.core.util.collectAsState as collectPref
 
-/** Settings → Anime4K: Enhanced Downloads, Smart Anime4K and how processing runs. */
+/** Settings → Anime4K: Enhanced Downloads and how processing runs. */
 object SettingsAnime4KScreen : SearchableSettings {
 
     @ReadOnlyComposable
@@ -29,10 +27,8 @@ object SettingsAnime4KScreen : SearchableSettings {
     @Composable
     override fun getPreferences(): List<Preference> {
         val prefs = remember { Anime4KPreferences() }
-        val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
         val downloads by prefs.enhancedDownloads().collectPref()
-        val smart by prefs.smartEnabled().collectPref()
         val jobs by EnhanceJobs.jobs.collectAsState()
         val presets = presetEntries()
         val outputs = persistentMapOf(
@@ -41,8 +37,6 @@ object SettingsAnime4KScreen : SearchableSettings {
             OutputSize.P1440.key to stringResource(YMR.strings.a4k_output_1440),
             OutputSize.DOUBLE.key to stringResource(YMR.strings.a4k_output_double),
         )
-        val cleared = stringResource(YMR.strings.a4k_cleared)
-        val smartSize = remember(jobs) { SmartAnime4K.cacheBytes(context) }
         val active = jobs.count { it.state.isActive || it.state == JobState.PAUSED }
 
         return listOf(
@@ -113,53 +107,6 @@ object SettingsAnime4KScreen : SearchableSettings {
                 ).toImmutableList(),
             ),
             Preference.PreferenceGroup(
-                title = stringResource(YMR.strings.a4k_group_smart),
-                preferenceItems = listOf(
-                    Preference.PreferenceItem.InfoPreference(stringResource(YMR.strings.a4k_smart_info)),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = prefs.smartEnabled(),
-                        title = stringResource(YMR.strings.a4k_smart_enabled),
-                    ),
-                    Preference.PreferenceItem.ListPreference(
-                        pref = prefs.smartPreset(),
-                        title = stringResource(YMR.strings.a4k_preset),
-                        entries = presets,
-                        enabled = smart,
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = prefs.smartCurrent(),
-                        title = stringResource(YMR.strings.a4k_smart_current),
-                        subtitle = stringResource(YMR.strings.a4k_smart_current_summary),
-                        enabled = smart,
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = prefs.smartNext(),
-                        title = stringResource(YMR.strings.a4k_smart_next),
-                        subtitle = stringResource(YMR.strings.a4k_smart_next_summary),
-                        enabled = smart,
-                    ),
-                    Preference.PreferenceItem.ListPreference(
-                        pref = prefs.smartCacheGb(),
-                        title = stringResource(YMR.strings.a4k_smart_cache),
-                        entries = gbEntries(listOf(2, 4, 6, 10, 16, 24)),
-                        enabled = smart,
-                    ),
-                    Preference.PreferenceItem.SwitchPreference(
-                        pref = prefs.smartWifiOnly(),
-                        title = stringResource(YMR.strings.a4k_smart_wifi),
-                        enabled = smart,
-                    ),
-                    Preference.PreferenceItem.TextPreference(
-                        title = stringResource(YMR.strings.a4k_smart_clear),
-                        subtitle = formatBytes(smartSize),
-                        onClick = {
-                            SmartAnime4K.clear(context)
-                            Toast.makeText(context, cleared, Toast.LENGTH_SHORT).show()
-                        },
-                    ),
-                ).toImmutableList(),
-            ),
-            Preference.PreferenceGroup(
                 title = stringResource(YMR.strings.a4k_group_processing),
                 preferenceItems = listOf(
                     Preference.PreferenceItem.SwitchPreference(
@@ -204,9 +151,4 @@ object SettingsAnime4KScreen : SearchableSettings {
     @Composable
     private fun gbEntries(values: List<Int>): ImmutableMap<Int, String> =
         values.associateWith { stringResource(YMR.strings.a4k_gb, it) }.toImmutableMap()
-
-    internal fun formatBytes(bytes: Long): String = when {
-        bytes >= 1L shl 30 -> "%.1f GB".format(bytes / (1L shl 30).toDouble())
-        else -> "%d MB".format(bytes / (1L shl 20))
-    }
 }

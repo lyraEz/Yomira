@@ -71,8 +71,8 @@ android {
 
         // versionCode must grow with every published APK and is shared by all ABI splits.
         // Scheme: major * 10000 + minor * 100 + patch (1.0.0 -> 10000). See docs/RELEASES.md.
-        versionCode = 11200
-        versionName = "1.12.0"
+        versionCode = 11300
+        versionName = "1.13.0"
 
         manifestPlaceholders["author"] = "@lyraEz"
 

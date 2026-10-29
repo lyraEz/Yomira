@@ -11,6 +11,31 @@ All notable changes to Yomira are listed here. The format follows
 - `Fixed` for bug fixes.
 - `Other` for technical notes (left out of the release text).
 
+## Yomira [1.13.0] - 2026-10-29
+
+Library and Browse with Yomira's own look, and a lighter player.
+
+### Changed
+- Library: a new header with the title, a summary ("128 anime · 9 with episodes to watch") and
+  round buttons for search, filters and more; it folds into one line while you scroll, and search
+  opens as a capsule in its place. Covers show how much you watched as a line along the bottom, a
+  status line under the title ("5/12 watched", "All watched"), the episodes left as an accent pill
+  and a white play button.
+- Browse: the same header with a summary per page. Sources open with a *Continue browsing* card for
+  the last source used, pinned sources as tiles and the rest in rounded groups by language, with
+  *Popular* and *Latest* as capsules. Extensions and Migrate use the same groups, with *Install*,
+  *Update* and *Trust* as capsules.
+- Empty pages show a moon instead of the old faces, with their actions as capsules. An empty
+  library offers to explore sources or open the Yomira guide.
+
+### Removed
+- Smart Anime4K. It rarely finished in time and could make playback stutter on mid-range phones.
+  Updating frees the space its prepared episodes used and removes its jobs and settings. Enhanced
+  Downloads stay as they were.
+
+### Other
+- The Anime4K job list drops a job it cannot read instead of the whole list.
+
 ## Yomira [1.12.0] - 2026-10-26
 
 A new icon, a leaner app and releases in the main repository.

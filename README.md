@@ -27,11 +27,11 @@ you choose.
 - **Player**: glass controls and seek bar, premium layout, a "You are watching" pause screen,
   smoothness options (match the display to the video, motion interpolation, image quality), a
   per-video optimizer and a heat guard that switches to lighter settings when the phone warms up.
-- **Picture**: real-time Anime4K with a recommendation for your phone, plus **color correction**
+- **Picture**: real-time Anime4K or light AI (CuNNy) with a recommendation for your phone, plus **color correction**
   (temperature, tint, exposure, shadows, highlights, vibrance) and **color grading** (looks, tinted
   shadows and highlights, contrast curve, fade).
-- **Offline Anime4K**: *Enhanced Downloads* processes downloaded episodes into an Anime4K version
-  that plays first, with a speed test that shows how long an episode takes on your phone.
+- **Offline Anime4K and light AI**: *Enhanced Downloads* processes downloaded episodes into an
+  enhanced version that plays first, showing how long each option takes on your phone.
 - **Discord Rich Presence without logging in**: a Crunchyroll-style card on your Discord profile
   while you watch, through the Discord app on the phone. No token, no password. Fully configurable.
 - **Episode names and artwork from TMDB**, skip intro without tracking (AniList, AniSkip, Anime

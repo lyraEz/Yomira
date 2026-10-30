@@ -1,6 +1,7 @@
-"""Official Anime4K v4 mpv presets (md/GLSL_Instructions_*.md of bloc97/Anime4K). Keep in step
-with yomira.anime4k.Anime4KPresets in the app."""
+"""Official Anime4K v4 mpv presets (md/GLSL_Instructions_*.md of bloc97/Anime4K), plus Lite (the S
+networks only). Keep in step with yomira.anime4k.Anime4KPresets in the app."""
 
+_LITE = {"big": "S", "small": "S"}
 _FAST = {"big": "M", "small": "S"}
 _HQ = {"big": "VL", "small": "M"}
 
@@ -22,6 +23,6 @@ def _modes(size):
 
 
 PRESETS = {}
-for _name, _size in (("FAST", _FAST), ("HQ", _HQ)):
+for _name, _size in (("LITE", _LITE), ("FAST", _FAST), ("HQ", _HQ)):
     for _mode, _files in _modes(_size).items():
         PRESETS[f"{_mode}_{_name}"] = _files

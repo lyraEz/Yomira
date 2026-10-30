@@ -9,4 +9,5 @@ val migrations: List<Migration>
         SetupSyncDataMigration(),
         SetupAppUpdateMigration(),
         yomira.anime4k.RemoveSmartAnime4KMigration(),
+        yomira.anime4k.EnhanceSpeedMigration(),
     )

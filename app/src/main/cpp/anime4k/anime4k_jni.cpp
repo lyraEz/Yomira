@@ -3,7 +3,7 @@
 
 #include <jni.h>
 
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 
 #include <memory>
 #include <string>
@@ -56,6 +56,14 @@ Java_yomira_anime4k_Anime4KNative_nativeConfigure(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
+Java_yomira_anime4k_Anime4KNative_nativePlanMacs(
+    JNIEnv *, jobject, jlong handle, jint nativeWidth, jint nativeHeight, jint outputWidth, jint outputHeight) {
+    std::string error;
+    if (!pipelineOf(handle)->plan(nativeWidth, nativeHeight, outputWidth, outputHeight, &error)) return -1;
+    return static_cast<jlong>(pipelineOf(handle)->macsPerFrame());
+}
+
+extern "C" JNIEXPORT jlong JNICALL
 Java_yomira_anime4k_Anime4KNative_nativeMacsPerFrame(JNIEnv *, jobject, jlong handle) {
     return static_cast<jlong>(pipelineOf(handle)->macsPerFrame());
 }
@@ -67,7 +75,7 @@ Java_yomira_anime4k_Anime4KNative_nativePassCount(JNIEnv *, jobject, jlong handl
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_yomira_anime4k_Anime4KNative_nativeProcess(
-    JNIEnv *env, jobject, jlong handle, jint inputTexture, jint targetFramebuffer, jboolean finishEachPass) {
+    JNIEnv *env, jobject, jlong handle, jint inputTexture, jint targetFramebuffer, jint sync) {
     GLuint target = 0;
     if (targetFramebuffer < 0) {
         GLint bound = 0;
@@ -77,7 +85,7 @@ Java_yomira_anime4k_Anime4KNative_nativeProcess(
         target = static_cast<GLuint>(targetFramebuffer);
     }
     auto *pipeline = pipelineOf(handle);
-    pipeline->finishEachPass = finishEachPass == JNI_TRUE;
+    pipeline->sync = sync == 2 ? a4k::PassSync::Finish : sync == 1 ? a4k::PassSync::Flush : a4k::PassSync::None;
     std::string error;
     bool ok = pipeline->process(static_cast<GLuint>(inputTexture), target, &error);
     return errorOrNull(env, ok, error);

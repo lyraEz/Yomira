@@ -1,5 +1,6 @@
 #include "hook_shader.h"
 
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <sstream>
@@ -66,6 +67,24 @@ bool parseHookShader(const std::string &source, std::vector<HookPass> *passes, s
                 current.when = value;
             } else if (key == "COMPONENTS") {
                 current.components = std::atoi(value.c_str());
+            } else if (key == "COMPUTE") {
+                int sizes[4] = {0, 0, 0, 0};
+                std::istringstream numbers(value);
+                int count = 0;
+                while (count < 4 && numbers >> sizes[count]) ++count;
+                if (count != 2 && count != 4) {
+                    *error = "bad //!COMPUTE in " + current.desc;
+                    return false;
+                }
+                current.compute = true;
+                current.blockWidth = sizes[0];
+                current.blockHeight = sizes[1];
+                current.threadsWidth = count == 4 ? sizes[2] : sizes[0];
+                current.threadsHeight = count == 4 ? sizes[3] : sizes[1];
+                if (current.blockWidth < 1 || current.blockHeight < 1 || current.threadsWidth < 1 || current.threadsHeight < 1) {
+                    *error = "bad //!COMPUTE in " + current.desc;
+                    return false;
+                }
             } else {
                 *error = "unsupported directive //!" + key;
                 return false;
@@ -156,14 +175,26 @@ bool evalExpression(const std::string &expression, const SizeLookup &lookup, flo
     return true;
 }
 
-long long macsPerPixel(const HookPass &pass) {
+namespace {
+
+long long countOf(const std::string &body, const std::string &needle) {
     long long count = 0;
     size_t at = 0;
-    while ((at = pass.body.find("mat4(", at)) != std::string::npos) {
-        ++count;
-        at += 5;
+    while ((at = body.find(needle, at)) != std::string::npos) {
+        // "mat4(" must not be the end of a longer name such as "f16mat4(".
+        if (at == 0 || !(std::isalnum(static_cast<unsigned char>(body[at - 1])) || body[at - 1] == '_')) ++count;
+        at += needle.size();
     }
-    return count * 16;
+    return count;
+}
+
+}  // namespace
+
+long long macsPerPixel(const HookPass &pass) {
+    // CuNNy and ArtCNN spell their weights M4(...) and V4(...) (mat4/vec4 or their half versions).
+    long long matrices = countOf(pass.body, "mat4(") + countOf(pass.body, "M4(");
+    long long vectors = pass.compute ? countOf(pass.body, "V4(") : 0;
+    return matrices * 16 + vectors * 4;
 }
 
 }  // namespace a4k

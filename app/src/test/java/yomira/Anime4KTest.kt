@@ -6,11 +6,14 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import yomira.anime4k.Anime4KMode
 import yomira.anime4k.Anime4KPreset
-import yomira.anime4k.Anime4KQuality
 import yomira.anime4k.EnhanceJob
+import yomira.anime4k.EnhanceQuality
 import yomira.anime4k.EnhancedDownloads
+import yomira.anime4k.Enhancer
 import yomira.anime4k.EtaTracker
 import yomira.anime4k.ExportQuality
+import yomira.anime4k.LightAiLook
+import yomira.anime4k.LightAiPreset
 import yomira.anime4k.OutputCodec
 import yomira.anime4k.OutputSize
 import yomira.anime4k.SegmentPlan
@@ -25,28 +28,66 @@ class Anime4KTest {
         // bloc97/Anime4K md/GLSL_Instructions_Mac.md, CTRL+1..6 (Fast and HQ).
         assertEquals(
             listOf("Clamp_Highlights", "Restore_CNN_M", "Upscale_CNN_x2_M") + pre + "Upscale_CNN_x2_S",
-            Anime4KPreset(Anime4KMode.A, Anime4KQuality.FAST).shaders,
+            Anime4KPreset(Anime4KMode.A, EnhanceQuality.FAST).shaders,
         )
         assertEquals(
             listOf("Clamp_Highlights", "Restore_CNN_VL", "Upscale_CNN_x2_VL", "Restore_CNN_M") + pre + "Upscale_CNN_x2_M",
-            Anime4KPreset(Anime4KMode.AA, Anime4KQuality.HIGH).shaders,
+            Anime4KPreset(Anime4KMode.AA, EnhanceQuality.HIGH).shaders,
         )
         assertEquals(
             listOf("Clamp_Highlights", "Restore_CNN_Soft_VL", "Upscale_CNN_x2_VL") + pre + listOf("Restore_CNN_Soft_M", "Upscale_CNN_x2_M"),
-            Anime4KPreset(Anime4KMode.BB, Anime4KQuality.HIGH).shaders,
+            Anime4KPreset(Anime4KMode.BB, EnhanceQuality.HIGH).shaders,
         )
         assertEquals(
             listOf("Clamp_Highlights", "Upscale_Denoise_CNN_x2_M") + pre + listOf("Restore_CNN_S", "Upscale_CNN_x2_S"),
-            Anime4KPreset(Anime4KMode.CA, Anime4KQuality.FAST).shaders,
+            Anime4KPreset(Anime4KMode.CA, EnhanceQuality.FAST).shaders,
         )
-        assertEquals(12, Anime4KPreset.ALL.size)
-        assertEquals(Anime4KPreset(Anime4KMode.AA, Anime4KQuality.HIGH), Anime4KPreset.fromId("AA_HQ"))
+        // Lite: the small networks only.
+        assertEquals(
+            listOf("Clamp_Highlights", "Restore_CNN_S", "Upscale_CNN_x2_S") + pre + "Upscale_CNN_x2_S",
+            Anime4KPreset(Anime4KMode.A, EnhanceQuality.LITE).shaders,
+        )
+        assertEquals(18, Anime4KPreset.ALL.size)
+        // Ids saved by older versions still resolve.
+        assertEquals(Anime4KPreset(Anime4KMode.AA, EnhanceQuality.HIGH), Enhancer.fromId("AA_HQ"))
+        assertEquals(Anime4KPreset(Anime4KMode.A, EnhanceQuality.FAST), Enhancer.fromId("A_FAST"))
+    }
+
+    @Test
+    fun `light AI presets use the CuNNy files and only upscale`() {
+        assertEquals(listOf("lightai/CuNNy-faster-DS.glsl"), LightAiPreset(LightAiLook.SHARP, EnhanceQuality.LITE).assets)
+        assertEquals(listOf("lightai/CuNNy-2x12-SOFT.glsl"), LightAiPreset(LightAiLook.SOFT, EnhanceQuality.HIGH).assets)
+        assertEquals(LightAiPreset(LightAiLook.SOFT, EnhanceQuality.FAST), Enhancer.fromId("AI_SOFT_FAST"))
+        assertEquals(Enhancer.ALL.size, Enhancer.ALL.map { it.id }.toSet().size)
+        assertTrue(LightAiPreset.ALL.all { it.upscaleOnly })
+        assertTrue(Anime4KPreset(Anime4KMode.C, EnhanceQuality.FAST).upscaleOnly)
+        assertTrue(!Anime4KPreset(Anime4KMode.A, EnhanceQuality.FAST).upscaleOnly)
+        // "Original" means 1080p for an upscaler, and stays the source size for Anime4K A.
+        val sharp = LightAiPreset(LightAiLook.SHARP, EnhanceQuality.LITE)
+        assertEquals(OutputSize.P1080, OutputSize.ORIGINAL.forEnhancer(sharp))
+        assertEquals(OutputSize.P1440, OutputSize.P1440.forEnhancer(sharp))
+        assertEquals(OutputSize.ORIGINAL, OutputSize.ORIGINAL.forEnhancer(Enhancer.DEFAULT))
+    }
+
+    @Test
+    fun `every light AI shader is in the APK with its license`() {
+        val assets = File("src/main/assets")
+        for (preset in LightAiPreset.ALL) {
+            val file = File(assets, preset.assets.single())
+            assertTrue(file.exists(), "missing ${file.name}")
+            val text = file.readText()
+            assertTrue("//!COMPUTE" in text && "//!HOOK LUMA" in text, "${file.name} is not a CuNNy shader")
+            assertTrue("GNU Lesser General Public" in text, "${file.name} lost its license header")
+        }
+        assertTrue(File(assets, "lightai/LICENSE-CuNNy.txt").exists())
+        assertTrue(File(assets, "lightai/LICENSE-GPL-3.0.txt").exists())
     }
 
     @Test
     fun `every shader a preset needs is in the APK, unmodified`() {
         val assets = File("src/main/assets/anime4k")
         for (preset in Anime4KPreset.ALL) {
+            assertEquals(preset.shaders.map { "anime4k/Anime4K_$it.glsl" }, preset.assets)
             for (name in preset.shaders) {
                 val file = File(assets, "Anime4K_$name.glsl")
                 assertTrue(file.exists(), "missing ${file.name}")

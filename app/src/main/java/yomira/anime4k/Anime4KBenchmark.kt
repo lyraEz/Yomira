@@ -11,7 +11,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 data class BenchmarkResult(
-    val preset: Anime4KPreset,
+    val preset: Enhancer,
     val width: Int,
     val height: Int,
     val outWidth: Int,
@@ -33,14 +33,14 @@ data class BenchmarkResult(
 }
 
 /**
- * Measures a preset on this phone's GPU with an offscreen frame of the given size. The shaders do
+ * Measures an enhancer on this phone's GPU with an offscreen frame of the given size. The shaders do
  * the same work whatever the picture, so a generated test pattern gives real timings.
  */
 object Anime4KBenchmark {
 
     suspend fun run(
         context: Context,
-        preset: Anime4KPreset,
+        preset: Enhancer,
         width: Int,
         height: Int,
         output: OutputSize,
@@ -61,13 +61,13 @@ object Anime4KBenchmark {
                 GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, fbo)
                 GLES30.glFramebufferTexture2D(GLES30.GL_FRAMEBUFFER, GLES30.GL_COLOR_ATTACHMENT0, GLES30.GL_TEXTURE_2D, target, 0)
                 // The first frame also pays for shader compilation.
-                Anime4KNative.process(handle, input, fbo, finishEachPass = true)?.let { error(it) }
+                Anime4KNative.process(handle, input, fbo, PassSync.FLUSH)?.let { error(it) }
                 GLES30.glFinish()
                 val setup = (SystemClock.elapsedRealtimeNanos() - setupStart) / 1e9
                 var best = Double.MAX_VALUE
                 repeat(frames.coerceAtLeast(1)) {
                     val start = SystemClock.elapsedRealtimeNanos()
-                    Anime4KNative.process(handle, input, fbo, finishEachPass = true)?.let { error(it) }
+                    Anime4KNative.process(handle, input, fbo, PassSync.FLUSH)?.let { error(it) }
                     GLES30.glFinish()
                     best = minOf(best, (SystemClock.elapsedRealtimeNanos() - start) / 1e9)
                 }

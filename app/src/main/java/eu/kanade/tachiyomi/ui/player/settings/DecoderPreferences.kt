@@ -23,6 +23,16 @@ class DecoderPreferences(
     fun anime4kMode() = preferenceStore.getString("pref_anime4k_mode", "OFF")
     fun anime4kQuality() = preferenceStore.getString("pref_anime4k_quality", "BALANCED")
 
+    /** What the upscaling card runs when on: "anime4k" or "lightai" (CuNNy, needs gpu-next). */
+    fun upscaler() = preferenceStore.getString("pref_upscaler", UPSCALER_ANIME4K)
+
+    fun lightAiLook() = preferenceStore.getString("pref_light_ai_look", "SHARP")
+
+    fun lightAiQuality() = preferenceStore.getString("pref_light_ai_quality", "LITE")
+
+    /** Light AI is on: the player then needs the gpu-next renderer. */
+    fun lightAiActive(): Boolean = enableAnime4K().get() && upscaler().get() == UPSCALER_LIGHT_AI
+
     // Non-preferences
 
     fun brightnessFilter() = preferenceStore.getInt("pref_player_filter_brightness")
@@ -37,6 +47,11 @@ class DecoderPreferences(
     fun debandRange() = preferenceStore.getInt("pref_player_filter_deband_range", 16)
 
     fun videoFilterTheme() = preferenceStore.getInt("pref_video_filter_theme", 0)
+
+    companion object {
+        const val UPSCALER_ANIME4K = "anime4k"
+        const val UPSCALER_LIGHT_AI = "lightai"
+    }
 }
 
 enum class InterpolationMode(val title: String, val value: String) {

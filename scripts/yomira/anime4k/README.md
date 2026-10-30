@@ -30,6 +30,19 @@ It prints PSNR and SSIM between the two results for the six modes, Fast and High
 2x. The references use an alpha-free format (`rgb0`): Anime4K writes into the alpha channel and
 libplacebo would otherwise blend the colours with it, which a video never does.
 
+## Compare the light AI shaders with libplacebo
+
+The light AI (CuNNy) shaders are compute passes hooked on the luma plane. libplacebo gets a 4:2:0
+frame and runs them on its luma; the engine gets the same frame as RGB and rebuilds the luma itself:
+
+```bash
+python3 -I scripts/yomira/anime4k/compare_luma.py \
+  --cli /tmp/a4k-build/a4k_cli --image frame.png --work /tmp/luma \
+  app/src/main/assets/lightai/CuNNy-*.glsl
+```
+
+It prints PSNR and SSIM of the luma and of the whole picture at 2x.
+
 ## Cost of a preset
 
 ```bash
@@ -38,4 +51,6 @@ EGL_PLATFORM=surfaceless /tmp/a4k-build/a4k_cli --size 1920x1080 --out-size 1920
 ```
 
 `--plan` lists the passes that run for that input and output size (the WHEN conditions decide)
-and the GFLOP per frame. `--frames N` with `--in`/`--out` renders and times real frames.
+and the GFLOP per frame. `--frames N` with `--in`/`--out` renders and times real frames. `--highp`
+renders the Anime4K passes in full precision instead of half (software rendering ignores the
+difference), and `--sync none|flush|finish` picks what happens after each pass.

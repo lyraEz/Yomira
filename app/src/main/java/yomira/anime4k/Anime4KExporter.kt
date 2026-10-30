@@ -47,11 +47,14 @@ data class SourceInfo(
 }
 
 data class ExportSettings(
-    val preset: Anime4KPreset,
+    val preset: Enhancer,
     val output: OutputSize,
     val codec: OutputCodec,
     val quality: ExportQuality,
-)
+) {
+    /** The output size actually used: an upscale-only enhancer turns "Original" into 1080p. */
+    val outputSize: OutputSize get() = output.forEnhancer(preset)
+}
 
 /** Why processing stopped between two pieces. */
 class ExportPaused(val reason: String) : Exception(reason)
@@ -59,7 +62,7 @@ class ExportPaused(val reason: String) : Exception(reason)
 class ExportFailed(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 /**
- * Turns a video file into an Anime4K version, a piece at a time:
+ * Turns a video file into an enhanced version (Anime4K or light AI), a piece at a time:
  *  1. each 20-second piece is decoded, run through the preset on the GPU and encoded by Media3,
  *  2. finished pieces stay on disk, so stopping loses at most the piece in progress,
  *  3. ffmpeg joins the pieces and copies the original audio, subtitles and fonts without re-encoding,
@@ -138,7 +141,7 @@ class Anime4KExporter(private val context: Context) {
         workDir.mkdirs()
         val segments = SegmentPlan.of(info.durationUs)
         val shaderSources = settings.preset.load(context)
-        val (outWidth, outHeight) = settings.output.resolve(info.width, info.height)
+        val (outWidth, outHeight) = settings.outputSize.resolve(info.width, info.height)
         val bitrate = settings.quality.bitrate(outWidth, outHeight, info.frameRate, settings.codec)
         val framesPerUs = info.frameRate / 1_000_000.0
         val finished = done.filter { segmentFile(workDir, it).length() > 0 }.toMutableSet()
@@ -152,7 +155,7 @@ class Anime4KExporter(private val context: Context) {
             var segmentFrames = 0L
             val effect = Anime4KEffect(
                 sources = shaderSources,
-                output = settings.output,
+                output = settings.outputSize,
                 listener = FrameListener { _, seconds ->
                     eta.add(seconds)
                     segmentFrames++

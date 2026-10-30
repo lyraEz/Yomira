@@ -32,7 +32,7 @@ another module is named.
 | Per-video optimizer, heat guard, audio extras, full stats | `yomira/player/PlaybackOptimizer.kt`, `OptimizerCard.kt`, `ThermalGuard.kt`, `PlayerExtras.kt` |
 | Info line (clock, battery, ends at), blue light filter, tools (A-B loop, frame step, rotate, stop at the end, speed per anime), sound | `yomira/player/PlayerTools.kt`, `PlayerToolsCards.kt` |
 | Button size and spacing with preview | `yomira/player/PlayerButtons.kt` |
-| Real-time Anime4K: recommendation per phone, plain descriptions, dropped-frame check | `yomira/player/Anime4KAdvisor.kt`, `VideoFiltersPanel.kt` |
+| Real-time Anime4K or light AI (CuNNy, with gpu-next): recommendation per phone, plain descriptions, dropped-frame check | `yomira/player/Anime4KAdvisor.kt`, `VideoFiltersPanel.kt`, `VideoFilterUtils.kt` |
 | Color correction and grading: one generated mpv shader hooked at OUTPUT, after Anime4K, subtitles untouched; the file name follows its content because mpv keeps shaders it has read by path | `yomira/player/ColorGrading.kt`, `ColorCards.kt` |
 | Skip intro without tracking: AniList by title, AniList sequels to the right season, AniSkip and Anime Skip | `yomira/player/SkipTimes.kt`, `yomira/metadata/AniListIds.kt` |
 
@@ -43,7 +43,7 @@ another module is named.
 | TMDB names, descriptions, stills and logos (cache in `files/yomira/meta`), season by AniList premiere date, manual match | `yomira/metadata/` |
 | Packed "season.episode" numbers (1.001 = S1 E1); split seasons matched to TMDB | `yomira/metadata/EpisodeNumbers.kt`, `EpisodeMetadata.kt` (`reconcile`) |
 | Discord Rich Presence through the Discord Social SDK: JNI bridge with one SDK thread, cards built by `PresenceBuilder`, at most one update every 4 seconds | `app/src/main/cpp/`, `yomira/discord/` |
-| Offline Anime4K (Enhanced Downloads); see [ANIME4K_OFFLINE.md](ANIME4K_OFFLINE.md) | `app/src/main/cpp/anime4k/`, `yomira/anime4k/` |
+| Offline Anime4K and light AI (Enhanced Downloads, time estimates); see [ANIME4K_OFFLINE.md](ANIME4K_OFFLINE.md) | `app/src/main/cpp/anime4k/`, `yomira/anime4k/` |
 
 ## Robustness
 

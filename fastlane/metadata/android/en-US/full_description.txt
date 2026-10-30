@@ -3,8 +3,8 @@ Yomira is an anime, series and movie player for Android phones, with a liquid gl
 <ul>
 <li>Liquid glass interface: floating tab bar, glass top bars, a Home tab with highlights and a streaming-style details page.</li>
 <li>A player built on mpv with smoothness options, a per-video optimizer, a heat guard and a premium layout.</li>
-<li>Real-time Anime4K, color correction and color grading.</li>
-<li>Offline Anime4K: Enhanced Downloads.</li>
+<li>Real-time Anime4K or light AI upscaling, color correction and color grading.</li>
+<li>Offline Anime4K and light AI: Enhanced Downloads.</li>
 <li>Discord Rich Presence through the Discord app, without logging in.</li>
 <li>Episode names and artwork from TMDB, and skip intro without tracking.</li>
 <li>Trackers: AniList, MyAnimeList, Kitsu, Shikimori, Simkl, Trakt and Bangumi.</li>

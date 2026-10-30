@@ -1,10 +1,10 @@
 package yomira.anime4k
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Download
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -22,8 +21,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,26 +33,50 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import logcat.LogPriority
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.core.common.util.system.logcat
 import tachiyomi.presentation.core.i18n.stringResource
 import yomira.glass.AlertDialog
 import yomira.i18n.YMR
 
 /**
- * The choice shown when downloading with Enhanced Downloads on: the original file, or an Anime4K
- * version made after the download with the chosen preset.
+ * The choice shown when downloading with Enhanced Downloads on: the original file, or a version made
+ * after the download with Anime4K or light AI, with how long that takes on this phone.
  */
 @Composable
 fun Anime4KDownloadDialog(
     episodeCount: Int,
     onDismiss: () -> Unit,
-    onConfirm: (preset: Anime4KPreset?) -> Unit,
+    onConfirm: (preset: Enhancer?) -> Unit,
 ) {
     val prefs = remember { Anime4KPreferences() }
     val context = LocalContext.current
     var enhanced by remember { mutableStateOf(true) }
-    var preset by remember { mutableStateOf(Anime4KPreset.fromId(prefs.downloadPreset().get()) ?: Anime4KPreset.DEFAULT) }
+    var enhancer by remember { mutableStateOf(Enhancer.fromId(prefs.downloadPreset().get()) ?: Enhancer.DEFAULT) }
     val output = remember { OutputSize.fromKey(prefs.outputSize().get()) }
-    val measured = prefs.measuredSecondsPerFrame(Anime4KPreferences.benchmarkKey(preset, 1080, output))
+    var measuring by remember { mutableStateOf(false) }
+    var measured by remember { mutableIntStateOf(0) }
+
+    // The first time, measure the phone (a second or two) so every option shows its time.
+    LaunchedEffect(Unit) {
+        if (!EnhanceSpeed.isMeasured(prefs) && Anime4KNative.available) {
+            measuring = true
+            runCatching { EnhanceSpeed.measure(context, prefs) }
+                .onFailure { logcat(LogPriority.WARN, it) { "Anime4K: could not measure the GPU" } }
+            measuring = false
+            measured++
+        }
+    }
+    val estimate by produceState<Pair<Long?, Long?>?>(null, enhancer, measured) {
+        value = withContext(Dispatchers.IO) {
+            val size = output.forEnhancer(enhancer)
+            EnhanceSpeed.episodeSeconds(context, prefs, enhancer, 1280, 720, size) to
+                EnhanceSpeed.episodeSeconds(context, prefs, enhancer, 1920, 1080, size)
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -76,44 +102,9 @@ fun Anime4KDownloadDialog(
                     onClick = { enhanced = true },
                 )
                 if (enhanced) {
-                    Text(stringResource(YMR.strings.a4k_mode), style = MaterialTheme.typography.titleSmall)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Anime4KMode.entries.forEach { mode ->
-                            FilterChip(
-                                selected = preset.mode == mode,
-                                onClick = { preset = preset.copy(mode = mode) },
-                                label = { Text(mode.label) },
-                                shape = RoundedCornerShape(percent = 50),
-                            )
-                        }
-                    }
-                    Text(stringResource(YMR.strings.a4k_quality), style = MaterialTheme.typography.titleSmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Anime4KQuality.entries.forEach { quality ->
-                            FilterChip(
-                                selected = preset.quality == quality,
-                                onClick = { preset = preset.copy(quality = quality) },
-                                label = {
-                                    Text(stringResource(if (quality == Anime4KQuality.HIGH) YMR.strings.a4k_quality_high else YMR.strings.a4k_quality_fast))
-                                },
-                                shape = RoundedCornerShape(percent = 50),
-                            )
-                        }
-                    }
+                    EnhancerPicker(enhancer = enhancer, onChange = { enhancer = it })
                     Text(
-                        text = modeHint(preset.mode),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = if (measured != null) {
-                            stringResource(
-                                YMR.strings.a4k_download_estimate,
-                                Anime4KNotifier.formatDuration(context, (measured * BenchmarkResult.EPISODE_FRAMES).toLong()),
-                            )
-                        } else {
-                            stringResource(YMR.strings.a4k_download_estimate_unknown)
-                        },
+                        text = estimateText(context, measuring, estimate),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -130,8 +121,8 @@ fun Anime4KDownloadDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (enhanced) prefs.downloadPreset().set(preset.id)
-                    onConfirm(if (enhanced) preset else null)
+                    if (enhanced) prefs.downloadPreset().set(enhancer.id)
+                    onConfirm(if (enhanced) enhancer else null)
                 },
             ) { Text(stringResource(YMR.strings.a4k_download_start)) }
         },
@@ -141,17 +132,20 @@ fun Anime4KDownloadDialog(
     )
 }
 
-@Composable
-internal fun modeHint(mode: Anime4KMode): String = stringResource(
-    when (mode) {
-        Anime4KMode.A -> YMR.strings.a4k_mode_a_hint
-        Anime4KMode.B -> YMR.strings.a4k_mode_b_hint
-        Anime4KMode.C -> YMR.strings.a4k_mode_c_hint
-        Anime4KMode.AA -> YMR.strings.a4k_mode_aa_hint
-        Anime4KMode.BB -> YMR.strings.a4k_mode_bb_hint
-        Anime4KMode.CA -> YMR.strings.a4k_mode_ca_hint
-    },
-)
+/** "About 25 min per 720p episode and 55 min per 1080p episode on this phone". */
+private fun estimateText(context: Context, measuring: Boolean, estimate: Pair<Long?, Long?>?): String {
+    val (hd, fullHd) = estimate ?: (null to null)
+    return when {
+        measuring -> context.stringResource(YMR.strings.a4k_estimate_measuring)
+        hd == null || fullHd == null -> context.stringResource(YMR.strings.a4k_download_estimate_unknown)
+        fullHd == 0L -> context.stringResource(YMR.strings.a4k_estimate_720, Anime4KNotifier.formatDuration(context, hd))
+        else -> context.stringResource(
+            YMR.strings.a4k_estimate_both,
+            Anime4KNotifier.formatDuration(context, hd),
+            Anime4KNotifier.formatDuration(context, fullHd),
+        )
+    }
+}
 
 @Composable
 private fun ChoiceCard(icon: ImageVector, title: String, summary: String, selected: Boolean, onClick: () -> Unit) {

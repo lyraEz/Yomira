@@ -5,6 +5,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.presentation.more.settings.Preference
@@ -141,11 +142,8 @@ object SettingsAnime4KScreen : SearchableSettings {
 
     @Composable
     internal fun presetEntries(): ImmutableMap<String, String> {
-        val fast = stringResource(YMR.strings.a4k_quality_fast)
-        val high = stringResource(YMR.strings.a4k_quality_high)
-        return Anime4KPreset.ALL.associate { preset ->
-            preset.id to "${preset.mode.label} · ${if (preset.quality == Anime4KQuality.HIGH) high else fast}"
-        }.toImmutableMap()
+        val context = LocalContext.current
+        return Enhancer.ALL.associate { it.id to it.displayName(context) }.toImmutableMap()
     }
 
     @Composable

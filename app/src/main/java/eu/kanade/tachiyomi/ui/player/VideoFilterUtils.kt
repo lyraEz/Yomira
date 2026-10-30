@@ -100,6 +100,23 @@ fun applyTheme(mpv: MPV?, theme: VideoFilterTheme, prefs: DecoderPreferences) {
 fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, isInit: Boolean = false) {
     val enabled = prefs.enableAnime4K().get()
 
+    // Light AI (CuNNy) is made of compute shaders, which mpv runs with gpu-next (libplacebo).
+    if (enabled && prefs.upscaler().get() == DecoderPreferences.UPSCALER_LIGHT_AI) {
+        if (!isInit) useVo(mpv, "gpu-next")
+        val preset = yomira.anime4k.LightAiPreset(
+            look = runCatching { yomira.anime4k.LightAiLook.valueOf(prefs.lightAiLook().get()) }
+                .getOrDefault(yomira.anime4k.LightAiLook.SHARP),
+            quality = runCatching { yomira.anime4k.EnhanceQuality.valueOf(prefs.lightAiQuality().get()) }
+                .getOrDefault(yomira.anime4k.EnhanceQuality.LITE),
+        )
+        val chain = yomira.player.ColorGrading.withColor(manager.getLightAiShader(preset).orEmpty())
+        logcat("Anime4K", LogPriority.DEBUG) { "Applying light AI: $chain" }
+        if (isInit) mpv?.setOptionString("glsl-shaders", chain) else mpv?.setPropertyString("glsl-shaders", chain)
+        return
+    }
+    // Back from light AI: the renderer the user chose.
+    if (!isInit && !prefs.gpuNext().get()) useVo(mpv, "gpu")
+
     // DEFENSIVE: Anime4K is incompatible with gpu-next in current builds
     val gpuNext = prefs.gpuNext().get()
     if (enabled && gpuNext) {
@@ -127,17 +144,17 @@ fun applyAnime4K(mpv: MPV?, prefs: DecoderPreferences, manager: Anime4KManager, 
     val chain = yomira.player.ColorGrading.withColor(if (enabled) manager.getShaderChain(mode, quality) else "")
     logcat("Anime4K", LogPriority.DEBUG) { "Applying Anime4K chain (enabled=$enabled): $chain" }
 
-    if (chain.isNotEmpty()) {
-        if (isInit) {
-            mpv?.setOptionString("glsl-shaders", chain)
-        } else {
-            mpv?.setPropertyString("glsl-shaders", chain)
-        }
+    if (isInit) {
+        mpv?.setOptionString("glsl-shaders", chain)
     } else {
-        if (isInit) {
-            mpv?.setOptionString("glsl-shaders", "")
-        } else {
-            mpv?.setPropertyString("glsl-shaders", "")
-        }
+        mpv?.setPropertyString("glsl-shaders", chain)
     }
+}
+
+/** Switches mpv's renderer while playing (mpv rebuilds the video output) unless it is already that one. */
+private fun useVo(mpv: MPV?, vo: String) {
+    mpv ?: return
+    if (mpv.getPropertyString("current-vo") == vo) return
+    logcat("Anime4K", LogPriority.INFO) { "Switching the renderer to $vo" }
+    mpv.setPropertyString("vo", vo)
 }

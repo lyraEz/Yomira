@@ -37,6 +37,8 @@ import `is`.xyz.mpv.KeyMapping
 import `is`.xyz.mpv.MPV
 import logcat.LogPriority
 import logcat.logcat
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(context, attributes) {
@@ -91,7 +93,8 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
 
     fun init(mpvInst: MPV) {
         this.mpv = mpvInst
-        setVo(if (decoderPreferences.gpuNext().get()) "gpu-next" else "gpu")
+        // Light AI (CuNNy compute shaders) needs gpu-next.
+        setVo(if (decoderPreferences.gpuNext().get() || decoderPreferences.lightAiActive()) "gpu-next" else "gpu")
         mpv?.setPropertyBoolean("pause", true)
         setSafeOptionString("profile", "fast")
         mpv?.setOptionString("hwdec", if (decoderPreferences.tryHWDecoding().get()) "auto" else "no")
@@ -131,6 +134,10 @@ class AniyomiMPVView(context: Context, attributes: AttributeSet?) : BaseMPVView(
         setSafeOptionString("vd-lavc-film-grain", "cpu")
 
         postInitOptions()
+        // Anime4K or light AI as left in the player's upscaling card
+        if (decoderPreferences.enableAnime4K().get()) {
+            applyAnime4K(mpv, decoderPreferences, Injekt.get(), isInit = true)
+        }
         // smooth motion (display-resample + interpolation) when enabled
         yomira.player.Smoothness.applyMpvOptions(context, mpv)
         setupSubtitlesOptions()

@@ -116,6 +116,9 @@ object PlayerDefaults {
         runCatching { decoder.enableAnime4K().delete() }
         runCatching { decoder.anime4kMode().delete() }
         runCatching { decoder.anime4kQuality().delete() }
+        runCatching { decoder.upscaler().delete() }
+        runCatching { decoder.lightAiLook().delete() }
+        runCatching { decoder.lightAiQuality().delete() }
         runCatching { decoder.videoDebanding().delete() }
         runCatching { decoder.gpuNext().delete() }
         runCatching { decoder.highQualityScaling().delete() }

@@ -68,7 +68,7 @@ object Anime4KNotifier {
     fun result(context: Context, job: EnhanceJob) {
         ensureChannel(context)
         val text = when (job.state) {
-            JobState.DONE -> context.stringResource(YMR.strings.a4k_notify_done, job.preset.label)
+            JobState.DONE -> context.stringResource(YMR.strings.a4k_notify_done, job.preset.displayName(context))
             else -> context.stringResource(YMR.strings.a4k_notify_failed, job.message.orEmpty())
         }
         val notification = NotificationCompat.Builder(context, CHANNEL)

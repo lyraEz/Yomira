@@ -1493,8 +1493,8 @@ class AnimeScreenModel(
         if (episodesToDownload.isNotEmpty()) startDownload(episodesToDownload, false)
     }
 
-    // the choice from the Anime4K dialog: null downloads the original only
-    fun startAnime4KDownload(episodes: List<Episode>, preset: yomira.anime4k.Anime4KPreset?) {
+    // the choice from the Enhanced Downloads dialog: null downloads the original only
+    fun startAnime4KDownload(episodes: List<Episode>, preset: yomira.anime4k.Enhancer?) {
         dismissDialog()
         if (preset != null) yomira.anime4k.EnhancedDownloads.request(episodes.map { it.id }, preset)
         startDownload(episodes, false)

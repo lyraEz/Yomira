@@ -12,6 +12,7 @@ class Anime4KManager(private val context: Context) {
 
     companion object {
         private const val SHADER_DIR = "shaders"
+        private const val LIGHT_AI_DIR = "lightai"
     }
 
     // Shader quality levels
@@ -178,4 +179,18 @@ class Anime4KManager(private val context: Context) {
     private fun getShaderPath(fileName: String): String {
         return File(shaderDir, fileName).absolutePath
     }
+
+    /**
+     * Light AI (CuNNy) shader for mpv, copied from assets/lightai. The "#extension" line is left out:
+     * GLSL ES only accepts it at the very top, and the half-float extension it asks for does not
+     * exist on OpenGL ES anyway (the shader then uses plain floats). Null when it cannot be written.
+     */
+    fun getLightAiShader(preset: yomira.anime4k.LightAiPreset): String? = runCatching {
+        val dir = File(context.filesDir, LIGHT_AI_DIR).apply { mkdirs() }
+        val target = File(dir, preset.file)
+        val source = context.assets.open(preset.assets.single()).bufferedReader().use { it.readText() }
+        val text = source.lineSequence().filterNot { it.trimStart().startsWith("#extension") }.joinToString("\n")
+        if (!target.exists() || target.readText() != text) target.writeText(text)
+        target.absolutePath
+    }.getOrNull()
 }

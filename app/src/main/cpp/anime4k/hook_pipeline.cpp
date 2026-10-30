@@ -59,19 +59,74 @@ GLuint compileShader(GLenum type, const std::string &source, std::string *error)
     return shader;
 }
 
-void defineTexture(std::ostringstream &out, const std::string &name, int unit) {
+// mpv's names for a bound texture (NAME_raw, NAME_pos, NAME_tex, ...). In a compute pass the
+// position is the centre of the output pixel this thread handles, like mpv's texmap().
+void defineTexture(std::ostringstream &out, const std::string &name, int unit, bool compute) {
     std::string u = std::to_string(unit);
+    std::string pos = compute ? "a4k_pos" : "v_pos";
     out << "#define " << name << "_raw a4k_tex" << u << "\n"
-        << "#define " << name << "_pos v_pos\n"
+        << "#define " << name << "_pos " << pos << "\n"
         << "#define " << name << "_size a4k_size" << u << "\n"
         << "#define " << name << "_pt (vec2(1.0) / a4k_size" << u << ")\n"
         << "#define " << name << "_mul 1.0\n"
         << "#define " << name << "_rot mat2(1.0, 0.0, 0.0, 1.0)\n"
         << "#define " << name << "_off vec2(0.0)\n"
         << "#define " << name << "_tex(pos) (texture(a4k_tex" << u << ", (pos)))\n"
-        << "#define " << name << "_texOff(off) (texture(a4k_tex" << u << ", v_pos + (vec2(1.0) / a4k_size" << u
+        << "#define " << name << "_texOff(off) (texture(a4k_tex" << u << ", " << pos << " + (vec2(1.0) / a4k_size" << u
         << ") * vec2(off)))\n";
+    if (compute) {
+        out << "#define " << name << "_map(id) a4k_map(id)\n"
+            << "#define " << name << "_gather(pos, c) (vec4(textureGather(a4k_tex" << u << ", (pos), (c))))\n";
+    }
 }
+
+// "#extension" lines must come before any code in GLSL ES, but mpv shaders keep them in the pass.
+std::string hoistExtensions(const std::string &body, std::string *extensions) {
+    std::istringstream lines(body);
+    std::ostringstream rest;
+    std::string line;
+    while (std::getline(lines, line)) {
+        size_t first = line.find_first_not_of(" \t");
+        if (first != std::string::npos && line.compare(first, 10, "#extension") == 0) {
+            *extensions += line + "\n";
+            rest << "\n";  // keeps the line numbers of compiler messages
+        } else {
+            rest << line << "\n";
+        }
+    }
+    return rest.str();
+}
+
+// The luma plane mpv gives LUMA hooks, from an RGB frame: limited-range Y' as in an 8-bit video.
+const char *kLumaExtractShader = R"(#version 300 es
+precision highp float;
+in vec2 v_pos;
+layout(location = 0) out vec4 out_color;
+uniform sampler2D a4k_tex0;
+uniform vec3 a4k_weights;
+void main() {
+    vec3 rgb = texture(a4k_tex0, v_pos).rgb;
+    out_color = vec4(16.0 / 255.0 + 219.0 / 255.0 * dot(rgb, a4k_weights), 0.0, 0.0, 1.0);
+}
+)";
+
+// Puts the processed luma back: the colour comes from the RGB frame scaled bilinearly (mpv's
+// chroma upscaling), the brightness from the luma. Adding the same amount to R, G and B changes Y'
+// by that amount and leaves Cb and Cr alone, whatever the matrix.
+const char *kLumaMergeShader = R"(#version 300 es
+precision highp float;
+in vec2 v_pos;
+layout(location = 0) out vec4 out_color;
+uniform sampler2D a4k_tex0;
+uniform sampler2D a4k_tex1;
+uniform vec3 a4k_weights;
+void main() {
+    vec3 rgb = texture(a4k_tex0, v_pos).rgb;
+    float before = 16.0 / 255.0 + 219.0 / 255.0 * dot(rgb, a4k_weights);
+    float after = texture(a4k_tex1, v_pos).x;
+    out_color = vec4(rgb + vec3((after - before) * 255.0 / 219.0), 1.0);
+}
+)";
 
 }  // namespace
 
@@ -87,24 +142,53 @@ long long HookPipeline::macsPerFrame() const {
     return total;
 }
 
-bool HookPipeline::configure(int nativeWidth, int nativeHeight, int outputWidth, int outputHeight, std::string *error) {
+bool HookPipeline::plan(int nativeWidth, int nativeHeight, int outputWidth, int outputHeight, std::string *error) {
     release();
     nativeWidth_ = nativeWidth;
     nativeHeight_ = nativeHeight;
     outputWidth_ = outputWidth;
     outputHeight_ = outputHeight;
 
+    for (const auto &pass : passes_) {
+        if (pass.hook != "LUMA" && pass.hook != "MAIN" && pass.hook != "PREKERNEL") {
+            *error = "hook " + pass.hook + " is not supported: " + pass.desc;
+            return false;
+        }
+    }
+
     // Version 0 is the input frame: it is both NATIVE and the first MAIN.
     versions_.push_back(Version{nativeWidth, nativeHeight, -1, -1});
     std::map<std::string, int> named = {{"MAIN", 0}, {"NATIVE", 0}};
+    int lumaPlane = -1;  // the extracted luma, once a LUMA pass runs
 
-    const char *stages[] = {"MAIN", "PREKERNEL"};
+    auto add = [&](Planned planned, const std::string &desc, long long macs) {
+        for (int input : planned.inputs) versions_[input].lastUse = static_cast<int>(planned_.size());
+        planned.output = static_cast<int>(versions_.size());
+        versions_.push_back(Version{planned.width, planned.height, -1, -1});
+        planned_.push_back(planned);
+        info_.push_back(PlannedPassInfo{desc, planned.width, planned.height, macs});
+        return planned.output;
+    };
+
+    const char *stages[] = {"LUMA", "MAIN", "PREKERNEL"};
     for (const char *stageName : stages) {
         std::string stage = stageName;
+        if (stage == "MAIN" && lumaPlane >= 0 && named["LUMA"] != lumaPlane) {
+            // The planes are merged before MAIN, at the size the LUMA hooks left (mpv's NATIVE).
+            Planned merge;
+            merge.builtin = Builtin::LumaMerge;
+            merge.width = versions_[named["LUMA"]].width;
+            merge.height = versions_[named["LUMA"]].height;
+            merge.inputs = {0, named["LUMA"]};
+            int merged = add(merge, "luma merge", 0);
+            named["MAIN"] = merged;
+            named["NATIVE"] = merged;
+        }
         for (size_t p = 0; p < passes_.size(); ++p) {
             const HookPass &pass = passes_[p];
             if (pass.hook != stage) continue;
-            int hooked = named["MAIN"];
+            bool luma = stage == "LUMA";
+            int hooked = luma ? lumaPlane >= 0 ? named["LUMA"] : -1 : named["MAIN"];
             SizeLookup lookup = [&](const std::string &name, float *w, float *h) {
                 int version = -1;
                 if (name == "OUTPUT") {
@@ -116,17 +200,31 @@ bool HookPipeline::configure(int nativeWidth, int nativeHeight, int outputWidth,
                     version = hooked;
                 } else {
                     auto found = named.find(name);
-                    if (found == named.end()) return false;
-                    version = found->second;
+                    if (found != named.end()) {
+                        version = found->second;
+                    } else if (name != "LUMA") {
+                        return false;
+                    }
                 }
-                *w = static_cast<float>(versions_[version].width);
-                *h = static_cast<float>(versions_[version].height);
+                // Before the first LUMA pass the luma plane is simply the size of the video.
+                *w = static_cast<float>(version >= 0 ? versions_[version].width : nativeWidth);
+                *h = static_cast<float>(version >= 0 ? versions_[version].height : nativeHeight);
                 return true;
             };
             if (!pass.when.empty()) {
                 float condition = 0;
                 if (!evalExpression(pass.when, lookup, &condition, error)) return false;
                 if (condition == 0.0f) continue;
+            }
+            if (luma && lumaPlane < 0) {
+                Planned extract;
+                extract.builtin = Builtin::LumaExtract;
+                extract.width = nativeWidth;
+                extract.height = nativeHeight;
+                extract.inputs = {0};
+                lumaPlane = add(extract, "luma", 0);
+                named["LUMA"] = lumaPlane;
+                hooked = lumaPlane;
             }
             float w = static_cast<float>(versions_[hooked].width);
             float h = static_cast<float>(versions_[hooked].height);
@@ -154,30 +252,35 @@ bool HookPipeline::configure(int nativeWidth, int nativeHeight, int outputWidth,
                     version = found->second;
                 }
                 planned.inputs.push_back(version);
-                versions_[version].lastUse = static_cast<int>(planned_.size());
             }
-            planned.output = static_cast<int>(versions_.size());
-            versions_.push_back(Version{planned.width, planned.height, -1, -1});
+            long long macs = macsPerPixel(pass);
+            if (pass.compute) {
+                planned.groupsX = (planned.width + pass.blockWidth - 1) / pass.blockWidth;
+                planned.groupsY = (planned.height + pass.blockHeight - 1) / pass.blockHeight;
+                macs *= static_cast<long long>(planned.groupsX) * planned.groupsY * pass.threadsWidth * pass.threadsHeight;
+            } else {
+                macs *= static_cast<long long>(planned.width) * planned.height;
+            }
+            int output = add(planned, pass.desc, macs);
 
             std::string target = pass.save.empty() ? stage : pass.save;
             if (target == stage || target == "HOOKED") {
-                named["MAIN"] = planned.output;
+                named[luma ? "LUMA" : "MAIN"] = output;
             } else {
-                named[target] = planned.output;
+                named[target] = output;
             }
-            planned_.push_back(planned);
-            info_.push_back(PlannedPassInfo{
-                pass.desc,
-                planned.width,
-                planned.height,
-                macsPerPixel(pass) * planned.width * planned.height,
-            });
         }
     }
     finalVersion_ = named["MAIN"];
     versions_[finalVersion_].lastUse = static_cast<int>(planned_.size());
+    return true;
+}
 
-    // Textures are shared between passes whose results are no longer needed.
+bool HookPipeline::configure(int nativeWidth, int nativeHeight, int outputWidth, int outputHeight, std::string *error) {
+    if (!plan(nativeWidth, nativeHeight, outputWidth, outputHeight, error)) return false;
+
+    // Textures are shared between passes whose results are no longer needed. Immutable storage, so
+    // compute passes can write them as images.
     std::vector<bool> busy;
     for (size_t i = 0; i < planned_.size(); ++i) {
         Version &out = versions_[planned_[i].output];
@@ -194,7 +297,7 @@ bool HookPipeline::configure(int nativeWidth, int nativeHeight, int outputWidth,
             texture.height = out.height;
             glGenTextures(1, &texture.texture);
             glBindTexture(GL_TEXTURE_2D, texture.texture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, out.width, out.height, 0, GL_RGBA, GL_HALF_FLOAT, nullptr);
+            glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, out.width, out.height);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -225,7 +328,7 @@ bool HookPipeline::configure(int nativeWidth, int nativeHeight, int outputWidth,
     vertexShader_ = compileShader(GL_VERTEX_SHADER, kVertexShader, error);
     if (!vertexShader_) return false;
     for (auto &planned : planned_) {
-        planned.program = compile(planned, error);
+        planned.program = planned.builtin != Builtin::None ? compileBuiltin(planned, error) : compile(planned, error);
         if (!planned.program) return false;
     }
     blitProgram_ = link(kBlitShader, error);
@@ -260,35 +363,28 @@ GLuint HookPipeline::link(const std::string &fragment, std::string *error) {
     return program;
 }
 
-GLuint HookPipeline::compile(const Planned &planned, std::string *error) {
-    const HookPass &pass = passes_[planned.pass];
-    std::ostringstream out;
-    out << "#version 300 es\n"
-        << "precision highp float;\n"
-        << "precision highp int;\n"
-        << "precision highp sampler2D;\n"
-        << "in vec2 v_pos;\n"
-        << "layout(location = 0) out vec4 out_color;\n";
-    for (size_t i = 0; i < planned.inputs.size(); ++i) {
-        out << "uniform sampler2D a4k_tex" << i << ";\n"
-            << "uniform vec2 a4k_size" << i << ";\n";
-    }
-    // Binding HOOKED also exposes the hooked texture under its own name, and the other way round.
-    std::set<std::string> defined;
-    for (size_t i = 0; i < pass.binds.size(); ++i) {
-        std::vector<std::string> names = {pass.binds[i]};
-        if (pass.binds[i] == "HOOKED") names.push_back(pass.hook);
-        if (pass.binds[i] == pass.hook) names.push_back("HOOKED");
-        for (const auto &name : names) {
-            if (defined.insert(name).second) defineTexture(out, name, static_cast<int>(i));
-        }
-    }
-    out << "#line 1\n" << pass.body << "\nvoid main() {\n    out_color = hook();\n}\n";
-    GLuint program = link(out.str(), error);
-    if (!program) {
-        *error = pass.desc + ": " + *error;
+GLuint HookPipeline::linkCompute(const std::string &source, std::string *error) {
+    GLuint shader = compileShader(GL_COMPUTE_SHADER, source, error);
+    if (!shader) return 0;
+    GLuint program = glCreateProgram();
+    glAttachShader(program, shader);
+    glLinkProgram(program);
+    glDeleteShader(shader);
+    GLint ok = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
+    if (!ok) {
+        GLint length = 0;
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+        std::string log(length > 0 ? length : 1, '\0');
+        glGetProgramInfoLog(program, length, nullptr, &log[0]);
+        *error = "program link failed: " + log;
+        glDeleteProgram(program);
         return 0;
     }
+    return program;
+}
+
+void HookPipeline::setTextureUniforms(GLuint program, const Planned &planned) {
     glUseProgram(program);
     for (size_t i = 0; i < planned.inputs.size(); ++i) {
         const Version &v = versions_[planned.inputs[i]];
@@ -297,7 +393,92 @@ GLuint HookPipeline::compile(const Planned &planned, std::string *error) {
         glUniform2f(glGetUniformLocation(program, ("a4k_size" + unit).c_str()),
                     static_cast<float>(v.width), static_cast<float>(v.height));
     }
+    GLint outSize = glGetUniformLocation(program, "a4k_out_size");
+    if (outSize >= 0) glUniform2f(outSize, static_cast<float>(planned.width), static_cast<float>(planned.height));
+    GLint weights = glGetUniformLocation(program, "a4k_weights");
+    if (weights >= 0) {
+        // mpv's guess for untagged video: BT.709 from 720p up, BT.601 below.
+        bool hd = nativeWidth_ >= 1280 || nativeHeight_ > 576;
+        if (hd) {
+            glUniform3f(weights, 0.2126f, 0.7152f, 0.0722f);
+        } else {
+            glUniform3f(weights, 0.299f, 0.587f, 0.114f);
+        }
+    }
     glUseProgram(0);
+}
+
+GLuint HookPipeline::compileBuiltin(const Planned &planned, std::string *error) {
+    GLuint program = link(planned.builtin == Builtin::LumaExtract ? kLumaExtractShader : kLumaMergeShader, error);
+    if (!program) {
+        *error = "luma: " + *error;
+        return 0;
+    }
+    setTextureUniforms(program, planned);
+    return program;
+}
+
+GLuint HookPipeline::compile(const Planned &planned, std::string *error) {
+    const HookPass &pass = passes_[planned.pass];
+    std::string extensions;
+    std::string body = hoistExtensions(pass.body, &extensions);
+    std::ostringstream out;
+    if (pass.compute) {
+        out << "#version 310 es\n"
+            << extensions
+            << "precision highp float;\n"
+            << "precision highp int;\n"
+            << "precision highp sampler2D;\n"
+            << "precision highp image2D;\n"
+            << "layout(local_size_x = " << pass.threadsWidth << ", local_size_y = " << pass.threadsHeight << ") in;\n"
+            << "layout(binding = 0, rgba16f) writeonly uniform highp image2D out_image;\n"
+            << "uniform highp vec2 a4k_out_size;\n"
+            << "#define a4k_map(id) ((vec2(id) + vec2(0.5)) / a4k_out_size)\n"
+            << "#define a4k_pos a4k_map(gl_GlobalInvocationID.xy)\n";
+    } else if (halfPrecision) {
+        // Half-precision arithmetic and samples, full-precision coordinates.
+        out << "#version 300 es\n"
+            << extensions
+            << "precision mediump float;\n"
+            << "precision highp int;\n"
+            << "precision mediump sampler2D;\n"
+            << "in highp vec2 v_pos;\n"
+            << "layout(location = 0) out vec4 out_color;\n";
+    } else {
+        out << "#version 300 es\n"
+            << extensions
+            << "precision highp float;\n"
+            << "precision highp int;\n"
+            << "precision highp sampler2D;\n"
+            << "in vec2 v_pos;\n"
+            << "layout(location = 0) out vec4 out_color;\n";
+    }
+    for (size_t i = 0; i < planned.inputs.size(); ++i) {
+        out << "uniform sampler2D a4k_tex" << i << ";\n"
+            << "uniform highp vec2 a4k_size" << i << ";\n";
+    }
+    // Binding HOOKED also exposes the hooked texture under its own name, and the other way round.
+    std::set<std::string> defined;
+    for (size_t i = 0; i < pass.binds.size(); ++i) {
+        std::vector<std::string> names = {pass.binds[i]};
+        if (pass.binds[i] == "HOOKED") names.push_back(pass.hook);
+        if (pass.binds[i] == pass.hook) names.push_back("HOOKED");
+        for (const auto &name : names) {
+            if (defined.insert(name).second) defineTexture(out, name, static_cast<int>(i), pass.compute);
+        }
+    }
+    out << "#line 1\n" << body;
+    if (pass.compute) {
+        out << "\nvoid main() {\n    hook();\n}\n";
+    } else {
+        out << "\nvoid main() {\n    out_color = hook();\n}\n";
+    }
+    GLuint program = pass.compute ? linkCompute(out.str(), error) : link(out.str(), error);
+    if (!program) {
+        *error = pass.desc + ": " + *error;
+        return 0;
+    }
+    setTextureUniforms(program, planned);
     return program;
 }
 
@@ -325,15 +506,27 @@ bool HookPipeline::process(GLuint inputTexture, GLuint targetFramebuffer, std::s
 
     for (const auto &planned : planned_) {
         const Texture &target = textures_[versions_[planned.output].physical];
-        glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer);
-        glViewport(0, 0, planned.width, planned.height);
         glUseProgram(planned.program);
         for (size_t i = 0; i < planned.inputs.size(); ++i) {
             glActiveTexture(GL_TEXTURE0 + static_cast<GLenum>(i));
             glBindTexture(GL_TEXTURE_2D, textureOf(planned.inputs[i]));
         }
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        if (finishEachPass) glFinish();
+        bool compute = planned.pass >= 0 && passes_[planned.pass].compute;
+        if (compute) {
+            glBindImageTexture(0, target.texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA16F);
+            glDispatchCompute(static_cast<GLuint>(planned.groupsX), static_cast<GLuint>(planned.groupsY), 1);
+            // The next passes sample (or draw over) what the threads wrote.
+            glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT);
+        } else {
+            glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer);
+            glViewport(0, 0, planned.width, planned.height);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+        if (sync == PassSync::Finish) {
+            glFinish();
+        } else if (sync == PassSync::Flush) {
+            glFlush();
+        }
     }
 
     const Version &result = versions_[finalVersion_];

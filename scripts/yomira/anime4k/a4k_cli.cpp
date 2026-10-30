@@ -2,11 +2,11 @@
 // so its output can be compared with libplacebo/mpv and timed.
 //
 //   a4k_cli --in in.rgba --size 320x180 --out out.rgba --out-size 640x360 \
-//           --shaders a.glsl:b.glsl [--frames 5] [--plan]
+//           --shaders a.glsl:b.glsl [--frames 5] [--plan] [--highp] [--sync none|flush|finish]
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 
 #include <chrono>
 #include <cstdio>
@@ -48,7 +48,7 @@ bool makeContext() {
         const EGLint fallback[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT, EGL_NONE};
         if (!eglChooseConfig(display, fallback, &config, 1, &count) || count == 0) return false;
     }
-    const EGLint contextAttribs[] = {EGL_CONTEXT_MAJOR_VERSION, 3, EGL_CONTEXT_MINOR_VERSION, 0, EGL_NONE};
+    const EGLint contextAttribs[] = {EGL_CONTEXT_MAJOR_VERSION, 3, EGL_CONTEXT_MINOR_VERSION, 1, EGL_NONE};
     EGLContext context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs);
     if (context == EGL_NO_CONTEXT) return false;
     return eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, context);
@@ -60,6 +60,8 @@ int main(int argc, char **argv) {
     std::string inPath, outPath, shaderList;
     int w = 0, h = 0, outW = 0, outH = 0, frames = 1;
     bool planOnly = false;
+    bool highp = false;
+    std::string syncName = "finish";
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
         auto next = [&]() { return i + 1 < argc ? argv[++i] : ""; };
@@ -70,6 +72,8 @@ int main(int argc, char **argv) {
         else if (arg == "--shaders") shaderList = next();
         else if (arg == "--frames") frames = std::atoi(next());
         else if (arg == "--plan") planOnly = true;
+        else if (arg == "--highp") highp = true;
+        else if (arg == "--sync") syncName = next();
     }
     if (w <= 0 || h <= 0 || shaderList.empty()) {
         std::cerr << "usage: a4k_cli --size WxH [--out-size WxH] --shaders a.glsl:b.glsl [--in f --out f] [--frames N] [--plan]\n";
@@ -82,6 +86,7 @@ int main(int argc, char **argv) {
     }
 
     a4k::HookPipeline pipeline;
+    pipeline.halfPrecision = !highp;
     std::string error;
     std::stringstream shaders(shaderList);
     std::string path;
@@ -131,7 +136,7 @@ int main(int argc, char **argv) {
     glBindFramebuffer(GL_FRAMEBUFFER, outFbo);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outTexture, 0);
 
-    pipeline.finishEachPass = true;
+    pipeline.sync = syncName == "none" ? a4k::PassSync::None : syncName == "flush" ? a4k::PassSync::Flush : a4k::PassSync::Finish;
     double best = 1e30, total = 0;
     for (int f = 0; f < frames; ++f) {
         auto start = std::chrono::steady_clock::now();

@@ -17,8 +17,9 @@ fun interface FrameListener {
 }
 
 /**
- * Media3 video effect that runs an Anime4K preset on every frame. Media3 decodes the source into a
- * texture, this effect draws the result into the next texture, and Media3 encodes it.
+ * Media3 video effect that runs an enhancer (Anime4K or light AI shaders) on every frame. Media3
+ * decodes the source into a texture, this effect draws the result into the next texture, and Media3
+ * encodes it.
  */
 @OptIn(UnstableApi::class)
 class Anime4KEffect(
@@ -57,8 +58,9 @@ internal class Anime4KShaderProgram(
 
     override fun drawFrame(inputTexId: Int, presentationTimeUs: Long) {
         val start = SystemClock.elapsedRealtimeNanos()
-        // Finishing every pass keeps one long frame from tripping the GPU watchdog.
-        Anime4KNative.process(handle, inputTexId, -1, finishEachPass = true)?.let {
+        // Each pass goes to the GPU on its own (no single long job for the watchdog to stop), and
+        // only the frame as a whole is waited for.
+        Anime4KNative.process(handle, inputTexId, -1, PassSync.FLUSH)?.let {
             throw VideoFrameProcessingException("Anime4K: $it")
         }
         GLES30.glFinish()

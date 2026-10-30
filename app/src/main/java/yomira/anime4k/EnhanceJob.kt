@@ -63,7 +63,7 @@ data class EnhanceJob(
 
     val remainingSeconds: Long? get() = secondsPerFrame?.let { ((totalFrames - doneFrames).coerceAtLeast(0) * it).toLong() }
 
-    val preset: Anime4KPreset get() = Anime4KPreset.fromId(presetId) ?: Anime4KPreset.DEFAULT
+    val preset: Enhancer get() = Enhancer.fromId(presetId) ?: Enhancer.DEFAULT
 
     val settings: ExportSettings get() = ExportSettings(
         preset = preset,
@@ -77,7 +77,7 @@ data class EnhanceJob(
 
     companion object {
         fun cacheKey(sourceId: Long, episodeUrl: String, presetId: String, output: String, codec: String, quality: String): String {
-            val raw = listOf(sourceId, episodeUrl, presetId, output, codec, quality, Anime4KPreset.ENGINE_VERSION).joinToString("|")
+            val raw = listOf(sourceId, episodeUrl, presetId, output, codec, quality, Enhancer.ENGINE_VERSION).joinToString("|")
             val digest = java.security.MessageDigest.getInstance("SHA-256").digest(raw.toByteArray())
             return digest.take(12).joinToString("") { "%02x".format(it) }
         }

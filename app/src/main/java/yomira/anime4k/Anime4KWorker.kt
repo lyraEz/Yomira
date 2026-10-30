@@ -21,7 +21,7 @@ import yomira.i18n.YMR
 import java.io.File
 
 /**
- * Runs the Anime4K jobs one after another in a foreground service: copies the downloaded original
+ * Runs the enhancement jobs one after another in a foreground service: copies the downloaded original
  * next to the pieces, processes, joins, checks and delivers the result to the download. Heat, battery,
  * the charger and the player pause it between pieces; the job continues from there later.
  */
@@ -80,12 +80,19 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             val info = exporter.probe(source)
             val segments = SegmentPlan.of(info.durationUs)
             val settings = job.settings
-            val (outWidth, outHeight) = settings.output.resolve(info.width, info.height)
+            // An upscaler on a video already at the output size would only re-encode it.
+            if (EnhanceSpeed.flopsPerFrame(context, settings.preset, info.width, info.height, settings.outputSize) == 0L) {
+                throw NothingToDo()
+            }
+            val (outWidth, outHeight) = settings.outputSize.resolve(info.width, info.height)
             val bitrate = settings.quality.bitrate(outWidth, outHeight, info.frameRate, settings.codec)
             checkStorage(job, workDir, StorageEstimate.bytesFor(info.durationUs, bitrate, info.audioBytesEstimate))
 
             val eta = EtaTracker().apply {
-                seed(job.secondsPerFrame ?: prefs.measuredSecondsPerFrame(Anime4KPreferences.benchmarkKey(job.preset, info.height, settings.output)))
+                seed(
+                    job.secondsPerFrame
+                        ?: EnhanceSpeed.secondsPerFrame(context, prefs, settings.preset, info.width, info.height, settings.outputSize),
+                )
             }
             update(job.id) {
                 it.copy(state = JobState.PROCESSING, totalFrames = info.frames, totalSegments = segments.size, message = null)
@@ -129,8 +136,10 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             logcat(LogPriority.ERROR, e) { "Anime4K: job ${job.id} failed" }
             val message = when (e) {
                 is LowStorage -> context.stringResource(YMR.strings.a4k_error_storage)
+                is NothingToDo -> context.stringResource(YMR.strings.a4k_error_no_upscale)
                 else -> e.message ?: e.javaClass.simpleName
             }
+            if (e is NothingToDo && prefs.cleanTemporary().get()) workDir.deleteRecursively()
             update(job.id) { it.copy(state = JobState.FAILED, message = message) }
             Outcome.Failed(message)
         }
@@ -175,16 +184,14 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         return null
     }
 
-    /** Warm phone: rest as long as each frame takes (half speed, much less heat). */
+    /**
+     * Hot phone: rest as long as each frame takes (half speed, much less heat). A merely warm phone,
+     * which is normal while charging, runs at full speed; very hot pauses (pauseReason).
+     */
     private fun throttleMillis(eta: EtaTracker): Long {
-        val status = thermalStatus()
-        val frame = ((eta.secondsPerFrame ?: 0.0) * 1000).toLong()
         if (!prefs.pauseWhenHot().get()) return 0
-        return when {
-            status >= PowerManager.THERMAL_STATUS_MODERATE -> frame.coerceIn(50, 4000)
-            status >= PowerManager.THERMAL_STATUS_LIGHT -> (frame / 3).coerceIn(0, 1500)
-            else -> 0
-        }
+        val frame = ((eta.secondsPerFrame ?: 0.0) * 1000).toLong()
+        return if (thermalStatus() >= PowerManager.THERMAL_STATUS_MODERATE) frame.coerceIn(50, 4000) else 0
     }
 
     private fun thermalStatus(): Int {
@@ -200,6 +207,8 @@ class Anime4KWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     }
 
     private class LowStorage : Exception("low storage")
+
+    private class NothingToDo : Exception("nothing to do at this size")
 
     private fun checkStorage(job: EnhanceJob, workDir: File, needed: Long) {
         val free = runCatching { StatFs(workDir.absolutePath).availableBytes }.getOrDefault(Long.MAX_VALUE)

@@ -38,7 +38,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.util.plus
 import yomira.i18n.YMR
 
-/** The Anime4K jobs with their progress and controls, and the speed test of this phone. */
+/** The enhancement jobs with their progress and controls, and the speed test of this phone. */
 class Anime4KQueueScreen : Screen() {
 
     @Composable
@@ -95,7 +95,7 @@ private fun JobCard(job: EnhanceJob) {
     Card {
         Text("${job.animeTitle} · ${job.episodeName}", style = MaterialTheme.typography.titleSmall, maxLines = 2)
         Text(
-            text = stringResource(YMR.strings.a4k_job_download, job.preset.label),
+            text = stringResource(YMR.strings.a4k_job_download, job.preset.displayName()),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -131,7 +131,7 @@ private fun BenchmarkCard() {
     val context = LocalContext.current
     val prefs = remember { Anime4KPreferences() }
     val scope = rememberCoroutineScope()
-    var preset by remember { mutableStateOf(Anime4KPreset.fromId(prefs.downloadPreset().get()) ?: Anime4KPreset.DEFAULT) }
+    var enhancer by remember { mutableStateOf(Enhancer.fromId(prefs.downloadPreset().get()) ?: Enhancer.DEFAULT) }
     var height by remember { mutableStateOf(1080) }
     var running by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<String?>(null) }
@@ -144,26 +144,9 @@ private fun BenchmarkCard() {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        EnhancerPicker(enhancer = enhancer, onChange = { enhancer = it })
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Anime4KMode.entries.forEach { mode ->
-                FilterChip(
-                    selected = preset.mode == mode,
-                    onClick = { preset = preset.copy(mode = mode) },
-                    label = { Text(mode.label) },
-                    shape = RoundedCornerShape(percent = 50),
-                )
-            }
-        }
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Anime4KQuality.entries.forEach { quality ->
-                FilterChip(
-                    selected = preset.quality == quality,
-                    onClick = { preset = preset.copy(quality = quality) },
-                    label = { Text(stringResource(if (quality == Anime4KQuality.HIGH) YMR.strings.a4k_quality_high else YMR.strings.a4k_quality_fast)) },
-                    shape = RoundedCornerShape(percent = 50),
-                )
-            }
-            listOf(720, 1080).forEach { value ->
+            listOf(480, 720, 1080).forEach { value ->
                 FilterChip(
                     selected = height == value,
                     onClick = { height = value },
@@ -180,8 +163,8 @@ private fun BenchmarkCard() {
                 scope.launch {
                     result = try {
                         val width = height * 16 / 9
-                        val measured = Anime4KBenchmark.run(context, preset, width, height, output)
-                        prefs.rememberBenchmark(Anime4KPreferences.benchmarkKey(preset, height, output), measured.secondsPerFrame)
+                        val measured = Anime4KBenchmark.run(context, enhancer, width, height, output.forEnhancer(enhancer))
+                        EnhanceSpeed.remember(prefs, measured)
                         benchmarkText(context, measured)
                     } catch (e: Exception) {
                         context.stringResource(YMR.strings.a4k_bench_failed, e.message ?: e.javaClass.simpleName)

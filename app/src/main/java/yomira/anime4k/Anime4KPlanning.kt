@@ -32,6 +32,9 @@ enum class OutputSize(val key: String) {
         return even((width * scale).roundToInt()) to even(targetHeight)
     }
 
+    /** Upscale-only enhancers do nothing at the source size, so "Original" means 1080p for them. */
+    fun forEnhancer(enhancer: Enhancer): OutputSize = if (enhancer.upscaleOnly && this == ORIGINAL) P1080 else this
+
     companion object {
         const val MAX_HEIGHT = 2160
 

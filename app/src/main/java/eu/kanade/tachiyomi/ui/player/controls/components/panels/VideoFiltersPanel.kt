@@ -86,6 +86,7 @@ import eu.kanade.tachiyomi.ui.player.applyDebandSetting
 import eu.kanade.tachiyomi.ui.player.applyFilter
 import eu.kanade.tachiyomi.ui.player.applyTheme
 import eu.kanade.tachiyomi.ui.player.utils.Anime4KManager
+import yomira.anime4k.labelRes
 import eu.kanade.tachiyomi.ui.player.controls.CARDS_MAX_WIDTH
 import eu.kanade.tachiyomi.ui.player.controls.panelCardsColors
 import eu.kanade.tachiyomi.ui.player.settings.DecoderPreferences
@@ -409,6 +410,7 @@ fun Anime4KCard() {
     var checkMessage by remember { mutableStateOf<String?>(null) }
     var checking by remember { mutableStateOf(false) }
     fun applyPreset(mode: Anime4KManager.Mode, quality: Anime4KManager.Quality) {
+        decoderPreferences.upscaler().set(DecoderPreferences.UPSCALER_ANIME4K)
         decoderPreferences.enableAnime4K().set(mode != Anime4KManager.Mode.OFF)
         if (mode != Anime4KManager.Mode.OFF) decoderPreferences.anime4kMode().set(mode.name)
         decoderPreferences.anime4kQuality().set(quality.name)
@@ -421,7 +423,7 @@ fun Anime4KCard() {
         title = {
             Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium)) {
                 Icon(Icons.Default.Memory, null)
-                Text(stringResource(MR.strings.pref_anime4k_title))
+                Text(stringResource(YMR.strings.a4k_title))
             }
         },
         colors = panelCardsColors(),
@@ -438,7 +440,7 @@ fun Anime4KCard() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = stringResource(MR.strings.pref_anime4k_title),
+                    text = stringResource(YMR.strings.a4k_title),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Switch(
@@ -448,6 +450,37 @@ fun Anime4KCard() {
                         applyAnime4K(mpv, decoderPreferences, anime4kManager)
                     }
                 )
+            }
+
+            val upscaler by decoderPreferences.upscaler().collectAsState()
+            val lightAi = upscaler == DecoderPreferences.UPSCALER_LIGHT_AI
+            if (enableAnime4K) {
+                Text(
+                    text = stringResource(YMR.strings.a4k_engine),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)) {
+                    InputChip(
+                        selected = !lightAi,
+                        onClick = {
+                            decoderPreferences.upscaler().set(DecoderPreferences.UPSCALER_ANIME4K)
+                            applyAnime4K(mpv, decoderPreferences, anime4kManager)
+                        },
+                        label = { Text(stringResource(YMR.strings.a4k_engine_anime4k)) },
+                    )
+                    InputChip(
+                        selected = lightAi,
+                        onClick = {
+                            decoderPreferences.upscaler().set(DecoderPreferences.UPSCALER_LIGHT_AI)
+                            applyAnime4K(mpv, decoderPreferences, anime4kManager)
+                        },
+                        label = { Text(stringResource(YMR.strings.a4k_engine_light_ai)) },
+                    )
+                }
+            }
+            if (enableAnime4K && lightAi) {
+                LightAiControls(mpv, decoderPreferences, anime4kManager)
+                return@Column
             }
 
             // recommendation for this phone, in plain words
@@ -597,4 +630,80 @@ fun Anime4KCard() {
             }
         }
     }
+}
+
+/** Light AI in the player: look, quality and a check for dropped frames that steps down when needed. */
+@Composable
+private fun LightAiControls(mpv: `is`.xyz.mpv.MPV?, prefs: DecoderPreferences, manager: Anime4KManager) {
+    val look by prefs.lightAiLook().collectAsState()
+    val quality by prefs.lightAiQuality().collectAsState()
+    val ctx = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var checkMessage by remember { mutableStateOf<String?>(null) }
+    var checking by remember { mutableStateOf(false) }
+
+    Text(text = stringResource(YMR.strings.a4k_look), style = MaterialTheme.typography.labelMedium)
+    Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)) {
+        yomira.anime4k.LightAiLook.entries.forEach { entry ->
+            InputChip(
+                selected = look == entry.name,
+                onClick = {
+                    prefs.lightAiLook().set(entry.name)
+                    applyAnime4K(mpv, prefs, manager)
+                },
+                label = { Text(stringResource(entry.labelRes)) },
+            )
+        }
+    }
+    Text(text = stringResource(YMR.strings.a4k_quality), style = MaterialTheme.typography.labelMedium)
+    Row(horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall)) {
+        yomira.anime4k.EnhanceQuality.entries.forEach { entry ->
+            InputChip(
+                selected = quality == entry.name,
+                onClick = {
+                    prefs.lightAiQuality().set(entry.name)
+                    applyAnime4K(mpv, prefs, manager)
+                },
+                label = { Text(stringResource(entry.labelRes)) },
+            )
+        }
+    }
+    val hint = if (look == yomira.anime4k.LightAiLook.SOFT.name) YMR.strings.a4k_light_ai_soft_hint else YMR.strings.a4k_light_ai_sharp_hint
+    Text(
+        text = stringResource(hint) + " " + stringResource(YMR.strings.a4k_player_light_ai_note),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    val checkingText = stringResource(YMR.strings.a4k_checking, 8)
+    val smoothText = stringResource(YMR.strings.a4k_check_smooth, 8)
+    androidx.compose.material3.OutlinedButton(
+        enabled = mpv != null && !checking,
+        onClick = {
+            val player = mpv ?: return@OutlinedButton
+            checking = true
+            checkMessage = checkingText
+            scope.launch {
+                val result = yomira.player.Anime4KAdvisor.measureDroppedFrames(player, 8)
+                checkMessage = if (result.smooth) {
+                    smoothText
+                } else {
+                    val current = runCatching { yomira.anime4k.EnhanceQuality.valueOf(prefs.lightAiQuality().get()) }
+                        .getOrDefault(yomira.anime4k.EnhanceQuality.LITE)
+                    if (current != yomira.anime4k.EnhanceQuality.LITE) {
+                        prefs.lightAiQuality().set(yomira.anime4k.EnhanceQuality.entries[current.ordinal - 1].name)
+                        applyAnime4K(mpv, prefs, manager)
+                        ctx.stringResource(YMR.strings.a4k_check_drops, result.dropped, result.delayed, result.seconds)
+                    } else {
+                        prefs.enableAnime4K().set(false)
+                        applyAnime4K(mpv, prefs, manager)
+                        ctx.stringResource(YMR.strings.a4k_check_drops_min, result.dropped + result.delayed, result.seconds)
+                    }
+                }
+                checking = false
+            }
+        },
+    ) {
+        Text(stringResource(YMR.strings.a4k_check))
+    }
+    checkMessage?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
 }

@@ -14,8 +14,8 @@ import java.io.File
 import java.io.IOException
 
 /**
- * Enhanced Downloads: an episode downloaded as "Anime4K Enhanced" is processed after the download
- * finishes, and the result goes into the same episode folder as "<name>.anime4k.mkv".
+ * Enhanced Downloads: an episode downloaded as "Enhanced" is processed after the download finishes
+ * (Anime4K or light AI), and the result goes into the same episode folder as "<name>.anime4k.mkv".
  */
 object EnhancedDownloads {
 
@@ -27,7 +27,7 @@ object EnhancedDownloads {
     private fun requests() = store().getStringSet("yomira_a4k_requests", emptySet())
 
     /** Remembers the choice made when the download was started. */
-    fun request(episodeIds: Collection<Long>, preset: Anime4KPreset) {
+    fun request(episodeIds: Collection<Long>, preset: Enhancer) {
         val ids = episodeIds.map { it.toString() }.toSet()
         val others = requests().get().filterNot { it.substringBefore('=') in ids }
         requests().set(others.toSet() + ids.map { "$it=${preset.id}" })
@@ -37,15 +37,15 @@ object EnhancedDownloads {
         requests().set(requests().get().filterNot { it.substringBefore('=') == episodeId.toString() }.toSet())
     }
 
-    private fun requested(episodeId: Long): Anime4KPreset? = requests().get()
+    private fun requested(episodeId: Long): Enhancer? = requests().get()
         .firstOrNull { it.substringBefore('=') == episodeId.toString() }
-        ?.let { Anime4KPreset.fromId(it.substringAfter('=')) }
+        ?.let { Enhancer.fromId(it.substringAfter('=')) }
 
     /** Called by the downloader when an episode is in its folder. Queues the processing if asked. */
     fun onDownloaded(context: Context, anime: Anime, episode: Episode, episodeDir: UniFile?) {
         val prefs = Anime4KPreferences()
         val preset = requested(episode.id)
-            ?: Anime4KPreset.fromId(prefs.downloadPreset().get())?.takeIf {
+            ?: Enhancer.fromId(prefs.downloadPreset().get())?.takeIf {
                 prefs.enhancedDownloads().get() && prefs.downloadChoice().get() == "always"
             }
             ?: return

@@ -1,11 +1,11 @@
-// Runs mpv user shaders (Anime4K) on OpenGL ES 3: the same hook order, texture names, size
+// Runs mpv user shaders (Anime4K, CuNNy) on OpenGL ES 3: the same hook order, texture names, size
 // expressions and WHEN conditions as mpv, so the official shader files are used unchanged.
 //
 // Call every method on the thread that owns the GL context.
 
 #pragma once
 
-#include <GLES3/gl3.h>
+#include <GLES3/gl31.h>
 
 #include <string>
 #include <vector>
@@ -21,6 +21,17 @@ struct PlannedPassInfo {
     long long macs = 0;  // per frame
 };
 
+// What happens on the GPU queue after each pass.
+enum class PassSync {
+    // Nothing: the driver batches as it likes.
+    None = 0,
+    // glFlush: every pass is sent on its own, so one frame never piles up into a single long job
+    // (GPU watchdogs) while the CPU keeps going.
+    Flush = 1,
+    // glFinish: waits for every pass, for per-pass timings.
+    Finish = 2,
+};
+
 class HookPipeline {
 public:
     HookPipeline() = default;
@@ -31,8 +42,12 @@ public:
     // Adds the passes of one shader file, in the order the files are given (like mpv's list).
     bool addShader(const std::string &source, std::string *error);
 
-    // Works out which passes run for this video and output size, compiles them and allocates
-    // the textures. Needs a current GL context.
+    // Works out which passes run for this video and output size (WHEN conditions, sizes) and what
+    // they cost, without touching GL: enough for plan() and macsPerFrame().
+    bool plan(int nativeWidth, int nativeHeight, int outputWidth, int outputHeight, std::string *error);
+
+    // plan(), then compiles the passes and allocates the textures. Needs a current GL context
+    // (OpenGL ES 3.1 for compute passes).
     bool configure(int nativeWidth, int nativeHeight, int outputWidth, int outputHeight, std::string *error);
 
     // Processes one frame: inputTexture is an RGBA GL_TEXTURE_2D of the native size. The result is
@@ -44,11 +59,17 @@ public:
     const std::vector<PlannedPassInfo> &plan() const { return info_; }
     long long macsPerFrame() const;
 
-    // glFinish after every pass: keeps one long frame from piling up on the GPU (watchdogs) and
-    // gives real timings in benchmarks.
-    bool finishEachPass = false;
+    PassSync sync = PassSync::Flush;
+
+    // Fragment passes compute in half precision (texture coordinates stay in full precision): about
+    // twice the arithmetic on mobile GPUs, with results that differ only in rounding. Set before
+    // configure().
+    bool halfPrecision = true;
 
 private:
+    // Passes the engine adds itself around the user's LUMA hooks.
+    enum class Builtin { None, LumaExtract, LumaMerge };
+
     struct Version {
         int width = 0;
         int height = 0;
@@ -56,12 +77,15 @@ private:
         int lastUse = -1;
     };
     struct Planned {
-        int pass = 0;
+        int pass = -1;  // index into passes_, -1 for a builtin pass
+        Builtin builtin = Builtin::None;
         int width = 0;
         int height = 0;
         int output = 0;  // version written
         std::vector<int> inputs;  // version per BIND
         GLuint program = 0;
+        int groupsX = 0;  // compute passes: work groups to dispatch
+        int groupsY = 0;
     };
     struct Texture {
         GLuint texture = 0;
@@ -71,7 +95,10 @@ private:
     };
 
     GLuint compile(const Planned &planned, std::string *error);
+    GLuint compileBuiltin(const Planned &planned, std::string *error);
     GLuint link(const std::string &fragment, std::string *error);
+    GLuint linkCompute(const std::string &source, std::string *error);
+    void setTextureUniforms(GLuint program, const Planned &planned);
 
     std::vector<HookPass> passes_;
     std::vector<Version> versions_;

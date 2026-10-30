@@ -11,6 +11,39 @@ All notable changes to Yomira are listed here. The format follows
 - `Fixed` for bug fixes.
 - `Other` for technical notes (left out of the release text).
 
+## Yomira [1.14.0-beta.1] - 2026-10-30
+
+Faster enhanced downloads, a Lite quality, and light AI in downloads and in the player. A beta:
+check how long an episode takes on your phone and how light AI looks.
+
+### Added
+- Light AI (CuNNy): small neural networks trained on drawn art that upscale 720p and smaller
+  episodes. Two looks, *Sharp* (also cleans noise) and *Soft*, each in Lite, Fast and High. In
+  Enhanced Downloads and in the player's upscaling card, next to Anime4K.
+- Lite quality for Anime4K: only the small networks, about half the work of Fast.
+- The download dialog shows how long the chosen option takes on your phone for a 720p and a 1080p
+  episode. The first time, it measures the phone in a second or two.
+
+### Improved
+- Enhanced Downloads are faster: Anime4K computes in half precision on the GPU (as the player
+  already did) and no longer waits for the GPU after every step. A phone that is only warm, as
+  when charging, keeps full speed.
+- New enhanced downloads default to Anime4K A Fast instead of A+A High, which took 6 hours or more
+  per episode on mid-range phones.
+- Upscalers (mode C and light AI) skip episodes already at the output size instead of re-encoding
+  them, and "Original" output means 1080p for them.
+
+### Fixed
+- The player turns on Anime4K (or light AI) when it opens, as left in its card, instead of only
+  after touching the card.
+
+### Other
+- Engine: compute passes (OpenGL ES 3.1) and LUMA hooks (the luma plane rebuilt from Media3's RGB
+  frames), checked against libplacebo: Lite presets 54 to 61 dB, light AI luma 52 dB. Light AI in
+  the player switches mpv to gpu-next while it is on. Real-ESRGAN and AnimeSR were evaluated and
+  left out: on a mid-range phone they need days per episode (docs/ANIME4K_OFFLINE.md). A migration
+  drops the per-preset timings kept before.
+
 ## Yomira [1.13.0] - 2026-10-29
 
 Library and Browse with Yomira's own look, and a lighter player.
